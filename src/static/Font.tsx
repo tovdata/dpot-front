@@ -1,0 +1,1 @@
+export const FontSizeMd = '14.4px';

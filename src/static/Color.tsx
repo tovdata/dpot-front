@@ -1,0 +1,1 @@
+export const ColorHeader = '#F8FAFC';

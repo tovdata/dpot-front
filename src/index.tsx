@@ -1,12 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
+// Pages
+import IndexPage from './views/IndexPage';
+// Route
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <IndexPage />
   </React.StrictMode>,
   document.getElementById('root')
 );
