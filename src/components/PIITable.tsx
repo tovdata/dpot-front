@@ -1,83 +1,71 @@
-import styled from 'styled-components';
-// Icon
-import { IoEllipsisHorizontal } from 'react-icons/io5';
+import { useRecoilState } from 'recoil';
+// Components
+import { TableForm, TableFormHeader, TableHeader } from './Table';
+// State
+import { updateAITableItemVisibleSelector } from '../models/State_h';
+// Styled
+import { StyledTable } from './Table';
 // Type
-import { TableDataProps } from '../models/Type';
+import { AIContentData, AIItem, BasicItem, PIIContentData, PIIItem, TableDataProps, TableHeaderData } from '../models/Type';
 
-// Create a styled element (TableForm)
-const TableForm = styled.div`
-  position: relative;
-`;
-// Create a styled element (TableFormHeader)
-const TableFormHeader = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  padding: 0.625rem;
-  user-select: none;
-`;
-// Create a styled element (TableTitle)
-const TableTitle = styled.h2`
-  color: #212121;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-`;
-// Create a styled element (TableTools)
-const TableTools = styled.div`
-  align-items: center;
-  cursor: pointer;
-  display: flex;
-  justify-content: end;
-  position: relative;
-`;
-// Create a styled element (Table)
-const Table = styled.table`
-  border-collapse: collapse;
-  position: relative;
-  width: 100%;
-  td {
-    color: #212121;
-    margin: 0;
-    padding: 0.75rem 0;
+/**
+ * Check an item type for pii
+ * @param data object
+ * @returns result
+ */
+const isPIIItem = (data: BasicItem|PIIItem|AIItem): data is PIIItem => {
+  return (data as PIIItem).sensitive !== undefined;
+}
+/**
+ * Check an item type for pii content
+ * @param data object
+ * @returns result
+ */
+const isPIIContentData = (data: AIContentData|PIIContentData): data is PIIContentData => {
+  return (data as PIIContentData).essentialItems !== undefined;
+}
+
+/**
+ * Create the items
+ * @param data obejct
+ * @returns item elements
+ */
+const createItems = (data: BasicItem[]|PIIItem[]): JSX.Element[] => {
+  return data.map((item: BasicItem|PIIItem, index: number): JSX.Element => isPIIItem(item) ? <span className={item.sensitive ? 'item outline sensitive' : 'item outline'} key={index}>{item.name}</span> : <span className='item outline' key={index}>{item.name}</span>);
+}
+/**
+ * Create a tag
+ * @param data object
+ * @returns content contain tag
+ */
+const createTag = (data: BasicItem): JSX.Element => {
+  return <>{data.tag ? <span className='item inline mr'>{data.tag}</span> : ''}{data.name}</>;
+}
+/**
+ * Create a content
+ * @param data content data
+ * @param index data index
+ * @returns created element
+ */
+const createContent = (data: AIContentData|PIIContentData, index: number): JSX.Element => {
+  if (isPIIContentData(data)) {
+    return <tr key={index}><td>{data.subject}</td><td>{createItems(data.purpose)}</td><td>{createItems(data.essentialItems)}</td><td>{createItems(data.selectionItems)}</td><td>{data.period}</td></tr>;
+  } else {
+    return <tr key={index}><td>{data.subject}</td><td>{createTag(data.purpose)}</td><td>{createItems(data.items)}</td><td>{data.period}</td><td>{data.department}</td><td>{data.charger}</td></tr>;
   }
-  th {
-    background-color: #F6F6F6;
-    border: none;
-    border-bottom: 1px solid #BDBDBD;
-    color: #424242;
-    font-size: 14.4px;
-    margin: 0;
-    padding: 0.75rem 0;
-    user-select: none;
-    &:first-child {
-      border-top-left-radius: 0.5rem;
-    }
-    &:last-child {
-      border-top-right-radius: 0.5rem;
-    }
-  }
-  tr {
-    margin: 0;
-    padding: 0;
-  }
-`;
+}
 
 const PIITable = ({ table }: TableDataProps): JSX.Element => {
-  // Create a table header
-  const tableHeader: JSX.Element = <thead><tr>{table.header.map((name: string, index: number): JSX.Element => <th key={index} >{name}</th>)}</tr></thead>;
-  // const tableHeader: JSX.Element = <thead><tr>{table.header.map((name: string, index: number): JSX.Element => <th key={index} >{name}</th>)}</tr></thead>;
+  // Create a table content
+  const tableContent: JSX.Element = <tbody>{table.content.map((data: AIContentData|PIIContentData, index: number): JSX.Element => createContent(data, index))}</tbody>;
   // Return an element
   return (
     <TableForm>
-      <TableFormHeader>
-        <TableTitle>{table.title}</TableTitle>
-        <TableTools>
-          <IoEllipsisHorizontal />
-        </TableTools>
-      </TableFormHeader>
-      <Table>{tableHeader}</Table>
+      <TableFormHeader title={table.title} />
+      <StyledTable>
+        <TableHeader header={table.header} />
+        {tableContent}
+      </StyledTable>
     </TableForm>
   )
 }

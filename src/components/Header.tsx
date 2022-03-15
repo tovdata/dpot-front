@@ -1,5 +1,9 @@
 import styled from 'styled-components';
-// types
+// Color
+import { GRAYSCALE300, GRAYSCALE_D } from '../static/Color';
+// Font
+import { FS_HXXXXS, LH_HXXXXS } from '../static/Font';
+// Type
 import { BasicElement } from '../models/Type';
 
 // Menu Item (type)
@@ -19,8 +23,7 @@ const menuItems: MenuItem[] = [
 const HeaderNav = styled.div<BasicElement>`
   align-items: center;
   background-color: #F8FAFC;
-  border-bottom: 1px solid #E0E0E0;
-  color: #212121;
+  border-bottom: 1px solid ${GRAYSCALE300};
   display: flex;
   height: 4.375rem;
   justify-content: space-between;
@@ -55,10 +58,11 @@ const HeaderMenu = styled.div<BasicElement>`
 `;
 // Create a styled element (HeaderMenuItem)
 const HeaderMenuItem = styled.a<BasicElement>`
-  color: #212121;
+  color: ${GRAYSCALE_D};
   cursor: pointer;
-  font-size: 14.4px;
+  font-size: ${FS_HXXXXS};
   font-weight: 700;
+  line-height: ${LH_HXXXXS};
   margin-right: 3.5rem;
   text-decoration: none;
   &:last-child {
