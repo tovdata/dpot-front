@@ -8,8 +8,8 @@ const IndexPage = (): JSX.Element => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/pii/add' element={<PIIAddPage />}></Route>
-        <Route path='/pii/view' element={<PIIPage />}></Route>
+        <Route path='/pi/add' element={<PIIAddPage />}></Route>
+        <Route path='/pi/view' element={<PIIPage />}></Route>
       </Routes>
     </BrowserRouter>
   )

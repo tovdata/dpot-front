@@ -1,7 +1,7 @@
 import { createGlobalStyle } from 'styled-components';
 // Components
-import Container from '../components/Container';
-import Header from '../components/Header';
+import Container from '../components/common/Container';
+import Header from '../components/common/Header';
 import PIITable from '../components/PIITable';
 // Type
 import { TableData } from '../models/Type';

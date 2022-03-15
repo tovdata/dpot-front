@@ -1,12 +1,12 @@
 import { useRecoilState } from 'recoil';
 // Components
-import { TableForm, TableFormHeader, TableHeader } from './Table';
+import { TableForm, TableFormHeader, TableHeader } from './common/Table';
 // State
 import { updateAITableItemVisibleSelector } from '../models/State_h';
 // Styled
-import { StyledTable } from './Table';
+import { StyledTable } from './common/Table';
 // Type
-import { AIContentData, AIItem, BasicItem, PIIContentData, PIIItem, TableDataProps, TableHeaderData } from '../models/Type';
+import { AIContentData, AIItem, BasicItem, PIIContentData, PIIItem, TableDataProps } from '../models/Type';
 
 /**
  * Check an item type for pii

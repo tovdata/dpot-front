@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 // Type
-import { BasicElement, ContainerProps } from '../models/Type';
+import { BasicElement, ContainerProps } from '../../models/Type';
 
 // Create a styled element (Container)
 const ContainerDiv = styled.div<BasicElement>`
@@ -18,8 +18,12 @@ const ContainerDiv = styled.div<BasicElement>`
   `}
 `;
 
+/**
+ * Create an element (for container)
+ * @param children child elements 
+ * @returns created element
+ */
 const Container = ({ children }: ContainerProps): JSX.Element => {
-  // Return an element
   return <ContainerDiv>{children}</ContainerDiv>
 }
 

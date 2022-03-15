@@ -1,6 +1,6 @@
 import styled, { createGlobalStyle } from "styled-components";
-import Container from "../components/Container";
-import Header from "../components/Header";
+import Container from "../components/common/Container";
+import Header from "../components/common/Header";
 import PIIAddTable from "../components/PIIAddTable";
 import { PIIObject } from "../models/Type2";
 
@@ -49,15 +49,13 @@ const PIIAddPage = (): JSX.Element => {
       <GlobalStyle />
       <Header />
       <Container>
-        <>
-          <TableScription>* 필수입력</TableScription>
-          <Width60>
-            <PIIAddTable information={initInformation} />
-          </Width60>
-          <Width60>
-            <PIIAddTable information={information} />
-          </Width60>
-        </>
+        <TableScription>* 필수입력</TableScription>
+        <Width60>
+          <PIIAddTable information={initInformation} />
+        </Width60>
+        <Width60>
+          <PIIAddTable information={information} />
+        </Width60>
       </Container>
     </>
   )

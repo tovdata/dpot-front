@@ -1,12 +1,12 @@
 import styled from 'styled-components';
 // Color
-import { GRAYSCALE200, GRAYSCALE400, GRAYSCALE800, GRAYSCALE_D, PRIMARY200, PRIMARY600, PRIMARY_D, RED100, RED_D, WHITE_B } from '../static/Color';
+import { GRAYSCALE200, GRAYSCALE400, GRAYSCALE800, GRAYSCALE_D, PRIMARY200, PRIMARY600, PRIMARY_D, RED100, RED_D, WHITE_B } from '../../static/Color';
 // Font
-import { FS_BS, FS_BXS, FS_HXXS, FS_HXXXXS, LH_BS, LH_BXS, LH_HXXS, LH_HXXXXS } from '../static/Font';
+import { FS_BS, FS_BXS, FS_HXXS, FS_HXXXXS, LH_BS, LH_BXS, LH_HXXS, LH_HXXXXS } from '../../static/Font';
 // Icon
 import { IoEllipsisHorizontal } from 'react-icons/io5';
 // Type
-import { ContainerProps, TableFormHeaderProps, TableHeaderData, TableHeaderProps } from '../models/Type';
+import { ContainerProps, TableFormHeaderProps, TableHeaderData, TableHeaderProps } from '../../models/Type';
 
 // Create a styled element (TableForm)
 const StyledTableForm = styled.div`
@@ -103,15 +103,23 @@ export const StyledTable = styled.table`
   }
 `;
 
+/**
+ * Create an element (for table form)
+ * @param children child elements
+ * @returns created element
+ */
 export const TableForm = ({ children }: ContainerProps): JSX.Element => {
-  // Return an element
   return (
     <StyledTableForm>{children}</StyledTableForm>
   )
 }
-
+/**
+ * Create an element (for table form header)
+ * @param options
+ * @param title table form title 
+ * @returns created element
+ */
 export const TableFormHeader = ({ options, title }: TableFormHeaderProps): JSX.Element => {
-  // Return an element
   return (
     <StyledTableFormHeader>
       <h2>{title}</h2>
@@ -121,9 +129,12 @@ export const TableFormHeader = ({ options, title }: TableFormHeaderProps): JSX.E
     </StyledTableFormHeader>
   )
 }
-
+/**
+ * Create an element (for table header)
+ * @param param0 table header
+ * @returns created element
+ */
 export const TableHeader = ({ header }: TableHeaderProps): JSX.Element => {
-  // Return an element
   return (
     <thead>
       <tr>{header.map((header: TableHeaderData, index: number): JSX.Element => <th hidden={!header.visible} key={index}>{header.name}</th>)}</tr>
