@@ -72,7 +72,7 @@ const HeaderMenuItem = styled.a<BasicElement>`
 
 const Header = (): JSX.Element => {
   // Create the element for menu items
-  const items: JSX.Element[] = menuItems.map((item: MenuItem, index: number): JSX.Element => <HeaderMenuItem key={index} href={item.link}>{item.name}</HeaderMenuItem>)
+  const items: JSX.Element[] = menuItems.map((item: MenuItem, index: number): JSX.Element => <HeaderMenuItem href={item.link} key={index}>{item.name}</HeaderMenuItem>)
   // Return an element
   return (
     <HeaderNav>
