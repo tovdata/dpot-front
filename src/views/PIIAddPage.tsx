@@ -1,6 +1,8 @@
 import styled, { createGlobalStyle } from "styled-components";
-import Container from "../components/common/Container";
+import { BorderSection } from "../components/common/BorderSection";
+import { ContainerDiv } from "../components/common/Container";
 import Header from "../components/common/Header";
+import { PIIAddSection } from "../components/PIIAddSection";
 import PIIAddTable from "../components/PIIAddTable";
 import { PIIObject } from "../models/Type2";
 
@@ -13,25 +15,22 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
 `;
-
-const Width60 = styled.div`
-  width: 60%;
-`;
-
 // Create a styled element (TableScription)
 const TableScription = styled.div`
-  padding-left: 1rem;
   text-align:left;
   font-size: 0.75rem;
   color:#2A2751;
 `;
 
+const FlexRowContainer = styled(ContainerDiv)`
+  display: flex;
+`;
+
 const PIIAddPage = (): JSX.Element => {
-  // Return an element
 
   // Test Information
   const initInformation: PIIObject = {
-    name: '회원관리',
+    name: '',
     pPurpose: [],
     required: [],
     optional: [],
@@ -44,19 +43,23 @@ const PIIAddPage = (): JSX.Element => {
     optional: ['주소'],
     period: ''
   };
+  const addSectionInformation = {
+    title: '업무명',
+    description: '업무명에 대한 설명 / 어떠한 내용이 주로 들어가는지(아래의 항목을 선택하거나 직접 입력, 택 1)',
+    items: ['회원관리', '신규 서비스 개발', '마케팅', '요금정산']
+  }
   return (
     <>
       <GlobalStyle />
       <Header />
-      <Container>
-        <TableScription>* 필수입력</TableScription>
-        <Width60>
-          <PIIAddTable information={initInformation} />
-        </Width60>
-        <Width60>
+      <FlexRowContainer>
+        <BorderSection width="70%">
+          <TableScription>* 필수입력</TableScription>
           <PIIAddTable information={information} />
-        </Width60>
-      </Container>
+          <PIIAddTable information={initInformation} />
+        </BorderSection>
+        <PIIAddSection information={addSectionInformation}></PIIAddSection>
+      </FlexRowContainer>
     </>
   )
 }
