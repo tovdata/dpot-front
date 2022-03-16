@@ -1,28 +1,28 @@
 import { atom, selector } from 'recoil';
 // Type
-import { AIContentVisible } from '../models/Type';
+import { PITableFieldVisible } from '../models/Type';
 
-export const defaultAITableItemVisible: AIContentVisible = {
-  charger: true,
-  department: true,
+/** Default values */
+export const defaultPITableFieldVisibleAtom: PITableFieldVisible = {
   items: true,
   period: true,
   purpose: true,
   subject: true
 };
 
-const aiTableItemVisibleAtom = atom({
-  key: 'piiTableItemVisibleAtom',
-  default: defaultAITableItemVisible
+/** Atom */
+const piTableFieldVisibleAtom = atom<PITableFieldVisible>({
+  key: 'piTableFieldVisibleAtom',
+  default: defaultPITableFieldVisibleAtom
 });
 
-export const getAITableItemVisibleSelector = selector<AIContentVisible>({
-  key: 'getAITableItemVisibleSelector',
-  get: ({ get }) => get(aiTableItemVisibleAtom)
+/** Selector */
+export const getPITableFieldVisibleSelector = selector<PITableFieldVisible>({
+  key: 'getPITableFieldVisibleSelector',
+  get: ({ get }) => get(piTableFieldVisibleAtom)
 });
-
-export const updateAITableItemVisibleSelector = selector<AIContentVisible>({
-  key: 'updateAITableItemVisibleSelector',
-  get: ({ get }) => get(aiTableItemVisibleAtom),
-  set: ({ set }, data) => set(aiTableItemVisibleAtom, data)
+export const updatePITableFieldVisibleSelector = selector<PITableFieldVisible>({
+  key: 'updatePITableFieldVisibleSelector',
+  get: ({ get }) => get(piTableFieldVisibleAtom),
+  set: ({ set }, value) => set(piTableFieldVisibleAtom, value)
 });
