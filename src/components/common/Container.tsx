@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { BasicElement, ContainerProps } from '../../models/Type';
 
 // Create a styled element (Container)
-const ContainerDiv = styled.div<BasicElement>`
+export const ContainerDiv = styled.div<BasicElement>`
   margin-top: 5rem;
   padding-left: 10.5rem;
   padding-right: 10.5rem; 
