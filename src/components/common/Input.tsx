@@ -1,7 +1,7 @@
-import { InputDivProps } from "../../models/Type2"
+import { InputDivProps } from "../../models/type2"
 import styled from 'styled-components';
 import React, { useState } from "react";
-import { FS_BXS } from "../../static/Font";
+import { FS_BXS } from "../../static/font";
 
 const Div = styled.div`
   position: relative;

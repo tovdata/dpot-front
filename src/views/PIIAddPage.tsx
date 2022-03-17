@@ -4,7 +4,7 @@ import { ContainerDiv } from "../components/common/Container";
 import Header from "../components/common/Header";
 import { PIIAddSection } from "../components/PIIAddSection";
 import PIIAddTable from "../components/PIIAddTable";
-import { PIIObject } from "../models/Type2";
+import { PIIObject } from "../models/type2";
 
 const GlobalStyle = createGlobalStyle`
   body {

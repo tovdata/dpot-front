@@ -1,9 +1,9 @@
 import styled from 'styled-components';
-import { InputDivElementProps, PIIAddTableProps } from '../models/Type2';
+import { InputDivElementProps, PIIAddTableProps } from '../models/type2';
 import { IoChevronDownOutline } from 'react-icons/io5';
 import { IoChevronUpOutline } from 'react-icons/io5';
 import { useState } from 'react';
-import { FS_BS, FS_BXS } from '../static/Font';
+import { FS_BS, FS_BXS } from '../static/font';
 // Create a styled element (TableForm)
 const TableForm = styled.div`
   position: relative;

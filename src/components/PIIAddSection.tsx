@@ -1,10 +1,10 @@
 import { useState } from "react";
 import styled from "styled-components"
-import { ItemListComponentProps, PIIAddSectionProps } from "../models/Type2";
+import { ItemListComponentProps, PIIAddSectionProps } from "../models/type2";
 import { SectionElement } from "./common/BorderSection"
 import { IoCheckmarkSharp } from "react-icons/io5";
 import { InputDiv } from "./common/Input";
-import { FS_BS, FS_BXS } from "../static/Font";
+import { FS_BS, FS_BXS } from "../static/font";
 import { InputDropDown } from "./common/InputDropDown";
 const AddSection = styled(SectionElement)`
   padding:2rem; 

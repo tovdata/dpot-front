@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { BorderSectionProps } from '../../models/Type2';
+import { BorderSectionProps } from '../../models/type2';
 
 export const SectionElement = styled.section<BorderSectionProps>`
   border: 1px solid #C3C8E5;

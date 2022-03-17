@@ -1,6 +1,6 @@
 import styled from "styled-components"
-import { InputDropDownProps } from "../../models/Type2"
-import { FS_BS } from "../../static/Font"
+import { InputDropDownProps } from "../../models/type2"
+import { FS_BS } from "../../static/font"
 
 const ListDiv = styled.div`
   width: 100%;

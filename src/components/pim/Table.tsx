@@ -5,15 +5,15 @@ import styled, { css } from 'styled-components';
 // Components
 import Switch from '../pim/Switch';
 // Color
-import { GRAYSCALE100, GRAYSCALE200, GRAYSCALE400, GRAYSCALE800, GRAYSCALE_D, PRIMARY200, PRIMARY_D, WHITE } from '../../static/Color';
+import { GRAYSCALE100, GRAYSCALE200, GRAYSCALE400, GRAYSCALE800, GRAYSCALE_D, PRIMARY200, PRIMARY_D, WHITE } from '../../static/color';
 // Font
-import { FS_BS, FS_BXS, FS_BXXS, FS_HXXS, FS_HXXXXS, LH_BS, LH_BXS, LH_BXXS, LH_HXXS, LH_HXXXXS } from '../../static/Font';
+import { FS_BS, FS_BXS, FS_BXXS, FS_HXXS, FS_HXXXXS, LH_BS, LH_BXS, LH_BXXS, LH_HXXS, LH_HXXXXS } from '../../static/font';
 // Icon
 import { IoEllipsisHorizontal } from 'react-icons/io5';
 // State
-import { updatePITableFieldVisibleSelector } from '../../models/State_h';
+import { updatePITableHeaderSelector } from '../../models/state_h';
 // Type
-import { CommonProps } from '../../models/Type';
+import { CommonProps, TableFormHeaderProps, TableHeaderData, TableViewMenuProps } from '../../models/type';
 
 // Styled element (TableForm)
 const StyledTableForm = styled.div`
@@ -112,7 +112,7 @@ export const StyledList = styled.ul`
     text-align: left;
   }
 `;
-// Styled element ()
+// Styled element (TableViewMenu)
 export const StyledTableViewMenu = styled.div<{visible: boolean}>`
   background-color: ${WHITE};
   border-radius: 0.25rem;
@@ -133,6 +133,7 @@ export const StyledTableViewMenu = styled.div<{visible: boolean}>`
     display: block;
   `}
 `;
+// Styled element (TableViewMenuItem)
 export const StyledTableViewMenuItem = styled.div`
   align-items: center;
   display: flex;
@@ -157,13 +158,7 @@ export const TableForm = ({ children }: CommonProps): JSX.Element => {
   )
 }
 
-export const TableFormHeader = ({ title, type }: any): JSX.Element => {
-  const options = [
-    { id: 1, key: 'purpose', name: '처리 목적', visible: true },
-    { id: 2, key: 'items', name: '처리 항목', visible: true },
-    { id: 3, key: 'period', name: '처리 및 보유 기간', visible: true }
-  ];
-
+export const TableFormHeader = ({ title, type }: TableFormHeaderProps): JSX.Element => {
   // Set a local state
   const [openMenu, setOpenMenu] = useState<boolean>(false);
   // Create an event handler (onClick)
@@ -176,29 +171,48 @@ export const TableFormHeader = ({ title, type }: any): JSX.Element => {
       <StyledTableTool>
         <StyledTableToolItem>
           <a className='icon' onClick={onClick}><IoEllipsisHorizontal /></a>
-          {type ? <TableViewMenuForPI options={options} visible={openMenu} /> : <TableViewMenuForPI options={options} visible={openMenu} />}
+          {type ? <TableFieldViewMenuForPI visible={openMenu} /> : <TableFieldViewMenuForPI visible={openMenu} />}
         </StyledTableToolItem>
       </StyledTableTool>
     </StyledTableFormHeader>
   )
 }
 
-const TableViewMenuForPI = ({ options, visible }: any): JSX.Element => {
+/**
+ * [Internel component] Create an element for view menu (PI)
+ * @param param0 
+ * @returns created element
+ */
+const TableFieldViewMenuForPI = ({ visible }: TableViewMenuProps): JSX.Element => {
   // Get a state
-  const [viewOptions, setViewOptions] = useRecoilState(updatePITableFieldVisibleSelector);
+  const [viewOptions, setViewOptions] = useRecoilState(updatePITableHeaderSelector);
 
   // Create the items
-  const items: JSX.Element[] = options.map((elem: any, index: number): JSX.Element => {
-    // Create an event handler (onChange)
-    const onChange = (e: any) => setViewOptions({...viewOptions, [elem.key]: e.target.checked});
-    // Return an element
-    return (
-      <StyledTableViewMenuItem key={index}>
-        <p>{elem.name}</p>
-        <Switch id={`pi-view-option-${index}`} status={viewOptions[elem.key]} onChange={onChange} />
-      </StyledTableViewMenuItem>
-    )
+  const items: JSX.Element[] = Object.keys(viewOptions).map((key: string, index: number): JSX.Element => {
+    if (key !== 'subject') {
+      // Create an event handler (onChange)
+      const onChange = (e: any) => {
+        // Extract a data for key
+        const elem: TableHeaderData = viewOptions[key];
+        // Update a view option
+        setViewOptions({...viewOptions, [key]: { key: elem.key, name: elem.name, visible: e.target.checked }});
+      }
+      // Return an element
+      return (
+        <StyledTableViewMenuItem key={index}>
+          <p>{viewOptions[key].name}</p>
+          <Switch id={`pi-view-option-${index}`} status={viewOptions[key].visible} onChange={onChange} />
+        </StyledTableViewMenuItem>
+      )
+    } else {
+      return (
+        <StyledTableViewMenuItem key={index}>
+          <p>{viewOptions[key].name}</p>
+        </StyledTableViewMenuItem>
+      )
+    }
   });
+
   // Return an element
   return (
     <StyledTableViewMenu visible={visible}>

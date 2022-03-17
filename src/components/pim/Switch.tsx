@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 // Color
-import { PRIMARY50, PRIMARY_D, WHITE } from '../../static/Color';
+import { PRIMARY50, PRIMARY_D, WHITE } from '../../static/color';
 // Props
-import { SwitchProps } from '../../models/Type';
+import { SwitchProps } from '../../models/type';
 
 // Create a styled element (Switch)
 export const StyledSwitch = styled.div`

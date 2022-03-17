@@ -1,10 +1,10 @@
 import styled from 'styled-components';
 // Color
-import { GRAYSCALE300, GRAYSCALE_D } from '../../static/Color';
+import { GRAYSCALE300, GRAYSCALE_D } from '../../static/color';
 // Font
-import { FS_HXXXXS, LH_HXXXXS } from '../../static/Font';
+import { FS_HXXXXS, LH_HXXXXS } from '../../static/font';
 // Type
-import { BasicElement } from '../../models/Type';
+import { BasicElement } from '../../models/type';
 // Menu Item (type)
 type MenuItem = {
   name: string;

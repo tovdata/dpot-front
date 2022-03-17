@@ -5,7 +5,7 @@ import Container from '../components/common/Container';
 import Header from '../components/common/Header';
 import PITable from '../components/PITable';
 // Type
-import { TableData } from '../models/Type';
+import { TableData } from '../models/type';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -21,45 +21,39 @@ const piiTableData: TableData = {
   content: [
     {
       items: [
-        { id: 0, name: '이름', essential: true, selection: false, sensitive: false },
-        { id: 1, name: '전화번호', essential: true, selection: false, sensitive: false },
-        { id: 2, name: '주소', essential: false, selection: true, sensitive: false },
-        { id: 3, name: '출생년도', essential: false, selection: true, sensitive: false }
+        { name: '이름', essential: true, selection: false, sensitive: false },
+        { name: '전화번호', essential: true, selection: false, sensitive: false },
+        { name: '주소', essential: false, selection: true, sensitive: false },
+        { name: '출생년도', essential: false, selection: true, sensitive: false }
       ],
       period: '회원 탈퇴 시까지',
       purpose: [
-        { id: 0, name: '회원 식별 및 확인' },
-        { id: 1, name: '부정 이용 방지' }
+        { name: '회원 식별 및 확인' },
+        { name: '부정 이용 방지' }
       ],
       subject: '회원 관리'
     }, {
       items: [
-        { id: 0, name: '이메일', essential: true, selection: false, sensitive: false },
-        { id: 1, name: '닉네임', essential: true, selection: false, sensitive: false }
+        { name: '이메일', essential: true, selection: false, sensitive: false },
+        { name: '닉네임', essential: true, selection: false, sensitive: false }
       ],
       period: '회원 탈퇴 시까지',
       purpose: [
-        { id: 0, name: '무료 및 유료 서비스 제공' },
-        { id: 1, name: '무료 및 유료 서비스 제공2' }
+        { name: '무료 및 유료 서비스 제공' },
+        { name: '무료 및 유료 서비스 제공2' }
       ],
       subject: '서비스 제공'
     }, {
       items: [
-        { id: 0, name: '성별', essential: false, selection: true, sensitive: false },
-        { id: 1, name: '방언정보', essential: false, selection: true, sensitive: true }
+        { name: '성별', essential: false, selection: true, sensitive: false },
+        { name: '방언정보', essential: false, selection: true, sensitive: true }
       ],
       period: '회원 탈퇴 시까지',
       purpose: [
-        { id: 0, name: '인공지능 학습을 통한 서비스 품질 개선 및 정확도 향상' }
+        { name: '인공지능 학습을 통한 서비스 품질 개선 및 정확도 향상' }
       ],
       subject: '서비스 품질 개선'
     }
-  ],
-  header: [
-    { id: 0, key: 'subject', name: '업무명', visible: true },
-    { id: 1, key: 'purpose', name: '처리 목적', visible: true },
-    { id: 2, key: 'items', name: '처리 항목', visible: true },
-    { id: 3, key: 'period', name: '처리 및 보유 기간', visible: true }
   ],
   title: '개인정보 수집 및 이용 현황',
 };
