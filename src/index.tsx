@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
-import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
 // Pages
 import IndexPage from './views/IndexPage';
 // Route

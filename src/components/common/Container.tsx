@@ -1,21 +1,13 @@
 import styled, { css } from 'styled-components';
 // Type
-import { BasicElement, CommonProps } from '../../models/type';
+import { CommonElementProps } from '../../models/type';
 
 // Create a styled element (Container)
-export const ContainerDiv = styled.div<BasicElement>`
+export const ContainerDiv = styled.div`
   margin-top: 5rem;
   padding-left: 10.5rem;
   padding-right: 10.5rem; 
   position: relative;
-  ${(props: any) => props.size && props.size === 'sm' && css`
-    padding-left: 8.5rem;
-    padding-right: 8.5rem;
-  `}
-  ${(props: any) => props.size && props.size === 'lg' && css`
-    padding-left: 12.5rem;
-    padding-right: 12.5rem;
-  `}
 `;
 
 /**
@@ -23,7 +15,7 @@ export const ContainerDiv = styled.div<BasicElement>`
  * @param children child elements 
  * @returns created element
  */
-const Container = ({ children }: CommonProps): JSX.Element => {
+const Container = ({ children }: CommonElementProps): JSX.Element => {
   return <ContainerDiv>{children}</ContainerDiv>
 }
 

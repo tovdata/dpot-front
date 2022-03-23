@@ -1,89 +1,66 @@
 import styled from 'styled-components';
 // Color
-import { GRAYSCALE300, GRAYSCALE_D } from '../../static/color';
-// Font
-import { FS_HXXXXS, LH_HXXXXS } from '../../static/font';
-// Type
-import { BasicElement } from '../../models/type';
-// Menu Item (type)
-type MenuItem = {
-  name: string;
-  link: string;
-}
+import { WHITE } from '../../static/color';
+// Icon
+import { AiOutlineBell, AiOutlineLogout } from 'react-icons/ai';
 
-// Create a styled element (HeaderNav)
-const StyledNav = styled.div<BasicElement>`
+// Styled element (HeaderNav)
+const StyledHeaderNav = styled.div`
   align-items: center;
-  background-color: #F8FAFC;
-  border-bottom: 1px solid ${GRAYSCALE300};
+  background-color: ${WHITE};
+  box-shadow: inset 0px -1px 0px #F0F0F0;
   display: flex;
-  height: 4.375rem;
+  height: 3.5rem;
   justify-content: space-between;
-  left: 0;
-  padding: 1rem 3.5rem;
+  padding: 0 3.75rem;
   position: relative;
-  top: 0;
+  user-select: none;
   width: 100vw;
-  z-index: 10;
+  z-index: 99;
 `;
-// Create a styled element (Logo)
-const StyledLogo = styled.a<BasicElement>`
-  background-color: #E7E9F5;
-  border-radius: 20px;
-  cursor: pointer;
-  height: 1.875rem;
-  width: 100px;
+// Styled element (HeaderLogo)
+const StyledHeaderLogo = styled.div`
+  background-color: #C4C4C4;
+  border-radius: 0.25rem;
+  height: 1.5rem;
+  width: 5rem;
 `;
-// Create a styled element (HeaderOptionForm)
-const StyledTools = styled.div<BasicElement>`
+// Styled element (HeaderTool)
+const StyledHeaderTool = styled.div`
   align-items: center;
   display: flex;
   justify-content: end;
   position: relative;
 `;
-// Create a styled element (HeaderMenu)
-const StyledMenu = styled.div<BasicElement>`
+// Styled element (HeaderToolItem)
+const StyledHeaderToolItem = styled.span`
   align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
   display: flex;
   justify-content: center;
-  position: relative;
-`;
-// Create a styled element (HeaderMenuItem)
-const StyledMenuItem = styled.a<BasicElement>`
-  color: ${GRAYSCALE_D};
-  cursor: pointer;
-  font-size: ${FS_HXXXXS};
-  font-weight: 700;
-  line-height: ${LH_HXXXXS};
-  margin-right: 3.5rem;
-  text-decoration: none;
+  margin-right: 1.25rem;
+  height: 1.5rem;
+  width: 1.5rem;
+  transition: background-color 0.25s;
   &:last-child {
     margin-right: 0;
   }
+  &:active,
+  &:hover {
+    background-color: #1890FF16;
+  }
 `;
 
-/**
- * Create an element (for header)
- * @returns created element
- */
 const Header = (): JSX.Element => {
-  // Menu Item (data)
-  const menuItems: MenuItem[] = [
-    { name: '개인정보 관리', link: '/pi/view' },
-    { name: '문서 관리', link: '/' },
-    { name: '활동이력 관리', link: '/' },
-    { name: '회사 관리', link: '/' }
-  ]
-
-  // Create the element for menu items
-  const items: JSX.Element[] = menuItems.map((item: MenuItem, index: number): JSX.Element => <StyledMenuItem href={item.link} key={index}>{item.name}</StyledMenuItem>)
-  // Return an element
   return (
-    <StyledNav>
-      <StyledLogo></StyledLogo>
-      <StyledMenu>{items}</StyledMenu>
-      <StyledTools></StyledTools>
-    </StyledNav>
+    <StyledHeaderNav>
+      <StyledHeaderLogo />
+      <StyledHeaderTool>
+        <StyledHeaderToolItem><AiOutlineBell /></StyledHeaderToolItem>
+        <StyledHeaderToolItem><AiOutlineLogout /></StyledHeaderToolItem>
+      </StyledHeaderTool>
+    </StyledHeaderNav>
   )
 }
 

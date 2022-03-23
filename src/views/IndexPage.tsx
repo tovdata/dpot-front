@@ -1,15 +1,17 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 // Pages
-import PIIPage from './PIIPage';
-import PIIAddPage from './PIIAddPage';
+import TestLucy from './TestLucy';
+import TestMin from './TestMin';
+import TestPI from './TestPI';
 
 const IndexPage = (): JSX.Element => {
   // Return an element
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/pi/add' element={<PIIAddPage />}></Route>
-        <Route path='/pi/view' element={<PIIPage />}></Route>
+        <Route path='/test/lucy' element={<TestLucy />}></Route>
+        <Route path='/test/min' element={<TestMin />}></Route>
+        <Route path='/test/pi' element={<TestPI />}></Route>
       </Routes>
     </BrowserRouter>
   )
