@@ -1,16 +1,19 @@
+import { useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { Tag, Tooltip } from 'antd';
+import { Button, Tag, Tooltip } from 'antd';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
-// Icon
-import { IoRestaurantOutline } from 'react-icons/io5';
 // Type
 import { CommonTableProps, TableProcessItemProps } from '../../models/type';
 
 // Styled element (TableForm)
 const StyledTableForm = styled.div`
   display: block;
+  margin-bottom: 5rem;
+  &:last-child {
+    margin-bottom: 0;
+  }
   .ant-table-cell {
     user-select: none;
   }
@@ -37,13 +40,12 @@ const StyledTableTool = styled.div`
   align-items: center;
   display: flex;
   justify-content: end;
-`;
-// Styled element (TableToolItem)
-const StyledTableToolItem = styled.div`
-  cursor: pointer;
-  margin-right: 1rem;
-  &:last-child {
-    margin-right: 0;
+  .ant-btn {
+    cursor: pointer;
+    margin-left: 1rem;
+  }
+  .ant-btn:first-child {
+    margin-left: 0;
   }
 `;
 // Styled element (List)
@@ -64,12 +66,26 @@ interface TableProcessItemsProps {
 
 // Component (form)
 export const CommonTableForm = ({ title, table }: CommonTableProps): JSX.Element => {
+  // Set a local state
+  const [edit, setEdit] = useState<boolean>(false);
+  // Create an event handler (onEdit)
+  const onEdit = (): void => setEdit(true);
+  // Create an event handler (onSave)
+  const onSave = (): void => setEdit(false);
+
   return (
     <StyledTableForm>
       <StyledTableFormHeader>
         <StyledTableTitle>{title}</StyledTableTitle>
         <StyledTableTool>
-          <StyledTableToolItem><IoRestaurantOutline /></StyledTableToolItem>
+          { edit ? (
+            <>
+              <Button>추가하기</Button>
+              <Button onClick={onSave} type='primary'>저장하기</Button>
+            </>
+          ) : (
+            <Button onClick={onEdit}>수정하기</Button>
+          ) }
         </StyledTableTool>
       </StyledTableFormHeader>
       {table}
