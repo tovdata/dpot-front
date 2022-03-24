@@ -1,9 +1,6 @@
 import styled from 'styled-components';
 // Component
-import { Table, TableColumnProps, Tag, Tooltip } from 'antd';
-// Data (temporary)
-import { personalInfoTableHeader } from '../../models/data';
-import { personalInfo } from '../../models/temporary';
+import { Tag, Tooltip } from 'antd';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
 // Icon
@@ -14,6 +11,12 @@ import { CommonTableProps, TableProcessItemProps } from '../../models/type';
 // Styled element (TableForm)
 const StyledTableForm = styled.div`
   display: block;
+  .ant-table-cell {
+    user-select: none;
+  }
+  .ant-table-cell > .ant-tag {
+    cursor: pointer;
+  }
 `;
 // Styled element (TableFormHeader)
 const StyledTableFormHeader = styled.div`
@@ -43,8 +46,24 @@ const StyledTableToolItem = styled.div`
     margin-right: 0;
   }
 `;
+// Styled element (List)
+const StyledList = styled.ul`
+  margin: 0;
+  padding-left: 1.125rem;
+`;
+const StyledListItem = styled.li``;
 
-const CommonTableForm = ({ title, table }: CommonTableProps): JSX.Element => {
+/** Interface */
+interface TableContentListProps {
+  items: string[];
+}
+interface TableProcessItemsProps {
+  items: TableProcessItemProps[];
+  tooltip: string;
+}
+
+// Component (form)
+export const CommonTableForm = ({ title, table }: CommonTableProps): JSX.Element => {
   return (
     <StyledTableForm>
       <StyledTableFormHeader>
@@ -57,31 +76,11 @@ const CommonTableForm = ({ title, table }: CommonTableProps): JSX.Element => {
     </StyledTableForm>
   );
 }
-
-export const PersonalInfoTable = (): JSX.Element => {
-  // Create the columns
-  const columns = Object.keys(personalInfoTableHeader).map((key: string): TableColumnProps<any> => {
-    const column: TableColumnProps<any> = {
-      dataIndex: key,
-      key: key,
-      title: personalInfoTableHeader[key]
-    };
-    // Process
-    if (key === 'period' || key === 'purpose') {
-      column.render = (data: any): JSX.Element => (<ul style={{ margin: 0, paddingLeft: '1.125rem' }}>{data.map((name: string, index: number): JSX.Element => <li key={index}>{name}</li>)}</ul>);
-    } else if (key === 'essentialItems' || key === 'selectionItems') {
-      column.render = (data: TableProcessItemProps[]): JSX.Element => <>{data.map((item: TableProcessItemProps, index: number): JSX.Element => item.intrinsic ? <Tooltip title='고유식별정보' key={index}><Tag color='geekblue'>{item.name}</Tag></Tooltip> : <Tag color='default' key={index}>{item.name}</Tag>)}</>;
-    }
-    // Return
-    return column;
-  });
-  // Append a key property to data source
-  const dataSource = personalInfo.map((elem: any, index: number): any => { return { ...elem, key: index.toString() }; });
-  // Create a table
-  const table: JSX.Element = <Table columns={columns} dataSource={dataSource} pagination={false} />
-
-  // Return an element
-  return (
-    <CommonTableForm title='개인정보 수집・이용 현황' table={table} />
-  );
+// Component (cell for list)
+export const TableContentList = ({ items }: TableContentListProps): JSX.Element => {
+  return (<StyledList>{items.map((key: string, index: number): JSX.Element => <StyledListItem key={index}>{key}</StyledListItem>)}</StyledList>);
+}
+// Component (cell for tags)
+export const TableProcessItems = ({ items, tooltip }: TableProcessItemsProps): JSX.Element => {
+  return (<>{items.map((item: TableProcessItemProps, index: number): JSX.Element => (item.intrinsic ? <Tooltip key={index} title={tooltip}><Tag color='geekblue'>{item.name}</Tag></Tooltip> : <Tag color='default' key={index}>{item.name}</Tag>))}</>);
 }
