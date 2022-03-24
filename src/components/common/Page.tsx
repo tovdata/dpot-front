@@ -23,6 +23,7 @@ const StyledWrapper = styled.div`
 // Styled element (Content)
 const StyledContent = styled.div`
   flex: 1;
+  padding: 4.625rem 4rem;
 `;
 
 const Page = ({ children }: CommonElementProps): JSX.Element => {
