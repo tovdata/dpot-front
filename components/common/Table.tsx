@@ -5,7 +5,7 @@ import { Button, Tag, Tooltip } from 'antd';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
 // Type
-import { CommonTableProps, TableProcessItemProps } from '../../models/type';
+import { TableProcessItemProps } from '../../models/type';
 
 // Styled element (TableForm)
 const StyledTableForm = styled.div`
@@ -56,6 +56,10 @@ const StyledList = styled.ul`
 const StyledListItem = styled.li``;
 
 /** Interface */
+interface TableProps {
+  table: JSX.Element | JSX.Element[];
+  title: string;
+}
 interface TableContentListProps {
   items: string[];
 }
@@ -65,7 +69,7 @@ interface TableProcessItemsProps {
 }
 
 // Component (form)
-export const CommonTableForm = ({ title, table }: CommonTableProps): JSX.Element => {
+export const CommonTableForm = ({ title, table }: TableProps): JSX.Element => {
   // Set a local state
   const [edit, setEdit] = useState<boolean>(false);
   // Create an event handler (onEdit)
