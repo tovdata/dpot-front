@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { Button, Tag, Tooltip } from 'antd';
+import { Button, Drawer, Popover, Tag, Tooltip } from 'antd';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
+// Icon
+import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle } from 'react-icons/ai';
 // Type
 import { TableProcessItemProps } from '../../models/type';
 
@@ -48,6 +50,31 @@ const StyledTableTool = styled.div`
     margin-left: 0;
   }
 `;
+// Styled element (TableHeader)
+const StyledTableHeader = styled.div`
+  align-items: center;
+  display: flex;
+`;
+// Styled element (TableHeaderQuestionItem)
+const StyledTableHeaderQuestionItem = styled.span`
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  margin-left: 0.5rem;
+`;
+// Styled element (TableEditCell)
+const StyledTableEditCell = styled.span`
+  align-items: center;
+  display: flex;
+  font-size: 1.125rem;
+  svg {
+    cursor: pointer;
+    margin-right: 0.5rem;
+  }
+  svg:last-child {
+    margin-right: 0;
+  }
+`;
 // Styled element (List)
 const StyledList = styled.ul`
   margin: 0;
@@ -57,8 +84,24 @@ const StyledListItem = styled.li``;
 
 /** Interface */
 interface TableProps {
+  edit: boolean;
+  onEdit: () => void;
+  onSave: () => void;
   table: JSX.Element | JSX.Element[];
   title: string;
+}
+interface TableEditCellProps {
+  edit: boolean;
+}
+interface TableEditPanelProps {
+  children?: JSX.Element | JSX.Element[];
+  onClose: () => void;
+  title: string;
+  visible: boolean;
+}
+interface TableHeaderProps {
+  description?: string;
+  name: string;
 }
 interface TableContentListProps {
   items: string[];
@@ -69,13 +112,13 @@ interface TableProcessItemsProps {
 }
 
 // Component (form)
-export const CommonTableForm = ({ title, table }: TableProps): JSX.Element => {
+export const TableForm = ({ edit, onEdit, onSave, title, table }: TableProps): JSX.Element => {
   // Set a local state
-  const [edit, setEdit] = useState<boolean>(false);
-  // Create an event handler (onEdit)
-  const onEdit = (): void => setEdit(true);
-  // Create an event handler (onSave)
-  const onSave = (): void => setEdit(false);
+  const [visible, setVisible] = useState<boolean>(false);
+  // Create an event handler (onClose)
+  const onClose = (): void => setVisible(false);
+  // Create an event handler (onShowDrawer)
+  const onShowDrawer = (): void => setVisible(true);
 
   return (
     <StyledTableForm>
@@ -84,16 +127,55 @@ export const CommonTableForm = ({ title, table }: TableProps): JSX.Element => {
         <StyledTableTool>
           { edit ? (
             <>
-              <Button>추가하기</Button>
+              <Button onClick={onShowDrawer}>추가하기</Button>
               <Button onClick={onSave} type='primary'>저장하기</Button>
             </>
           ) : (
             <Button onClick={onEdit}>수정하기</Button>
           ) }
+          <TableEditPanel title='Basic Drawer' onClose={onClose} visible={visible}>
+            <p>Some contents...</p>
+            <p>Some contents...</p>
+            <p>Some contents...</p>
+          </TableEditPanel>
         </StyledTableTool>
       </StyledTableFormHeader>
       {table}
     </StyledTableForm>
+  );
+}
+// Component (table header)
+export const TableHeader = ({ description, name }: TableHeaderProps): JSX.Element => {
+  // Return an element
+  return (
+    <StyledTableHeader>
+      <>{name}</>
+      {description ? (
+          <Popover content={description} trigger='click'>
+            <StyledTableHeaderQuestionItem>
+              <AiOutlineQuestionCircle />
+            </StyledTableHeaderQuestionItem>
+          </Popover>
+        ) : (undefined)
+      }
+    </StyledTableHeader>
+  );
+}
+// Component (table edit cell)
+export const TableEditCell = ({ edit }: TableEditCellProps): JSX.Element => {
+  return (<>
+    <StyledTableEditCell hidden={!edit}>
+      <AiOutlineEdit />
+      <AiOutlineDelete />
+    </StyledTableEditCell>
+  </>);
+}
+// Component (table edit panel)
+export const TableEditPanel = ({ children, title, onClose, visible }: TableEditPanelProps): JSX.Element => {
+  return (
+    <Drawer onClose={onClose} placement='right' title={title} visible={visible}>
+      {children}
+    </Drawer>
   );
 }
 // Component (cell for list)
