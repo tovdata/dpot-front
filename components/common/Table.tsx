@@ -1,14 +1,11 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { Button, Popover, TableColumnProps, Table, Tag, Tooltip } from 'antd';
-import { EditableDrawer } from './Drawer';
+import { Button, Tag, Tooltip } from 'antd';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
-// Icon
-import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle } from 'react-icons/ai';
 // Type
-import { EditableDrawerContent, TableProcessItemProps } from '../../models/type';
+import { TableProcessItemProps } from '../../models/type';
 
 // Styled element (TableForm)
 const StyledTableForm = styled.div`
@@ -51,31 +48,6 @@ const StyledTableTool = styled.div`
     margin-left: 0;
   }
 `;
-// Styled element (TableHeader)
-const StyledTableHeader = styled.div`
-  align-items: center;
-  display: flex;
-`;
-// Styled element (TableHeaderQuestionItem)
-const StyledTableHeaderQuestionItem = styled.span`
-  align-items: center;
-  cursor: pointer;
-  display: flex;
-  margin-left: 0.5rem;
-`;
-// Styled element (TableEditCell)
-const StyledTableEditCell = styled.span`
-  align-items: center;
-  display: flex;
-  font-size: 1.125rem;
-  svg {
-    cursor: pointer;
-    margin-right: 0.5rem;
-  }
-  svg:last-child {
-    margin-right: 0;
-  }
-`;
 // Styled element (List)
 const StyledList = styled.ul`
   margin: 0;
@@ -85,16 +57,8 @@ const StyledListItem = styled.li``;
 
 /** Interface */
 interface TableProps {
-  columns: TableColumnProps<any>[],
-  dataSource: any[],
+  table: JSX.Element | JSX.Element[];
   title: string;
-}
-interface TableHeaderProps {
-  description?: string;
-  name: string;
-}
-interface TableEditCellProps {
-  onEdit: () => void;
 }
 interface TableContentListProps {
   items: string[];
@@ -103,38 +67,16 @@ interface TableProcessItemsProps {
   items: TableProcessItemProps[];
   tooltip: string;
 }
-interface EditableTableProps extends TableProps {
-  drawer: EditableDrawerContent
-}
 
-// Component (editable table form)
-export const EditableTableForm = ({ columns, dataSource, drawer, title }: EditableTableProps): JSX.Element => {
+// Component (form)
+export const CommonTableForm = ({ title, table }: TableProps): JSX.Element => {
   // Set a local state
   const [edit, setEdit] = useState<boolean>(false);
-  const [content, setContent] = useState<any>({});
-  // Get a state
-  const [show, setShow] = useState<boolean>(false);
-
   // Create an event handler (onEdit)
   const onEdit = (): void => setEdit(true);
   // Create an event handler (onSave)
   const onSave = (): void => setEdit(false);
-  // Create an event handler (onShow)
-  const onShow = (data: any): void => {
-    setContent(data);
-    setShow(true);
-  }
-  // Create an event handler (onClose)
-  const onClose = (): void => setShow(false);
-  // Create an event handler (onChange)
-  const onChange = (data: any): void => setContent(data);
 
-  // Set a data source
-  const editedDataSource: any[] = dataSource.map((elem: any, index: number): any => { return { ...elem, key: index.toString(), edit: elem }; });
-  // Set a columns
-  const editedColumns: TableColumnProps<any>[] = [...columns, { dataIndex: 'edit', key: 'edit', title: 'edit', render: (data: any) => { return <TableEditCell onEdit={() => onShow(data)}></TableEditCell> } }];
-
-  // Return an element
   return (
     <StyledTableForm>
       <StyledTableFormHeader>
@@ -142,7 +84,7 @@ export const EditableTableForm = ({ columns, dataSource, drawer, title }: Editab
         <StyledTableTool>
           { edit ? (
             <>
-              <Button onClick={onShow}>추가하기</Button>
+              <Button>추가하기</Button>
               <Button onClick={onSave} type='primary'>저장하기</Button>
             </>
           ) : (
@@ -150,47 +92,8 @@ export const EditableTableForm = ({ columns, dataSource, drawer, title }: Editab
           ) }
         </StyledTableTool>
       </StyledTableFormHeader>
-      <Table columns={editedColumns} dataSource={editedDataSource} pagination={false} />
-      <EditableDrawer data={content} onChange={onChange} onClose={onClose} title={drawer.title} type={drawer.type} visible={show} />
+      {table}
     </StyledTableForm>
-  );
-}
-// Component (table form)
-export const TableForm = ({ columns, dataSource, title }: TableProps): JSX.Element => {
-  return (
-    <StyledTableForm>
-      <StyledTableFormHeader>
-        <StyledTableTitle>{title}</StyledTableTitle>
-        <StyledTableTool>
-        </StyledTableTool>
-      </StyledTableFormHeader>
-      <Table columns={columns} dataSource={dataSource} />
-    </StyledTableForm>
-  );
-}
-// Component (table header)
-export const TableHeader = ({ description, name }: TableHeaderProps): JSX.Element => {
-  return (
-    <StyledTableHeader>
-      <>{name}</>
-      {description ? (
-          <Popover content={description} trigger='click'>
-            <StyledTableHeaderQuestionItem>
-              <AiOutlineQuestionCircle />
-            </StyledTableHeaderQuestionItem>
-          </Popover>
-        ) : (<></>)
-      }
-    </StyledTableHeader>
-  );
-}
-// Component (table edit cell)
-const TableEditCell = ({ onEdit }: TableEditCellProps): JSX.Element => {
-  return (
-    <StyledTableEditCell>
-      <AiOutlineEdit onClick={onEdit} />
-      <AiOutlineDelete />
-    </StyledTableEditCell>
   );
 }
 // Component (cell for list)
