@@ -8,7 +8,7 @@ export interface TableProcessItemProps {
 }
 /** Data Type */
 export interface EditableDrawerContent {
-  data?: {};
+  data?: any;
   title: string;
   type: string;
 }

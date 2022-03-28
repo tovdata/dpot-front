@@ -25,8 +25,6 @@ export const PersonalInfoTable = (): JSX.Element => {
     // Return
     return column;
   });
-  // Append a key property to data source
-  const dataSource = personalInfo.map((elem: any, index: number): any => { return { ...elem, key: index.toString() }; });
 
   // Create a drawer content
   const drawer: EditableDrawerContent = {
@@ -37,7 +35,7 @@ export const PersonalInfoTable = (): JSX.Element => {
 
   // Return an element
   return (
-    <EditableTableForm columns={columns} dataSource={dataSource} drawer={drawer} title='개인정보 수집・이용 현황' />
+    <EditableTableForm columns={columns} dataSource={personalInfo} drawer={drawer} title='개인정보 수집・이용 현황' />
   );
 }
 // // Component (pseudonym info table)

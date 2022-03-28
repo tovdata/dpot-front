@@ -111,6 +111,7 @@ interface EditableTableProps extends TableProps {
 export const EditableTableForm = ({ columns, dataSource, drawer, title }: EditableTableProps): JSX.Element => {
   // Set a local state
   const [edit, setEdit] = useState<boolean>(false);
+  const [content, setContent] = useState<any>({});
   // Get a state
   const [show, setShow] = useState<boolean>(false);
 
@@ -119,12 +120,19 @@ export const EditableTableForm = ({ columns, dataSource, drawer, title }: Editab
   // Create an event handler (onSave)
   const onSave = (): void => setEdit(false);
   // Create an event handler (onShow)
-  const onShow = (): void => setShow(true);
+  const onShow = (data: any): void => {
+    setContent(data);
+    setShow(true);
+  }
   // Create an event handler (onClose)
   const onClose = (): void => setShow(false);
+  // Create an event handler (onChange)
+  const onChange = (data: any): void => setContent(data);
 
+  // Set a data source
+  const editedDataSource: any[] = dataSource.map((elem: any, index: number): any => { return { ...elem, key: index.toString(), edit: elem }; });
   // Set a columns
-  const editedColumns: TableColumnProps<any>[] = [...columns, { dataIndex: 'edit', key: 'edit', title: 'edit', render: () => <TableEditCell onEdit={onShow}></TableEditCell> }];
+  const editedColumns: TableColumnProps<any>[] = [...columns, { dataIndex: 'edit', key: 'edit', title: 'edit', render: (data: any) => { return <TableEditCell onEdit={() => onShow(data)}></TableEditCell> } }];
 
   // Return an element
   return (
@@ -142,8 +150,8 @@ export const EditableTableForm = ({ columns, dataSource, drawer, title }: Editab
           ) }
         </StyledTableTool>
       </StyledTableFormHeader>
-      <Table columns={editedColumns} dataSource={dataSource} pagination={false} />
-      <EditableDrawer data={drawer.data} onClose={onClose} title={drawer.title} type={drawer.type} visible={show} />
+      <Table columns={editedColumns} dataSource={editedDataSource} pagination={false} />
+      <EditableDrawer data={content} onChange={onChange} onClose={onClose} title={drawer.title} type={drawer.type} visible={show} />
     </StyledTableForm>
   );
 }
