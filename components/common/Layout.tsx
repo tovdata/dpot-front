@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 // Component
+import { RecoilRoot } from 'recoil';
 import Header from './Header';
 import SideMenu from './SideMenu';
 // Type
@@ -26,7 +27,7 @@ const StyledContent = styled.div`
 
 const Layout = ({ children }: CommonElementProps): JSX.Element => {
   return (
-    <>
+    <RecoilRoot>
       <StyledLayout>
         <Header />
         <StyledContainer>
@@ -34,7 +35,7 @@ const Layout = ({ children }: CommonElementProps): JSX.Element => {
           <StyledContent>{children}</StyledContent>
         </StyledContainer>
       </StyledLayout>
-    </>
+    </RecoilRoot>
   );
 }
 
