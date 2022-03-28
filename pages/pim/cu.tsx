@@ -1,11 +1,11 @@
 // Component
-import { PersonalInfoTable, PseudonymInfoTable } from "../../components/PITable";
+import { PersonalInfoTable } from "../../components/PITable";
 
 const Page = () => {
   return (
     <>
       <PersonalInfoTable />
-      <PseudonymInfoTable />
+      {/* <PseudonymInfoTable /> */}
     </>
   )
 }
