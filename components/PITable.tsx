@@ -1,42 +1,12 @@
 // Component
-import { TableColumnProps } from 'antd';
-import { EditableTableForm, TableContentList, TableHeader, TableProcessItems } from '../components/common/Table';
+import { EditableTableForm } from '../components/common/Table';
 // Data
 import { personalInfoTableHeader, pseudonymInfoTableHeader } from '../models/data';
 import { personalInfo, pseudonymInfo } from '../models/temporary';
-// Type
-import { EditableDrawerContent, TableProcessItemProps } from '../models/type';
 
 // Component (personal info table)
 export const PersonalInfoTable = (): JSX.Element => {
-  // Create the columns
-  const columns: TableColumnProps<any>[] = Object.keys(personalInfoTableHeader).map((key: string): TableColumnProps<any> => {
-    const column: TableColumnProps<any> = {
-      dataIndex: key,
-      key: key,
-      title: <TableHeader description={personalInfoTableHeader[key].description} name={personalInfoTableHeader[key].name} />
-    };
-    // Set a render
-    if (key === 'period' || key === 'purpose') {
-      column.render = (items: string[]): JSX.Element => <TableContentList items={items} />;
-    } else if (key === 'essentialItems' || key === 'selectionItems') {
-      column.render = (items: TableProcessItemProps[]): JSX.Element => <TableProcessItems items={items} tooltip='고유식별정보' />;
-    }
-    // Return
-    return column;
-  });
-
-  // Create a drawer content
-  const drawer: EditableDrawerContent = {
-    data: {},
-    title: '개인정보 수집・이용 현황',
-    type: 'personalInfo'
-  }
-
-  // Return an element
-  return (
-    <EditableTableForm columns={columns} dataSource={personalInfo} drawer={drawer} title='개인정보 수집・이용 현황' />
-  );
+  return (<EditableTableForm dataSource={personalInfo} headers={personalInfoTableHeader} title='개인정보 수집・이용 현황' />);
 }
 // // Component (pseudonym info table)
 // export const PseudonymInfoTable = (): JSX.Element => {

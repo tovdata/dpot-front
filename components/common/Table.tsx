@@ -3,12 +3,15 @@ import styled from 'styled-components';
 // Component
 import { Button, Popover, TableColumnProps, Table, Tag, Tooltip } from 'antd';
 import { EditableDrawer } from './Drawer';
+import { EditableSelect } from './Select';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
 // Icon
-import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle } from 'react-icons/ai';
+import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
+// Temporary
+import { processingItems } from '../../models/temporary';
 // Type
-import { EditableDrawerContent, TableProcessItemProps } from '../../models/type';
+import { TableProcessItemData } from '../../models/type';
 
 // Styled element (TableForm)
 const StyledTableForm = styled.div`
@@ -83,56 +86,160 @@ const StyledList = styled.ul`
 `;
 const StyledListItem = styled.li``;
 
-/** Interface */
-interface TableProps {
-  columns: TableColumnProps<any>[],
-  dataSource: any[],
-  title: string;
-}
+/** Interface (Props) */
 interface TableHeaderProps {
   description?: string;
   name: string;
 }
+interface TableProps {
+  dataSource: any[],
+  headers: TableHeadersData;
+  title: string;
+}
 interface TableEditCellProps {
+  edit: boolean;
   onEdit: () => void;
+  onSave: () => void;
 }
 interface TableContentListProps {
   items: string[];
 }
 interface TableProcessItemsProps {
-  items: TableProcessItemProps[];
+  items: TableProcessItemData[];
   tooltip: string;
 }
-interface EditableTableProps extends TableProps {
-  drawer: EditableDrawerContent
+interface EditableTableProps extends TableProps {}
+/** Interface (Data Type) */
+interface TableHeaderData extends TableHeaderProps {
+  display: string;
+}
+interface TableHeadersData {
+  [key: string]: TableHeaderData;
 }
 
+// // Component (editable table form)
+// export const EditableTableForm1 = ({ columns, dataSource, drawer, title }: EditableTableProps): JSX.Element => {
+//   // Set a data source
+//   const editedDataSource: any[] = dataSource.map((elem: any, index: number): any => { return { ...elem, key: index.toString(), edit: elem }; });
+
+//   // Set a local state
+//   const [edit, setEdit] = useState<boolean>(false);
+//   const [data, setData] = useState<any[]>(editedDataSource);
+//   const [row, setRow] = useState<any>(drawer.data);
+//   // Get a state
+//   const [show, setShow] = useState<boolean>(false);
+
+//   // Create an event handler (onEdit)
+//   const onEdit = (): void => setEdit(true);
+//   // Create an event handler (onSave)
+//   const onSave = (): void => setEdit(false);
+//   // Create an event handler (onShow)
+//   const onShow = (rowData: any): void => {
+//     setRow(rowData);
+//     setShow(true);
+//   }
+//   // Create an event handler (onClose)
+//   const onClose = (): void => setShow(false);
+//   // Create an event handler (onChange)
+//   const onChange = (value: any): void => {
+//     setRow(value);
+
+//     let totalData: any[] = [];
+//     const index: number = data.findIndex((item: any): boolean => item.uuid === value.uuid);
+//     if (index >= 0) {
+//       totalData = [...data.slice(0, index), value, ...data.slice(index + 1)];
+//     } else {
+//       totalData = [...data, value];
+//     }
+//     setData(totalData.map((item: any, index: number): any => { return {...item, key: index.toString()} }));
+//   }
+
+//   // Set a columns
+//   const editedColumns: TableColumnProps<any>[] = [...columns, { dataIndex: 'edit', key: 'edit', title: 'edit', render: (data: any) => { console.log(data); return <TableEditCell edit={edit} onEdit={() => onShow(data)} onSave={onChange}></TableEditCell> } }];
+
+//   // Return an element
+//   return (
+//     <StyledTableForm>
+//       <StyledTableFormHeader>
+//         <StyledTableTitle>{title}</StyledTableTitle>
+//         <StyledTableTool>
+//           { edit ? (
+//             <>
+//               <Button onClick={onShow}>추가하기</Button>
+//               <Button onClick={onSave} type='primary'>저장하기</Button>
+//             </>
+//           ) : (
+//             <Button onClick={onEdit}>수정하기</Button>
+//           ) }
+//         </StyledTableTool>
+//       </StyledTableFormHeader>
+//       <Table columns={editedColumns} dataSource={data} pagination={false} />
+//       <EditableDrawer data={row} onChange={onChange} onClose={onClose} title={drawer.title} type={drawer.type} visible={show} />
+//     </StyledTableForm>
+//   );
+// }
 // Component (editable table form)
-export const EditableTableForm = ({ columns, dataSource, drawer, title }: EditableTableProps): JSX.Element => {
-  // Set a local state
-  const [edit, setEdit] = useState<boolean>(false);
-  const [content, setContent] = useState<any>({});
-  // Get a state
-  const [show, setShow] = useState<boolean>(false);
-
-  // Create an event handler (onEdit)
-  const onEdit = (): void => setEdit(true);
-  // Create an event handler (onSave)
-  const onSave = (): void => setEdit(false);
-  // Create an event handler (onShow)
-  const onShow = (data: any): void => {
-    setContent(data);
-    setShow(true);
-  }
-  // Create an event handler (onClose)
-  const onClose = (): void => setShow(false);
-  // Create an event handler (onChange)
-  const onChange = (data: any): void => setContent(data);
-
+export const EditableTableForm = ({ dataSource, headers, title }: EditableTableProps): JSX.Element => {
   // Set a data source
-  const editedDataSource: any[] = dataSource.map((elem: any, index: number): any => { return { ...elem, key: index.toString(), edit: elem }; });
-  // Set a columns
-  const editedColumns: TableColumnProps<any>[] = [...columns, { dataIndex: 'edit', key: 'edit', title: 'edit', render: (data: any) => { return <TableEditCell onEdit={() => onShow(data)}></TableEditCell> } }];
+  const editedDataSource: any[] = dataSource.map((item: any): any => { return {...item, key: item.uuid} });
+
+  // Set a local state (for edit mode)
+  const [editRow, setEditRow] = useState<boolean>(false);
+  const [editTable, setEditTable] = useState<boolean>(false);
+  // Set a local state (for data)
+  const [row, setRow] = useState<any>({});
+  const [table, setTable] = useState<any[]>(editedDataSource);
+
+  // Create an event handler (onEditRow)
+  const onEditRow = (value: any): void => { setEditRow(true); setRow(value) }
+  // Create an event handler (onEditTable)
+  const onEditTable = (): void => setEditTable(true);
+  // Create an event handler (onChangeRow)
+  const onChangeRow = (column: string, display: string, value: any): void => {
+    if (display === 'item') {
+      const newItem: any[] = value.map((item: string): TableProcessItemData => {
+        // Find an index
+        const index: number = processingItems.findIndex((elem: TableProcessItemData): boolean => elem.name === item);
+        // Return
+        return index >= 0 ? processingItems[index] : { intrinsic: false, name: item };
+      });
+      // Update a state for row
+      setRow({...row, [column]: newItem});
+    } else {
+      setRow({...row, [column]: value});
+    }
+  }
+  // Create an event handler (onSave)
+  const onSave = (): void => {
+    // Find an index for selected row
+    const index: number = table.findIndex((item: any): boolean => item.uuid === row.uuid);
+    // Set a new table data
+    const total: any[] = index >= 0 ? [...table.slice(0, index), row, ...table.slice(index + 1)] : [...table, row];
+    // Update a state for table
+    setTable(total.map((item: any, index: number): any => { return {...item, key: index.toString()} }));
+    // Change an edit mode
+    setEditRow(false);
+  }
+
+  // Set the columns
+  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
+    // Set a column
+    const column: TableColumnProps<any> = { dataIndex: key, key: key, title: <TableHeader description={headers[key].description} name={headers[key].name} /> };
+    // Set a render for column
+    if (headers[key].display === 'list') {
+      column.render = (items: string[], record: any): JSX.Element => (editRow && row.uuid === record.uuid) ? <EditableSelect column={key} defaultOptions={row[key]} display={headers[key].display} onChange={onChangeRow} totalOptions={[]} /> : <TableContentList items={items} />
+    } else if (headers[key].display === 'period') {
+      column.render = (items: string[], record: any): JSX.Element => (editRow && row.uuid === record.uuid) ? <EditableSelect column={key} defaultOptions={row[key]} display={headers[key].display} onChange={onChangeRow} totalOptions={[]} /> : <TableContentList items={items} />
+    } else if (headers[key].display === 'item') {
+      column.render = (items: TableProcessItemData[], record: any): JSX.Element => (editRow && row.uuid === record.uuid) ? <EditableSelect column={key} defaultOptions={row[key].map((item: TableProcessItemData): string => item.name)} display={headers[key].display} onChange={onChangeRow} totalOptions={[]} /> : <TableProcessItems items={items} tooltip='고유식별정보' />
+    } else {  // display type is 'string'
+      column.render = (value: string): JSX.Element => (<>{value}</>);
+    }
+    // Return
+    return column;
+  });
+  // Add an edit column
+  columns.push({ dataIndex: 'edit', key: 'edit', title: 'edit', render: (_: any, record: any) => { return <TableEditCell edit={editRow && record.uuid === row.uuid} onEdit={() => onEditRow(record)} onSave={() => onSave()}></TableEditCell> } });
 
   // Return an element
   return (
@@ -140,23 +247,25 @@ export const EditableTableForm = ({ columns, dataSource, drawer, title }: Editab
       <StyledTableFormHeader>
         <StyledTableTitle>{title}</StyledTableTitle>
         <StyledTableTool>
-          { edit ? (
+          { editTable ? (
             <>
-              <Button onClick={onShow}>추가하기</Button>
-              <Button onClick={onSave} type='primary'>저장하기</Button>
+              {/* <Button onClick={onShow}>추가하기</Button> */}
+              <Button onClick={onEditTable} type='primary'>저장하기</Button>
             </>
           ) : (
-            <Button onClick={onEdit}>수정하기</Button>
+            <Button onClick={onEditTable}>수정하기</Button>
           ) }
         </StyledTableTool>
       </StyledTableFormHeader>
-      <Table columns={editedColumns} dataSource={editedDataSource} pagination={false} />
-      <EditableDrawer data={content} onChange={onChange} onClose={onClose} title={drawer.title} type={drawer.type} visible={show} />
+      <Table columns={columns} dataSource={table} pagination={false} />
     </StyledTableForm>
   );
 }
 // Component (table form)
-export const TableForm = ({ columns, dataSource, title }: TableProps): JSX.Element => {
+export const TableForm = ({ dataSource, headers, title }: TableProps): JSX.Element => {
+  // Create the columns
+  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => { return { dataIndex: key, key: key, title: <TableHeader description={headers[key].description} name={headers[key].name} /> } });
+  // Return an element
   return (
     <StyledTableForm>
       <StyledTableFormHeader>
@@ -185,10 +294,10 @@ export const TableHeader = ({ description, name }: TableHeaderProps): JSX.Elemen
   );
 }
 // Component (table edit cell)
-const TableEditCell = ({ onEdit }: TableEditCellProps): JSX.Element => {
+const TableEditCell = ({ edit, onEdit, onSave }: TableEditCellProps): JSX.Element => {
   return (
     <StyledTableEditCell>
-      <AiOutlineEdit onClick={onEdit} />
+      { edit ? <AiOutlineSave onClick={onSave} /> : <AiOutlineEdit onClick={onEdit} />}
       <AiOutlineDelete />
     </StyledTableEditCell>
   );
@@ -199,5 +308,5 @@ export const TableContentList = ({ items }: TableContentListProps): JSX.Element 
 }
 // Component (cell for tags)
 export const TableProcessItems = ({ items, tooltip }: TableProcessItemsProps): JSX.Element => {
-  return (<>{items.map((item: TableProcessItemProps, index: number): JSX.Element => (item.intrinsic ? <Tooltip key={index} title={tooltip}><Tag color='geekblue'>{item.name}</Tag></Tooltip> : <Tag color='default' key={index}>{item.name}</Tag>))}</>);
+  return (<>{items.map((item: TableProcessItemData, index: number): JSX.Element => (item.intrinsic ? <Tooltip key={index} title={tooltip}><Tag color='geekblue'>{item.name}</Tag></Tooltip> : <Tag color='default' key={index}>{item.name}</Tag>))}</>);
 }

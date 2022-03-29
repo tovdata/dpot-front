@@ -1,3 +1,6 @@
+// Type
+import { TableProcessItemData } from './type';
+
 // 개인정보 수집 및 이용 현황 데이터
 export const personalInfo = [{
   basisOfCollection: ["통신비밀보호법", "전자금융거래법"],
@@ -114,9 +117,9 @@ export const pseudonymInfo = [{
   uuid: "1"
 }];
 // 목적
-export const purposes = ["본인 식별 및 인증", "회원 자격 유지 및 관리", "이용자 식별", "본인 여부 및 연령 확인", "콘텐츠 제공", "구매 및 요금결제"];
+export const purposes = ["본인 식별 및 인증", "회원 자격 유지 및 관리", "이용자 식별", "본인 여부 및 연령 확인", "콘텐츠 제공", "구매 및 요금결제", "서비스 연구", "서비스 웹/앱 버전 개발"];
 // 처리 항목
-export const processingItems = [{
+export const processingItems: TableProcessItemData[] = [{
   intrinsic: false,
   name: "이름",
 }, {
@@ -149,4 +152,13 @@ export const processingItems = [{
 }, {
   intrinsic: false,
   name: "결제기록",
+}, {
+  intrinsic: false,
+  name: "방문일시",
+}, {
+  intrinsic: false,
+  name: "서비스 이용 기록",
+}, {
+  intrinsic: false,
+  name: "IP Address",
 }];
