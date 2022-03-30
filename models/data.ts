@@ -22,7 +22,7 @@ export const personalInfoTableHeader: any = {
   },
   period: {
     description: "e",
-    display:"period",
+    display: "period",
     name: "보유 기간"
   }
 };
@@ -53,3 +53,85 @@ export const pseudonymInfoTableHeader: any = {
     name: "보유 및 이용 기간"
   }
 };
+
+
+// provision of personal information
+export const provisionTableHeader: any = {
+  recipient: {
+    description: "a",
+    display: "string",
+    name: "제공받는 자"
+  },
+  purpose: {
+    description: "a",
+    display: "list",
+    name: "제공 목적"
+  },
+  items: {
+    description: "a",
+    display: "item",
+    name: "제공 항목"
+  },
+  period: {
+    description: "a",
+    display: "period",
+    name: "보유 및 이용기간"
+  },
+  charger: {
+    description: "a",
+    display: "string",
+    name: "담당자(연락처)"
+  },
+  isForeign: {
+    description: "a",
+    display: "checkbox",
+    name: "국외여부"
+  }
+}
+
+// provision of personal additional information
+export const expandProvisionTableHeader: any = {
+  country: {
+    description: "a",
+    display: "string",
+    name: "제공받는 업체의 국가"
+  },
+  address: {
+    description: "a",
+    display: "list",
+    name: "제공받는 업체의 위치(주소)"
+  },
+  method: {
+    description: "a",
+    display: "string",
+    name: "제공 일시 및 방법"
+  }
+}
+
+export const consignmentTableHeader: any = {
+  company: {
+    description: "a",
+    display: "string",
+    name: "업체명"
+  },
+  subject: {
+    description: "a",
+    display: "list",
+    name: "업무명"
+  },
+  content: {
+    description: "a",
+    display: "item",
+    name: "위탁 내용"
+  },
+  charger: {
+    description: "a",
+    display: "string",
+    name: "담당자(연락처)"
+  },
+  isForeign: {
+    description: "a",
+    display: "checkbox",
+    name: "국외 여부"
+  }
+}
