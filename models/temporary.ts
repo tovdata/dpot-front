@@ -102,7 +102,7 @@ export const personalInfo = [{
   uuid: "4"
 }];
 // 가명정보 수집 및 이용 현황 데이터
-export const pseudonymInfo = [{
+export const falseNameInfo = [{
   basis: "과학적 연구",
   items: [{
     intrinsic: false,

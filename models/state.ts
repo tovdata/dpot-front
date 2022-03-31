@@ -13,6 +13,10 @@ const purposesForPimAtom = atom<string[]>({
   key: 'purposesForPimAtom',
   default: purposes
 });
+const editLogAtom = atom<any>({
+  key: 'editLogAtom',
+  default: {}
+});
 
 /** Selector */
 export const getProcessingItemsForPimSelector = selector<TableProcessItemData[]>({
@@ -32,4 +36,9 @@ export const updatePurposeForPimSelector = selector<string[]>({
   key: 'updatePurposeForPimSelector',
   get: ({ get }) => get(purposesForPimAtom),
   set: ({ set }, value) => set(purposesForPimAtom, value)
+});
+export const updateEditLogSelector = selector<any>({
+  key: 'updateEditLogSelector',
+  get: ({ get }) => get(editLogAtom),
+  set: ({ set }, value) => set(editLogAtom, value)
 });
