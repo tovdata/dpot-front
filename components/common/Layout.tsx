@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 // Component
 import { RecoilRoot } from 'recoil';
 import Header from './Header';
@@ -6,6 +6,12 @@ import SideMenu from './SideMenu';
 // Type
 import { CommonElementProps } from '../../models/type';
 
+// Global style
+const GlobalStyle = createGlobalStyle`
+  .ant-select-item-option-selected {
+    display: none;
+  }
+`;
 // Styled element (Layout)
 const StyledLayout = styled.div`
   display: flex;
@@ -28,6 +34,7 @@ const StyledContent = styled.div`
 const Layout = ({ children }: CommonElementProps): JSX.Element => {
   return (
     <RecoilRoot>
+      <GlobalStyle />
       <StyledLayout>
         <Header />
         <StyledContainer>

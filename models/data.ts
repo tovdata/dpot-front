@@ -1,5 +1,8 @@
+// Type
+import { TableHeadersData } from './type';
+
 /** Table Header */
-export const personalInfoTableHeader: any = {
+export const personalInfoTableHeader: TableHeadersData = {
   subject: {
     description: "a",
     display: "string",
@@ -26,7 +29,7 @@ export const personalInfoTableHeader: any = {
     name: "보유 기간"
   }
 };
-export const pseudonymInfoTableHeader: any = {
+export const falseNameInfoTableHeader: TableHeadersData = {
   subject: {
     description: "a",
     display: "string",
@@ -53,10 +56,8 @@ export const pseudonymInfoTableHeader: any = {
     name: "보유 및 이용 기간"
   }
 };
-
-
 // provision of personal information
-export const provisionTableHeader: any = {
+export const provisionTableHeader: TableHeadersData = {
   recipient: {
     description: "a",
     display: "string",
@@ -88,9 +89,8 @@ export const provisionTableHeader: any = {
     name: "국외여부"
   }
 }
-
 // provision of personal additional information
-export const expandProvisionTableHeader: any = {
+export const expandProvisionTableHeader: TableHeadersData = {
   country: {
     description: "a",
     display: "string",
@@ -107,8 +107,7 @@ export const expandProvisionTableHeader: any = {
     name: "제공 일시 및 방법"
   }
 }
-
-export const consignmentTableHeader: any = {
+export const consignmentTableHeader: TableHeadersData = {
   company: {
     description: "a",
     display: "string",
