@@ -12,9 +12,9 @@ pipeline {
     }
     stage('Deply') {
       steps {
-        script {
-          sh './scripts/deploy.sh'
-        }
+        sh '$pid=$(lsof -t -i:3000)'
+        sh 'if [ -n $pid ]; then kill -9 $pid fi'
+        sh 'npm run start'
       }
     }
   }
