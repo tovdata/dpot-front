@@ -8,7 +8,7 @@ pipeline {
       }
     }
     stage('Deply') {
-      step {
+      steps {
         script {
           sh 'sudo chmod +x ./script/deploy.sh'
           sh 'sudo ./scripts/deploy.sh'
