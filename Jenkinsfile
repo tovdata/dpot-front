@@ -5,12 +5,14 @@ pipeline {
   }
   stages {
     stage('Build') {
+      agent nodejs
       steps {
         sh 'npm install'
         sh 'npm run build'
       }
     }
     stage('Deply') {
+      agent nodejs
       steps {
         sh 'sudo ./scripts/deploy.sh'
       }
