@@ -12,7 +12,7 @@ pipeline {
     }
     stage('Deply') {
       steps {
-        sh '$pid=$(lsof -t -i:3000)'
+        sh 'pid=$(lsof -t -i:3000)'
         sh 'if [ -n $pid ]; then kill -9 $pid fi'
         sh 'npm run start'
       }
