@@ -12,8 +12,7 @@ pipeline {
     }
     stage('Deply') {
       steps {
-        sh 'if [ -n $(lsof -t -i:3000) ]; then kill -9 $(lsof -t -i:3000) fi'
-        sh 'npm run start'
+        sh 'sudo ./scripts/deploy.sh'
       }
     }
   }
