@@ -7,6 +7,7 @@ export interface TableHeaderData {
   description?: string;
   display: string;
   name: string;
+  required: boolean;
 }
 export interface TableHeadersData {
   [key: string]: TableHeaderData;
