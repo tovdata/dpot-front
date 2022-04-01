@@ -13,8 +13,7 @@ pipeline {
     stage('Deply') {
       steps {
         script {
-          sh 'sudo chmod +x ./script/deploy.sh'
-          sh 'sudo ./scripts/deploy.sh'
+          sh './scripts/deploy.sh'
         }
       }
     }
