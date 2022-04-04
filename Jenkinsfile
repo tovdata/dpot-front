@@ -1,7 +1,7 @@
 pipeline {
   agent any
   tools {
-    nodejs "NodeJS 16.14.0"
+    nodejs "NodeJS"
   }
   stages {
     stage('Build') {
@@ -12,6 +12,7 @@ pipeline {
     }
     stage('Deply') {
       steps {
+        sh 'which npm'
         sh 'sudo ./scripts/deploy.sh'
         sh 'npm run start &'
       }
