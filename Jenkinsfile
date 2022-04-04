@@ -21,7 +21,7 @@ pipeline {
   post {
     success {
       echo 'Success to build and deploy for project'
-      sh 'JENKINS_NODE_COOKIE=dontKillMe && nohup ./scripts/deploy.sh > /dev/null &'
+      sh 'JENKINS_NODE_COOKIE=dontKillMe && nohup ./scripts/deploy.sh &'
     }
     failure {
       echo 'Failed to build an deploy for project'
