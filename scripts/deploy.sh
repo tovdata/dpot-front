@@ -5,4 +5,4 @@ if [ $pid ]; then
   kill -9 $pid
 fi
 # Start
-npm run start
+JENKINS_NODE_COOKIE=dontKillMe && nohup npm run start &
