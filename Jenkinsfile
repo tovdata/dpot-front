@@ -1,5 +1,5 @@
 pipeline {
-  agent none
+  agent any
   tools {
     nodejs "NodeJS 16.14.0"
   }
