@@ -4,5 +4,3 @@ pid=$(lsof -t -i:3000)
 if [ -n $pid ]; then
   kill -9 $pid
 fi
-# Start a process (for next.js)
-npm run start &

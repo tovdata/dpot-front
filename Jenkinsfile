@@ -13,6 +13,7 @@ pipeline {
     stage('Deply') {
       steps {
         sh 'sudo ./scripts/deploy.sh'
+        sh 'npm run start &'
       }
     }
   }
