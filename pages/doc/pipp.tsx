@@ -1,8 +1,9 @@
+// Component
+import { PersonalInfoProcessingPolicy } from '../../components/PIPPTable';
+
 const Page = () => {
   return (
-    <div>
-      <h2>PIPP page</h2>
-    </div>
+    <PersonalInfoProcessingPolicy />
   )
 }
 

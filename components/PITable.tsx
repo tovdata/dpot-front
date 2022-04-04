@@ -1,5 +1,5 @@
 // Component
-import { EditableTable } from '../components/common/Table';
+import { EditableTable } from './common/Table';
 // Data
 import { personalInfoTableHeader, falseNameInfoTableHeader } from '../models/data';
 import { personalInfo, falseNameInfo } from '../models/temporary';

@@ -158,3 +158,25 @@ export const consignmentTableHeader: TableHeadersData = {
     required: true
   }
 }
+export const personalInfoProcessingPolicyTableHeader: TableHeadersData = {
+  name: {
+    display: "string",
+    name: "문서 이름",
+    required: true
+  },
+  status: {
+    display: "tag",
+    name: "상태",
+    required: true
+  },
+  createAt: {
+    display: "datetime",
+    name: "생성일",
+    required: true
+  },
+  latestAt: {
+    display: "datetime",
+    name: "최종 편집일",
+    required: true
+  }
+}

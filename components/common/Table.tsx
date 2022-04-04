@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import styled, { css } from 'styled-components';
 // Component
-import { Button, Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Form, Input } from 'antd';
-import { EditableInput } from './Input';
+import { Button, Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Form } from 'antd';
+import { EditableInput, SearchableInput } from './Input';
 import { EditableSelectMulti, EditableSelectSingle } from './Select';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
 // Icon
-import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
+import { AiOutlineDelete, AiOutlineDownload, AiOutlineEdit, AiOutlinePlus, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
 // State
 import { updateEditLogSelector } from '../../models/state';
 // Temporary
@@ -16,6 +16,7 @@ import { processingItems } from '../../models/temporary';
 // Type
 import { TableHeaderData, TableHeadersData, TableProcessItemData } from '../../models/type';
 import { CustomizeComponent } from 'rc-table/lib/interface';
+import { ColumnsType } from 'antd/lib/table';
 
 // Styled element (OuterTable)
 const OuterTable = styled(Table)`
@@ -147,7 +148,6 @@ export const BasicTable = ({ dataSource, headers, title }: TableProps): JSX.Elem
     <StyledTableForm>
       <StyledTableFormHeader>
         <StyledTableTitle>{title}</StyledTableTitle>
-        <StyledTableTool></StyledTableTool>
       </StyledTableFormHeader>
       <Table columns={columns} dataSource={dataSource} />
     </StyledTableForm>
@@ -298,13 +298,34 @@ const BaseEditableTable = ({ dataSource, expandKey, headers, innerHeaders, title
     </StyledTableForm>
   );
 }
+// Component (Searchable table)
+export const SearchableTable = ({ dataSource, headers, title }: TableProps): JSX.Element => {
+  // Set a data source
+  const editedDataSource: any[] = setDataSource(dataSource);
+  // Set a columns
+  const columns: any[] = createSearchableTableColumnProps(headers);
+
+  // Return an element
+  return (
+    <StyledTableForm>
+      <StyledTableFormHeader>
+        <StyledTableTitle>{title}</StyledTableTitle>
+        <StyledTableTool>
+          <SearchableInput content='' onSearch={() => {}} />
+          <Button type='primary'><AiOutlinePlus /> 문서 만들기</Button>
+        </StyledTableTool>
+      </StyledTableFormHeader>
+      <Table columns={columns} dataSource={editedDataSource} />
+    </StyledTableForm>
+  )
+}
 // [Internal] Component (Table header)
 const TableHeader = ({ description, name }: TableHeaderProps): JSX.Element => {
   return (
     <StyledTableHeader>
       <>{name}</>
       {description ? (
-        <Popover content={description} trigger='click'>
+        <Popover content={description} trigger='hover'>
           <StyledTableHeaderQuestionItem>
             <AiOutlineQuestionCircle />
           </StyledTableHeaderQuestionItem>
@@ -331,6 +352,17 @@ const TableContentList = ({ items }: TableContentListProps): JSX.Element => {
 // [Internal] Component (cell for tags)
 const TableProcessItems = ({ items, tooltip }: TableProcessItemsProps): JSX.Element => {
   return (<>{items.map((item: TableProcessItemData, index: number): JSX.Element => (item.intrinsic ? <Tooltip key={index} title={tooltip}><Tag color='geekblue'>{item.name}</Tag></Tooltip> : <Tag color='default' key={index}>{item.name}</Tag>))}</>);
+}
+// [Internal] Component (cell for tools)
+const TableToolCell = (): JSX.Element => {
+  return (
+    <StyledTableEditCell>
+      <AiOutlineDownload />
+      <AiOutlineEdit />
+      <AiOutlineDownload />
+      <AiOutlineDelete />
+    </StyledTableEditCell>
+  );
 }
 
 /**
@@ -387,14 +419,22 @@ const createEditableTableColumns = (editRow: boolean, editTable: boolean, header
     } else if (header.display === 'item') {
       column.render = (items: TableProcessItemData[], record: any): JSX.Element => {
         if (editRow && row.uuid === record.uuid) {
+          // Set a compare the items
+          let compareItems: TableProcessItemData[] = [];
+          if (key === 'essentialItems') {
+            compareItems = row['selectionItems'];
+          } else if (key === 'selectionItems') {
+            compareItems = row['essentialItems'];
+          }
+          // Set a render for select box
           if (header.required) {
             return (
               <Form.Item name={key} rules={[{ required: true }]}>
-                <EditableSelectMulti defaultOptions={row[key].map((item: TableProcessItemData): string => item.name)} onChange={(items: string[]): void => onChangeRow(key, header.display, items)} totalOptions={['이름', '아이디', '비밀번호', '이메일주소', '실주소', 'aa', 'bb']} />
+                <EditableSelectMulti compareOptions={compareItems.map((item: TableProcessItemData): string => item.name)} defaultOptions={row[key].map((item: TableProcessItemData): string => item.name)} onChange={(items: string[]): void => onChangeRow(key, header.display, items)} totalOptions={['이름', '아이디', '비밀번호', '이메일주소', '실주소', '휴대전화번호', '생년월일', 'aa', 'bb']} />
               </Form.Item>
             );
           } else {
-            return (<EditableSelectMulti defaultOptions={row[key].map((item: TableProcessItemData): string => item.name)} onChange={(items: string[]): void => onChangeRow(key, header.display, items)} totalOptions={['이름', '아이디', '비밀번호', '이메일주소', '실주소', 'aa', 'bb']} />);
+            return (<EditableSelectMulti compareOptions={compareItems.map((item: TableProcessItemData): string => item.name)} defaultOptions={row[key].map((item: TableProcessItemData): string => item.name)} onChange={(items: string[]): void => onChangeRow(key, header.display, items)} totalOptions={['이름', '아이디', '비밀번호', '이메일주소', '실주소', '휴대전화번호', '생년월일', 'aa', 'bb']} />);
           }
         } else {
           return (<TableProcessItems items={items} tooltip='고유식별정보' />);
@@ -456,6 +496,40 @@ const createEditableTableColumns = (editRow: boolean, editTable: boolean, header
   if (!isInner) {
     columns.push({ className: 'edit', dataIndex: 'edit', key: 'edit', title: 'edit', visible: editTable, render: (_: any, record: any) => (<TableEditCell edit={editRow && row.uuid === record.uuid} onDelete={() => onDelete(record)} onEdit={() => onEditRow(record)} onSave={onSaveRow}></TableEditCell>) });
   }
+  // Return
+  return columns;
+}
+const createSearchableTableColumnProps = (headers: any): any[] => {
+  const columns: any[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
+    // Extract a this header info
+    const header: TableHeaderData = headers[key];
+    // Set a column
+    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
+    // Set a render for column
+    if (header.display === 'tag') {
+      column.render = (item: string): JSX.Element => {
+        // Set a tag color and content
+        let content: string = '';
+        let color: string = 'geekblue';
+        switch (item) {
+          case 'complete':
+            content = '게재완료';
+            color = 'green';
+            break;
+          default:
+            content = '임시저장'
+            color = 'geekblue';
+            break;
+        }
+        // Return
+        return <Tag color={color}>{content}</Tag>
+      }
+    }
+    // Return
+    return column;
+  });
+  // Add a tools columns
+  columns.push({ className: 'tools', dataIndex: 'tools', key: 'tools', title: '', render: (_: any, record: any) => (<TableToolCell />) });
   // Return
   return columns;
 }
