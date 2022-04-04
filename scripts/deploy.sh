@@ -4,3 +4,5 @@ pid=$(lsof -t -i TCP:3000 -a -c node)
 if [ $pid ]; then
   kill -9 $pid
 fi
+# Start
+npm run start
