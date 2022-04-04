@@ -13,7 +13,7 @@ pipeline {
     stage('Deply') {
       steps {
         nodejs("NodeJS") {
-          sh './scripts/deploy.sh'
+          sh 'JENKINS_NODE_COOKIE=dontKillMe && nohup ./scripts/deploy.sh > /dev/null &'
         }
       }
     }
