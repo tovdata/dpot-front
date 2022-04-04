@@ -12,9 +12,7 @@ pipeline {
     }
     stage('Deply') {
       steps {
-        sh 'which npm'
         sh 'sudo ./scripts/deploy.sh'
-        sh 'npm run start &'
       }
     }
   }
