@@ -13,7 +13,8 @@ pipeline {
     stage('Deply') {
       steps {
         nodejs("NodeJS") {
-          sh 'JENKINS_NODE_COOKIE=dontKillMe sudo ./scripts/deploy.sh &'
+          sh './scripts/deploy.sh'
+          sh 'JENKINS_NODE_COOKIE=dontKillMe && nohup npm run start &'
         }
       }
     }
