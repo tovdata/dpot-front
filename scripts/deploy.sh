@@ -6,5 +6,5 @@ if [ $pid ]; then
   echo "Kill a previous process ($pid)"
 fi
 # Start
-JENKINS_NODE_COOKIE=dontKillMe && nohup npm run start &
-echo "Start a process for front server"
+# JENKINS_NODE_COOKIE=dontKillMe && nohup npm run start &
+# echo "Start a process for front server"

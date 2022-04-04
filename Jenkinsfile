@@ -14,6 +14,7 @@ pipeline {
       steps {
         nodejs("NodeJS") {
           sh './scripts/deploy.sh'
+          sh 'JENKINS_NODE_COOKIE=dontKillMe && nohup npm run start &'
         }
       }
     }
