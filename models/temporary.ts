@@ -202,15 +202,10 @@ export const provisionPersonalInfo = [{
 }];
 
 export const consignmentPersonalInfo = [{
+  uuid: 1,
+  subject: "결제 및 요금 정산 처리",
   company: "나이스페이먼츠(주)",
-  subject: ["결제 및 요금 정산 처리"],
-  content: [{
-    intrinsic: false,
-    name: "결제대행 서비스"
-  }, {
-    intrinsic: false,
-    name: "바로결제 서비스 정산"
-  }],
+  content: ["결제대행 서비스", "바로결제 서비스 정산"],
   charger: "전수지(3667)",
-  isForeign: false
+  isForeign: false,
 }]
