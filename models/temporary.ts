@@ -1,5 +1,5 @@
 // Type
-import { TableProcessItemData } from './type';
+import { ProcessingItemDF } from './type';
 
 // 개인정보 수집 및 이용 현황 데이터
 export const personalInfo = [{
@@ -119,7 +119,7 @@ export const falseNameInfo = [{
 // 목적
 export const purposes = ["본인 식별 및 인증", "회원 자격 유지 및 관리", "이용자 식별", "본인 여부 및 연령 확인", "콘텐츠 제공", "구매 및 요금결제", "서비스 연구", "서비스 웹/앱 버전 개발"];
 // 처리 항목
-export const processingItems: TableProcessItemData[] = [{
+export const processingItems: ProcessingItemDF[] = [{
   intrinsic: false,
   name: "이름",
 }, {

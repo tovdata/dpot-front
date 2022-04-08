@@ -18,6 +18,7 @@ const StyledIFTTTFormRow = styled.div`
 
 /** [Interface] Properties for addable select */
 interface AddableSelectProps {
+  error?: boolean;
   multiple?: boolean;
   onChange: (value: any) => void;
   totalOptions: string[];
@@ -38,6 +39,7 @@ interface SelectOption {
 interface SingleSelectProps {
   onSelect: (item: string) => void;
   refresh?: MutableRefObject<number>;
+  status?: boolean;
   totalOptions: string[];
   value: string;
 }
@@ -85,7 +87,7 @@ export const SingleSelect = ({ onSelect, refresh, totalOptions, value }: SingleS
   return (<Select key={refresh ? refresh.current : undefined} options={options} onSelect={onSelect} placeholder='선택' value={value === '' ? undefined : value} />);
 }
 /** [Component] Addable select */
-export const AddableSelect = ({ multiple, onChange, totalOptions, values }: AddableSelectProps): JSX.Element => {
+export const AddableSelect = ({ error, multiple, onChange, totalOptions, values }: AddableSelectProps): JSX.Element => {
   // Set a local state
   const [selected, setSelected] = useState<string[]|string>(values);
   // Set the options for select box
@@ -93,7 +95,7 @@ export const AddableSelect = ({ multiple, onChange, totalOptions, values }: Adda
   // Create an event handler (onSelect)
   const onSelect = (item: string[]|string): void => { setSelected(item); onChange(item) }
   // Return an element
-  return (<Select mode={multiple ? 'tags' : undefined} onChange={onSelect} options={options} style={{ width: '100%' }} tokenSeparators={[',']} value={selected} />);
+  return (<Select mode={multiple ? 'tags' : undefined} onChange={onSelect} options={options} status={error ? 'error' : undefined} style={{ width: '100%' }} tokenSeparators={[',']} value={selected} />);
 }
 /** [Component] IFTTT select */
 export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {

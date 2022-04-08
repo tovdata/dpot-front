@@ -17,10 +17,6 @@ export interface EditableDrawerContent {
   title: string;
   type: string;
 }
-export interface TableProcessItemData {
-  intrinsic: boolean;
-  name: string;
-}
 
 /** Data format (for processing item) */
 export interface ProcessingItemDF {

@@ -2,46 +2,39 @@ import { useState } from 'react';
 // Component
 import { notification } from 'antd';
 // import { EditableTable } from './common/Table';
-import { EditableTableForm } from './common/RenewerTable';
+import { EditableTableForm, setDataSource } from './common/RenewerTable';
 // Data
 import { personalInfoTableHeader, falseNameInfoTableHeader } from '../models/data';
 import { personalInfo, falseNameInfo } from '../models/temporary';
+// Module
+import { createSimpleWarningNotification } from './common/Notification';
 
 /**
  * [Component] Personal information table
  */
 export const PersonalInfoTable = (): JSX.Element => {
   // Set a local state (for data)
-  const [data, setData] = useState<any[]>(personalInfo);
+  const [data, setData] = useState<any[]>(setDataSource(personalInfo));
 
   // Create an event handler (onAdd)
   const onAdd = (record: any): void => setData([...data, record]);
   // Create an event handler (onDelete)
-  const onDelete = (index: number) => data.length - 1 === index ? setData([...data.slice(0, index)]) : setData([...data.slice(0, index), ...data.slice(index + 1)]);
+  const onDelete = (index: number): void => data.length - 1 === index ? setData([...data.slice(0, index)]) : setData([...data.slice(0, index), ...data.slice(index + 1)]);
   // Create an event handler (onSave)
-  const onSave = (index: number, record: any): void => {
+  const onSave = (index: number, record: any): boolean => {
     if (record.essentialItems.length === 0 && record.selectionItems.length === 0) {
-      createWarningNotification('');
+      createSimpleWarningNotification('필수 항목과 선택 항목 중에서 하나의 항목을 필수로 입력해야 합니다.');
+      return false;
     } else {
-      data.length - 1 === index ? setData([...data.slice(0, index), record]) : setData([...data.slice(0, index), record, ...data.slice(index + 1)])
+      data.length - 1 === index ? setData([...data.slice(0, index), record]) : setData([...data.slice(0, index), record, ...data.slice(index + 1)]);
+      return true;
     }
   };
 
+  // Return an element
   return (<EditableTableForm dataSource={data} headers={personalInfoTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} title='개인정보 수집・이용 현황' />);
 }
 // // // Component (pseudonym info table)
 // export const FalseNameInfoTable = (): JSX.Element => {
 //   return (<EditableTable dataSource={falseNameInfo} headers={falseNameInfoTableHeader} title='가명정보 수집・이용 현황' />);
 // }
-
-/**
- * [Internal Function] Create a warning notification
- * @param message notification message
- */
- const createWarningNotification = (message: string): void => {
-  notification.warning({
-    description: message,
-    duration: 2.4,
-    message: 'Warning'
-  });
-}

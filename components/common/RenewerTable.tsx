@@ -1,11 +1,9 @@
 import { MutableRefObject, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 // Component
-import { Button, Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Form, Input, Space, Typography } from 'antd';
-import { notification } from 'antd';
-import { EditableInput, SearchableInput } from './Input';
-import { AddableSelect, EditableSelectMulti, EditableSelectSingle, IFTTTSelect, SingleSelect } from './Select';
+import { Button, Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography } from 'antd';
+import { AddableSelect, IFTTTSelect } from './Select';
 // Data
 import { defaultExtendPersonalInfoTable } from '../../models/data';
 // Font
@@ -14,14 +12,14 @@ import { FS_HXXS, LH_HXXS } from '../../static/font';
 import { AiOutlineDelete, AiOutlineDownload, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
 import { IoAddCircle } from 'react-icons/io5';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+// Module
+import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // State
 import { updateEditLogSelector } from '../../models/state';
 // Temporary
 import { processingItems } from '../../models/temporary';
 // Type
 import { ProcessingItemDF, TableHeaderData, TableHeadersData } from '../../models/type';
-import { CustomizeComponent } from 'rc-table/lib/interface';
-import { ModalToCreatePipp } from './Modal';
 
 // Styled element (OuterTable)
 const OuterTable = styled(Table)`
@@ -119,9 +117,11 @@ interface AddableTableProps extends TableProps {
 }
 /** [Interface] Properties for editable table */
 interface EditableTableProps extends TableProps {
+  expandKey?: string;
+  innerHeaders?: TableHeadersData;
   onAdd: (record: any) => void;
   onDelete: (index: number) => void;
-  onSave: (index: number, value: any) => void;
+  onSave: (index: number, value: any) => boolean;
 }
 /** [Internal] Properties for table form */
 interface EditableTableFormProps extends EditableTableProps {
@@ -175,21 +175,43 @@ export const BasicTable = ({ dataSource, pagination, headers }: TableProps): JSX
 /**
  * [Component] Editable table
  */
-export const EditableTable = ({ dataSource, headers, onAdd, onDelete, onSave, pagination }: EditableTableProps): JSX.Element => {
+export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, pagination }: EditableTableProps): JSX.Element => {
+  // Set a default focus and default record for columns in row
+  const defaultFocusState: any = {};
+  const defaultRecord: any = {};
+  // Extract a focus state and record by header key
+  Object.keys(headers).forEach((key: string): void => {
+    defaultFocusState[key] = false;
+    const type: string = headers[key].display;
+    defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
+  });
+  // Extract a focus state by inner header key
+  if (innerHeaders) {
+    Object.keys(innerHeaders).forEach((key: string): void => {
+      defaultFocusState[key] = false;
+      const type: string = innerHeaders[key].display;
+      defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
+    });
+  }
+
   // Set a ref
   const newProjectCnt: MutableRefObject<number> = useRef(0);
   // Set a local state
   const [row, setRow] = useState<any>({});
+  const [focus, setFocus] = useState<any>(defaultFocusState); 
 
-  // Create an event handler (onCreate)
+  /**
+   * [Event Handler] Create a row
+   */
   const onCreate = (): void => {
     // Set a key
     const key: string = `npc_${newProjectCnt.current++}`;
     // Create a new row
-    const record: any = {...defaultExtendPersonalInfoTable, uuid: key,  key: key};
+    const record: any = {...defaultRecord, uuid: key,  key: key};
+
     // Check a editing status
     if (row.uuid !== undefined) {
-      createWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.');
+      createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.');
     } else {
       // Add a row
       onAdd(record);
@@ -197,86 +219,173 @@ export const EditableTable = ({ dataSource, headers, onAdd, onDelete, onSave, pa
       setRow(record);
     }
   }
-  // Create an event handler (onChange)
-  const onChange = (key: string, item: string[]|string): void => setRow({...row, [key]: item});
-  // Create an event handler (onEdit)
+  /**
+   * [Event Handler] Change a row
+   * @param key column key
+   * @param item column value
+   * @param required required
+   * @param type column type
+   */
+  const onChange = (key: string, item: string[]|string, required: boolean, type?: string): void => {
+    if (type && type === 'item') {
+      const newItem: ProcessingItemDF[] = (item as string[]).map((value: string): ProcessingItemDF => {
+        // Find
+        const index: number = processingItems.findIndex((elem: ProcessingItemDF): boolean => elem.name === value);
+        // Return
+        return index === -1 ? { intrinsic: false, name: value } : processingItems[index];
+      });
+      // Set a row
+      setRow({...row, [key]: newItem});
+    } else {
+      // Set a row
+      setRow({...row, [key]: item});
+      // Check a required
+      setFocus({...focus, [key]: checkRequired(headers[key].name, item, required)});
+    }
+  }
+  /**
+   * [Event Handler] Set a edit state
+   * @param record selected row
+   */
   const onEdit = (record: any): void => {
-    (row.uuid && record.uuid && row.uuid !== record.uuid) ? createWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.') : setRow(record);
+    clearFocus();
+    (row.uuid && record.uuid && row.uuid !== record.uuid) ? createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.') : setRow(record);
   }
 
-  // Set a columns
-  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
-    // Extract a header data
-    const header: TableHeaderData = headers[key];
-    // Create a column
-    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
-    // Set a render for column
-    column.render = (item: any, record: any, index: number): JSX.Element => {
-      switch (header.display) {
-        case 'item':
-          if (row.uuid === record.uuid) {
-            const childElement: JSX.Element = (<AddableSelect multiple onChange={(items: string[]): void => onChange(key, items)} totalOptions={[]} values={item.map((elem: ProcessingItemDF): string => elem.name)} />);
-            return header.required ? (<Form.Item key={index}>{childElement}</Form.Item>) : childElement;
-          } else {
-            return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
-          }
-        case 'list':
-          if (row.uuid === record.uuid) {
-            const childElement: JSX.Element = (<AddableSelect multiple onChange={(items: string[]): void => onChange(key, items)} totalOptions={[]} values={item} />);
-            return header.required ? (<Form.Item key={index}>{childElement}</Form.Item>) : childElement;
-          } else {
-            return (<TableContentForList items={item} key={index} />);
-          }
-        case 'period':
-          if (row.uuid === record.uuid) {
-            const childElement: JSX.Element = (
-              <>
-                <Space size={[6, 6]} wrap>
-                  {row[key].map((elem: string, index: number): JSX.Element => (<Tag closable key={index} onClose={(e: any): void => { e.preventDefault(); onChange(key, row[key].length - 1 === index ? [...row[key].slice(0, index)] : [...row[key].slice(0, index), ...row[key].slice(index + 1)])}}>{elem}</Tag>))}
-                </Space>
-                <IFTTTSelect onAdd={(value: string): void => { row[key].some((item: string): boolean => item === value) ? createWarningNotification('동일한 기간이 존재합니다!') : onChange(key, [...row[key], value]) }} />
-              </>
-            );
-            return header.required ? (<Form.Item key={index}>{childElement}</Form.Item>) : childElement;
-          } else {
-            return (<TableContentForList items={item} key={index} />);
-          }
-        default:
-          if (row.uuid === record.uuid) {
-            const childElement: JSX.Element = (<Input key={index} onChange={(e: any): void => onChange(key, e.target.value)} value={item} />);
-            return header.required ? (<Form.Item key={index}>{childElement}</Form.Item>) : childElement;
-          } else {
-            return (<>{item}</>);
-          }
-      }
+  /**
+   * [Inner Function] Check a required for column in row (using state)
+   * @returns check result
+   */
+  const checkRequiredForRow = (): boolean => {
+    const state: any = {};
+    // Check a required
+    const result: boolean[] = Object.keys(headers).map((key: string): boolean => {
+      const warning: boolean = checkRequired(headers[key].name, row[key], headers[key].required);
+      // Set a local state
+      state[key] = warning;
+      // Return
+      return warning;
+    });
+    // Set a state
+    setFocus(state);
+    // Return
+    return !result.includes(true);
+  }
+  /**
+   * [Inner Function] Check a required for column
+   * @param columnName column key
+   * @param item column value
+   * @param required required
+   * @returns check result
+   */
+  const checkRequired = (columnName: string, item: string[]|string, required: boolean): boolean => {
+    // Check a warning
+    const warning: boolean = required && ((typeof item === 'string' && item === '') || (Array.isArray(item) && item.length === 0));
+    // Alert a message
+    if (warning) {
+      createWarningMessage(`해당 필드(${columnName})는 필수로 입력해야 합니다.`, columnName);
     }
     // Return
-    return column;
-  });
-  // Add a column for delete
-  columns.push({dataIndex: 'edit', key: 'edit', title: '', render: (item: any, record: any, index: number): JSX.Element => <TableEditCell edit={row.uuid === record.uuid} key={index} onDelete={() => { onDelete(index); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { onSave(index, row); onEdit({}) }}/>});
+    return warning;
+  }
+  /**
+   * [Inner Function] Clear a state for focus
+   */
+  const clearFocus = (): void => {
+    setFocus(defaultFocusState);
+  }
+  /**
+   * [Inner Function] Create the columns
+   * @param headers header data
+   * @returns created columns
+   */
+  const createColumns = (headers: TableHeadersData, isMainHeader: boolean): TableColumnProps<any>[] => {
+    // Set a columns
+    const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
+      // Extract a header data
+      const header: TableHeaderData = headers[key];
+      // Create a column
+      const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
+      // Set a render for column
+      column.render = (item: any, record: any, index: number): JSX.Element => {
+        switch (header.display) {
+          case 'checkbox':
+            if (row.uuid === record.uuid) {
+              return (<Checkbox checked={row[key]} onChange={(e: any): void => onChange(key, e.target.checked, header.required)} />);
+            } else {
+              return (<Checkbox checked={item} disabled />);
+            }
+          case 'item':
+            if (row.uuid === record.uuid) {
+              return (<AddableSelect error={focus[key]} multiple onChange={(items: string[]): void => onChange(key, items, header.required, 'item')} totalOptions={[]} values={item.map((elem: ProcessingItemDF): string => elem.name)} />);
+            } else {
+              return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
+            }
+          case 'list':
+            if (row.uuid === record.uuid) {
+              return (<AddableSelect error={focus[key]} multiple onChange={(items: string[]): void => onChange(key, items, header.required)} totalOptions={[]} values={item} />);
+            } else {
+              return (<TableContentForList items={item} key={index} />);
+            }
+          case 'period':
+            if (row.uuid === record.uuid) {
+              return (
+                <>
+                  <Space size={[6, 6]} wrap>
+                    {row[key].map((elem: string, index: number): JSX.Element => (<Tag closable key={index} onClose={(e: any): void => { e.preventDefault(); onChange(key, row[key].length - 1 === index ? [...row[key].slice(0, index)] : [...row[key].slice(0, index), ...row[key].slice(index + 1)], header.required)}}>{elem}</Tag>))}
+                  </Space>
+                  <IFTTTSelect onAdd={(value: string): void => { row[key].some((item: string): boolean => item === value) ? createWarningMessage('동일한 기간이 존재합니다!') : onChange(key, [...row[key], value], header.required) }} status={focus[key]} />
+                </>
+              );
+            } else {
+              return (<TableContentForList items={item} key={index} />);
+            }
+          default:
+            if (row.uuid === record.uuid) {
+              return (<Input key={index} onChange={(e: any): void => onChange(key, e.target.value, header.required)} value={row[key]} status={focus[key] ? 'error' : undefined} />);
+            } else {
+              return (<>{item}</>);
+            }
+        }
+      }
+      // Return
+      return column;
+    });
+    // Add a column for delete
+    if (isMainHeader) {
+      columns.push({
+        dataIndex: 'edit',
+        key: 'edit',
+        title: '',
+        render: (_: any, record: any, index: number): JSX.Element => (<TableEditCell edit={row.uuid === record.uuid} key={index} onDelete={() => { clearFocus(); onDelete(index); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { checkRequiredForRow() ? onSave(index, row) ? onEdit({}) : undefined : undefined }}/>)
+      });
+    }
+    // Return
+    return columns;
+  }
 
   // Set a footer (add an add button)
   const footer = (): JSX.Element => (<TableFooterContainAddButton onClick={onCreate} />);
   // Return an element
-  return (
-    <Form>
-      <Table columns={columns} dataSource={dataSource} footer={footer} pagination={pagination ? undefined : false} />
-    </Form>
+  return expandKey ? (
+    <OuterTable columns={createColumns(headers, true)} dataSource={dataSource} expandable={{
+      expandedRowRender: (record: any, index: number) => innerHeaders ? (<Table key={index} columns={createColumns(innerHeaders, false)} dataSource={row.uuid === record.uuid ? [row] : [record]} pagination={false} />) : (<></>),
+      rowExpandable: (record: any) => (row.uuid === record.uuid) ? row[expandKey] : record[expandKey]
+    }} footer={footer} pagination={pagination ? undefined : false} />
+  ) : (
+    <Table columns={createColumns(headers, true)} dataSource={dataSource} footer={footer} pagination={pagination ? undefined : false} />
   );
 }
 /**
  * [Component] Editable table form
  */
-export const EditableTableForm = ({ dataSource, headers, onAdd, onDelete, onSave, title }: EditableTableFormProps): JSX.Element => {
+export const EditableTableForm = ({ dataSource, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, title }: EditableTableFormProps): JSX.Element => {
   return (
     <StyledTableForm>
       <StyledTableFormHeader>
         <StyledTableTitle>{title}</StyledTableTitle>
       </StyledTableFormHeader>
-      <Form>
-        <EditableTable dataSource={dataSource} headers={headers} onAdd={onAdd} onDelete={onDelete} onSave={onSave} />
-      </Form>
+      <EditableTable dataSource={dataSource} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} />
     </StyledTableForm>
   );
 }
@@ -308,11 +417,7 @@ export const InputableTable = ({ dataSource, onAdd, onChange, onDelete, paginati
   // Set a footer (add an add button)
   const footer = (): JSX.Element => (<TableFooterContainAddButton onClick={onAdd} />);
   // Return an element
-  return (
-    <Form>
-      <Table columns={columns} dataSource={dataSource} footer={footer} pagination={pagination ? undefined : false} />
-    </Form>
-  );
+  return (<Table columns={columns} dataSource={dataSource} footer={footer} pagination={pagination ? undefined : false} />);
 }
 /**
  * [Internal Component] Create an element for table header
@@ -398,7 +503,7 @@ const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.
  * @param dataSource raw data source
  * @returns data source
  */
- export const setDataSource = (dataSource: any): any[] => {
+export const setDataSource = (dataSource: any): any[] => {
   return dataSource.map((item: any): any => { return {...item, key: item.uuid} });
 }
 /**
@@ -410,15 +515,4 @@ const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.
  */
 const createTableColumnProps = (key: string, name: string, description?: string): any => {
   return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true };
-}
-/**
- * [Internal Function] Create a warning notification
- * @param message notification message
- */
-const createWarningNotification = (message: string): void => {
-  notification.warning({
-    description: message,
-    duration: 2.4,
-    message: 'Warning'
-  });
 }
