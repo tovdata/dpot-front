@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components'
 // Component
 import { Divider, Menu } from 'antd';
 // Icon
-import { AiOutlineLeft } from 'react-icons/ai';
+import { AiOutlineArrowLeft } from 'react-icons/ai';
 import { IoBusinessOutline } from 'react-icons/io5';
 import { AiOutlineAudit, AiOutlineCheckCircle, AiOutlineDatabase, AiOutlineDashboard, AiOutlineFire, AiOutlineHistory, AiOutlinePaperClip, AiOutlinePartition, AiOutlineSolution, AiOutlineTool } from 'react-icons/ai';
 import { AiOutlineApartment, AiOutlineTeam } from 'react-icons/ai';
@@ -39,19 +39,24 @@ const StyledSideMenu = styled.div<MenuOpenStatus>`
 // Styled component (sideMenuToggle)
 const StyledSideMenuToggle = styled.div<MenuOpenStatus>`
   align-items: center;
-  background-color: #f0f5ff;
-  border-radius: 50%;
+  background-color: #ffffff;
+  border: 1px solid #0050B3;
+  border-radius: 0.25rem;
+  color: #0050B3;
   cursor: pointer;
   display: flex;
   justify-content: center;
-  height: 1.5rem;
+  height: 1.125rem;
   position: absolute;
-  right: -0.75rem;
-  transition: transform 0.42s;
-  top: 1.125rem;
-  width: 1.5rem;
+  right: 1.25rem;
+  transition: transform 0.42s, background-color 0.29s, color: 0.29s;;
+  top: 11px;
+  width: 1.125rem;
   z-index: 11;
   ${(props: any) => !props.open && css`
+    background-color: #0050B3;
+    color: #ffffff;
+    right: 30px;
     svg {
       transform: rotate(180deg);
     }
@@ -62,7 +67,7 @@ const StyledSideMenuProfile = styled.li`
   align-items: center;
   cursor: default;
   display: flex;
-  height: 40px;
+  height: 2.5rem;
   margin: 4px 0 8px 0;
   overflow: hidden;
   padding-left: 17px;
@@ -79,16 +84,17 @@ const StyledSideMenuProfileIcon = styled.span<MenuOpenStatus>`
   height: 1.75rem;
   justify-content: center;
   padding: 7px;
-  transition: margin 0.4s, padding 0.4s;
+  transition: margin 0.4s, opacity 0.28s, padding 0.4s;
   user-select: none;
   ${(props: any) => !props.open && css`
     margin-left: 9px;
     margin-right: 48px;
+    opacity: 0;
     transition-delay: 0.12s;
   `}
 `;
 // Styled component (sideMenuProfileContent)
-const StyledSideMenuProfileContent = styled.div`
+const StyledSideMenuProfileContent = styled.div<MenuOpenStatus>`
   color: #002766;
   display: block;
   flex: 1;
@@ -96,7 +102,11 @@ const StyledSideMenuProfileContent = styled.div`
   line-height: 1.5715;
   margin-left: 10px;
   overflow: hidden;
+  transition: opacity 0.19s;
   white-space:nowrap;
+  ${(props: any) => !props.open && css`
+    opacity: 0;
+  `}
 `;
 
 /** [Interface] Menu open status */
@@ -121,16 +131,16 @@ const SideMenu = ({open, onOpen}: SideMenuProps): JSX.Element => {
   // Return an element
   return (
     <>
-      <StyledSideMenuToggle onClick={onOpen} open={open}>
-        <AiOutlineLeft />
-      </StyledSideMenuToggle>
       <StyledSideMenu open={open}>
-      <Menu defaultSelectedKeys={[path]} mode='inline' style={{ cursor: 'pointer', paddingTop: 48, userSelect: 'none', width: '100%' }}>
+      <Menu defaultSelectedKeys={[path]} mode='inline' style={{ cursor: 'pointer', paddingTop: 24, userSelect: 'none', width: '100%' }}>
         <StyledSideMenuProfile>
           <StyledSideMenuProfileIcon open={open}>
             <IoBusinessOutline />
           </StyledSideMenuProfileIcon>
-          <StyledSideMenuProfileContent>{'주식회사 토브데이터'}</StyledSideMenuProfileContent>
+          <StyledSideMenuProfileContent open={open}>{'주식회사 토브데이터'}</StyledSideMenuProfileContent>
+          <StyledSideMenuToggle onClick={onOpen} open={open}>
+            <AiOutlineArrowLeft />
+          </StyledSideMenuToggle>
         </StyledSideMenuProfile>
         <Menu.Item icon={<AiOutlineDashboard />} key='/'><Link href='/'>대시보드</Link></Menu.Item>
         <Divider />

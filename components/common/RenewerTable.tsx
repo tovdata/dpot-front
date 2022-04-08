@@ -70,19 +70,6 @@ const StyledTableTitle = styled.h2`
   font-weight: 600;
   line-height: ${LH_HXXS};
 `;
-// Styled element (TableTool)
-const StyledTableTool = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: end;
-  .ant-btn {
-    cursor: pointer;
-    margin-left: 1rem;
-  }
-  .ant-btn:first-child {
-    margin-left: 0;
-  }
-`;
 // Styled element (TableHeader)
 const StyledTableHeader = styled.div`
   align-items: center;
@@ -146,13 +133,16 @@ interface TableProps {
   pagination?: boolean;
   headers: TableHeadersData;
 }
+/** [Interface] Properties for table form */
 interface TableFormProps extends TableProps {
   title: string;
 }
+/** [Interface] Properties for table header */
 interface TableHeaderProps {
   description?: string;
   name: string;
 }
+/** [Interface] Properties for table footer contain add button */
 interface TableFooterContainAddButtonProps {
   onClick: () => void;
 }
