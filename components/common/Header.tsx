@@ -1,6 +1,4 @@
 import styled from 'styled-components';
-// Color
-import { WHITE } from '../../static/color';
 // Component
 import { Button, Steps } from 'antd';
 // Icon
@@ -10,12 +8,12 @@ import { VscChevronLeft } from 'react-icons/vsc';
 // Styled element (HeaderNav)
 const StyledHeaderNav = styled.div`
   align-items: center;
-  background-color: ${WHITE};
-  box-shadow: inset 0px -1px 0px #F0F0F0;
+  background-color: #ffffff;
+  box-shadow: inset 0px -1px 0px #f0f0f0;
   display: flex;
   height: 3.5rem;
   justify-content: space-between;
-  padding: 0 3.75rem;
+  padding: 0 1.875rem;
   position: relative;
   user-select: none;
   width: 100vw;
@@ -42,7 +40,7 @@ const StyledHeaderToolItem = styled.span`
   cursor: pointer;
   display: flex;
   justify-content: center;
-  margin-right: 1.25rem;
+  margin-right: 0.875rem;
   height: 1.5rem;
   width: 1.5rem;
   transition: background-color 0.25s;
@@ -101,10 +99,11 @@ const StyledPageTitle = styled.h2`
   white-space: nowrap;
 `;
 
-// Interface
+/** [Interface] Properties for page header */
 interface PageHeaderProps {
   title: string;
 }
+/** [Interface] Properties for page header contain step */
 interface PageHeaderContainStepProps extends PageHeaderProps {
   current: number;
   onNext: () => void;
@@ -112,6 +111,7 @@ interface PageHeaderContainStepProps extends PageHeaderProps {
   steps: string[];
 }
 
+/** [Component] Main header */
 export const Header = (): JSX.Element => {
   return (
     <StyledHeaderNav>
@@ -123,7 +123,7 @@ export const Header = (): JSX.Element => {
     </StyledHeaderNav>
   )
 }
-// Component (page header contain step)
+/** [Component] Page header contain step */
 export const PageHeaderContainStep = ({ current, onNext, onPrev, title, steps }: PageHeaderContainStepProps): JSX.Element => {
   // Create a step item
   const items: JSX.Element[] = steps.map((item: string, index: number): JSX.Element => (<Steps.Step key={index} title={item} />));

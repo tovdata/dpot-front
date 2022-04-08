@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 // Component
 import { RecoilRoot } from 'recoil';
@@ -5,10 +6,9 @@ import { Header } from './Header';
 import SideMenu from './SideMenu';
 // Type
 import { CommonElementProps } from '../../models/type';
-import { useState } from 'react';
 
 // Set a side width
-const CLOSE_SIDE_WIDTH: number = 80;
+const CLOSE_SIDE_WIDTH: number = 88;
 const OPEN_SIDE_WIDTH: number = 256;
 
 // Styled element (Layout)
@@ -21,34 +21,35 @@ const StyledLayout = styled.div`
 `;
 // Styled element (Container)
 const StyledContainer = styled.div`
+  display: flex;
+  flex: 1;
   position: relative;
-  z-index: 2;
 `;
 // Styled element (Content)
-const StyledContent = styled.div<MenuOpenStatus>`
-  margin-left: ${CLOSE_SIDE_WIDTH}px;
+const StyledContent = styled.div`
+  display: block;
+  flex: 1;
   padding: 4.625rem 4rem;
   position: relative;
-  transition: margin-left 0.42s;
-  ${(props: any) => props.open && css`
-    margin-left: ${OPEN_SIDE_WIDTH}px;
-  `}
 `;
 // Styled element (Sider)
-const StyledSider = styled.div<MenuOpenStatus>`
-  height: 100%;
-  position: fixed;
+const StyledSider = styled.div<SiderProps>`
+  display: block;
+  position: relative;
   transition: width 0.42s;
   width: ${CLOSE_SIDE_WIDTH}px;
-  z-index: 4;
   ${(props: any) => props.open && css`
     width: ${OPEN_SIDE_WIDTH}px;
   `}
+  ${(props: any) => props.pos <= 56 && css`
+    height: calc(100vh - 56px + ${props.pos}px);
+`}
 `;
 
 /** [Interface] Menu open status */
-interface MenuOpenStatus {
+interface SiderProps {
   open: boolean;
+  pos: number;
 }
 
 /**
@@ -56,9 +57,18 @@ interface MenuOpenStatus {
  */
 const Layout = ({ children }: CommonElementProps): JSX.Element => {
   // Set a local state
+  const [scrollPos, setScrollPos] = useState<number>(0);
   const [openMenu, setOpenMenu] = useState<boolean>(true);
   // Create an event handler (onOpenMenu)
   const onOpenMenu = (): void => setOpenMenu(!openMenu);
+  // Set a effect
+  useEffect((): void => {
+    window.addEventListener('scroll', () => {
+      setScrollPos(window.scrollY || document.documentElement.scrollTop);
+    });
+  });
+  // Set a status to fixed a sider
+  const isFixed: boolean = scrollPos > 56 ? true : false;
 
   // Return an element
   return (
@@ -66,10 +76,10 @@ const Layout = ({ children }: CommonElementProps): JSX.Element => {
       <StyledLayout>
         <Header />
         <StyledContainer>
-          <StyledSider open={openMenu}>
-            <SideMenu onOpen={onOpenMenu} open={openMenu} />
+          <StyledSider open={openMenu} pos={scrollPos}>
+            <SideMenu isFixed={isFixed} onOpen={onOpenMenu} open={openMenu} />
           </StyledSider>
-          <StyledContent open={openMenu}>{children}</StyledContent>
+          <StyledContent>{children}</StyledContent>
         </StyledContainer>
       </StyledLayout>
     </RecoilRoot>
