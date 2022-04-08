@@ -1,5 +1,6 @@
 // Type
 import { TableHeadersData } from './type';
+import { ExtendPersonalInfoTableDF } from './type';
 
 /** Table Header */
 export const personalInfoTableHeader: TableHeadersData = {
@@ -180,3 +181,13 @@ export const personalInfoProcessingPolicyTableHeader: TableHeadersData = {
     required: true
   }
 }
+
+/** [Default] Personal information table */
+export const defaultExtendPersonalInfoTable: ExtendPersonalInfoTableDF = {
+  essentialItems: [],
+  key: '',
+  period: [],
+  purpose: [],
+  selectionItems: [],
+  subject: ''
+};

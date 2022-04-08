@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import styled, { css } from 'styled-components';
 // Component
-import { Button, Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Form } from 'antd';
+import { Button, Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Form, Input } from 'antd';
 import { EditableInput, SearchableInput } from './Input';
 import { EditableSelectMulti, EditableSelectSingle } from './Select';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
 // Icon
-import { AiOutlineDelete, AiOutlineDownload, AiOutlineEdit, AiOutlinePlus, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
+import { AiOutlineDelete, AiOutlineDownload, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
+import { PlusOutlined } from '@ant-design/icons';
 // State
 import { updateEditLogSelector } from '../../models/state';
 // Temporary
@@ -16,7 +17,7 @@ import { processingItems } from '../../models/temporary';
 // Type
 import { TableHeaderData, TableHeadersData, TableProcessItemData } from '../../models/type';
 import { CustomizeComponent } from 'rc-table/lib/interface';
-import { ColumnsType } from 'antd/lib/table';
+import { ModalToCreatePipp } from './Modal';
 
 // Styled element (OuterTable)
 const OuterTable = styled(Table)`
@@ -124,6 +125,9 @@ interface TableEditCellProps {
   onEdit: () => void;
   onSave: () => void;
 }
+interface TableFormProps extends TableProps {
+  title: string;
+}
 interface TableHeaderProps {
   description?: string;
   name: string;
@@ -135,26 +139,29 @@ interface TableProcessItemsProps {
 interface TableProps {
   dataSource: any[];
   headers: TableHeadersData;
-  title: string;
 }
+interface TestTableProps {
+  data: any[];
+  headers: TableHeadersData;
+  pagination?: boolean;
+  onChange: () => void;
+}
+
 /** Interface (Data type) */
 
-// Component (Basic table - readable)
-export const BasicTable = ({ dataSource, headers, title }: TableProps): JSX.Element => {
-  // Create the columns
-  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => createTableColumnProps(key, headers[key].name, headers[key].description));
-  // Return an element
+// Component (Basic table form - readable)
+export const BasicTableFrom = ({ dataSource, headers, title }: TableFormProps): JSX.Element => {
   return (
     <StyledTableForm>
       <StyledTableFormHeader>
         <StyledTableTitle>{title}</StyledTableTitle>
       </StyledTableFormHeader>
-      <Table columns={columns} dataSource={dataSource} />
+      <BasicTable dataSource={dataSource} headers={headers} />
     </StyledTableForm>
   );
 }
 // Component (Editable table)
-export const EditableTable = ({ dataSource, headers, title }: TableProps): JSX.Element => {
+export const EditableTable = ({ dataSource, headers, title }: TableFormProps): JSX.Element => {
   return (<BaseEditableTable dataSource={dataSource} headers={headers} title={title} />);
 }
 // Component (Editable expand table)
@@ -305,6 +312,13 @@ export const SearchableTable = ({ dataSource, headers, title }: TableProps): JSX
   // Set a columns
   const columns: any[] = createSearchableTableColumnProps(headers);
 
+  // Set a local state
+  const [open, setOpen] = useState<boolean>(false);
+  // Create an event handler (onOpen)
+  const onOpen = (): void => setOpen(true);
+  // Create an event handler (onClose)
+  const onClose = (): void => setOpen(false);
+
   // Return an element
   return (
     <StyledTableForm>
@@ -312,13 +326,60 @@ export const SearchableTable = ({ dataSource, headers, title }: TableProps): JSX
         <StyledTableTitle>{title}</StyledTableTitle>
         <StyledTableTool>
           <SearchableInput content='' onSearch={() => {}} />
-          <Button type='primary'><AiOutlinePlus /> 문서 만들기</Button>
+          <Button icon={<PlusOutlined />} type='primary' onClick={onOpen}>문서 만들기</Button>
         </StyledTableTool>
       </StyledTableFormHeader>
       <Table columns={columns} dataSource={editedDataSource} />
+      <ModalToCreatePipp onClose={onClose} open={open} />
     </StyledTableForm>
   )
 }
+// Component (basic table)
+export const BasicTable = ({ dataSource, headers }: TableProps): JSX.Element => {
+  // Create the columns
+  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => createTableColumnProps(key, headers[key].name, headers[key].description));
+  // Return an element
+  return (<Table columns={columns} dataSource={dataSource} />);
+}
+// Component (inputable table)
+export const InputableTable = ({ data, headers, pagination, setData }: TestTableProps): JSX.Element => {
+  // Create an event handler (onChange)
+  const onChange = (column: string, index: number, record: any, value: any): void => {
+    setData([...data.slice(0, index), {...record, [column]: value}, ...data.slice(index + 1)]);
+  }
+  
+  // Create an empty row
+  const row: any = { uuid: 'new', key: 'new' };
+  // Set the columns
+  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
+    // Extract a header data
+    const header: TableHeaderData = headers[key];
+    // Set a column
+    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
+    // Set a render for column
+    column.render = (item: any, record: any, index: number): JSX.Element => {
+      return (<Input value={item} onChange={(e: any) => onChange(key, index, record, e.target.value)} />);
+    }
+    row[key] = '';
+    // Return
+    return column;
+  });
+  // Set a data source
+  setData(setDataSource(data));
+  setData([...data, row]);
+
+  console.log(columns);
+  console.log(data)
+  
+  // Return an element
+  return (
+    <Form>
+      <Table columns={columns} dataSource={data} />
+    </Form>
+  );
+}
+
+
 // [Internal] Component (Table header)
 const TableHeader = ({ description, name }: TableHeaderProps): JSX.Element => {
   return (
@@ -338,10 +399,16 @@ const TableHeader = ({ description, name }: TableHeaderProps): JSX.Element => {
 const TableEditCell = ({ edit, onDelete, onEdit, onSave }: TableEditCellProps): JSX.Element => {
   return (
     <StyledTableEditCell>
-      { edit ? <AiOutlineSave onClick={onSave} /> : <AiOutlineEdit onClick={onEdit} />}
-      <Popconfirm title='해당 업무를 삭제하시겠습니까?' onConfirm={onDelete}>
-        <AiOutlineDelete />
-      </Popconfirm>
+      { edit ? (
+        <>
+          <AiOutlineSave onClick={onSave} />
+          <Popconfirm title='해당 업무를 삭제하시겠습니까?' onConfirm={onDelete}>
+            <AiOutlineDelete />
+          </Popconfirm>
+        </>
+      ) : (
+        <AiOutlineEdit onClick={onEdit} />
+      )}
     </StyledTableEditCell>
   )
 }
@@ -369,7 +436,7 @@ const TableToolCell = (): JSX.Element => {
  * [Internal function] Create the editable table columns
  * @param editRow row edit status
  * @param editTable table edit status
- * @param headers headers
+ * @param headers table header data
  * @param onChangeRow event handler for change row
  * @param onDelete event handler for delete row
  * @param onEditRow event handler for edit row status
@@ -499,6 +566,11 @@ const createEditableTableColumns = (editRow: boolean, editTable: boolean, header
   // Return
   return columns;
 }
+/**
+ * [Internal function] Create the searchable table columns
+ * @param headers table header data
+ * @returns created the columns
+ */
 const createSearchableTableColumnProps = (headers: any): any[] => {
   const columns: any[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
     // Extract a this header info

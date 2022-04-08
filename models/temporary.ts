@@ -218,10 +218,12 @@ export const personalInfoProcessingPolicy = [{
   createAt: "2022-03-23 14:03",
   latestAt: "2022-03-24 10:45",
   name: "토브데이터 개인정보 처리방침",
-  status: "processing"
+  status: "processing",
+  uuid: 1
 }, {
   createAt: "2022-03-24 09:12",
   latestAt: "2022-03-24 15:52",
   name: "토브데이터 개인정보 처리방침(2)",
-  status: "complete"
+  status: "complete",
+  uuid: 2
 }];

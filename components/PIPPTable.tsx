@@ -9,7 +9,3 @@ import { personalInfoProcessingPolicy } from '../models/temporary';
 export const PersonalInfoProcessingPolicy = (): JSX.Element => {
   return (<SearchableTable dataSource={personalInfoProcessingPolicy} headers={personalInfoProcessingPolicyTableHeader} title='개인정보 처리방침' />);
 }
-// Component (create a pipp)
-export const CreatePIPP = (): JSX.Element => {
-  return (<></>);
-}

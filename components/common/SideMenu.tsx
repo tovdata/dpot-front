@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useRouter } from 'next/router';
 import styled, { css } from 'styled-components'
 // Component
@@ -13,11 +12,7 @@ import Link from 'next/link';
 
 // Styled component (sideMenu)
 const StyledSideMenu = styled.div<MenuOpenStatus>`
-  display: flex;
-  height: 100%;
   position: relative;
-  transition: width 0.42s;
-  width: 256px;
   .ant-menu-item-group {
     margin-bottom: 1.875rem;
   }
@@ -27,10 +22,6 @@ const StyledSideMenu = styled.div<MenuOpenStatus>`
     white-space:nowrap;
   }
   ${(props: any) => !props.open && css`
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    width: 80px;
     .ant-menu-item > svg {
       margin-left: 9px;
       margin-right: 48px;
@@ -57,7 +48,7 @@ const StyledSideMenuToggle = styled.div<MenuOpenStatus>`
   transition: transform 0.3s;
   top: 1.125rem;
   width: 1.5rem;
-  z-index: 9;
+  z-index: 11;
   ${(props: any) => !props.open && css`
     svg {
       transform: rotate(180deg);
@@ -91,7 +82,7 @@ const StyledSideMenuProfileIcon = styled.span<MenuOpenStatus>`
   ${(props: any) => !props.open && css`
     margin-left: 9px;
     margin-right: 48px;
-    transition-delay: 0.08s;
+    transition-delay: 0.12s;
   `}
 `;
 // Styled component (sideMenuProfileContent)
@@ -106,21 +97,24 @@ const StyledSideMenuProfileContent = styled.div`
   white-space:nowrap;
 `;
 
-// Interface (MenuOpenStatus)
+/** [Interface] Menu open status */
 interface MenuOpenStatus {
   open: boolean;
 }
+/** [Interface] Properties for side menu */
+interface SideMenuProps {
+  open: boolean;
+  onOpen: () => void;
+}
 
-const SideMenu = (): JSX.Element => {
+/**
+ * [Component] Side menu
+ */
+const SideMenu = ({open, onOpen}: SideMenuProps): JSX.Element => {
   // Get a router
   const router = useRouter();
   // Extract a submenu key, path
   const path = router.pathname;
-  
-  // Set a local state
-  const [open, setOpen] = useState<boolean>(true);
-  // Create an event handler (onOpen)
-  const onOpen = (): void => setOpen(!open);
 
   // Return an element
   return (
