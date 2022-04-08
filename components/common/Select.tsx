@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { MutableRefObject, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
 import { Form, Input, Select } from 'antd';
+// Module
+import { createSimpleWarningNotification } from './Notification';
 
-// Styled component (IFTTP form)
-const StyledIFTTPFormRow = styled.div`
+// Styled component (IFTTT form)
+const StyledIFTTTForm = styled.div`
+  position: relative;
+`;
+// Styled component (IFTTT form row)
+const StyledIFTTTFormRow = styled.div`
   display: flex;
   flex: 1;
   position: relative;
@@ -17,6 +23,25 @@ interface AddableSelectProps {
   totalOptions: string[];
   values: string[];
 }
+/** [Interface] IFTTT Data format */
+interface IFTTTData {
+  event: string;
+  adverb: string;
+  digit: number;
+  unit: string;
+}
+/** Interface (Data type) */
+interface SelectOption {
+  value: string;
+}
+/**  [Interface] Single select props */
+interface SingleSelectProps {
+  onSelect: (item: string) => void;
+  refresh?: MutableRefObject<number>;
+  totalOptions: string[];
+  value: string;
+}
+
 interface EditableSelectProps {
   compareOptions?: string[];
   defaultOptions: string[];
@@ -27,10 +52,6 @@ interface EditableSelectMultiProps extends EditableSelectProps {
 }
 interface EditableSelectSingleProps extends EditableSelectProps {
   onChange: (items: string) => void;
-}
-/** Interface (Data type) */
-interface SelectOption {
-  value: string;
 }
 
 // Component (editable select)
@@ -57,11 +78,11 @@ export const EditableSelectMulti = ({ compareOptions, defaultOptions, onChange, 
 };
 
 /** [Component] Single select */
-export const SingleSelect = ({ onSelect, totalOptions, value }: any): JSX.Element => {
+export const SingleSelect = ({ onSelect, refresh, totalOptions, value }: SingleSelectProps): JSX.Element => {
   // Set the options for select box
   const options: SelectOption[] = totalOptions.map((item: string): SelectOption => { return { value: item } });
   // Return an element
-  return (<Select defaultValue={value} options={options} onSelect={onSelect} placeholder='선택' value={value} />);
+  return (<Select key={refresh ? refresh.current : undefined} options={options} onSelect={onSelect} placeholder='선택' value={value === '' ? undefined : value} />);
 }
 /** [Component] Addable select */
 export const AddableSelect = ({ multiple, onChange, totalOptions, values }: AddableSelectProps): JSX.Element => {
@@ -74,55 +95,62 @@ export const AddableSelect = ({ multiple, onChange, totalOptions, values }: Adda
   // Return an element
   return (<Select mode={multiple ? 'tags' : undefined} onChange={onSelect} options={options} style={{ width: '100%' }} tokenSeparators={[',']} value={selected} />);
 }
-/** [Component] IFTTP format select */
-export const IFTTPSelect = ({ onAdd }: any): JSX.Element => {
+/** [Component] IFTTT select */
+export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {
+  // For refresh for element
+  const refresh: MutableRefObject<number> = useRef(0);
   // Set a data type
-  const keyList: string[] = ['1', '2', '3', '4'];
-  const defaultValue: any = {'1': '이벤트 종료', '3': 0};
+  const defaultValue: IFTTTData = { adverb: '', digit: 1, event: '이벤트 종료', unit: '' };
+
   // Set a local state
   const [hidden, setHidden] = useState<boolean>(true);
-  const [values, setValues] = useState<any>(defaultValue);
+  const [data, setData] = useState<IFTTTData>(defaultValue);
+
   // Create an event handler (onChange)
   const onChange = (key: string, value: string): void => {
     // Change a value
-    const changed: any = {...values, [key]: value};
-    setValues(changed);
+    const changed: IFTTTData = {...data, [key]: value};
+    setData(changed);
     // Hidden a second row
-    if (changed['2'] === '시까지') {
-      onAdd(`${changed['1']} ${changed['2']}`);
+    if (changed.adverb === '시까지') {
+      onAdd(`${changed.event} ${changed.adverb}`);
       // Update a state
       setHidden(true);
-      setValues(defaultValue);
-    } else if (changed['2'] === '후') {
+      setData(defaultValue);
+      // Update a variable for refresh
+      refresh.current++
+    } else if (changed.adverb === '후') {
       setHidden(false);
       // Create an item
-      if (!keyList.some((key: string): boolean => changed[key] === undefined)) {
-        onAdd(`${changed['1']} ${changed['2']} ${changed['3']}${changed['4']}`);
+      if (changed.digit <= 0) {
+        createSimpleWarningNotification('0보다 큰 정수 값을 입력해주세요.');
+      }
+      if (changed.digit > 0 && changed.unit !== '') {
+        onAdd(`${changed.event} ${changed.adverb} ${changed.digit}${changed.unit}`);
         // Update a state
         setHidden(true);
-        setValues(defaultValue);
+        setData(defaultValue);
+        // Update a variable for refresh
+        refresh.current++
       }
-    } else {
-      setHidden(true);
-      setValues({...changed, '3': 0, '4': undefined});
     }
   }
 
   // Return an element
   return (
-    <Form>
-      <StyledIFTTPFormRow>
-        <SingleSelect onSelect={(value: string) => onChange('1', value)} totalOptions={['이벤트 종료', '회원 탈퇴', '재화 및 서비스 공급 완료']} value={values['1']} />
-        <SingleSelect onSelect={(value: string) => onChange('2', value)} totalOptions={['후', '시까지']} value={values['2']} />
-      </StyledIFTTPFormRow>
+    <StyledIFTTTForm>
+      <StyledIFTTTFormRow>
+        <SingleSelect onSelect={(value: string) => onChange('event', value)} totalOptions={['이벤트 종료', '회원 탈퇴', '재화 및 서비스 공급 완료']} value={data.event} />
+        <SingleSelect onSelect={(value: string) => onChange('adverb', value)} refresh={refresh} totalOptions={['후', '시까지']} value={data.adverb} />
+      </StyledIFTTTFormRow>
       {hidden ? (
         <></>
       ) : (
-        <StyledIFTTPFormRow>
-          <Input onChange={(e: any) => onChange('3', e.target.value.toString())} type='number' value={values['3']} />
-          <SingleSelect onSelect={(value: string) => onChange('4', value)} totalOptions={['일', '개월', '년']} value={values['4']} />
-        </StyledIFTTPFormRow>
+        <StyledIFTTTFormRow>
+          <Input onChange={(e: any) => onChange('digit', e.target.value.toString())} type='number' value={data.digit} />
+          <SingleSelect onSelect={(value: string) => onChange('unit', value)} totalOptions={['일', '개월', '년']} value={data.unit} />
+        </StyledIFTTTFormRow>
       )}
-    </Form>
+    </StyledIFTTTForm>
   )
 }

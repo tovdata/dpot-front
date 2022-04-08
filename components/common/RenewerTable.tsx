@@ -5,7 +5,7 @@ import styled, { css } from 'styled-components';
 import { Button, Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Form, Input, Space, Typography } from 'antd';
 import { notification } from 'antd';
 import { EditableInput, SearchableInput } from './Input';
-import { AddableSelect, EditableSelectMulti, EditableSelectSingle, IFTTPSelect, SingleSelect } from './Select';
+import { AddableSelect, EditableSelectMulti, EditableSelectSingle, IFTTTSelect, SingleSelect } from './Select';
 // Data
 import { defaultExtendPersonalInfoTable } from '../../models/data';
 // Font
@@ -186,25 +186,22 @@ export const EditableTable = ({ dataSource, headers, onAdd, onDelete, onSave, pa
     // Set a key
     const key: string = `npc_${newProjectCnt.current++}`;
     // Create a new row
-    const row: any = {...defaultExtendPersonalInfoTable, uuid: key,  key: key};
-    // Add a row
-    onAdd(row);
-    // Update a state
-    setRow(row);
+    const record: any = {...defaultExtendPersonalInfoTable, uuid: key,  key: key};
+    // Check a editing status
+    if (row.uuid !== undefined) {
+      createWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.');
+    } else {
+      // Add a row
+      onAdd(record);
+      // Update a state
+      setRow(record);
+    }
   }
   // Create an event handler (onChange)
   const onChange = (key: string, item: string[]|string): void => setRow({...row, [key]: item});
   // Create an event handler (onEdit)
   const onEdit = (record: any): void => {
-    if (row.uuid && record.uuid && row.uuid !== record.uuid) {
-      notification.warning({
-        description: '현재 수정 중인 데이터를 저장하고 진행해주세요.',
-        duration: 2.6,
-        message: 'Warning'
-      });
-    } else {
-      setRow(record);
-    }
+    (row.uuid && record.uuid && row.uuid !== record.uuid) ? createWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.') : setRow(record);
   }
 
   // Set a columns
@@ -237,7 +234,7 @@ export const EditableTable = ({ dataSource, headers, onAdd, onDelete, onSave, pa
                 <Space size={[6, 6]} wrap>
                   {row[key].map((elem: string, index: number): JSX.Element => (<Tag closable key={index} onClose={(e: any): void => { e.preventDefault(); onChange(key, row[key].length - 1 === index ? [...row[key].slice(0, index)] : [...row[key].slice(0, index), ...row[key].slice(index + 1)])}}>{elem}</Tag>))}
                 </Space>
-                <IFTTPSelect onAdd={(value: string): void => onChange(key, [...row[key], value])} />
+                <IFTTTSelect onAdd={(value: string): void => { row[key].some((item: string): boolean => item === value) ? createWarningNotification('동일한 기간이 존재합니다!') : onChange(key, [...row[key], value]) }} />
               </>
             );
             return header.required ? (<Form.Item key={index}>{childElement}</Form.Item>) : childElement;
@@ -413,4 +410,15 @@ const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.
  */
 const createTableColumnProps = (key: string, name: string, description?: string): any => {
   return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true };
+}
+/**
+ * [Internal Function] Create a warning notification
+ * @param message notification message
+ */
+const createWarningNotification = (message: string): void => {
+  notification.warning({
+    description: message,
+    duration: 2.4,
+    message: 'Warning'
+  });
 }
