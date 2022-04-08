@@ -12,6 +12,8 @@ import Link from 'next/link';
 
 // Styled component (sideMenu)
 const StyledSideMenu = styled.div<MenuOpenStatus>`
+  height: 100%;
+  overflow-y: auto;
   position: relative;
   .ant-menu-item-group {
     margin-bottom: 1.875rem;
@@ -45,7 +47,7 @@ const StyledSideMenuToggle = styled.div<MenuOpenStatus>`
   height: 1.5rem;
   position: absolute;
   right: -0.75rem;
-  transition: transform 0.3s;
+  transition: transform 0.42s;
   top: 1.125rem;
   width: 1.5rem;
   z-index: 11;
@@ -118,11 +120,12 @@ const SideMenu = ({open, onOpen}: SideMenuProps): JSX.Element => {
 
   // Return an element
   return (
-    <StyledSideMenu open={open}>
+    <>
       <StyledSideMenuToggle onClick={onOpen} open={open}>
         <AiOutlineLeft />
       </StyledSideMenuToggle>
-      <Menu defaultSelectedKeys={[path]} mode='inline' style={{ cursor: 'pointer', paddingTop: 24, userSelect: 'none', width: '100%' }}>
+      <StyledSideMenu open={open}>
+      <Menu defaultSelectedKeys={[path]} mode='inline' style={{ cursor: 'pointer', paddingTop: 48, userSelect: 'none', width: '100%' }}>
         <StyledSideMenuProfile>
           <StyledSideMenuProfileIcon open={open}>
             <IoBusinessOutline />
@@ -174,6 +177,7 @@ const SideMenu = ({open, onOpen}: SideMenuProps): JSX.Element => {
         </Menu.ItemGroup>
       </Menu>
     </StyledSideMenu>
+    </>
   )
 }
 

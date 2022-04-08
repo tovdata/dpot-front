@@ -37,7 +37,6 @@ const StyledContent = styled.div<MenuOpenStatus>`
 // Styled element (Sider)
 const StyledSider = styled.div<MenuOpenStatus>`
   height: 100%;
-  overflow-y: auto;
   position: fixed;
   transition: width 0.42s;
   width: ${CLOSE_SIDE_WIDTH}px;
