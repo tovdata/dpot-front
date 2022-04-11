@@ -1,23 +1,25 @@
-import { useState } from 'react';
+import { MutableRefObject, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 // Component
-import { Button, Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Form, Input } from 'antd';
-import { EditableInput, SearchableInput } from './Input';
-import { EditableSelectMulti, EditableSelectSingle } from './Select';
+import { Button, Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography } from 'antd';
+import { AddableSelect, IFTTTSelect } from './Select';
+// Data
+import { defaultExtendPersonalInfoTable } from '../../models/data';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
 // Icon
 import { AiOutlineDelete, AiOutlineDownload, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
-import { PlusOutlined } from '@ant-design/icons';
+import { IoAddCircle } from 'react-icons/io5';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+// Module
+import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // State
 import { updateEditLogSelector } from '../../models/state';
 // Temporary
 import { processingItems } from '../../models/temporary';
 // Type
-import { TableHeaderData, TableHeadersData, TableProcessItemData } from '../../models/type';
-import { CustomizeComponent } from 'rc-table/lib/interface';
-import { ModalToCreatePipp } from './Modal';
+import { ProcessingItemDF, TableHeaderData, TableHeadersData } from '../../models/type';
 
 // Styled element (OuterTable)
 const OuterTable = styled(Table)`
@@ -27,7 +29,7 @@ const OuterTable = styled(Table)`
   }
 `;
 // Styled element (TableForm)
-const StyledTableForm = styled.div<{edit?: boolean}>`
+const StyledTableForm = styled.div`
   display: block;
   margin-bottom: 5rem;
   &:last-child {
@@ -42,10 +44,14 @@ const StyledTableForm = styled.div<{edit?: boolean}>`
   .ant-table-cell > .ant-tag {
     cursor: pointer;
   }
-  .ant-table-content > table > tbody > tr > .edit {
-    ${(props: any) => !props.edit && css`
-      display: none;
-    `}
+  table > tbody > tr > td .ant-tag {
+    margin: 0;
+  }
+  .ant-table > .ant-table-footer {
+    background-color: #ffffff;
+    border: 1px dashed #D9D9D9;
+    padding-bottom: 8px;
+    padding-top: 8px;
   }
 `;
 // Styled element (TableFormHeader)
@@ -61,19 +67,6 @@ const StyledTableTitle = styled.h2`
   font-size: ${FS_HXXS};
   font-weight: 600;
   line-height: ${LH_HXXS};
-`;
-// Styled element (TableTool)
-const StyledTableTool = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: end;
-  .ant-btn {
-    cursor: pointer;
-    margin-left: 1rem;
-  }
-  .ant-btn:first-child {
-    margin-left: 0;
-  }
 `;
 // Styled element (TableHeader)
 const StyledTableHeader = styled.div`
@@ -106,281 +99,329 @@ const StyledList = styled.ul`
   padding-left: 1.125rem;
 `;
 const StyledListItem = styled.li``;
+// Styled element (Table footer)
+const StyledTableFooter = styled.span`
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  svg {
+    margin-right: 0.625rem;
+  }
+`;
 
-/** Interface (Props) */
-interface BaseEditableTableProps extends TableProps {
+/** [Interface] Properties for addable table */
+interface AddableTableProps extends TableProps {
+  onAdd: () => void;
+  onChange: (index: number, key: string, record: any, value: any) => void;
+  onDelete: (index: number) => void;
+}
+/** [Interface] Properties for editable table */
+interface EditableTableProps extends TableProps {
   expandKey?: string;
   innerHeaders?: TableHeadersData;
+  onAdd: (record: any) => void;
+  onDelete: (index: number) => void;
+  onSave: (index: number, value: any) => boolean;
 }
-interface ExpandTableProps extends TableProps {
-  expandKey: string;
-  innerHeaders: TableHeadersData;
+/** [Internal] Properties for table form */
+interface EditableTableFormProps extends EditableTableProps {
+  title: string;
 }
-interface TableContentListProps {
+/** [Interface] Properties for table */
+interface TableProps {
+  dataSource: any[];
+  pagination?: boolean;
+  headers: TableHeadersData;
+}
+/** [Interface] Properties for table form */
+interface TableFormProps extends TableProps {
+  title: string;
+}
+/** [Interface] Properties for table header */
+interface TableHeaderProps {
+  description?: string;
+  name: string;
+}
+/** [Interface] Properties for table footer contain add button */
+interface TableFooterContainAddButtonProps {
+  onClick: () => void;
+}
+/** [Interface] Properties for table content for item  */
+interface TableContentForItemProps {
+  items: ProcessingItemDF[];
+  tooltip: string;
+}
+/** [Internal] Properties for table content for list */
+interface TableContentForListProps {
   items: string[];
 }
+/** [Interface] Properties for table edit cell */
 interface TableEditCellProps {
   edit: boolean;
   onDelete: () => void;
   onEdit: () => void;
   onSave: () => void;
 }
-interface TableFormProps extends TableProps {
-  title: string;
-}
-interface TableHeaderProps {
-  description?: string;
-  name: string;
-}
-interface TableProcessItemsProps {
-  items: TableProcessItemData[];
-  tooltip: string;
-}
-interface TableProps {
-  dataSource: any[];
-  headers: TableHeadersData;
-}
-interface TestTableProps {
-  data: any[];
-  headers: TableHeadersData;
-  pagination?: boolean;
-  onChange: () => void;
-}
 
-/** Interface (Data type) */
-
-// Component (Basic table form - readable)
-export const BasicTableFrom = ({ dataSource, headers, title }: TableFormProps): JSX.Element => {
-  return (
-    <StyledTableForm>
-      <StyledTableFormHeader>
-        <StyledTableTitle>{title}</StyledTableTitle>
-      </StyledTableFormHeader>
-      <BasicTable dataSource={dataSource} headers={headers} />
-    </StyledTableForm>
-  );
-}
-// Component (Editable table)
-export const EditableTable = ({ dataSource, headers, title }: TableFormProps): JSX.Element => {
-  return (<BaseEditableTable dataSource={dataSource} headers={headers} title={title} />);
-}
-// Component (Editable expand table)
-export const EditableExpandTable = ({ dataSource, expandKey, headers, innerHeaders, title }: ExpandTableProps): JSX.Element => {
-  return (<BaseEditableTable dataSource={dataSource} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} title={title} />);
-}
-// [Internal] Component (Editable table)
-const BaseEditableTable = ({ dataSource, expandKey, headers, innerHeaders, title }: BaseEditableTableProps): JSX.Element => {
-  // Set a data source
-  const editedDataSource: any[] = setDataSource(dataSource);
-
-  // Get a form
-  const [form] = Form.useForm();
-  // Get a state (for log)
-  const [_log, setLog] = useRecoilState(updateEditLogSelector);
-  // Set a local state (for edit mode)
-  const [editRow, setEditRow] = useState<boolean>(false);
-  const [editTable, setEditTable] = useState<boolean>(false);
-  // Set a local state (for data)
-  const [row, setRow] = useState<any>({});
-  const [table, setTable] = useState<any[]>(editedDataSource);
-
-  // Create an event handler (onAdd)
-  const onAdd = (): void => {
-    // Set a new column
-    const newRow: any = {uuid: 'newProject', key: 'newProject'};
-    // Set a properties for column
-    Object.keys(headers).map((key: string): any => headers[key].display === 'item' || headers[key].display === 'list' || headers[key].display === 'period' ? newRow[key] = [] : newRow[key] = '');
-    // If not existance
-    if (!table.some((project: any): boolean => project.uuid === newRow.uuid)) {
-      // Add a column
-      setTable([...table, newRow]);
-      // Set a state (for row)
-      setRow(newRow);
-    }
-    // Set a state
-    setEditRow(true);
-  }
-  // Create an event handler (onEditRow)
-  const onEditRow = async (value: any): Promise<void> => {
-    // Validate the form values
-    await form.validateFields();
-    // Update the form values
-    form.setFieldsValue(value);
-    // Update a state
-    setEditRow(true);
-    setRow(value);
-  }
-  // Create an event handler (onEditTable)
-  const onEditTable = (): void => setEditTable(true);
-  // Create an event handler (onSaveTable)
-  const onSaveTable = async (): Promise<void> => {
-    // Validate the form values
-    await form.validateFields();
-    // Update a states
-    setEditRow(false);
-    setEditTable(false);
-  }
-  // Create an event handler (onChangeRow)
-  const onChangeRow = (column: string, display: string, value: any): void => {
-    let changedRow: any = {};
-    if (display === 'item') {
-      const items: any[] = value.map((item: string): TableProcessItemData => {
-        // Find an index
-        const index: number = processingItems.findIndex((elem: TableProcessItemData): boolean => elem.name === item);
-        // Return
-        return index >= 0 ? processingItems[index] : { intrinsic: false, name: item };
-      });
-      // Set a row
-      changedRow = {...row, [column]: items}
-    } else {
-      changedRow = {...row, [column]: value}
-    }
-    // Update a state for row
-    setRow(changedRow);
-    // Set a form value
-    form.setFieldsValue(changedRow);
-    // Set a state (for log)
-    if (changedRow.uuid === 'newProject') {
-      setLog({ date: new Date(), type: 'table_name', row: changedRow.uuid, column: column, status: 'create' });
-    } else {
-      setLog({ date: new Date(), type: 'table_name', row: changedRow.uuid, column: column, status: 'edit' });
-    }
-  }
-  // Create an event handler (onDelete)
-  const onDelete = (value: any): void => {
-    // Find an index for selected row
-    const index: number = table.findIndex((item: any): boolean => item.uuid === value.uuid);
-    // Set a new table data
-    const total: any[] = [...table.slice(0, index), ...table.slice(index + 1)];
-    // Update a state for table
-    setTable(total.map((item: any, index: number): any => { return {...item, key: index.toString()} }));
-    // Set a state (for log)
-    setLog({ date: new Date(), type: 'table_name', row: value.uuid, status: 'delete' });
-  }
-  // Create an event handler (onSaveRow)
-  const onSaveRow = async (): Promise<void> => {
-    try {
-      // Validate a input or select
-      await form.validateFields();
-      // Find an index for selected row
-      const index: number = table.findIndex((item: any): boolean => item.uuid === row.uuid);
-      // Set a new table data
-      const total: any[] = index >= 0 ? [...table.slice(0, index), row, ...table.slice(index + 1)] : [...table, row];
-      // Update a state for table
-      setTable(total.map((item: any, index: number): any => { return {...item, key: index.toString()} }));
-      // Change an edit mode
-      setEditRow(false);
-    } catch (err: any) {
-      console.error(`[ERROR] ${JSON.stringify(err)}`);
-    }
-  }
-
-  // Set the columns
-  const columns: any[] = createEditableTableColumns(editRow, editTable, headers, false, onChangeRow, onDelete, onEditRow, onSaveRow, row);
-  // Create a table
-  const tableElement: JSX.Element = expandKey ? (
-    <OuterTable columns={columns} components={{ header: { row: (props: any) => renderHeader(props, columns) } }} dataSource={table} expandable={{
-      expandedRowRender: (record: any, index: number) => innerHeaders ? (<Table key={index} columns={createEditableTableColumns(editRow, editTable, innerHeaders, true, onChangeRow, onDelete, onEditRow, onSaveRow, row)} dataSource={(editRow && row.uuid === record.uuid) ? [row] : [record]} pagination={false} />) : (<></>),
-      rowExpandable: (record: any) => (editRow && row.uuid === record.uuid) ? row[expandKey] : record[expandKey]
-    }} pagination={false} />
-  ) : (<Table columns={columns} components={{ header: { row: (props: any) => renderHeader(props, columns) } }} dataSource={table} pagination={false} />);
-
-  // Return an element
-  return (
-    <StyledTableForm edit={editTable}>
-      <StyledTableFormHeader>
-        <StyledTableTitle>{title}</StyledTableTitle>
-        <StyledTableTool>
-          {editTable ? (
-            <>
-              <Button onClick={onAdd} type='default'>추가하기</Button>
-              <Button onClick={onSaveTable} type='primary'>저장하기</Button>
-            </>
-          ) : (
-            <Button onClick={onEditTable} type='default'>수정하기</Button>
-          )}
-        </StyledTableTool>
-      </StyledTableFormHeader>
-      <Form form={form}>{tableElement}</Form>
-    </StyledTableForm>
-  );
-}
-// Component (Searchable table)
-export const SearchableTable = ({ dataSource, headers, title }: TableProps): JSX.Element => {
-  // Set a data source
-  const editedDataSource: any[] = setDataSource(dataSource);
-  // Set a columns
-  const columns: any[] = createSearchableTableColumnProps(headers);
-
-  // Set a local state
-  const [open, setOpen] = useState<boolean>(false);
-  // Create an event handler (onOpen)
-  const onOpen = (): void => setOpen(true);
-  // Create an event handler (onClose)
-  const onClose = (): void => setOpen(false);
-
-  // Return an element
-  return (
-    <StyledTableForm>
-      <StyledTableFormHeader>
-        <StyledTableTitle>{title}</StyledTableTitle>
-        <StyledTableTool>
-          <SearchableInput content='' onSearch={() => {}} />
-          <Button icon={<PlusOutlined />} type='primary' onClick={onOpen}>문서 만들기</Button>
-        </StyledTableTool>
-      </StyledTableFormHeader>
-      <Table columns={columns} dataSource={editedDataSource} />
-      <ModalToCreatePipp onClose={onClose} open={open} />
-    </StyledTableForm>
-  )
-}
-// Component (basic table)
-export const BasicTable = ({ dataSource, headers }: TableProps): JSX.Element => {
+/** 
+ * [Component] Basic table (only read)
+ */
+export const BasicTable = ({ dataSource, pagination, headers }: TableProps): JSX.Element => {
   // Create the columns
   const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => createTableColumnProps(key, headers[key].name, headers[key].description));
   // Return an element
-  return (<Table columns={columns} dataSource={dataSource} />);
+  return (<Table columns={columns} dataSource={dataSource} pagination={pagination ? undefined : false} />);
 }
-// Component (inputable table)
-export const InputableTable = ({ data, headers, pagination, setData }: TestTableProps): JSX.Element => {
-  // Create an event handler (onChange)
-  const onChange = (column: string, index: number, record: any, value: any): void => {
-    setData([...data.slice(0, index), {...record, [column]: value}, ...data.slice(index + 1)]);
+/**
+ * [Component] Editable table
+ */
+export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, pagination }: EditableTableProps): JSX.Element => {
+  // Set a default focus and default record for columns in row
+  const defaultFocusState: any = {};
+  const defaultRecord: any = {};
+  // Extract a focus state and record by header key
+  Object.keys(headers).forEach((key: string): void => {
+    defaultFocusState[key] = false;
+    const type: string = headers[key].display;
+    defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
+  });
+  // Extract a focus state by inner header key
+  if (innerHeaders) {
+    Object.keys(innerHeaders).forEach((key: string): void => {
+      defaultFocusState[key] = false;
+      const type: string = innerHeaders[key].display;
+      defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
+    });
   }
-  
-  // Create an empty row
-  const row: any = { uuid: 'new', key: 'new' };
+
+  // Set a ref
+  const newProjectCnt: MutableRefObject<number> = useRef(0);
+  // Set a local state
+  const [row, setRow] = useState<any>({});
+  const [focus, setFocus] = useState<any>(defaultFocusState); 
+
+  /**
+   * [Event Handler] Create a row
+   */
+  const onCreate = (): void => {
+    // Set a key
+    const key: string = `npc_${newProjectCnt.current++}`;
+    // Create a new row
+    const record: any = {...defaultRecord, uuid: key,  key: key};
+
+    // Check a editing status
+    if (row.uuid !== undefined) {
+      createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.');
+    } else {
+      // Add a row
+      onAdd(record);
+      // Update a state
+      setRow(record);
+    }
+  }
+  /**
+   * [Event Handler] Change a row
+   * @param key column key
+   * @param item column value
+   * @param required required
+   * @param type column type
+   */
+  const onChange = (key: string, item: string[]|string, required: boolean, type?: string): void => {
+    if (type && type === 'item') {
+      const newItem: ProcessingItemDF[] = (item as string[]).map((value: string): ProcessingItemDF => {
+        // Find
+        const index: number = processingItems.findIndex((elem: ProcessingItemDF): boolean => elem.name === value);
+        // Return
+        return index === -1 ? { intrinsic: false, name: value } : processingItems[index];
+      });
+      // Set a row
+      setRow({...row, [key]: newItem});
+    } else {
+      // Set a row
+      setRow({...row, [key]: item});
+      // Check a required
+      setFocus({...focus, [key]: checkRequired(headers[key].name, item, required)});
+    }
+  }
+  /**
+   * [Event Handler] Set a edit state
+   * @param record selected row
+   */
+  const onEdit = (record: any): void => {
+    clearFocus();
+    (row.uuid && record.uuid && row.uuid !== record.uuid) ? createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.') : setRow(record);
+  }
+
+  /**
+   * [Inner Function] Check a required for column in row (using state)
+   * @returns check result
+   */
+  const checkRequiredForRow = (): boolean => {
+    const state: any = {};
+    // Check a required
+    const result: boolean[] = Object.keys(headers).map((key: string): boolean => {
+      const warning: boolean = checkRequired(headers[key].name, row[key], headers[key].required);
+      // Set a local state
+      state[key] = warning;
+      // Return
+      return warning;
+    });
+    // Set a state
+    setFocus(state);
+    // Return
+    return !result.includes(true);
+  }
+  /**
+   * [Inner Function] Check a required for column
+   * @param columnName column key
+   * @param item column value
+   * @param required required
+   * @returns check result
+   */
+  const checkRequired = (columnName: string, item: string[]|string, required: boolean): boolean => {
+    // Check a warning
+    const warning: boolean = required && ((typeof item === 'string' && item === '') || (Array.isArray(item) && item.length === 0));
+    // Alert a message
+    if (warning) {
+      createWarningMessage(`해당 필드(${columnName})는 필수로 입력해야 합니다.`, columnName);
+    }
+    // Return
+    return warning;
+  }
+  /**
+   * [Inner Function] Clear a state for focus
+   */
+  const clearFocus = (): void => {
+    setFocus(defaultFocusState);
+  }
+  /**
+   * [Inner Function] Create the columns
+   * @param headers header data
+   * @returns created columns
+   */
+  const createColumns = (headers: TableHeadersData, isMainHeader: boolean): TableColumnProps<any>[] => {
+    // Set a columns
+    const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
+      // Extract a header data
+      const header: TableHeaderData = headers[key];
+      // Create a column
+      const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
+      // Set a render for column
+      column.render = (item: any, record: any, index: number): JSX.Element => {
+        switch (header.display) {
+          case 'checkbox':
+            if (row.uuid === record.uuid) {
+              return (<Checkbox checked={row[key]} onChange={(e: any): void => onChange(key, e.target.checked, header.required)} />);
+            } else {
+              return (<Checkbox checked={item} disabled />);
+            }
+          case 'item':
+            if (row.uuid === record.uuid) {
+              return (<AddableSelect error={focus[key]} multiple onChange={(items: string[]): void => onChange(key, items, header.required, 'item')} totalOptions={[]} values={item.map((elem: ProcessingItemDF): string => elem.name)} />);
+            } else {
+              return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
+            }
+          case 'list':
+            if (row.uuid === record.uuid) {
+              return (<AddableSelect error={focus[key]} multiple onChange={(items: string[]): void => onChange(key, items, header.required)} totalOptions={[]} values={item} />);
+            } else {
+              return (<TableContentForList items={item} key={index} />);
+            }
+          case 'period':
+            if (row.uuid === record.uuid) {
+              return (
+                <>
+                  <Space size={[6, 6]} style={{ marginBottom: '10px' }} wrap>
+                    {row[key].map((elem: string, index: number): JSX.Element => (<Tag closable key={index} onClose={(e: any): void => { e.preventDefault(); onChange(key, row[key].length - 1 === index ? [...row[key].slice(0, index)] : [...row[key].slice(0, index), ...row[key].slice(index + 1)], header.required)}}>{elem}</Tag>))}
+                  </Space>
+                  <IFTTTSelect onAdd={(value: string): void => { row[key].some((item: string): boolean => item === value) ? createWarningMessage('동일한 기간이 존재합니다!') : onChange(key, [...row[key], value], header.required) }} status={focus[key]} />
+                </>
+              );
+            } else {
+              return (<TableContentForList items={item} key={index} />);
+            }
+          default:
+            if (row.uuid === record.uuid) {
+              return (<Input key={index} onChange={(e: any): void => onChange(key, e.target.value, header.required)} value={row[key]} status={focus[key] ? 'error' : undefined} />);
+            } else {
+              return (<>{item}</>);
+            }
+        }
+      }
+      // Return
+      return column;
+    });
+    // Add a column for delete
+    if (isMainHeader) {
+      columns.push({
+        dataIndex: 'edit',
+        key: 'edit',
+        title: '',
+        render: (_: any, record: any, index: number): JSX.Element => (<TableEditCell edit={row.uuid === record.uuid} key={index} onDelete={() => { clearFocus(); onDelete(index); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { checkRequiredForRow() ? onSave(index, row) ? onEdit({}) : undefined : undefined }}/>)
+      });
+    }
+    // Return
+    return columns;
+  }
+
+  // Set a footer (add an add button)
+  const footer = (): JSX.Element => (<TableFooterContainAddButton onClick={onCreate} />);
+  // Return an element
+  return expandKey ? (
+    <OuterTable columns={createColumns(headers, true)} dataSource={dataSource} expandable={{
+      expandedRowRender: (record: any, index: number) => innerHeaders ? (<Table key={index} columns={createColumns(innerHeaders, false)} dataSource={row.uuid === record.uuid ? [row] : [record]} pagination={false} />) : (<></>),
+      rowExpandable: (record: any) => (row.uuid === record.uuid) ? row[expandKey] : record[expandKey]
+    }} footer={footer} pagination={pagination ? undefined : false} />
+  ) : (
+    <Table columns={createColumns(headers, true)} dataSource={dataSource} footer={footer} pagination={pagination ? undefined : false} />
+  );
+}
+/**
+ * [Component] Editable table form
+ */
+export const EditableTableForm = ({ dataSource, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, title }: EditableTableFormProps): JSX.Element => {
+  return (
+    <StyledTableForm>
+      <StyledTableFormHeader>
+        <StyledTableTitle>{title}</StyledTableTitle>
+      </StyledTableFormHeader>
+      <EditableTable dataSource={dataSource} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} />
+    </StyledTableForm>
+  );
+}
+/** 
+ * [Component] Inputable table
+ */
+export const InputableTable = ({ dataSource, onAdd, onChange, onDelete, pagination, headers }: AddableTableProps): JSX.Element => {
   // Set the columns
   const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
     // Extract a header data
     const header: TableHeaderData = headers[key];
-    // Set a column
+    // Create a column
     const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
     // Set a render for column
     column.render = (item: any, record: any, index: number): JSX.Element => {
-      return (<Input value={item} onChange={(e: any) => onChange(key, index, record, e.target.value)} />);
+      switch(header.display) {
+        case 'list':
+          return (<AddableSelect multiple onChange={(value: string[]): void => onChange(index, key, record, value)} totalOptions={[]} values={item} />);
+        default:
+          return (<Input onChange={(e: any): void => onChange(index, key, record, e.target.value)} value={item} />);
+      }
     }
-    row[key] = '';
     // Return
     return column;
   });
-  // Set a data source
-  setData(setDataSource(data));
-  setData([...data, row]);
+  // Add a column for delete
+  columns.push({dataIndex: 'delete', key: 'delete', title: '', render: (item: any, record: any, index: number): JSX.Element => <DeleteOutlined onClick={() => onDelete(index)} />});
 
-  console.log(columns);
-  console.log(data)
-  
+  // Set a footer (add an add button)
+  const footer = (): JSX.Element => (<TableFooterContainAddButton onClick={onAdd} />);
   // Return an element
-  return (
-    <Form>
-      <Table columns={columns} dataSource={data} />
-    </Form>
-  );
+  return (<Table columns={columns} dataSource={dataSource} footer={footer} pagination={pagination ? undefined : false} />);
 }
-
-
-// [Internal] Component (Table header)
+/**
+ * [Internal Component] Create an element for table header
+ */
 const TableHeader = ({ description, name }: TableHeaderProps): JSX.Element => {
   return (
     <StyledTableHeader>
@@ -395,7 +436,20 @@ const TableHeader = ({ description, name }: TableHeaderProps): JSX.Element => {
     </StyledTableHeader>
   );
 }
-// [Internal] Component (Table edit cell)
+/**
+ * [Internal Component] Table footer containing an additional button
+ */
+const TableFooterContainAddButton = ({ onClick }: TableFooterContainAddButtonProps): JSX.Element => {
+  return (
+    <StyledTableFooter onClick={onClick}>
+      <IoAddCircle />
+      <>행 추가</>
+    </StyledTableFooter>
+  );
+}
+/**
+ * [Internal Component] Table edit cell
+ */
 const TableEditCell = ({ edit, onDelete, onEdit, onSave }: TableEditCellProps): JSX.Element => {
   return (
     <StyledTableEditCell>
@@ -412,201 +466,48 @@ const TableEditCell = ({ edit, onDelete, onEdit, onSave }: TableEditCellProps): 
     </StyledTableEditCell>
   )
 }
-// [Internal] Component (cell for list)
-const TableContentList = ({ items }: TableContentListProps): JSX.Element => {
-  return (<StyledList>{items.map((key: string, index: number): JSX.Element => <StyledListItem key={index}>{key}</StyledListItem>)}</StyledList>);
-}
-// [Internal] Component (cell for tags)
-const TableProcessItems = ({ items, tooltip }: TableProcessItemsProps): JSX.Element => {
-  return (<>{items.map((item: TableProcessItemData, index: number): JSX.Element => (item.intrinsic ? <Tooltip key={index} title={tooltip}><Tag color='geekblue'>{item.name}</Tag></Tooltip> : <Tag color='default' key={index}>{item.name}</Tag>))}</>);
-}
-// [Internal] Component (cell for tools)
-const TableToolCell = (): JSX.Element => {
+/**
+ * [Internal Component] Table content for list
+ */
+const TableContentForList = ({ items }: TableContentForListProps): JSX.Element => {
   return (
-    <StyledTableEditCell>
-      <AiOutlineDownload />
-      <AiOutlineEdit />
-      <AiOutlineDownload />
-      <AiOutlineDelete />
-    </StyledTableEditCell>
+    <StyledList>
+      {items.map((key: string, index: number): JSX.Element => (<StyledListItem key={index}>{key}</StyledListItem>))}
+    </StyledList>
   );
 }
+/**
+ * [Internal Component] Table content for tags
+ */
+const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.Element => {
+  return (
+    <Space size={[6, 6]} wrap>
+      {items.map((item: ProcessingItemDF, index: number): JSX.Element => (
+        item.intrinsic ? (
+          <Tooltip key={index} title={tooltip}>
+            <Tag color='geekblue'>{item.name}</Tag>
+          </Tooltip>
+        ) : (
+          <Tag color='default' key={index}>{item.name}</Tag>
+        )
+      ))}
+    </Space>
+  );
+}
+// const RemovableTags = (): JSX.Element => {
+
+// }
 
 /**
- * [Internal function] Create the editable table columns
- * @param editRow row edit status
- * @param editTable table edit status
- * @param headers table header data
- * @param onChangeRow event handler for change row
- * @param onDelete event handler for delete row
- * @param onEditRow event handler for edit row status
- * @param onSaveRow event handler for save row
- * @param row selected row data
- * @returns created the columns
+ * [Function] Set a data source 
+ * @param dataSource raw data source
+ * @returns data source
  */
-const createEditableTableColumns = (editRow: boolean, editTable: boolean, headers: TableHeadersData, isInner: boolean, onChangeRow: (column: string, display: string, value: any) => void, onDelete: (value: any) => void, onEditRow: (value: any) => void, onSaveRow: () => void, row: any): any[] => {
-  const columns: any[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
-    // Extract a this header info
-    const header: TableHeaderData = headers[key];
-    // Set a column
-    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
-    // Set a render for column
-    if (header.display === 'list') {
-      column.render = (items: string[], record: any): JSX.Element => {
-        if (editRow && row.uuid === record.uuid) {
-          if (header.required) {
-            return (
-              <Form.Item name={key} rules={[{ required: true }]}>
-                <EditableSelectMulti defaultOptions={row[key]} onChange={(items: string[]): void => onChangeRow(key, header.display, items)} totalOptions={[]} />
-              </Form.Item>
-            );
-          } else {
-            return (<EditableSelectMulti defaultOptions={row[key]} onChange={(items: string[]): void => onChangeRow(key, header.display, items)} totalOptions={[]} />);
-          }
-        } else {
-          return (<TableContentList items={items} />);
-        }
-      }
-    } else if (header.display === 'period') {
-      column.render = (items: string[], record: any): JSX.Element => {
-        if (editRow && row.uuid === record.uuid) {
-          if (header.required) {
-            return (
-              <Form.Item name={key} rules={[{ required: true }]}>
-                <EditableSelectMulti defaultOptions={row[key]} onChange={(items: string[]): void => onChangeRow(key, header.display, items)} totalOptions={[]} />
-              </Form.Item>
-            );
-          } else {
-            return (<EditableSelectMulti defaultOptions={row[key]} onChange={(items: string[]): void => onChangeRow(key, header.display, items)} totalOptions={[]} />);
-          }
-        } else {
-          return (<TableContentList items={items} />);
-        }
-      }
-    } else if (header.display === 'item') {
-      column.render = (items: TableProcessItemData[], record: any): JSX.Element => {
-        if (editRow && row.uuid === record.uuid) {
-          // Set a compare the items
-          let compareItems: TableProcessItemData[] = [];
-          if (key === 'essentialItems') {
-            compareItems = row['selectionItems'];
-          } else if (key === 'selectionItems') {
-            compareItems = row['essentialItems'];
-          }
-          // Set a render for select box
-          if (header.required) {
-            return (
-              <Form.Item name={key} rules={[{ required: true }]}>
-                <EditableSelectMulti compareOptions={compareItems.map((item: TableProcessItemData): string => item.name)} defaultOptions={row[key].map((item: TableProcessItemData): string => item.name)} onChange={(items: string[]): void => onChangeRow(key, header.display, items)} totalOptions={['이름', '아이디', '비밀번호', '이메일주소', '실주소', '휴대전화번호', '생년월일', 'aa', 'bb']} />
-              </Form.Item>
-            );
-          } else {
-            return (<EditableSelectMulti compareOptions={compareItems.map((item: TableProcessItemData): string => item.name)} defaultOptions={row[key].map((item: TableProcessItemData): string => item.name)} onChange={(items: string[]): void => onChangeRow(key, header.display, items)} totalOptions={['이름', '아이디', '비밀번호', '이메일주소', '실주소', '휴대전화번호', '생년월일', 'aa', 'bb']} />);
-          }
-        } else {
-          return (<TableProcessItems items={items} tooltip='고유식별정보' />);
-        }
-      }
-    } else if (header.display === 'checkbox') {
-      column.render = (check: boolean, record: any): JSX.Element => {
-        if (editRow && row.uuid === record.uuid) {
-          if (header.required) {
-            return (
-              <Form.Item name={key} rules={[{ required: true }]}>
-                <Checkbox checked={row[key]} onChange={(e: any) => onChangeRow(key, header.display, e.target.checked)} />
-              </Form.Item>
-            );
-          } else {
-            return (<Checkbox checked={row[key]} onChange={(e: any) => onChangeRow(key, header.display, e.target.checked)} />);
-          }
-        } else {
-          return (<Checkbox checked={check} disabled />);
-        }
-      }
-    } else if (header.display === 'select') {
-      column.render = (value: string, record: any): JSX.Element => {
-        if (editRow && row.uuid === record.uuid) {
-          if (header.required) {
-            return (
-              <Form.Item name={key} rules={[{ required: true }]}>
-                <EditableSelectSingle defaultOptions={[row[key]]} onChange={(value: string): void => onChangeRow(key, header.display, value)} totalOptions={[]} />
-              </Form.Item>
-            );
-          } else {
-            return (<EditableSelectSingle defaultOptions={[row[key]]} onChange={(value: string): void => onChangeRow(key, header.display, value)} totalOptions={[]} />);
-          }
-        } else {
-          return (<>{value}</>);
-        }
-      }
-    } else {  // display type is 'string'
-      column.render = (value: string, record: any): JSX.Element => {
-        if (editRow && row.uuid === record.uuid) {
-          if (header.required) {
-            return (
-              <Form.Item name={key} rules={[{ required: true }]}>
-                <EditableInput content={row[key]} onChange={(value: string): void => onChangeRow(key, header.display, value)} />
-              </Form.Item>
-            );
-          } else {
-            return (<EditableInput content={row[key]} onChange={(value: string): void => onChangeRow(key, header.display, value)} />);
-          }
-        } else {
-          return (<>{value}</>);
-        }
-      }
-    }
-    // Return
-    return column;
-  });
-  // Add an edit column
-  if (!isInner) {
-    columns.push({ className: 'edit', dataIndex: 'edit', key: 'edit', title: 'edit', visible: editTable, render: (_: any, record: any) => (<TableEditCell edit={editRow && row.uuid === record.uuid} onDelete={() => onDelete(record)} onEdit={() => onEditRow(record)} onSave={onSaveRow}></TableEditCell>) });
-  }
-  // Return
-  return columns;
+export const setDataSource = (dataSource: any): any[] => {
+  return dataSource.map((item: any): any => { return {...item, key: item.uuid} });
 }
 /**
- * [Internal function] Create the searchable table columns
- * @param headers table header data
- * @returns created the columns
- */
-const createSearchableTableColumnProps = (headers: any): any[] => {
-  const columns: any[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
-    // Extract a this header info
-    const header: TableHeaderData = headers[key];
-    // Set a column
-    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
-    // Set a render for column
-    if (header.display === 'tag') {
-      column.render = (item: string): JSX.Element => {
-        // Set a tag color and content
-        let content: string = '';
-        let color: string = 'geekblue';
-        switch (item) {
-          case 'complete':
-            content = '게재완료';
-            color = 'green';
-            break;
-          default:
-            content = '임시저장'
-            color = 'geekblue';
-            break;
-        }
-        // Return
-        return <Tag color={color}>{content}</Tag>
-      }
-    }
-    // Return
-    return column;
-  });
-  // Add a tools columns
-  columns.push({ className: 'tools', dataIndex: 'tools', key: 'tools', title: '', render: (_: any, record: any) => (<TableToolCell />) });
-  // Return
-  return columns;
-}
-/**
- * [Internal function] Create a table column(= header) property
+ * [Internal Function] Create a table column(= header) property
  * @param key unique key
  * @param name header name
  * @param description header description
@@ -614,47 +515,4 @@ const createSearchableTableColumnProps = (headers: any): any[] => {
  */
 const createTableColumnProps = (key: string, name: string, description?: string): any => {
   return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true };
-}
-/**
- * [Internal function] Set a data source 
- * @param dataSource raw data source
- * @returns data source
- */
-const setDataSource = (dataSource: any): any[] => {
-  return dataSource.map((item: any): any => { return {...item, key: item.uuid} });
-}
-/**
- * [Internal function] Render a table header
- * @param props properties
- * @param columns columns
- * @returns rendered table header
- */
-const renderHeader = (props: any, columns: TableColumnProps<any>[]): JSX.Element => {
-  return (<tr>{extractVisibleColumns(props, columns)}</tr>);
-}
-/**
- * [Internal function] Render a table body (Deprecated)
- * @param props properties
- * @param columns columns
- * @returns rendered table body
- */
-// const renderBody = (props: any, columns: TableColumnProps<any>[]): JSX.Element => {
-//   return (<tr className={props.className}>{extractVisibleColumns(props, columns)}</tr>)
-// }
-/**
- * [Internal function] Extract a visible chilren for columns
- * @param props properties
- * @param columns columns
- * @returns extracted a column children
- */
-const extractVisibleColumns = (props: any, columns: TableColumnProps<any>[]): CustomizeComponent|undefined[] => {
-  // Extract the columns
-  const customColumns: CustomizeComponent|undefined[] = columns.map((item: any): any => item.visible ? props.children.find((elem: any): boolean => item.key === elem.key) : undefined);
-  // Find a table key row
-  const index: number = props.children.findIndex((item: any): boolean => item.key === 'RC_TABLE_KEY');
-  if (index >= 0) {
-    customColumns.unshift(props.children[index]);
-  }
-  // Return
-  return customColumns;
 }

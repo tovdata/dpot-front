@@ -1,19 +1,16 @@
 import { MutableRefObject, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { Form, Input, Select } from 'antd';
+import { Col, Input, Row, Select } from 'antd';
 // Module
 import { createSimpleWarningNotification } from './Notification';
 
 // Styled component (IFTTT form)
 const StyledIFTTTForm = styled.div`
   position: relative;
-`;
-// Styled component (IFTTT form row)
-const StyledIFTTTFormRow = styled.div`
-  display: flex;
-  flex: 1;
-  position: relative;
+  .ant-select {
+    width: 100%;
+  }
 `;
 
 /** [Interface] Properties for addable select */
@@ -133,7 +130,7 @@ export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {
         setHidden(true);
         setData(defaultValue);
         // Update a variable for refresh
-        refresh.current++
+        refresh.current++;
       }
     }
   }
@@ -141,18 +138,26 @@ export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {
   // Return an element
   return (
     <StyledIFTTTForm>
-      <StyledIFTTTFormRow>
-        <SingleSelect onSelect={(value: string) => onChange('event', value)} totalOptions={['이벤트 종료', '회원 탈퇴', '재화 및 서비스 공급 완료']} value={data.event} />
-        <SingleSelect onSelect={(value: string) => onChange('adverb', value)} refresh={refresh} totalOptions={['후', '시까지']} value={data.adverb} />
-      </StyledIFTTTFormRow>
-      {hidden ? (
-        <></>
-      ) : (
-        <StyledIFTTTFormRow>
-          <Input onChange={(e: any) => onChange('digit', e.target.value.toString())} type='number' value={data.digit} />
-          <SingleSelect onSelect={(value: string) => onChange('unit', value)} totalOptions={['일', '개월', '년']} value={data.unit} />
-        </StyledIFTTTFormRow>
-      )}
+      <Row gutter={[4, 4]}>
+        <Col span={16}>
+          <SingleSelect onSelect={(value: string) => onChange('event', value)} totalOptions={['이벤트 종료', '회원 탈퇴', '재화 및 서비스 공급 완료']} value={data.event} />
+        </Col>
+        <Col span={8}>
+          <SingleSelect onSelect={(value: string) => onChange('adverb', value)} refresh={refresh} totalOptions={['후', '시까지']} value={data.adverb} />
+        </Col>
+        {hidden ? (
+          <></>
+        ) : (
+          <>
+            <Col span={12}>
+              <Input onChange={(e: any) => onChange('digit', e.target.value.toString())} type='number' value={data.digit} />
+            </Col>
+            <Col span={12}>
+              <SingleSelect onSelect={(value: string) => onChange('unit', value)} totalOptions={['일', '개월', '년']} value={data.unit} />
+            </Col>
+          </>
+        )}
+      </Row>
     </StyledIFTTTForm>
-  )
+  );
 }

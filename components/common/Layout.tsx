@@ -59,14 +59,21 @@ const Layout = ({ children }: CommonElementProps): JSX.Element => {
   // Set a local state
   const [scrollPos, setScrollPos] = useState<number>(0);
   const [openMenu, setOpenMenu] = useState<boolean>(true);
+
   // Create an event handler (onOpenMenu)
   const onOpenMenu = (): void => setOpenMenu(!openMenu);
+  // Create a function (updateScrollPos)
+  const updateScrollPos = () => setScrollPos(window.scrollY || document.documentElement.scrollTop);
+
   // Set a effect
-  useEffect((): void => {
-    window.addEventListener('scroll', () => {
-      setScrollPos(window.scrollY || document.documentElement.scrollTop);
-    });
-  });
+  useEffect(() => {
+    // Add an event listenr (onScroll)
+    window.addEventListener('scroll', updateScrollPos);
+    // Return a trigger to remove an event listener
+    return () => {
+      window.removeEventListener('scroll', updateScrollPos);
+    }
+  }, []);
   // Set a status to fixed a sider
   const isFixed: boolean = scrollPos > 56 ? true : false;
 

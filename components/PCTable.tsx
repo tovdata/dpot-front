@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { consignmentTableHeader, expandProvisionTableHeader, provisionTableHeader } from "../models/data";
 import { consignmentPersonalInfo, provisionPersonalInfo } from "../models/temporary";
-import { EditableTable, EditableTableForm, setDataSource } from "./common/RenewerTable";
+import { EditableTable, EditableTableForm, setDataSource } from "./common/Table";
 // Module
 import { createSimpleWarningNotification } from './common/Notification';
 
@@ -25,5 +25,18 @@ export function ProvisionTable() {
 };
 
 export function ConsignmentTable() {
-  return (<EditableTable dataSource={consignmentPersonalInfo} headers={consignmentTableHeader} title='개인정보 위탁' />)
+  // Set a local state (for data)
+  const [data, setData] = useState<any[]>(setDataSource(consignmentPersonalInfo));
+
+  // Create an event handler (onAdd)
+  const onAdd = (record: any): void => setData([...data, record]);
+  // Create an event handler (onDelete)
+  const onDelete = (index: number): void => data.length - 1 === index ? setData([...data.slice(0, index)]) : setData([...data.slice(0, index), ...data.slice(index + 1)]);
+  // Create an event handler (onSave)
+  const onSave = (index: number, record: any): boolean => {
+    data.length - 1 === index ? setData([...data.slice(0, index), record]) : setData([...data.slice(0, index), record, ...data.slice(index + 1)]);
+    return true;
+  };
+
+  return (<EditableTableForm dataSource={data} headers={consignmentTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} title='개인정보 위탁' />)
 }
