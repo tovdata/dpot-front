@@ -1,7 +1,6 @@
 import { useState } from 'react';
 // Component
-import { PersonalInfoProcessingPolicy } from '../../components/PIPPTable';
-import { CreateForm } from '../../components/CreatePIPP';
+import { PIPPTable } from '../../components/PIPP';
 
 const Page = () => {
   // Set a state
@@ -9,7 +8,7 @@ const Page = () => {
   const [doc, setDoc] = useState<any>({});
 
   return (
-    <CreateForm />
+    <PIPPTable />
   )
 }
 

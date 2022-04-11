@@ -15,8 +15,9 @@ export const createSimpleWarningNotification = (message: string): void => {
 /**
  * [Function] Create a warning message
  * @param content message content
+ * @param duration duration (seconds)
  * @param key message key (for overlapping protection)
  */
-export const createWarningMessage = (content: string, key?: string): void => {
-  message.warn({ content, key });
+export const createWarningMessage = (content: string, duration?: number, key?: string): void => {
+  message.warn({ content, duration, key });
 }

@@ -2,16 +2,14 @@ import { MutableRefObject, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
 // Component
-import { Button, Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography } from 'antd';
+import { Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography } from 'antd';
 import { AddableSelect, IFTTTSelect } from './Select';
-// Data
-import { defaultExtendPersonalInfoTable } from '../../models/data';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
 // Icon
-import { AiOutlineDelete, AiOutlineDownload, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
+import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
 import { IoAddCircle } from 'react-icons/io5';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { AiOutlineDownload, AiOutlineExport } from 'react-icons/ai';
 // Module
 import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // State
@@ -29,7 +27,7 @@ const OuterTable = styled(Table)`
   }
 `;
 // Styled element (TableForm)
-const StyledTableForm = styled.div`
+export const StyledTableForm = styled.div`
   display: block;
   margin-bottom: 5rem;
   &:last-child {
@@ -68,6 +66,8 @@ const StyledTableTitle = styled.h2`
   font-weight: 600;
   line-height: ${LH_HXXS};
 `;
+// Styled element (TableTools)
+const StyledTableTools = styled.div``;
 // Styled element (TableHeader)
 const StyledTableHeader = styled.div`
   align-items: center;
@@ -93,6 +93,15 @@ const StyledTableEditCell = styled.span`
     margin-right: 0;
   }
 `;
+// Styled element (TableToolCellItem)
+const StyledTableToolCellItem = styled.span`
+  cursor: pointer;
+  font-size: 1rem;
+  margin-right: 0.5rem;
+  &:last-child {
+    margin-right: 0;
+  }
+`;
 // Styled element (List)
 const StyledList = styled.ul`
   margin: 0;
@@ -115,6 +124,10 @@ interface AddableTableProps extends TableProps {
   onChange: (index: number, key: string, record: any, value: any) => void;
   onDelete: (index: number) => void;
 }
+/** [Interface] Properties for document table */
+interface DocumentTableProps extends TableProps {
+  onDelete: (index: number) => void;
+}
 /** [Interface] Properties for editable table */
 interface EditableTableProps extends TableProps {
   expandKey?: string;
@@ -134,8 +147,9 @@ interface TableProps {
   headers: TableHeadersData;
 }
 /** [Interface] Properties for table form */
-interface TableFormProps extends TableProps {
+interface TableFormHeaderProps {
   title: string;
+  tools?: JSX.Element | JSX.Element[];
 }
 /** [Interface] Properties for table header */
 interface TableHeaderProps {
@@ -166,11 +180,58 @@ interface TableEditCellProps {
 /** 
  * [Component] Basic table (only read)
  */
-export const BasicTable = ({ dataSource, pagination, headers }: TableProps): JSX.Element => {
+export const BasicTable = ({ dataSource, headers, pagination }: TableProps): JSX.Element => {
   // Create the columns
   const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => createTableColumnProps(key, headers[key].name, headers[key].description));
   // Return an element
   return (<Table columns={columns} dataSource={dataSource} pagination={pagination ? undefined : false} />);
+}
+export const DocumentTable = ({ dataSource, headers, onDelete, pagination }: DocumentTableProps): JSX.Element => {
+  // Create the columns
+  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
+    // Extract a header
+    const header: TableHeaderData = headers[key];
+    // Create a column
+    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
+    // Set a render
+    column.render = (item: any, _record: any, _index: number) => {
+      if (header.display === 'status') {
+        return item === 'processing' ? <Tag color='geekblue'>임시저장</Tag> : item === 'fail' ? <Tag color='red'>작성실패</Tag> : <Tag color='green'>게재완료</Tag>;
+      } else {
+        return item;
+      }
+    }
+    // Return
+    return column;
+  });
+  // Add a tool cell
+  columns.push({
+    dataIndex: 'tools',
+    key: 'tools',
+    render: (_item: any, record: any) => (
+      <>
+        <StyledTableToolCellItem>
+          <AiOutlineExport />
+        </StyledTableToolCellItem>
+        <StyledTableToolCellItem>
+          <AiOutlineEdit />
+        </StyledTableToolCellItem>
+        <StyledTableToolCellItem>
+          <AiOutlineDownload />
+        </StyledTableToolCellItem>
+        <StyledTableToolCellItem>
+          <Popconfirm title='해당 문서를 삭제하시겠습니까?' onConfirm={() => onDelete(record)}>
+            <AiOutlineDelete />
+          </Popconfirm>
+        </StyledTableToolCellItem>
+      </>
+    )
+  });
+
+  // Return an element
+  return (
+    <Table columns={columns} dataSource={dataSource} pagination={pagination ? undefined : false} />
+  );
 }
 /**
  * [Component] Editable table
@@ -283,7 +344,7 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
     const warning: boolean = required && ((typeof item === 'string' && item === '') || (Array.isArray(item) && item.length === 0));
     // Alert a message
     if (warning) {
-      createWarningMessage(`해당 필드(${columnName})는 필수로 입력해야 합니다.`, columnName);
+      createWarningMessage(`해당 필드(${columnName})는 필수로 입력해야 합니다.`, 1.6, columnName);
     }
     // Return
     return warning;
@@ -334,7 +395,7 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
                   <Space size={[6, 6]} style={{ marginBottom: '10px' }} wrap>
                     {row[key].map((elem: string, index: number): JSX.Element => (<Tag closable key={index} onClose={(e: any): void => { e.preventDefault(); onChange(key, row[key].length - 1 === index ? [...row[key].slice(0, index)] : [...row[key].slice(0, index), ...row[key].slice(index + 1)], header.required)}}>{elem}</Tag>))}
                   </Space>
-                  <IFTTTSelect onAdd={(value: string): void => { row[key].some((item: string): boolean => item === value) ? createWarningMessage('동일한 기간이 존재합니다!') : onChange(key, [...row[key], value], header.required) }} status={focus[key]} />
+                  <IFTTTSelect onAdd={(value: string): void => { row[key].some((item: string): boolean => item === value) ? createWarningMessage('동일한 기간이 존재합니다!', 1.6) : onChange(key, [...row[key], value], header.required) }} status={focus[key]} />
                 </>
               );
             } else {
@@ -389,36 +450,47 @@ export const EditableTableForm = ({ dataSource, expandKey, headers, innerHeaders
     </StyledTableForm>
   );
 }
+/**
+ * [Component] Table form header
+ */
+export const TableFormHeader = ({ title, tools }: TableFormHeaderProps): JSX.Element => {
+  return (
+    <StyledTableFormHeader>
+      <StyledTableTitle>{title}</StyledTableTitle>
+      <StyledTableTools>{tools}</StyledTableTools>
+    </StyledTableFormHeader>
+  );
+}
 /** 
  * [Component] Inputable table
  */
-export const InputableTable = ({ dataSource, onAdd, onChange, onDelete, pagination, headers }: AddableTableProps): JSX.Element => {
-  // Set the columns
-  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
-    // Extract a header data
-    const header: TableHeaderData = headers[key];
-    // Create a column
-    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
-    // Set a render for column
-    column.render = (item: any, record: any, index: number): JSX.Element => {
-      switch(header.display) {
-        case 'list':
-          return (<AddableSelect multiple onChange={(value: string[]): void => onChange(index, key, record, value)} totalOptions={[]} values={item} />);
-        default:
-          return (<Input onChange={(e: any): void => onChange(index, key, record, e.target.value)} value={item} />);
-      }
-    }
-    // Return
-    return column;
-  });
-  // Add a column for delete
-  columns.push({dataIndex: 'delete', key: 'delete', title: '', render: (item: any, record: any, index: number): JSX.Element => <DeleteOutlined onClick={() => onDelete(index)} />});
+// export const InputableTable = ({ dataSource, onAdd, onChange, onDelete, pagination, headers }: AddableTableProps): JSX.Element => {
+//   // Set the columns
+//   const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
+//     // Extract a header data
+//     const header: TableHeaderData = headers[key];
+//     // Create a column
+//     const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description);
+//     // Set a render for column
+//     column.render = (item: any, record: any, index: number): JSX.Element => {
+//       switch(header.display) {
+//         case 'list':
+//           return (<AddableSelect multiple onChange={(value: string[]): void => onChange(index, key, record, value)} totalOptions={[]} values={item} />);
+//         default:
+//           return (<Input onChange={(e: any): void => onChange(index, key, record, e.target.value)} value={item} />);
+//       }
+//     }
+//     // Return
+//     return column;
+//   });
+//   // Add a column for delete
+//   columns.push({dataIndex: 'delete', key: 'delete', title: '', render: (item: any, record: any, index: number): JSX.Element => <DeleteOutlined onClick={() => onDelete(index)} />});
 
-  // Set a footer (add an add button)
-  const footer = (): JSX.Element => (<TableFooterContainAddButton onClick={onAdd} />);
-  // Return an element
-  return (<Table columns={columns} dataSource={dataSource} footer={footer} pagination={pagination ? undefined : false} />);
-}
+//   // Set a footer (add an add button)
+//   const footer = (): JSX.Element => (<TableFooterContainAddButton onClick={onAdd} />);
+//   // Return an element
+//   return (<Table columns={columns} dataSource={dataSource} footer={footer} pagination={pagination ? undefined : false} />);
+// }
 /**
  * [Internal Component] Create an element for table header
  */
@@ -494,9 +566,6 @@ const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.
     </Space>
   );
 }
-// const RemovableTags = (): JSX.Element => {
-
-// }
 
 /**
  * [Function] Set a data source 

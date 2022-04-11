@@ -166,7 +166,7 @@ export const personalInfoProcessingPolicyTableHeader: TableHeadersData = {
     required: true
   },
   status: {
-    display: "tag",
+    display: "status",
     name: "상태",
     required: true
   },
@@ -180,14 +180,4 @@ export const personalInfoProcessingPolicyTableHeader: TableHeadersData = {
     name: "최종 편집일",
     required: true
   }
-}
-
-/** [Default] Personal information table */
-export const defaultExtendPersonalInfoTable: ExtendPersonalInfoTableDF = {
-  essentialItems: [],
-  key: '',
-  period: [],
-  purpose: [],
-  selectionItems: [],
-  subject: ''
 };
