@@ -1,8 +1,15 @@
+import { useState } from 'react';
+// Component
+import { PersonalInfoProcessingPolicy } from '../../components/PIPPTable';
+import { CreateForm } from '../../components/CreatePIPP';
+
 const Page = () => {
+  // Set a state
+  const [create, setCreate] = useState<boolean>(false);
+  const [doc, setDoc] = useState<any>({});
+
   return (
-    <div>
-      <h2>PIPP page</h2>
-    </div>
+    <CreateForm />
   )
 }
 
