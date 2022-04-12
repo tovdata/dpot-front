@@ -1,9 +1,11 @@
 import styled from 'styled-components';
+import { useRouter, NextRouter } from 'next/router';
 // Component
 import { Button, Steps } from 'antd';
 // Icon
 import { AiOutlineBell, AiOutlineLogout } from 'react-icons/ai';
 import { VscChevronLeft } from 'react-icons/vsc';
+import Link from 'next/link';
 
 // Styled element (HeaderNav)
 const StyledHeaderNav = styled.div`
@@ -54,6 +56,7 @@ const StyledHeaderToolItem = styled.span`
 `;
 // Styled component (pageHeader)
 const StyledPageHeader = styled.div`
+  margin-bottom: 2rem;
   position: relative;
   user-select: none;
 `;
@@ -106,8 +109,9 @@ interface PageHeaderProps {
 /** [Interface] Properties for page header contain step */
 interface PageHeaderContainStepProps extends PageHeaderProps {
   current: number;
-  onNext: () => void;
-  onPrev: () => void;
+  goTo?: string;
+  onBack?: () => void;
+  onMove: (type: string) => void;
   steps: string[];
 }
 
@@ -124,15 +128,24 @@ export const Header = (): JSX.Element => {
   )
 }
 /** [Component] Page header contain step */
-export const PageHeaderContainStep = ({ current, onNext, onPrev, title, steps }: PageHeaderContainStepProps): JSX.Element => {
+export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, title, steps }: PageHeaderContainStepProps): JSX.Element => {
+  // Get a router
+  const router: NextRouter = useRouter(); 
   // Create a step item
   const items: JSX.Element[] = steps.map((item: string, index: number): JSX.Element => (<Steps.Step key={index} title={item} />));
+  // Create an event handler (onBackRoute)
+  const onBackRoute = () => {
+    // Clear
+    onBack ? onBack() : undefined;
+    // Move
+    goTo ? router.push(goTo) : router.back();
+  }
   // Return an element
   return (
     <StyledPageHeader>
       <StyledPageHeaderHeading>
         <StyledPageHeaderHeadingLeft>
-          <StyledPageBackIcon>
+          <StyledPageBackIcon onClick={onBackRoute}>
             <VscChevronLeft />
           </StyledPageBackIcon>
           <StyledPageTitle>{title}</StyledPageTitle>
@@ -142,8 +155,8 @@ export const PageHeaderContainStep = ({ current, onNext, onPrev, title, steps }:
         </StyledPageHeaderHeadingRight>
       </StyledPageHeaderHeading>
       <StyledPageHeaderExtra>
-        {current > 0 ? <Button type='default' onClick={onPrev}>이전</Button> : <span></span>}
-        {current < steps.length - 1 ? <Button type='primary' onClick={onNext}>다음</Button> : <Button type='primary'>완료</Button>}
+        {current > 0 ? <Button type='default' onClick={() => onMove('prev')}>이전</Button> : <span></span>}
+        {current < steps.length - 1 ? <Button type='primary' onClick={() => onMove('next')}>다음</Button> : <Button type='primary'>완료</Button>}
       </StyledPageHeaderExtra>
     </StyledPageHeader>
   );

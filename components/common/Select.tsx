@@ -1,4 +1,4 @@
-import { MutableRefObject, useRef, useState } from 'react';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
 import { Col, Input, Row, Select } from 'antd';
@@ -14,9 +14,8 @@ const StyledIFTTTForm = styled.div`
 `;
 
 /** [Interface] Properties for addable select */
-interface AddableSelectProps {
+interface AddableTagSelectProps {
   error?: boolean;
-  multiple?: boolean;
   onChange: (value: any) => void;
   totalOptions: string[];
   values: string[];
@@ -84,7 +83,21 @@ export const SingleSelect = ({ onSelect, refresh, totalOptions, value }: SingleS
   return (<Select key={refresh ? refresh.current : undefined} options={options} onSelect={onSelect} placeholder='선택' value={value === '' ? undefined : value} />);
 }
 /** [Component] Addable select */
-export const AddableSelect = ({ error, multiple, onChange, totalOptions, values }: AddableSelectProps): JSX.Element => {
+export const AddableSelect = (): JSX.Element => {
+  const [value, setValue] = useState<string>();
+  const [options, setOptions] = useState<any[]>([]);
+
+  const onAdd = (e: any): void => {
+    if (e.key === 'Enter' && e.target.value !== '') {
+      setOptions([...options, { value: e.target.value }]);
+      setValue(e.target.value);
+    }
+  }
+
+  return (<Select showSearch onSelect={(item: string): void => setValue(item)} options={options} onInputKeyDown={onAdd} style={{ width: '100%' }} value={value} />)
+}
+/** [Component] Addable tag select */
+export const AddableTagSelect = ({ error, onChange, totalOptions, values }: AddableTagSelectProps): JSX.Element => {
   // Set a local state
   const [selected, setSelected] = useState<string[]|string>(values);
   // Set the options for select box
@@ -92,7 +105,7 @@ export const AddableSelect = ({ error, multiple, onChange, totalOptions, values 
   // Create an event handler (onSelect)
   const onSelect = (item: string[]|string): void => { setSelected(item); onChange(item) }
   // Return an element
-  return (<Select mode={multiple ? 'tags' : undefined} onChange={onSelect} options={options} status={error ? 'error' : undefined} style={{ width: '100%' }} tokenSeparators={[',']} value={selected} />);
+  return (<Select mode='tags' onChange={onSelect} options={options} status={error ? 'error' : undefined} style={{ width: '100%' }} tokenSeparators={[',']} value={selected} />);
 }
 /** [Component] IFTTT select */
 export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {

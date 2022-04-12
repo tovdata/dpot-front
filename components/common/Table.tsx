@@ -3,7 +3,7 @@ import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
 // Component
 import { Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography } from 'antd';
-import { AddableSelect, IFTTTSelect } from './Select';
+import { AddableTagSelect, IFTTTSelect } from './Select';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
 // Icon
@@ -378,13 +378,13 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
             }
           case 'item':
             if (row.uuid === record.uuid) {
-              return (<AddableSelect error={focus[key]} multiple onChange={(items: string[]): void => onChange(key, items, header.required, 'item')} totalOptions={[]} values={item.map((elem: ProcessingItemDF): string => elem.name)} />);
+              return (<AddableTagSelect error={focus[key]} onChange={(items: string[]): void => onChange(key, items, header.required, 'item')} totalOptions={[]} values={item.map((elem: ProcessingItemDF): string => elem.name)} />);
             } else {
               return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
           case 'list':
             if (row.uuid === record.uuid) {
-              return (<AddableSelect error={focus[key]} multiple onChange={(items: string[]): void => onChange(key, items, header.required)} totalOptions={[]} values={item} />);
+              return (<AddableTagSelect error={focus[key]} onChange={(items: string[]): void => onChange(key, items, header.required)} totalOptions={[]} values={item} />);
             } else {
               return (<TableContentForList items={item} key={index} />);
             }
