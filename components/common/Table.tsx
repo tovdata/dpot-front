@@ -1,4 +1,4 @@
-import { MutableRefObject, useRef, useState } from 'react';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
 // Component
@@ -17,7 +17,7 @@ import { updateEditLogSelector } from '../../models/state';
 // Temporary
 import { processingItems } from '../../models/temporary';
 // Type
-import { ProcessingItemDF, TableHeaderData, TableHeadersData } from '../../models/type';
+import { ProcessingItemDF, SelectOptionsByColumn, TableHeaderData, TableHeadersData } from '../../models/type';
 
 // Styled element (OuterTable)
 const OuterTable = styled(Table)`
@@ -118,24 +118,19 @@ const StyledTableFooter = styled.span`
   }
 `;
 
-/** [Interface] Properties for addable table */
-interface AddableTableProps extends TableProps {
-  onAdd: () => void;
-  onChange: (index: number, key: string, record: any, value: any) => void;
-  onDelete: (index: number) => void;
-}
 /** [Interface] Properties for document table */
 interface DocumentTableProps extends TableProps {
   onDelete: (index: number) => void;
 }
 /** [Interface] Properties for editable table */
 interface EditableTableProps extends TableProps {
+  defaultSelectOptions?: any;
   expandKey?: string;
   innerHeaders?: TableHeadersData;
   onAdd: (record: any) => void;
   onDelete: (index: number) => void;
   onSave: (index: number, value: any) => boolean;
-  selectOptions: any;
+  rawSelectOptions: any;
 }
 /** [Internal] Properties for table form */
 interface EditableTableFormProps extends EditableTableProps {
@@ -237,7 +232,7 @@ export const DocumentTable = ({ dataSource, headers, onDelete, pagination }: Doc
 /**
  * [Component] Editable table
  */
-export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, pagination, selectOptions }: EditableTableProps): JSX.Element => {
+export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, pagination, rawSelectOptions }: EditableTableProps): JSX.Element => {
   // Set a default focus and default record for columns in row
   const defaultFocusState: any = {};
   const defaultRecord: any = {};
@@ -245,22 +240,23 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
   Object.keys(headers).forEach((key: string): void => {
     defaultFocusState[key] = false;
     const type: string = headers[key].display;
-    defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
+    defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'itemA' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
   });
   // Extract a focus state by inner header key
   if (innerHeaders) {
     Object.keys(innerHeaders).forEach((key: string): void => {
       defaultFocusState[key] = false;
       const type: string = innerHeaders[key].display;
-      defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
+      defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'itemA' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
     });
   }
-
+  
   // Set a ref
   const newProjectCnt: MutableRefObject<number> = useRef(0);
   // Set a local state
   const [row, setRow] = useState<any>({});
   const [focus, setFocus] = useState<any>(defaultFocusState);
+  const [selectOptions, setSelectOptions] = useState<SelectOptionsByColumn>(extractSelectOptionsByColumn(dataSource, defaultSelectOptions, headers));
 
   /**
    * [Event Handler] Create a row
@@ -313,6 +309,11 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
     clearFocus();
     (row.uuid && record.uuid && row.uuid !== record.uuid) ? createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.') : setRow(record);
   }
+
+  /**
+   * UseEffect
+   */
+  useEffect(() => setSelectOptions(extractSelectOptionsByColumn(dataSource, defaultSelectOptions, headers)), [dataSource]);
 
   /**
    * [Inner Function] Check a required for column in row (using state)
@@ -465,13 +466,13 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
 /**
  * [Component] Editable table form
  */
-export const EditableTableForm = ({ dataSource, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, selectOptions, title }: EditableTableFormProps): JSX.Element => {
+export const EditableTableForm = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, rawSelectOptions, title }: EditableTableFormProps): JSX.Element => {
   return (
     <StyledTableForm>
       <StyledTableFormHeader>
         <StyledTableTitle>{title}</StyledTableTitle>
       </StyledTableFormHeader>
-      <EditableTable dataSource={dataSource} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} selectOptions={selectOptions} />
+      <EditableTable dataSource={dataSource} defaultSelectOptions={defaultSelectOptions} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} rawSelectOptions={rawSelectOptions} />
     </StyledTableForm>
   );
 }
@@ -609,4 +610,43 @@ export const setDataSource = (dataSource: any): any[] => {
  */
 const createTableColumnProps = (key: string, name: string, description?: string): any => {
   return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true };
+}
+/**
+ * [Function] Extract the select option by column
+ * @param dataSource data source
+ * @param defaultOptions default select options
+ * @param headers table header data
+ */
+export const extractSelectOptionsByColumn = (dataSource: any[], defaultOptions: any, headers: TableHeadersData): SelectOptionsByColumn => {
+  const options: SelectOptionsByColumn = {};
+  // Set the default select options by columns
+  defaultOptions ? Object.keys(defaultOptions).forEach((key: string): string[] => defaultOptions[key] ? options[key] = [...defaultOptions[key]] : []) : undefined;
+  // Set the select options by columns
+  for (const row of dataSource) {
+    for (const key of Object.keys(headers)) {
+      // Processing by display option
+      const display: string = headers[key].display;
+      if (display === 'period' || display === 'string' || display === 'select') {
+        continue;
+      }
+      // Set a select option object by key
+      if (options[key] === undefined) options[key] = [];
+      // Add the select options
+      if (Array.isArray(row[key])) {
+        if (display === 'itemA') {
+          options[key].push(...row[key].filter((item: ProcessingItemDF): boolean => !options[key].includes(item.name)).map((item: ProcessingItemDF): string => item.name));
+        } else {
+          options[key].push(...row[key].filter((item: string): boolean => !options[key].includes(item)));
+        }
+      } else {
+        !options[key].includes(row[key]) ? options[key].push(row[key]) : undefined;
+      }
+    }
+  }
+  // Set the items
+  if (Object.keys(options).includes('essentialItems') && Object.keys(options).includes('selectionItems')) {
+    options['items'] = options['essentialItems'].concat(options['selectionItems']);
+  }
+  // Return
+  return options;
 }
