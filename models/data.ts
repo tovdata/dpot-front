@@ -7,7 +7,7 @@ export const personalInfoTableHeader: TableHeadersData = {
     description: "a",
     display: "selectA",
     name: "업무명",
-    required: true
+    required: true,
   },
   purpose: {
     description: "b",

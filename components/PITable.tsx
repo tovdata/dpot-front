@@ -38,9 +38,6 @@ export const PersonalInfoTable = (): JSX.Element => {
     const options: SelectOptionsByColumn = extractSelectOptionsByColumn(data, {}, personalInfoTableHeader);
     // Combine the items
     options['items'] = options['essentialItems'].concat(options['selectionItems']);
-    // Delete
-    delete options['essentialItems'];
-    delete options['selectionItems'];
     // Update the options state
     setSelectOptions(options);
   }, [data]);
@@ -100,7 +97,7 @@ const extractSelectOptionsByColumn = (dataSource: any[], defaultOptions: any, he
       if (options[key] === undefined) options[key] = [];
       // Add the select options
       if (Array.isArray(row[key])) {
-        if (display === 'item') {
+        if (display === 'itemA') {
           options[key].push(...row[key].filter((item: ProcessingItemDF): boolean => !options[key].includes(item.name)).map((item: ProcessingItemDF): string => item.name));
         } else {
           options[key].push(...row[key].filter((item: string): boolean => !options[key].includes(item)));
