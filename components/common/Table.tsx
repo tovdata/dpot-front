@@ -3,7 +3,7 @@ import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
 // Component
 import { Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography } from 'antd';
-import { AddableTagSelect, IFTTTSelect } from './Select';
+import { AddableSelect, AddableTagSelect, SingleSelect, TagSelect, IFTTTSelect } from './Select';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
 // Icon
@@ -135,6 +135,7 @@ interface EditableTableProps extends TableProps {
   onAdd: (record: any) => void;
   onDelete: (index: number) => void;
   onSave: (index: number, value: any) => boolean;
+  selectOptions: any;
 }
 /** [Internal] Properties for table form */
 interface EditableTableFormProps extends EditableTableProps {
@@ -236,7 +237,7 @@ export const DocumentTable = ({ dataSource, headers, onDelete, pagination }: Doc
 /**
  * [Component] Editable table
  */
-export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, pagination }: EditableTableProps): JSX.Element => {
+export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, pagination, selectOptions }: EditableTableProps): JSX.Element => {
   // Set a default focus and default record for columns in row
   const defaultFocusState: any = {};
   const defaultRecord: any = {};
@@ -378,13 +379,25 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
             }
           case 'item':
             if (row.uuid === record.uuid) {
-              return (<AddableTagSelect error={focus[key]} onChange={(items: string[]): void => onChange(key, items, header.required, 'item')} totalOptions={[]} values={item.map((elem: ProcessingItemDF): string => elem.name)} />);
+              // Extract a options
+              const options: string[] = (key === 'essentialItems' || key === 'selectionItems') ? selectOptions['items'].filter((item: string): boolean => {
+                const standard: string = key === 'essentialItems' ? 'selectionItems' : 'essentialItems';
+                return !row[standard].some((elem: ProcessingItemDF): boolean => elem.name === item);
+              }) : selectOptions[key] ? selectOptions[key] : [];
+              // Return an element
+              return (<AddableTagSelect error={focus[key]} onChange={(items: string|string[]): void => onChange(key, items, header.required, 'item')} options={options} value={row[key].map((elem: ProcessingItemDF): string => elem.name)} />);
+            } else {
+              return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
+            }
+          case 'itemA':
+            if (row.uuid === record.uuid) {
+              return (<TagSelect error={focus[key]} onChange={(items: string|string[]): void => onChange(key, items, header.required, 'item')} options={selectOptions[key] ? selectOptions[key] : []} value={row[key].map((elem: ProcessingItemDF): string => elem.name)} />);
             } else {
               return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
           case 'list':
             if (row.uuid === record.uuid) {
-              return (<AddableTagSelect error={focus[key]} onChange={(items: string[]): void => onChange(key, items, header.required)} totalOptions={[]} values={item} />);
+              return (<AddableTagSelect error={focus[key]} onChange={(items: string|string[]): void => onChange(key, items, header.required)} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
             } else {
               return (<TableContentForList items={item} key={index} />);
             }
@@ -400,6 +413,18 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
               );
             } else {
               return (<TableContentForList items={item} key={index} />);
+            }
+          case 'select':
+            if (row.uuid === record.uuid) {
+              return (<SingleSelect error={focus[key]} onChange={(item: string|string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
+            } else {
+              return (<>{item}</>);
+            }
+          case 'selectA':
+            if (row.uuid === record.uuid) {
+              return (<AddableSelect error={focus[key]} onChange={(item: string|string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
+            } else {
+              return (<>{item}</>);
             }
           default:
             if (row.uuid === record.uuid) {
@@ -440,13 +465,13 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
 /**
  * [Component] Editable table form
  */
-export const EditableTableForm = ({ dataSource, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, title }: EditableTableFormProps): JSX.Element => {
+export const EditableTableForm = ({ dataSource, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, selectOptions, title }: EditableTableFormProps): JSX.Element => {
   return (
     <StyledTableForm>
       <StyledTableFormHeader>
         <StyledTableTitle>{title}</StyledTableTitle>
       </StyledTableFormHeader>
-      <EditableTable dataSource={dataSource} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} />
+      <EditableTable dataSource={dataSource} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} selectOptions={selectOptions} />
     </StyledTableForm>
   );
 }

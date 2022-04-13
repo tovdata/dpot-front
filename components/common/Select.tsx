@@ -13,12 +13,12 @@ const StyledIFTTTForm = styled.div`
   }
 `;
 
-/** [Interface] Properties for addable select */
-interface AddableTagSelectProps {
+/** [Interface] Properties for general purpose select */
+interface GeneralPurposeSelectProps {
   error?: boolean;
-  onChange: (value: any) => void;
-  totalOptions: string[];
-  values: string[];
+  onChange: (value: string|string[]) => void;
+  options: string[];
+  value: string|string[];
 }
 /** [Interface] IFTTT Data format */
 interface IFTTTData {
@@ -27,87 +27,93 @@ interface IFTTTData {
   digit: number;
   unit: string;
 }
-/** Interface (Data type) */
-interface SelectOption {
+/** [Interface] Select option format */
+interface SelectOptionFormat {
+  label: string;
   value: string;
 }
 /**  [Interface] Single select props */
-interface SingleSelectProps {
-  onSelect: (item: string) => void;
+interface SingleSelectProps extends GeneralPurposeSelectProps {
+  placeholder?: string;
   refresh?: MutableRefObject<number>;
-  status?: boolean;
-  totalOptions: string[];
-  value: string;
 }
 
-interface EditableSelectProps {
-  compareOptions?: string[];
-  defaultOptions: string[];
-  totalOptions: string[];
-}
-interface EditableSelectMultiProps extends EditableSelectProps {
-  onChange: (items: string[]) => void;
-}
-interface EditableSelectSingleProps extends EditableSelectProps {
-  onChange: (items: string) => void;
-}
+// interface EditableSelectProps {
+//   compareOptions?: string[];
+//   defaultOptions: string[];
+//   totalOptions: string[];
+// }
+// interface EditableSelectMultiProps extends EditableSelectProps {
+//   onChange: (items: string[]) => void;
+// }
+// interface EditableSelectSingleProps extends EditableSelectProps {
+//   onChange: (items: string) => void;
+// }
 
-// Component (editable select)
-export const EditableSelectSingle = ({ defaultOptions, onChange, totalOptions }: EditableSelectSingleProps): JSX.Element => {
-  // Set a local state
-  const [selected, setSelected] = useState<string[]>(defaultOptions);
-  // Set the select options
-  const options: SelectOption[] = totalOptions.filter((item: string): boolean => !selected.includes(item)).map((item: string): SelectOption => { return { value: item } });
-  // Create an event handler (onChange)
-  const onSelect = (items: string[]): void => { setSelected(items); onChange(items[0] ? items[0] : '') }
-  // Return an element
-  return (<Select onChange={onSelect} options={options} showSearch style={{ width: '100%' }} value={selected} />);
-};
-// Component (editable select)
-export const EditableSelectMulti = ({ compareOptions, defaultOptions, onChange, totalOptions }: EditableSelectMultiProps): JSX.Element => {
-  // Set a local state
-  const [selected, setSelected] = useState<string[]>(defaultOptions);
-  // Set the select options
-  const options: SelectOption[] = totalOptions.filter((item: string): boolean => compareOptions ? !compareOptions.includes(item) : true).filter((item: string): boolean => !selected.includes(item)).map((item: string): SelectOption => { return { value: item } });
-  // Create an event handler (onChange)
-  const onSelect = (items: string[]): void => { setSelected(items); onChange(items) }
-  // Return an element
-  return (<Select mode='tags' onChange={onSelect} options={options} style={{ width: '100%' }} filterOption={true} tokenSeparators={[',']} value={selected} />);
-};
+// // Component (editable select)
+// export const EditableSelectSingle = ({ defaultOptions, onChange, totalOptions }: EditableSelectSingleProps): JSX.Element => {
+//   // Set a local state
+//   const [selected, setSelected] = useState<string[]>(defaultOptions);
+//   // Set the select options
+//   const options: SelectOption[] = totalOptions.filter((item: string): boolean => !selected.includes(item)).map((item: string): SelectOption => { return { value: item } });
+//   // Create an event handler (onChange)
+//   const onSelect = (items: string[]): void => { setSelected(items); onChange(items[0] ? items[0] : '') }
+//   // Return an element
+//   return (<Select onChange={onSelect} options={options} showSearch style={{ width: '100%' }} value={selected} />);
+// };
+// // Component (editable select)
+// export const EditableSelectMulti = ({ compareOptions, defaultOptions, onChange, totalOptions }: EditableSelectMultiProps): JSX.Element => {
+//   // Set a local state
+//   const [selected, setSelected] = useState<string[]>(defaultOptions);
+//   // Set the select options
+//   const options: SelectOption[] = totalOptions.filter((item: string): boolean => compareOptions ? !compareOptions.includes(item) : true).filter((item: string): boolean => !selected.includes(item)).map((item: string): SelectOption => { return { value: item } });
+//   // Create an event handler (onChange)
+//   const onSelect = (items: string[]): void => { setSelected(items); onChange(items) }
+//   // Return an element
+//   return (<Select mode='tags' onChange={onSelect} options={options} style={{ width: '100%' }} filterOption={true} tokenSeparators={[',']} value={selected} />);
+// };
 
-/** [Component] Single select */
-export const SingleSelect = ({ onSelect, refresh, totalOptions, value }: SingleSelectProps): JSX.Element => {
+/**
+ * [Component] Single select
+ */
+export const SingleSelect = ({ onChange, placeholder, refresh, options, value }: SingleSelectProps): JSX.Element => {
   // Set the options for select box
-  const options: SelectOption[] = totalOptions.map((item: string): SelectOption => { return { value: item } });
+  const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select key={refresh ? refresh.current : undefined} options={options} onSelect={onSelect} placeholder='선택' value={value === '' ? undefined : value} />);
+  return (<Select key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} value={value === '' ? undefined : value} />);
 }
-/** [Component] Addable select */
-export const AddableSelect = (): JSX.Element => {
-  const [value, setValue] = useState<string>();
-  const [options, setOptions] = useState<any[]>([]);
-
-  const onAdd = (e: any): void => {
-    if (e.key === 'Enter' && e.target.value !== '') {
-      setOptions([...options, { value: e.target.value }]);
-      setValue(e.target.value);
-    }
-  }
-
-  return (<Select showSearch onSelect={(item: string): void => setValue(item)} options={options} onInputKeyDown={onAdd} style={{ width: '100%' }} value={value} />)
-}
-/** [Component] Addable tag select */
-export const AddableTagSelect = ({ error, onChange, totalOptions, values }: AddableTagSelectProps): JSX.Element => {
-  // Set a local state
-  const [selected, setSelected] = useState<string[]|string>(values);
-  // Set the options for select box
-  const options: SelectOption[] = totalOptions.filter((item: string): boolean => !selected.includes(item)).map((item: string): SelectOption => { return { value: item } });
-  // Create an event handler (onSelect)
-  const onSelect = (item: string[]|string): void => { setSelected(item); onChange(item) }
+/** 
+ * [Component] Addable select
+ */
+export const AddableSelect = ({ error, onChange, options, value }: GeneralPurposeSelectProps): JSX.Element => {
+  // Create the select options
+  const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
+  // Create an event handler (onInputKeyDown)
+  const onInputKeyDown = (e: any): void => (e.key === 'Enter' && e.target.value !== '') ? onChange(e.target.value) : undefined;
   // Return an element
-  return (<Select mode='tags' onChange={onSelect} options={options} status={error ? 'error' : undefined} style={{ width: '100%' }} tokenSeparators={[',']} value={selected} />);
+  return (<Select showSearch onSelect={(item: string): void => onChange(item)} options={selectOptions} onInputKeyDown={onInputKeyDown} status={error ? 'error' : undefined} style={{ width: '100%' }} value={value} />);
 }
-/** [Component] IFTTT select */
+/**
+ * [Component] Addable tag select
+ */
+export const AddableTagSelect = ({ error, onChange, options, value }: GeneralPurposeSelectProps): JSX.Element => {
+  // Create the select options
+  const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
+  // Return an element
+  return (<Select mode='tags' onChange={onChange} options={selectOptions} status={error ? 'error' : undefined} style={{ width: '100%' }} tokenSeparators={[',']} value={value as string[]} />);
+}
+/**
+ * [Component] Tag select
+ */
+export const TagSelect = ({ error, onChange, options, value }: GeneralPurposeSelectProps): JSX.Element => {
+  // Create the select options
+  const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
+  // Return an element
+  return (<Select mode='multiple' onChange={onChange} options={selectOptions} status={error ? 'error' : undefined} style={{ width: '100%' }} value={value as string[]} />);
+}
+/**
+ * [Component] IFTTT select
+ */
 export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {
   // For refresh for element
   const refresh: MutableRefObject<number> = useRef(0);
@@ -153,10 +159,10 @@ export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {
     <StyledIFTTTForm>
       <Row gutter={[4, 4]}>
         <Col span={16}>
-          <SingleSelect onSelect={(value: string) => onChange('event', value)} totalOptions={['이벤트 종료', '회원 탈퇴', '재화 및 서비스 공급 완료']} value={data.event} />
+          <SingleSelect onChange={(value: string|string[]) => onChange('event', value as string)} options={['이벤트 종료', '회원 탈퇴', '재화 및 서비스 공급 완료']} placeholder='선택' value={data.event} />
         </Col>
         <Col span={8}>
-          <SingleSelect onSelect={(value: string) => onChange('adverb', value)} refresh={refresh} totalOptions={['후', '시까지']} value={data.adverb} />
+          <SingleSelect onChange={(value: string|string[]) => onChange('adverb', value as string)} refresh={refresh} options={['후', '시까지']} placeholder='선택' value={data.adverb} />
         </Col>
         {hidden ? (
           <></>
@@ -166,7 +172,7 @@ export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {
               <Input onChange={(e: any) => onChange('digit', e.target.value.toString())} type='number' value={data.digit} />
             </Col>
             <Col span={12}>
-              <SingleSelect onSelect={(value: string) => onChange('unit', value)} totalOptions={['일', '개월', '년']} value={data.unit} />
+              <SingleSelect onChange={(value: string|string[]) => onChange('unit', value as string)} options={['일', '개월', '년']} placeholder='선택' value={data.unit} />
             </Col>
           </>
         )}

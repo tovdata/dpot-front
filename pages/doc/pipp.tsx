@@ -22,7 +22,6 @@ const Page = () => {
 
   return (
     <>
-      <AddableSelect />
       {doc.uuid === '' ? (
         <PIPPTable onSelect={onSelectDoc} />
       ) : (

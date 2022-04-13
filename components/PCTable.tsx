@@ -21,7 +21,7 @@ export function ProvisionTable() {
   };
 
   // Return an element
-  return (<EditableTableForm dataSource={data} expandKey='isForeign' headers={provisionTableHeader} innerHeaders={expandProvisionTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} title='개인정보 제공'  />);
+  return (<EditableTableForm dataSource={data} expandKey='isForeign' headers={provisionTableHeader} innerHeaders={expandProvisionTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} selectOptions={{}} title='개인정보 제공'  />);
 };
 
 export function ConsignmentTable() {
@@ -38,5 +38,5 @@ export function ConsignmentTable() {
     return true;
   };
 
-  return (<EditableTableForm dataSource={data} headers={consignmentTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} title='개인정보 위탁' />)
+  return (<EditableTableForm dataSource={data} headers={consignmentTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} selectOptions={{}} title='개인정보 위탁' />)
 }

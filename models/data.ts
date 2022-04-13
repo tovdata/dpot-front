@@ -1,12 +1,11 @@
 // Type
 import { TableHeadersData } from './type';
-import { ExtendPersonalInfoTableDF } from './type';
 
 /** Table Header */
 export const personalInfoTableHeader: TableHeadersData = {
   subject: {
     description: "a",
-    display: "string",
+    display: "selectA",
     name: "업무명",
     required: true
   },
@@ -18,13 +17,13 @@ export const personalInfoTableHeader: TableHeadersData = {
   },
   essentialItems: {
     description: "c",
-    display: "item",
+    display: "itemA",
     name: "필수 항목",
     required: true
   },
   selectionItems: {
     description: "d",
-    display: "item",
+    display: "itemA",
     name: "선택 항목",
     required: false
   },
