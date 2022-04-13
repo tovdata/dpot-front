@@ -13,7 +13,7 @@ import { AiOutlineDownload, AiOutlineExport } from 'react-icons/ai';
 // Module
 import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // State
-import { updateEditLogSelector } from '../../models/state';
+import { UpdatePersonalInfoSelector } from '../../models/state';
 // Temporary
 import { processingItems } from '../../models/temporary';
 // Type
@@ -130,7 +130,7 @@ interface EditableTableProps extends TableProps {
   onAdd: (record: any) => void;
   onDelete: (index: number) => void;
   onSave: (index: number, value: any) => boolean;
-  rawSelectOptions: any;
+  tableName: string;
 }
 /** [Internal] Properties for table form */
 interface EditableTableFormProps extends EditableTableProps {
@@ -232,7 +232,7 @@ export const DocumentTable = ({ dataSource, headers, onDelete, pagination }: Doc
 /**
  * [Component] Editable table
  */
-export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, pagination, rawSelectOptions }: EditableTableProps): JSX.Element => {
+export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, pagination, tableName }: EditableTableProps): JSX.Element => {
   // Set a default focus and default record for columns in row
   const defaultFocusState: any = {};
   const defaultRecord: any = {};
@@ -250,13 +250,15 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
       defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'itemA' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
     });
   }
-  
+
   // Set a ref
   const newProjectCnt: MutableRefObject<number> = useRef(0);
   // Set a local state
   const [row, setRow] = useState<any>({});
   const [focus, setFocus] = useState<any>(defaultFocusState);
   const [selectOptions, setSelectOptions] = useState<SelectOptionsByColumn>(extractSelectOptionsByColumn(dataSource, defaultSelectOptions, headers));
+  // Get a state (for personal info)
+  const [ref, setRef] = useRecoilState(UpdatePersonalInfoSelector);
 
   /**
    * [Event Handler] Create a row
@@ -300,6 +302,8 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
       // Check a required
       setFocus({...focus, [key]: checkRequired(headers[key].name, item, required)});
     }
+    // Update the select options
+    setSelectOptionsByColumn((value: any) => setSelectOptions(value), ref, selectOptions, { [key]: item }, tableName, key);
   }
   /**
    * [Event Handler] Set a edit state
@@ -308,6 +312,8 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
   const onEdit = (record: any): void => {
     clearFocus();
     (row.uuid && record.uuid && row.uuid !== record.uuid) ? createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.') : setRow(record);
+    // Update the select options
+    setSelectOptionsByColumn((value: any) => setSelectOptions(value), ref, selectOptions, { subject: record.subject }, tableName);
   }
 
   /**
@@ -466,13 +472,13 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
 /**
  * [Component] Editable table form
  */
-export const EditableTableForm = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, rawSelectOptions, title }: EditableTableFormProps): JSX.Element => {
+export const EditableTableForm = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, tableName, title }: EditableTableFormProps): JSX.Element => {
   return (
     <StyledTableForm>
       <StyledTableFormHeader>
         <StyledTableTitle>{title}</StyledTableTitle>
       </StyledTableFormHeader>
-      <EditableTable dataSource={dataSource} defaultSelectOptions={defaultSelectOptions} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} rawSelectOptions={rawSelectOptions} />
+      <EditableTable dataSource={dataSource} defaultSelectOptions={defaultSelectOptions} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} tableName={tableName} />
     </StyledTableForm>
   );
 }
@@ -591,6 +597,32 @@ const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.
       ))}
     </Space>
   );
+}
+/**
+ * [Internal Function] Set the select options by column
+ * @param onUpdate update handler
+ * @param ref ref table data
+ * @param selectOptions select options
+ * @param tableName table name
+ * @param standard standard object
+ * @param key column key
+ */
+const setSelectOptionsByColumn = (onUpdate: (value: any) => void, ref: any, selectOptions: any, standard: any, tableName: string, key?: string) => {
+  switch (tableName) {
+    case 'falseNameInfo':
+      if (key) {
+        const [refRow] = ref.filter((elem: any): boolean => elem[key] === standard[key]);
+        if (key === 'subject') {
+          refRow ? onUpdate({...selectOptions, ['items']: refRow['essentialItems'].concat(refRow['selectionItems']).map((item: ProcessingItemDF): string => item.name)}) : onUpdate({...selectOptions, ['items']: []});
+        }
+      } else {
+        const [refRow] = ref.filter((elem: any): boolean => elem.subject === standard.subject);
+        refRow ? onUpdate({...selectOptions, ['items']: refRow['essentialItems'].concat(refRow['selectionItems']).map((item: ProcessingItemDF): string => item.name)}) : onUpdate({...selectOptions, ['items']: []});
+      }
+      break;
+    default:
+      break;
+  }
 }
 
 /**
