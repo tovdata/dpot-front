@@ -260,7 +260,7 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
   const newProjectCnt: MutableRefObject<number> = useRef(0);
   // Set a local state
   const [row, setRow] = useState<any>({});
-  const [focus, setFocus] = useState<any>(defaultFocusState); 
+  const [focus, setFocus] = useState<any>(defaultFocusState);
 
   /**
    * [Event Handler] Create a row
@@ -379,6 +379,12 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
             }
           case 'item':
             if (row.uuid === record.uuid) {
+              return (<TagSelect error={focus[key]} onChange={(items: string|string[]): void => onChange(key, items, header.required, 'item')} options={selectOptions[key] ? selectOptions[key] : []} value={row[key].map((elem: ProcessingItemDF): string => elem.name)} />);
+            } else {
+              return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
+            }
+          case 'itemA':
+            if (row.uuid === record.uuid) {
               // Extract a options
               const options: string[] = (key === 'essentialItems' || key === 'selectionItems') ? selectOptions['items'].filter((item: string): boolean => {
                 const standard: string = key === 'essentialItems' ? 'selectionItems' : 'essentialItems';
@@ -386,12 +392,6 @@ export const EditableTable = ({ dataSource, expandKey, headers, innerHeaders, on
               }) : selectOptions[key] ? selectOptions[key] : [];
               // Return an element
               return (<AddableTagSelect error={focus[key]} onChange={(items: string|string[]): void => onChange(key, items, header.required, 'item')} options={options} value={row[key].map((elem: ProcessingItemDF): string => elem.name)} />);
-            } else {
-              return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
-            }
-          case 'itemA':
-            if (row.uuid === record.uuid) {
-              return (<TagSelect error={focus[key]} onChange={(items: string|string[]): void => onChange(key, items, header.required, 'item')} options={selectOptions[key] ? selectOptions[key] : []} value={row[key].map((elem: ProcessingItemDF): string => elem.name)} />);
             } else {
               return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
