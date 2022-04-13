@@ -8,7 +8,6 @@ export interface TableHeaderData {
   display: string;
   name: string;
   required: boolean;
-  uuid: string;
 }
 /** [Interface] Table headers */
 export interface TableHeadersData {

@@ -164,7 +164,7 @@ const SideMenu = ({ isFixed, open, onOpen }: SideMenuProps): JSX.Element => {
             </StyledSideMenuToggle>
           </StyledSideMenuProfile>
           <Menu.Item icon={<AiOutlineDashboard />} key='/'><Link href='/'>대시보드</Link></Menu.Item>
-          <Divider />
+          <Menu.Divider style={{ margin: '1.625rem' }} />
           <Menu.ItemGroup title={open ? '개인정보 관리' : '정보관리'}>
             <Menu.Item key='/pim/cu' icon={<AiOutlineDatabase size={20} />}>
               <Link href='/pim/cu'>수집・이용</Link>
