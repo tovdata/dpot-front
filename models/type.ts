@@ -2,40 +2,23 @@
 export interface CommonElementProps {
   children?: JSX.Element | JSX.Element[];
 }
-/** Data Type */
+/** [Interface] Table header */
 export interface TableHeaderData {
   description?: string;
   display: string;
   name: string;
   required: boolean;
 }
+/** [Interface] Table headers */
 export interface TableHeadersData {
   [key: string]: TableHeaderData;
 }
-export interface EditableDrawerContent {
-  data?: any;
-  title: string;
-  type: string;
-}
-
-/** Data format (for processing item) */
+/** [Interface] Processing item */
 export interface ProcessingItemDF {
   intrinsic: boolean;
   name: string;
 }
-/** Data format (for personal information table columns) */
-export interface PersonalInfoTableDF {
-  essentialItems: ProcessingItemDF[];
-  period: string[];
-  purpose: string[];
-  selectionItems: ProcessingItemDF[];
-  subject: string;
-}
-/** Data format (for personal information table columns / extend) */
-export interface ExtendPersonalInfoTableDF extends PersonalInfoTableDF {
-  key: string;
-}
-/** Data format (for false name information table columns) */
-export interface DF_FalseNameInfoTableDF {
-
+/** [Interface] Select options */
+export interface SelectOptionsByColumn {
+  [key: string]: string[];
 }
