@@ -1,9 +1,9 @@
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
 import { Col, Input, Row, Select } from 'antd';
 // Module
-import { createSimpleWarningNotification } from './Notification';
+import { createWarningMessage } from './Notification';
 
 // Styled component (IFTTT form)
 const StyledIFTTTForm = styled.div`
@@ -38,49 +38,14 @@ interface SingleSelectProps extends GeneralPurposeSelectProps {
   refresh?: MutableRefObject<number>;
 }
 
-// interface EditableSelectProps {
-//   compareOptions?: string[];
-//   defaultOptions: string[];
-//   totalOptions: string[];
-// }
-// interface EditableSelectMultiProps extends EditableSelectProps {
-//   onChange: (items: string[]) => void;
-// }
-// interface EditableSelectSingleProps extends EditableSelectProps {
-//   onChange: (items: string) => void;
-// }
-
-// // Component (editable select)
-// export const EditableSelectSingle = ({ defaultOptions, onChange, totalOptions }: EditableSelectSingleProps): JSX.Element => {
-//   // Set a local state
-//   const [selected, setSelected] = useState<string[]>(defaultOptions);
-//   // Set the select options
-//   const options: SelectOption[] = totalOptions.filter((item: string): boolean => !selected.includes(item)).map((item: string): SelectOption => { return { value: item } });
-//   // Create an event handler (onChange)
-//   const onSelect = (items: string[]): void => { setSelected(items); onChange(items[0] ? items[0] : '') }
-//   // Return an element
-//   return (<Select onChange={onSelect} options={options} showSearch style={{ width: '100%' }} value={selected} />);
-// };
-// // Component (editable select)
-// export const EditableSelectMulti = ({ compareOptions, defaultOptions, onChange, totalOptions }: EditableSelectMultiProps): JSX.Element => {
-//   // Set a local state
-//   const [selected, setSelected] = useState<string[]>(defaultOptions);
-//   // Set the select options
-//   const options: SelectOption[] = totalOptions.filter((item: string): boolean => compareOptions ? !compareOptions.includes(item) : true).filter((item: string): boolean => !selected.includes(item)).map((item: string): SelectOption => { return { value: item } });
-//   // Create an event handler (onChange)
-//   const onSelect = (items: string[]): void => { setSelected(items); onChange(items) }
-//   // Return an element
-//   return (<Select mode='tags' onChange={onSelect} options={options} style={{ width: '100%' }} filterOption={true} tokenSeparators={[',']} value={selected} />);
-// };
-
 /**
  * [Component] Single select
  */
-export const SingleSelect = ({ onChange, placeholder, refresh, options, value }: SingleSelectProps): JSX.Element => {
+export const SingleSelect = ({ error, onChange, placeholder, refresh, options, value }: SingleSelectProps): JSX.Element => {
   // Set the options for select box
   const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} value={value === '' ? undefined : value} />);
+  return (<Select key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} status={error ? 'error' : undefined} style={{ width: '100%' }} value={value === '' ? undefined : value} />);
 }
 /** 
  * [Component] Addable select
@@ -141,7 +106,7 @@ export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {
       setHidden(false);
       // Create an item
       if (changed.digit <= 0) {
-        createSimpleWarningNotification('0보다 큰 정수 값을 입력해주세요.');
+        createWarningMessage('0보다 큰 정수 값을 입력해주세요.', 1.6);
       }
       if (changed.digit > 0 && changed.unit !== '') {
         onAdd(`${changed.event} ${changed.adverb} ${changed.digit}${changed.unit}`);

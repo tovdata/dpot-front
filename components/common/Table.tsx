@@ -1,5 +1,5 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import styled from 'styled-components';
 // Component
 import { Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography } from 'antd';
@@ -13,7 +13,7 @@ import { AiOutlineDownload, AiOutlineExport } from 'react-icons/ai';
 // Module
 import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // State
-import { UpdatePersonalInfoSelector } from '../../models/state';
+import { GetPersonalInfoSelector } from '../../models/state';
 // Temporary
 import { processingItems } from '../../models/temporary';
 // Type
@@ -258,7 +258,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
   const [focus, setFocus] = useState<any>(defaultFocusState);
   const [selectOptions, setSelectOptions] = useState<SelectOptionsByColumn>(extractSelectOptionsByColumn(dataSource, defaultSelectOptions, headers));
   // Get a state (for personal info)
-  const [ref, setRef] = useRecoilState(UpdatePersonalInfoSelector);
+  const ref = useRecoilValue(GetPersonalInfoSelector);
 
   /**
    * [Event Handler] Create a row
