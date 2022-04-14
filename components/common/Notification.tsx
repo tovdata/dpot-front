@@ -4,11 +4,12 @@ import { message, notification } from 'antd';
 /**
  * [Function] Create a simple warning notification
  * @param message notification message
+ * @param duration duration (milliseconds)
  */
-export const createSimpleWarningNotification = (message: string): void => {
+export const createSimpleWarningNotification = (message: string, duration?: number): void => {
   notification.warning({
     description: message,
-    duration: 2.4,
+    duration: duration ? duration : 2.4,
     message: 'Wanring'
   });
 }

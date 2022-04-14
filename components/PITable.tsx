@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 // Component
 import { EditableTableForm, setDataSource } from './common/Table';
 // Data
@@ -49,12 +49,7 @@ export const FalseNameInfoTable = (): JSX.Element => {
     return true;
   }
 
-  // // If update a data source, update the select options
-  // useEffect(() => {
-  //   const options: SelectOptionsByColumn = extractSelectOptionsByColumn(data, { basis: ['과학적 연구', '처리 근거 1', '처리 근거 2'], subject: ['회원가입 및 관리', '새로운 업무 1', '새로운 업무 2'] }, falseNameInfoTableHeader);
-  //   // Update the options state
-  //   setSelectOptions(options);
-  // }, [data]);
+  const defaultSelectOptions: any = [];
 
   // Return an element
   return (<EditableTableForm dataSource={data} defaultSelectOptions={{ basis: ['과학적 연구', '처리 근거 1', '처리 근거 2'], subject: ['회원가입 및 관리', '새로운 업무 1', '새로운 업무 2'] }} headers={falseNameInfoTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} tableName='falseNameInfo' title='가명정보 수집・이용 현황' />);

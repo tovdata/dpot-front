@@ -1,67 +1,68 @@
 // Type
 import { TableHeadersData } from './type';
 
-/** Table Header */
+/** [Table Header] Personal Information */
 export const personalInfoTableHeader: TableHeadersData = {
   subject: {
-    description: "a",
+    description: "업무명 설명",
     display: "selectA",
-    name: "업무명",
+    name: "구분(업무명)",
     required: true,
   },
   purpose: {
-    description: "b",
+    description: "처리 목적 설명",
     display: "list",
-    name: "목적",
+    name: "처리 목적",
     required: true,
   },
   essentialItems: {
-    description: "c",
+    description: "필수항목 설명",
     display: "itemA",
-    name: "필수 항목",
+    name: "필수항목",
     required: true,
   },
   selectionItems: {
-    description: "d",
+    description: "선택항목 설명",
     display: "itemA",
-    name: "선택 항목",
+    name: "선택항목",
     required: false,
   },
   period: {
-    description: "e",
+    description: "보유 및 이용 기간 설명",
     display: "period",
-    name: "보유 기간",
+    name: "보유 및 이용 기간",
     required: true,
   }
 };
+/** [Table Header] False name information */
 export const falseNameInfoTableHeader: TableHeadersData = {
   subject: {
-    description: "a",
+    description: "업무명 설명",
     display: "select",
-    name: "업무명",
+    name: "구분(업무명)",
     required: true,
   },
   basis: {
-    description: "b",
+    description: "처리 근거 설명",
     display: "select",
-    name: "가명처리 처리 근거",
+    name: "처리 근거",
     required: true,
   },
   purpose: {
-    description: "",
+    description: "상세 목적 설명",
     display: "select",
     name: "상세 목적",
     required: true,
   },
   items: {
-    description: "d",
-    display: "itemA",
-    name: "처리 항목",
+    description: "처리항목 설명",
+    display: "item",
+    name: "처리항목",
     required: true,
   },
   period: {
-    description: "",
-    display: "period",
+    description: "보유 및 이용 기간 설명",
+    display: "list",
     name: "보유 및 이용 기간",
     required: true,
   }
@@ -212,3 +213,27 @@ export const personalInfoProcessingPolicyTableHeader: TableHeadersData = {
     required: true,
   }
 };
+
+/** [Select options] Personal information */
+export const personalInfoSelectOptions: any = {
+  "회원가입 및 관리": {
+    purpose: ["본인 식별·인증", "회원자격 유지·관리", "각종 고지·통지사항 전달", "서비스 부정가입 및 이용 방지", "성인 인증", "만 14세 미만 여부 확인", "법정대리인의 동의여부 확인"],
+    items: ["이름", "생년월일", "연령대", "나이", "휴대전화번호", "이메일주소", "아이디", "비밀번호", "내외국인 구분", "소속(기관명)", "부서명", "직책(직위)", "CI(연계정보)", "DI(중복가입확인정보)", "닉네임", "프로필 사진", "법정대리인 이름", "법정 대리인 관계", "법정 대리인 연락처", "추천인"]
+  },
+  "고객 상담 및 문의": {
+    purpose: ["제품 및 서비스 상담", "고객 문의 접수 및 처리", "고객 불만 사항 처리", "문의 접수 및 처리 이력관리"],
+    items: ["이름", "생년월일", "휴대전화번호", "이메일주소", "아이디", "문의 내용", "상담 내역", "서비스 이용 내역"]
+  },
+  "재화 및 서비스 이용": {
+    purpose: ["이용자 식별", "본인 여부 및 연령 확인", "재화 및 서비스 제공", "서비스 이용 내역 제공", "콘텐츠 제공", "계약의 체결·유지·이행·관리·개선", "서비스의 유지·관리 및 개선"],
+    items: ["이름", "생년월일", "연령대", "나이", "휴대전화번호", "이메일주소", "아이디", "비밀번호", "소속(기관명)", "부서명", "직책(직위)", "CI(연계정보)", "DI(중복가입확인정보)", "닉네임", "프로필 사진", "서비스 이용 내역", "쿠키"]
+  },
+  "요금 결제 및 환불": {
+    purspose: ["구매 및 요금결제·정산", "포인트 적립 및 사용", "계약서·청구서 발송", "채권추심", "현금영수증 발행", "결제내역 취소 및 환불처리", "제세공과금 대납", "부정거래 확인"],
+    items: ["이름", "이메일주소", "휴대전화번호", "신용카드정보(카드사명, 카드 번호, 유효기간, CVC)", "입금자명", "은행명", "예금주", "계좌번호", "결제일시", "결제수단", "주문번호", "결제 금액", "물품명", "거래수량"]
+  },
+  "상품 배송": {
+    purpose: ["물품 배송", "배송지 관리", "주문 내역 및 구매 정보 확인", "배송 내역 확인"],
+    items: ["결제일시", "결제수단", "주문번호", "결제 금액", "물폼명", "거래수량", "주문자 이름", "주문자 휴대전화번호", "주문자 이메일주소", "수취인 이름", "수취인 휴대전화번호", "수취인 주소"]
+  }
+}
