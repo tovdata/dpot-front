@@ -31,8 +31,8 @@ export interface PersonalInformationDF {
   uuid: string;
   subject: string;
   purpose: string[];
-  essentialItems: ProcessingItemDF[];
-  selectionItems: ProcessingItemDF[];
+  essentialItems: string[];
+  selectionItems: string[];
   period: string[];
   basisOfCollection?: string[];
   collectionMethod?: string[];
@@ -46,7 +46,7 @@ export interface FalseNameInformationDF {
   subject: string;
   basis: string;
   purpose: string;
-  items: ProcessingItemDF[];
+  items: string[];
   period: string[];
   charger?: string[];
 }
@@ -55,7 +55,7 @@ export interface PersonalInformationProvisonDF {
   uuid: string;
   recipient: string;
   purpose: string[];
-  items: ProcessingItemDF[];
+  items: string[];
   period: string[];
   isForeign: boolean;
   isUrl: string;

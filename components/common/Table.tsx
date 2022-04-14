@@ -13,7 +13,7 @@ import { AiOutlineDownload, AiOutlineExport } from 'react-icons/ai';
 // Module
 import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // State
-import { GetPersonalInfoSelector } from '../../models/state';
+import { GetPersonalInfoSelectOptionsSelector, GetPersonalInfoSelector } from '../../models/state';
 // Temporary
 import { processingItems } from '../../models/temporary';
 // Type
@@ -158,7 +158,7 @@ interface TableFooterContainAddButtonProps {
 }
 /** [Interface] Properties for table content for item  */
 interface TableContentForItemProps {
-  items: ProcessingItemDF[];
+  items: string[];
   tooltip: string;
 }
 /** [Internal] Properties for table content for list */
@@ -257,8 +257,26 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
   const [row, setRow] = useState<any>({});
   const [focus, setFocus] = useState<any>(defaultFocusState);
   const [selectOptions, setSelectOptions] = useState<SelectOptionsByColumn>(extractSelectOptionsByColumn(dataSource, defaultSelectOptions, headers));
-  // Get a state (for personal info)
-  const ref = useRecoilValue(GetPersonalInfoSelector);
+
+  // Get a reference data for table name
+  let ref: any[];
+  switch(tableName) {
+    case 'pi':
+      ref = useRecoilValue(GetPersonalInfoSelectOptionsSelector);
+      break;
+    case 'fni':
+      ref = useRecoilValue(GetPersonalInfoSelector);
+      break;
+    case 'ppi':
+      break;
+    case 'cpi':
+      break;
+    case 'dpi':
+      break;
+    default:
+      ref = [];
+      break;
+  }
 
   /**
    * [Event Handler] Create a row
@@ -288,11 +306,18 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
    */
   const onChange = (key: string, item: string[]|string, required: boolean, type?: string): void => {
     if (type && type === 'item') {
-      const newItem: ProcessingItemDF[] = (item as string[]).map((value: string): ProcessingItemDF => {
-        // Find
-        const index: number = processingItems.findIndex((elem: ProcessingItemDF): boolean => elem.name === value);
-        // Return
-        return index === -1 ? { intrinsic: false, name: value } : processingItems[index];
+      const newItem: string[] = (item as string[]).map((value: string): string => {
+        if (RegExp('^[주민].*[번호]').test(value)) {
+          return '주민등록번호';
+        } else if (RegExp('^[여권].*[번호]').test(value)) {
+          return '여권번호';
+        } else if (RegExp('^[운전].*[번호]').test(value)) {
+          return '운전면허번호';
+        } else if (RegExp('^[외국].*[번호]').test(value)) {
+          return '외국인등록번호';
+        } else {
+          return value;
+        }
       });
       // Set a row
       setRow({...row, [key]: newItem});
@@ -303,7 +328,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
       setFocus({...focus, [key]: checkRequired(headers[key].name, item, required)});
     }
     // Update the select options
-    setSelectOptionsByColumn((value: any) => setSelectOptions(value), ref, selectOptions, { [key]: item }, tableName, key);
+    setSelectOptionsByColumn((value: any) => setSelectOptions(value), ref, tableName, key, item);
   }
   /**
    * [Event Handler] Set a edit state
@@ -313,7 +338,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
     clearFocus();
     (row.uuid && record.uuid && row.uuid !== record.uuid) ? createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.') : setRow(record);
     // Update the select options
-    setSelectOptionsByColumn((value: any) => setSelectOptions(value), ref, selectOptions, { subject: record.subject }, tableName);
+    setSelectOptionsByColumn((value: any) => setSelectOptions(value), ref, tableName, 'init');
   }
 
   /**
@@ -386,19 +411,16 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
             }
           case 'item':
             if (row.uuid === record.uuid) {
-              return (<TagSelect error={focus[key]} onChange={(items: string|string[]): void => onChange(key, items, header.required, 'item')} options={selectOptions[key] ? selectOptions[key] : []} value={row[key].map((elem: ProcessingItemDF): string => elem.name)} />);
+              return (<TagSelect error={focus[key]} onChange={(items: string|string[]): void => onChange(key, items, header.required, 'item')} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
             } else {
               return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
           case 'itemA':
             if (row.uuid === record.uuid) {
               // Extract a options
-              const options: string[] = (key === 'essentialItems' || key === 'selectionItems') ? selectOptions['items'].filter((item: string): boolean => {
-                const standard: string = key === 'essentialItems' ? 'selectionItems' : 'essentialItems';
-                return !row[standard].some((elem: ProcessingItemDF): boolean => elem.name === item);
-              }) : selectOptions[key] ? selectOptions[key] : [];
+              const options: string[] = (key === 'essentialItems' || key === 'selectionItems') ? selectOptions['items'].filter((item: string): boolean => key === 'essentialItems' ? !row['selectionItems'].includes(item) : !row['essentialItems'].includes(item)) : selectOptions[key] ? selectOptions[key] : [];
               // Return an element
-              return (<AddableTagSelect error={focus[key]} onChange={(items: string|string[]): void => onChange(key, items, header.required, 'item')} options={options} value={row[key].map((elem: ProcessingItemDF): string => elem.name)} />);
+              return (<AddableTagSelect error={focus[key]} onChange={(items: string|string[]): void => onChange(key, items, header.required, 'item')} options={options} value={row[key]} />);
             } else {
               return item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
@@ -586,13 +608,13 @@ const TableContentForList = ({ items }: TableContentForListProps): JSX.Element =
 const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.Element => {
   return (
     <Space size={[6, 6]} wrap>
-      {items.map((item: ProcessingItemDF, index: number): JSX.Element => (
-        item.intrinsic ? (
+      {items.map((item: string, index: number): JSX.Element => (
+        RegExp('^[주민|운전|외국|여권].*[번호]').test(item) ? (
           <Tooltip key={index} title={tooltip}>
-            <Tag color='geekblue'>{item.name}</Tag>
+            <Tag color='geekblue'>{item}</Tag>
           </Tooltip>
         ) : (
-          <Tag color='default' key={index}>{item.name}</Tag>
+          <Tag color='default' key={index}>{item}</Tag>
         )
       ))}
     </Space>
@@ -602,27 +624,41 @@ const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.
  * [Internal Function] Set the select options by column
  * @param onUpdate update handler
  * @param ref ref table data
- * @param selectOptions select options
  * @param tableName table name
- * @param standard standard object
- * @param key column key
+ * @param key column key (contain 'init')
+ * @param value column value
  */
-const setSelectOptionsByColumn = (onUpdate: (value: any) => void, ref: any, selectOptions: any, standard: any, tableName: string, key?: string) => {
+const setSelectOptionsByColumn = (onUpdate: (value: any) => void, ref: any, tableName: string, key: string, value?: string|string[]) => {
   switch (tableName) {
-    case 'falseNameInfo':
-      if (key) {
-        const [refRow] = ref.filter((elem: any): boolean => elem[key] === standard[key]);
-        if (key === 'subject') {
-          refRow ? onUpdate({...selectOptions, ['items']: refRow['essentialItems'].concat(refRow['selectionItems']).map((item: ProcessingItemDF): string => item.name)}) : onUpdate({...selectOptions, ['items']: []});
-        }
-      } else {
-        const [refRow] = ref.filter((elem: any): boolean => elem.subject === standard.subject);
-        refRow ? onUpdate({...selectOptions, ['items']: refRow['essentialItems'].concat(refRow['selectionItems']).map((item: ProcessingItemDF): string => item.name)}) : onUpdate({...selectOptions, ['items']: []});
+    case 'pi':
+      if (key === 'init') {
+        onUpdate({ subject: Object.keys(ref) });
+      } else if (key === 'subject') {
+        const [refRow] =  filteringRow(ref, key, value);
+        refRow ? onUpdate({ purpose: refRow.purpose, items: refRow.items }) : onUpdate({ purpose: [], items: [] });
+      }
+      break;
+    case 'fni':
+      if (key === 'init') {
+        onUpdate({ items: [] });
+      } else if (key === 'subject') {
+        const [refRow] = filteringRow(ref, key, value);
+        refRow ? onUpdate({['items']: refRow['essentialItems'].concat(refRow['selectionItems']).map((item: ProcessingItemDF): string => item.name)}) : onUpdate({['items']: []});
       }
       break;
     default:
       break;
   }
+}
+/**
+ * [Internal Function] Filtering row
+ * @param ref ref data
+ * @param refKey ref key
+ * @param refValue ref value
+ * @returns filtered row
+ */
+const filteringRow = (ref: any[], refKey: string, refValue: any): any => {
+  return refValue ? Array.isArray(refValue) ? ref.filter((elem: any): boolean => refValue.includes(elem[refKey])) : ref.filter((elem: any): boolean => elem[refKey] === refValue) : undefined;
 }
 
 /**
