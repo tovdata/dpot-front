@@ -180,11 +180,11 @@ export const provisionPersonalInfo = [{
     name: "CI(연계정보)"
   }],
   period: ["출금이체 서비스 제공시까지", "출금동의 확인 목적 달성시까지"],
-  charger: "전수지(3667)",
   isForeign: true,
   country: "미국",
-  address: ["○시 ○구 ○동 건물명"],
+  address: "○시 ○구 ○동 건물명",
   method: "전용네트워크를 이용한 원격지로 수시 전송",
+  charger: "aws-korea-privacy@amazon.com",
 }, {
   uuid: "2",
   recipient: "한국SC은행",
@@ -202,8 +202,9 @@ export const provisionPersonalInfo = [{
 }];
 
 export const consignmentPersonalInfo = [{
+  uuid: "1",
   company: "나이스페이먼츠(주)",
-  subject: ["결제 및 요금 정산 처리"],
+  subject: "결제 및 요금 정산 처리",
   content: [{
     intrinsic: false,
     name: "결제대행 서비스"
@@ -212,7 +213,18 @@ export const consignmentPersonalInfo = [{
     name: "바로결제 서비스 정산"
   }],
   charger: "전수지(3667)",
-  isForeign: false
+  isForeign: false,
+  country: "미국",
+  address: "○시 ○구 ○동 건물명",
+  method: "",
+  items: [{
+    intrinsic: false,
+    name: "이름"
+  }, {
+    intrinsic: false,
+    name: "휴대전화번호"
+  }],
+  period: ["해당 송금 완료 시까지"]
 }]
 export const personalInfoProcessingPolicy = [{
   createAt: "2022-03-23 14:03",

@@ -82,7 +82,7 @@ export const provisionTableHeader: TableHeadersData = {
   },
   items: {
     description: "a",
-    display: "item",
+    display: "itemA",
     name: "제공 항목",
     required: true,
   },
@@ -91,12 +91,6 @@ export const provisionTableHeader: TableHeadersData = {
     display: "period",
     name: "보유 및 이용기간",
     required: true,
-  },
-  charger: {
-    description: "a",
-    display: "string",
-    name: "담당자(연락처)",
-    required: false,
   },
   isForeign: {
     description: "a",
@@ -110,39 +104,19 @@ export const expandProvisionTableHeader: TableHeadersData = {
   country: {
     description: "a",
     display: "string",
-    name: "제공받는 업체의 국가",
+    name: "국가",
     required: true,
   },
   address: {
     description: "a",
-    display: "list",
-    name: "제공받는 업체의 위치(주소)",
+    display: "string",
+    name: "위치(주소)",
     required: true,
   },
   method: {
     description: "a",
     display: "string",
-    name: "제공 일시 및 방법",
-    required: true,
-  }
-}
-export const consignmentTableHeader: TableHeadersData = {
-  company: {
-    description: "a",
-    display: "string",
-    name: "업체명",
-    required: true,
-  },
-  subject: {
-    description: "a",
-    display: "list",
-    name: "업무명",
-    required: true,
-  },
-  content: {
-    description: "a",
-    display: "item",
-    name: "위탁 내용",
+    name: "일시 및 방법",
     required: true,
   },
   charger: {
@@ -150,12 +124,70 @@ export const consignmentTableHeader: TableHeadersData = {
     display: "string",
     name: "담당자(연락처)",
     required: false,
+  }
+}
+export const consignmentTableHeader: TableHeadersData = {
+  subject: {
+    description: "a",
+    display: "string",
+    name: "구분",
+    required: true,
+  },
+  company: {
+    description: "a",
+    display: "string",
+    name: "위탁받는 자(수탁자)",
+    required: true,
+  },
+  content: {
+    description: "a",
+    display: "item",
+    name: "위탁 업무",
+    required: true,
   },
   isForeign: {
     description: "a",
     display: "checkbox",
     name: "국외 여부",
     required: true,
+  }
+}
+export const expandConsignmentTableHeader: TableHeadersData = {
+  country: {
+    description: "a",
+    display: "string",
+    name: "국가",
+    required: true,
+  },
+  address: {
+    description: "a",
+    display: "string",
+    name: "위치(주소)",
+    required: true,
+  },
+  method: {
+    description: "a",
+    display: "string",
+    name: "일시 및 방법",
+    required: true,
+  },
+  items: {
+    description: "a",
+    display: "item",
+    name: "위탁 항목",
+    required: true
+  },
+  period: {
+    description: "a",
+    display: "list",
+    name: "보유 및 이용기간",
+    required: true,
+  },
+  charger: {
+    description: "a",
+    display: "string",
+    name: "담당자(연락처)",
+    required: false,
   }
 }
 export const personalInfoProcessingPolicyTableHeader: TableHeadersData = {
