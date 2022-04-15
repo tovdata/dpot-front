@@ -83,7 +83,7 @@ export const provisionTableHeader: TableHeadersData = {
   },
   items: {
     description: "a",
-    display: "itemA",
+    display: "item",
     name: "제공 항목",
     required: true,
   },
@@ -116,13 +116,13 @@ export const expandProvisionTableHeader: TableHeadersData = {
   },
   method: {
     description: "a",
-    display: "string",
+    display: "list",
     name: "일시 및 방법",
     required: true,
   },
   charger: {
     description: "a",
-    display: "string",
+    display: "list",
     name: "담당자(연락처)",
     required: false,
   }
@@ -168,7 +168,7 @@ export const expandConsignmentTableHeader: TableHeadersData = {
   },
   method: {
     description: "a",
-    display: "string",
+    display: "list",
     name: "일시 및 방법",
     required: true,
   },
@@ -186,7 +186,7 @@ export const expandConsignmentTableHeader: TableHeadersData = {
   },
   charger: {
     description: "a",
-    display: "string",
+    display: "list",
     name: "담당자(연락처)",
     required: false,
   }
