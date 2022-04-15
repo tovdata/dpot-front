@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { Col, Input, Row, Select } from 'antd';
 // Module
 import { createWarningMessage } from './Notification';
+// Type
+import { SelectOptionsByColumn } from '../../models/type';
 
 // Styled component (IFTTT form)
 const StyledIFTTTForm = styled.div`
@@ -36,6 +38,11 @@ interface SelectOptionFormat {
 interface SingleSelectProps extends GeneralPurposeSelectProps {
   placeholder?: string;
   refresh?: MutableRefObject<number>;
+}
+/** [Interface] IFTTT select props */
+interface IFTTTSelectProps {
+  onAdd: (value: string) => void;
+  options: string[];
 }
 
 /**
@@ -79,11 +86,11 @@ export const TagSelect = ({ error, onChange, options, value }: GeneralPurposeSel
 /**
  * [Component] IFTTT select
  */
-export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {
+export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element => {
   // For refresh for element
   const refresh: MutableRefObject<number> = useRef(0);
   // Set a data type
-  const defaultValue: IFTTTData = { adverb: '', digit: 1, event: '이벤트 종료', unit: '' };
+  const defaultValue: IFTTTData = { adverb: '', digit: 1, event: '', unit: '' };
 
   // Set a local state
   const [hidden, setHidden] = useState<boolean>(true);
@@ -102,14 +109,14 @@ export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {
       setData(defaultValue);
       // Update a variable for refresh
       refresh.current++
-    } else if (changed.adverb === '후') {
+    } else if (changed.adverb === '일로부터') {
       setHidden(false);
       // Create an item
       if (changed.digit <= 0) {
         createWarningMessage('0보다 큰 정수 값을 입력해주세요.', 1.6);
-      }
-      if (changed.digit > 0 && changed.unit !== '') {
-        onAdd(`${changed.event} ${changed.adverb} ${changed.digit}${changed.unit}`);
+        setData({...data, digit: 1});
+      } else if (changed.digit > 0 && changed.unit !== '') {
+        onAdd(`${changed.event}${changed.adverb} ${changed.digit}${changed.unit}`);
         // Update a state
         setHidden(true);
         setData(defaultValue);
@@ -124,10 +131,10 @@ export const IFTTTSelect = ({ onAdd }: any): JSX.Element => {
     <StyledIFTTTForm>
       <Row gutter={[4, 4]}>
         <Col span={16}>
-          <SingleSelect onChange={(value: string|string[]) => onChange('event', value as string)} options={['이벤트 종료', '회원 탈퇴', '재화 및 서비스 공급 완료']} placeholder='선택' value={data.event} />
+          <AddableSelect onChange={(value: string|string[]) => onChange('event', value as string)} options={options} value={data.event} />
         </Col>
         <Col span={8}>
-          <SingleSelect onChange={(value: string|string[]) => onChange('adverb', value as string)} refresh={refresh} options={['후', '시까지']} placeholder='선택' value={data.adverb} />
+          <SingleSelect onChange={(value: string|string[]) => onChange('adverb', value as string)} refresh={refresh} options={['일로부터', '시까지']} placeholder='선택' value={data.adverb} />
         </Col>
         {hidden ? (
           <></>

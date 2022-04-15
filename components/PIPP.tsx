@@ -209,7 +209,7 @@ const CreateDocumentFormContent01 = (): JSX.Element => {
   };
 
   // Return an element
-  return (<EditableTable dataSource={data} headers={personalInfoTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} tableName='pipp' />);
+  return (<></>);
 }
 /**
  * [Inner Component] Create a document content (step2)

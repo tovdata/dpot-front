@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
 // Component
 import { EditableTableForm, setDataSource } from './common/Table';
 // Data
@@ -6,13 +7,24 @@ import { personalInfoTableHeader, falseNameInfoTableHeader } from '../models/dat
 import { personalInfo, falseNameInfo } from '../models/temporary';
 // Module
 import { createSimpleWarningNotification } from './common/Notification';
+// State
+import { GetPersonalInfoSelectOptionsSelector, GetPersonalInfoSelector, UpdatePersonalInfoSelector } from '../models/state';
+// Type
+import { SelectOptionsByColumn } from '../models/type';
 
 /**
  * [Component] Personal information table
  */
 export const PersonalInfoTable = (): JSX.Element => {
   // Set a local state (for data)
-  const [data, setData] = useState<any[]>(setDataSource(personalInfo));
+  // const [data, setData] = useState<any[]>(setDataSource(personalInfo));
+  const [data, setData] = useRecoilState(UpdatePersonalInfoSelector);
+  // Get a state (for select options)
+  const ref: any = useRecoilValue(GetPersonalInfoSelectOptionsSelector);
+  // Set a default select options
+  const defaultSelectOptions: SelectOptionsByColumn = {
+    subject: ["회원가입 및 관리", "고객 상담 및 문의", "재화 및 서비스 이용", "요금 결제 및 환불", "상품 배송"]
+  };
 
   // Create an event handler (onAdd)
   const onAdd = (record: any): void => setData([...data, record]);
@@ -30,7 +42,7 @@ export const PersonalInfoTable = (): JSX.Element => {
   };
 
   // Return an element
-  return (<EditableTableForm dataSource={data} headers={personalInfoTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} tableName='personalInfo' title='개인정보 수집・이용 현황' />);
+  return (<EditableTableForm dataSource={data} defaultSelectOptions={defaultSelectOptions} headers={personalInfoTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={ref} tableName='pi' title='개인정보 수집・이용 현황' />);
 }
 /**
  * [Component] False name information table
@@ -38,7 +50,13 @@ export const PersonalInfoTable = (): JSX.Element => {
 export const FalseNameInfoTable = (): JSX.Element => {
   // Set a local state
   const [data, setData] = useState<any[]>(setDataSource(falseNameInfo));
-  
+  // Get a state (for select options)
+  const ref: any = useRecoilValue(GetPersonalInfoSelector);
+  // Set a default select options
+  const defaultSelectOptions: SelectOptionsByColumn = {
+    basis: ['과학적 연구', '처리근거1', '처리근거2']
+  }
+    
   // Create an event handler (onAdd)
   const onAdd = (record: any): void => setData([...data, record]);
   // Create an event handler (onDelete)
@@ -49,8 +67,6 @@ export const FalseNameInfoTable = (): JSX.Element => {
     return true;
   }
 
-  const defaultSelectOptions: any = [];
-
   // Return an element
-  return (<EditableTableForm dataSource={data} defaultSelectOptions={{ basis: ['과학적 연구', '처리 근거 1', '처리 근거 2'], subject: ['회원가입 및 관리', '새로운 업무 1', '새로운 업무 2'] }} headers={falseNameInfoTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} tableName='falseNameInfo' title='가명정보 수집・이용 현황' />);
+  return (<EditableTableForm dataSource={data} defaultSelectOptions={defaultSelectOptions} headers={falseNameInfoTableHeader} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={ref} tableName='fni' title='가명정보 수집・이용 현황' />);
 }
