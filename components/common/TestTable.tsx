@@ -54,18 +54,10 @@ export const StyledTableForm = styled.div`
   }
 `;
 // Styled element (TableFormHeader)
-const StyledTableFormHeader = styled.div`
+const StyledTableFormHeader = styled('div') <{ flexStart?: boolean }>`
   align-items: center;
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 1.75rem;
-  user-select: none;
-`;
-// Styled element (TableFormHeader contain URL)
-const StyledURLTableFormHeader = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: flex-start;
+  justify-content: ${props => props.flexStart ? 'flex-start' : 'space-between'};
   margin-bottom: 1.75rem;
   user-select: none;
 `;
@@ -74,6 +66,7 @@ const StyledTableTitle = styled.h2`
   font-size: ${FS_HXXS};
   font-weight: 600;
   line-height: ${LH_HXXS};
+  margin-bottom: 0;
 `;
 // Styled element (TableTools)
 const StyledTableTools = styled.div``;
@@ -82,15 +75,16 @@ const StyledTableHeader = styled.div`
   align-items: center;
   display: flex;
 `;
-
-// Styled element (Empty table footer)
-const StyledEmptyTableFooter = styled.span`
+const StyledCustomTableFooter = styled.span`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding-bottom: 1rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+`
+// Styled element (Empty table footer)
+const StyledEmptyTableFooter = styled(StyledCustomTableFooter)`
   cursor: pointer;
   .message{
     color:#BFBFBF;
@@ -102,6 +96,10 @@ const StyledEmptyTableFooter = styled.span`
     color:#096DD9;
     font-weight: bold;
   }
+`;
+const StyledURLTableFooter = styled(StyledCustomTableFooter)`
+  padding-top: 1rem;
+  color:#BFBFBF;
 `;
 
 // Styled element (TableHeaderQuestionItem)
@@ -161,9 +159,11 @@ interface EditableTableProps extends TableProps {
   defaultSelectOptions?: any;
   expandKey?: string;
   innerHeaders?: TableHeadersData;
+  url?: string;
   onAdd: (record: any) => void;
   onDelete: (index: number) => void;
   onSave: (index: number, value: any) => boolean;
+  onClickURL?: () => void;
   refData: any;
   tableName: string;
 }
@@ -190,6 +190,10 @@ interface TableHeaderProps {
 /** [Interface] Properties for table footer contain add button */
 interface TableFooterContainAddButtonProps {
   onClick: () => void;
+}
+/** [Interface] Properties for table footer */
+interface URLTableFooterProps {
+  url: string
 }
 /** [Interface] Properties for table content for item  */
 interface TableContentForItemProps {
@@ -267,7 +271,7 @@ export const DocumentTable = ({ dataSource, headers, onDelete, pagination }: Doc
 /**
  * [Component] Editable table
  */
-export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, pagination, refData, tableName }: EditableTableProps): JSX.Element => {
+export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, pagination, refData, tableName }: EditableTableProps): JSX.Element => {
   // Set a default focus and default record for columns in row
   const defaultFocusState: any = {};
   const defaultRecord: any = {};
@@ -512,12 +516,23 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
   // Set a footer (add an add button)
   const footer = (): JSX.Element => (<TableFooterContainAddButton onClick={onCreate} />);
 
+  // URL 정보가 존재하는 경우 URL 정보를 보여준다.
+  if (url && url != '') {
+    return (
+      <>
+        <EmptyTable columns={createColumns(headers, true)} dataSource={dataSource} pagination={pagination ? undefined : false} />
+        <URLTableFooter url={url} />
+      </>
+    );
+  }
+  // URL 정보가 존재하지 않고, 테이블 정보도 없는 경우 빈 테이블 UI를 보여준다.
   if (dataSource?.length === 0)
-    return <>
-      <EmptyTable columns={createColumns(headers, true)} dataSource={dataSource} pagination={pagination ? undefined : false} />
-      <EmptyTableFooter onClick={onCreate} />
-    </>
-
+    return (
+      <>
+        <EmptyTable columns={createColumns(headers, true)} dataSource={dataSource} pagination={pagination ? undefined : false} />
+        <EmptyTableFooter onClick={onCreate} />
+      </>
+    );
   // Return an element
   return expandKey ? (
     <OuterTable columns={createColumns(headers, true)} dataSource={dataSource} expandable={{
@@ -545,22 +560,15 @@ export const EditableTableForm = ({ dataSource, defaultSelectOptions, expandKey,
 /**
  * [Component] Editable url table form
  */
-export const EditableURLTableForm = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, refData, tableName, title }: EditableTableFormProps): JSX.Element => {
+export const EditableURLTableForm = ({ dataSource, url, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, onClickURL, refData, tableName, title }: EditableTableFormProps): JSX.Element => {
   const isExistDataSource = dataSource?.length > 0 ? true : false;
   return (
     <StyledTableForm>
-      {isExistDataSource ?
-        <StyledTableFormHeader >
-          <StyledTableTitle>{title}</StyledTableTitle>
-          <URLButton disabled><LinkOutlined />URL 입력</URLButton>
-        </StyledTableFormHeader>
-        :
-        <StyledURLTableFormHeader>
-          <StyledTableTitle>{title}</StyledTableTitle>
-          <URLButton><LinkOutlined />URL 입력</URLButton>
-        </StyledURLTableFormHeader>
-      }
-      <EditableTable dataSource={dataSource} defaultSelectOptions={defaultSelectOptions} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={refData} tableName={tableName} />
+      <StyledTableFormHeader flexStart={!isExistDataSource}>
+        <StyledTableTitle>{title}</StyledTableTitle>
+        <URLButton disabled={isExistDataSource} onClick={onClickURL}><LinkOutlined />URL 입력</URLButton>
+      </StyledTableFormHeader>
+      <EditableTable dataSource={dataSource} url={url} defaultSelectOptions={defaultSelectOptions} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={refData} tableName={tableName} />
     </StyledTableForm>
   );
 }
@@ -603,7 +611,10 @@ const TableFooterContainAddButton = ({ onClick }: TableFooterContainAddButtonPro
     </StyledTableFooter>
   );
 }
-
+/**
+ * [Internal Component] Table footer of empty table
+ * @param onClick click handler
+ */
 const EmptyTableFooter = ({ onClick }: TableFooterContainAddButtonProps): JSX.Element => {
   return (
     <StyledEmptyTableFooter onClick={onClick}>
@@ -612,6 +623,16 @@ const EmptyTableFooter = ({ onClick }: TableFooterContainAddButtonProps): JSX.El
     </StyledEmptyTableFooter>
   );
 }
+
+/**
+ * [Internal Component] URL table footer of empty table
+ */
+const URLTableFooter = ({ url }: URLTableFooterProps): JSX.Element => {
+  return (
+    <StyledURLTableFooter>{url}</StyledURLTableFooter>
+  );
+}
+
 /**
  * [Internal Component] Table edit cell
  */
