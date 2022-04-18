@@ -1,11 +1,10 @@
 import styled from 'styled-components';
 import { useRouter, NextRouter } from 'next/router';
 // Component
-import { Button, Steps } from 'antd';
+import { Button, Col, Row, Steps } from 'antd';
 // Icon
 import { AiOutlineBell, AiOutlineLogout } from 'react-icons/ai';
 import { VscChevronLeft } from 'react-icons/vsc';
-import Link from 'next/link';
 
 // Styled element (HeaderNav)
 const StyledHeaderNav = styled.div`
@@ -62,21 +61,9 @@ const StyledPageHeader = styled.div`
 `;
 // Styled component (pageHeaderHeading)
 const StyledPageHeaderHeading = styled.div`
-  align-items: start;
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4.5rem;
-  position: relative;
-`;
-// Styled component (pageHeaderHeadingLeft)
-const StyledPageHeaderHeadingLeft = styled.div`
   align-items: center;
   display: flex;
-  margin-right: 7rem;
-  position: relative;
-`;
-// Styled component (pageHeaderHeadingRight)
-const StyledPageHeaderHeadingRight = styled.div`
+  height: 100%;
   position: relative;
 `;
 // Styled component (pageHeaderContent)
@@ -132,7 +119,7 @@ export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, title, st
   // Get a router
   const router: NextRouter = useRouter(); 
   // Create a step item
-  const items: JSX.Element[] = steps.map((item: string, index: number): JSX.Element => (<Steps.Step key={index} title={item} />));
+  const items: JSX.Element[] = steps.map((item: string, index: number): JSX.Element => current === index ? (<Steps.Step key={index} status='process' title={item} />) : current < index ? (<Steps.Step key={index} status='wait' title={item} />) : (<Steps.Step key={index} status='finish' title={item} />));
   // Create an event handler (onBackRoute)
   const onBackRoute = () => {
     // Clear
@@ -143,17 +130,19 @@ export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, title, st
   // Return an element
   return (
     <StyledPageHeader>
-      <StyledPageHeaderHeading>
-        <StyledPageHeaderHeadingLeft>
-          <StyledPageBackIcon onClick={onBackRoute}>
-            <VscChevronLeft />
-          </StyledPageBackIcon>
-          <StyledPageTitle>{title}</StyledPageTitle>
-        </StyledPageHeaderHeadingLeft>
-        <StyledPageHeaderHeadingRight>
-          <Steps current={current} progressDot>{items}</Steps>
-        </StyledPageHeaderHeadingRight>
-      </StyledPageHeaderHeading>
+      <Row style={{ marginBottom: '4.5rem' }}>
+        <Col flex='auto'>
+          <StyledPageHeaderHeading>
+            <StyledPageBackIcon onClick={onBackRoute}>
+              <VscChevronLeft />
+            </StyledPageBackIcon>
+            <StyledPageTitle>{title}</StyledPageTitle>
+          </StyledPageHeaderHeading>
+        </Col>
+        <Col flex='auto'>
+          <Steps current={current} type='navigation'>{items}</Steps>
+        </Col>
+      </Row>
       <StyledPageHeaderExtra>
         {current > 0 ? <Button type='default' onClick={() => onMove('prev')}>이전</Button> : <span></span>}
         {current < steps.length - 1 ? <Button type='primary' onClick={() => onMove('next')}>다음</Button> : <Button type='primary'>완료</Button>}

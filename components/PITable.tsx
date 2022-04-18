@@ -17,7 +17,6 @@ import { SelectOptionsByColumn } from '../models/type';
  */
 export const PersonalInfoTable = (): JSX.Element => {
   // Set a local state (for data)
-  // const [data, setData] = useState<any[]>(setDataSource(personalInfo));
   const [data, setData] = useRecoilState(UpdatePersonalInfoSelector);
   // Get a state (for select options)
   const ref: any = useRecoilValue(GetPersonalInfoSelectOptionsSelector);
@@ -54,9 +53,8 @@ export const FalseNameInfoTable = (): JSX.Element => {
   const ref: any = useRecoilValue(GetPersonalInfoSelector);
   // Set a default select options
   const defaultSelectOptions: SelectOptionsByColumn = {
-    basis: ['과학적 연구', '처리근거1', '처리근거2']
+    basis: ['과학적 연구', '통계 작성', '공익적 기록 및 보존', '기타']
   }
-    
   // Create an event handler (onAdd)
   const onAdd = (record: any): void => setData([...data, record]);
   // Create an event handler (onDelete)

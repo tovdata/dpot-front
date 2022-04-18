@@ -50,7 +50,7 @@ export const falseNameInfoTableHeader: TableHeadersData = {
   },
   purpose: {
     description: "상세 목적 설명",
-    display: "select",
+    display: "string",
     name: "상세 목적",
     required: true,
   },

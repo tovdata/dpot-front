@@ -92,7 +92,7 @@ const StyledTableEditCell = styled.span`
 const StyledTableToolCellItem = styled.span`
   cursor: pointer;
   font-size: 1rem;
-  margin-right: 0.5rem;
+  margin-right: 1rem;
   &:last-child {
     margin-right: 0;
   }
@@ -193,6 +193,8 @@ export const DocumentTable = ({ dataSource, headers, onDelete, pagination }: Doc
         return item;
       }
     }
+    // Set a sort
+    column.sorter = (standard: any, target: any, sortOrder: string|null|undefined) => standard[key] < target[key] ? -1 : standard[key] > target[key] ? 1 : 0;
     // Return
     return column;
   });
@@ -202,9 +204,6 @@ export const DocumentTable = ({ dataSource, headers, onDelete, pagination }: Doc
     key: 'tools',
     render: (_item: any, record: any) => (
       <>
-        <StyledTableToolCellItem>
-          <AiOutlineExport />
-        </StyledTableToolCellItem>
         <StyledTableToolCellItem>
           <AiOutlineEdit />
         </StyledTableToolCellItem>
