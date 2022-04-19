@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { AddableSelect } from '../../components/common/Select';
 // Component
-// import { CreateDocumentForm, PIPPTable } from '../../components/PIPP';
+import { CreateDocumentForm, PIPPTable } from '../../components/PIPP';
 
 /** [Interface] Document info */
 interface DocumentInfo {
@@ -22,11 +21,11 @@ const Page = () => {
 
   return (
     <>
-      {/* {doc.uuid === '' ? (
+      {doc.uuid === '' ? (
         <PIPPTable onSelect={onSelectDoc} />
       ) : (
         <CreateDocumentForm onBack={onBack} />
-      )} */}
+      )}
     </>
   );
 }
