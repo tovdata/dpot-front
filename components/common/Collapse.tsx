@@ -1,12 +1,13 @@
 import styled from 'styled-components';
 import { useState } from 'react';
 // Component
-import { Collapse, Popover, Radio, Space } from 'antd';
+import { Collapse, Descriptions, Input, Popover, Radio, Space } from 'antd';
 // Icon
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import { EditableInput } from './Input';
 
 // Styled element (collapse)
-const StyledCollapse = styled(Collapse)`
+export const StyledCollapse = styled(Collapse)`
   .ant-collapse-item > .ant-collapse-header {
     align-items: center;
     display: flex;
@@ -14,6 +15,12 @@ const StyledCollapse = styled(Collapse)`
   }
 `;
 
+/** [Interface] Collapse header data */
+export interface CollapsePanelHeaderData {
+  description?: string;
+  precedence?: string|number;
+  title: string;
+}
 /** [Interface] Radio Option */
 interface RadioOption {
   label: string;
@@ -23,22 +30,96 @@ interface RadioOption {
 /**
  * [Component] Custom collapse
  */
-export const CollapseContainToggle = ({ activeKey, panels, onActiveKey }: any): JSX.Element => { 
+export const CollapseForPIPP = ({ collapseItems, data, openPanel, onOpenPanel }: any): JSX.Element => { 
   // Create the collapse panels
-  const panelElements: JSX.Element[] = panels.map((item: any, index: number): JSX.Element => (<CollapsePanelContainToggle description={item.description} disabled={item.precedence ? activeKey[item.precedence] ? !activeKey[item.precedence] : true : undefined} id={item.id} key={index} onActiveKey={onActiveKey} title={item.title} />));
-  console.log(activeKey)
+  const panelElements: JSX.Element[] = Object.keys(collapseItems).map((key: string): JSX.Element => {
+    // Extract a item for collapse panel header
+    const item: CollapsePanelHeaderData = collapseItems[key];
+    // Set a disabled state for panel
+    const disabled: boolean|undefined = item.precedence ? openPanel[item.precedence] !== undefined ? !openPanel[item.precedence] : true : undefined;
+    // Set the children element by panel id
+    let children: JSX.Element = (<></>);
+    if (key === 'cookie') {
+      children = (
+        <Descriptions bordered labelStyle={{ width: '200px' }}>
+          <Descriptions.Item label="사용 목적" span={3}>
+            <Input />
+          </Descriptions.Item>
+          <Descriptions.Item label="거부 방법" span={3}>
+            <Input />
+          </Descriptions.Item>
+          <Descriptions.Item label="거부 시 불이익" span={3}>
+            <Input allowClear onChange={(e: any): void => console.log(e.target.value)} />
+          </Descriptions.Item>
+        </Descriptions>
+      );
+    } else if (key === 'advertising') {
+      children = (
+        <Descriptions bordered labelStyle={{ width: '200px' }}>
+          <Descriptions.Item label="수집하는 형태정보 항목" span={3}>
+            <Input />
+          </Descriptions.Item>
+          <Descriptions.Item label="형태정보 수집 방법" span={3}>
+            <Input />
+          </Descriptions.Item>
+          <Descriptions.Item label="형태정보 수집 목적" span={3}>
+            <Input allowClear onChange={(e: any): void => console.log(e.target.value)} />
+          </Descriptions.Item>
+          <Descriptions.Item label="보유.이용기간 및 이후 정보처리 방법" span={3}>
+            <Input allowClear onChange={(e: any): void => console.log(e.target.value)} />
+          </Descriptions.Item>
+        </Descriptions>
+      );
+    } else if (key === 'thirdParty') {
+      children = (
+        <Descriptions bordered labelStyle={{ width: '200px' }}>
+          <Descriptions.Item label="광고 사업자명" span={3}>
+            <Input />
+          </Descriptions.Item>
+          <Descriptions.Item label="형태정보 항목" span={3}>
+            <Input />
+          </Descriptions.Item>
+          <Descriptions.Item label="형태정보 수집 방법" span={3}>
+            <Input allowClear onChange={(e: any): void => console.log(e.target.value)} />
+          </Descriptions.Item>
+          <Descriptions.Item label="보유 및 이용기간" span={3}>
+            <Input allowClear onChange={(e: any): void => console.log(e.target.value)} />
+          </Descriptions.Item>
+        </Descriptions>
+      );
+    } else if (key === 'etc') {
+      children = (
+        <Descriptions bordered labelStyle={{ width: '200px' }}>
+          <Descriptions.Item label="개인정보 항목" span={3}>
+            <Input />
+          </Descriptions.Item>
+          <Descriptions.Item label="이용 및 제공 목적" span={3}>
+            <Input />
+          </Descriptions.Item>
+          <Descriptions.Item label="보유 및 이용기간" span={3}>
+            <Input allowClear onChange={(e: any): void => console.log(e.target.value)} />
+          </Descriptions.Item>
+        </Descriptions>
+      );
+    }
+    // Return
+    return (
+      <CollapsePanelContainToggle description={item.description} disabled={disabled} id={key} key={key} onOpenPanel={onOpenPanel} status={openPanel[key]} title={item.title}>
+        <>{children}</>
+      </CollapsePanelContainToggle>
+    );
+  });
   // Return an element
-  return (<StyledCollapse activeKey={Object.keys(activeKey).filter((key: string): boolean => activeKey[key])}>{panelElements}</StyledCollapse>);
+  return (<StyledCollapse activeKey={Object.keys(openPanel).filter((key: string): boolean => openPanel[key])}>{panelElements}</StyledCollapse>);
 }
 /**
- * [Internal Component] Collapse panel
+ * [Component] Collapse panel
  */
-const CollapsePanelContainToggle = ({ description, children, disabled, id, onActiveKey, title, ...props }: any): JSX.Element => {
+export const CollapsePanelContainToggle = ({ description, children, disabled, id, onOpenPanel, status, title, ...props }: any): JSX.Element => {
   // Set a radio option data
   const options: RadioOption[] = [{ label: '예', value: true }, { label: '아니오', value: false }];
   // Create an extra in panel header
-  const extraElement: JSX.Element = (<Radio.Group disabled={disabled} buttonStyle='outline' onChange={(e: any): void => onActiveKey(e.target.value, id)} options={options} optionType='button' />);
-  // console.log(description, disabled, id, title)
+  const extraElement: JSX.Element = (<Radio.Group disabled={disabled} buttonStyle='outline' onChange={(e: any): void => { console.log("onChange"); onOpenPanel(id, e.target.value) }} options={options} optionType='button' value={status} />);
   // Create a header in panel
   const headerElement: JSX.Element = (
     <Space align='center'>
@@ -54,5 +135,5 @@ const CollapsePanelContainToggle = ({ description, children, disabled, id, onAct
   );
 
   // Return an element
-  return (<Collapse.Panel collapsible={disabled} extra={extraElement} header={'asdfsf'} key={id} {...props}></Collapse.Panel>);
+  return (<Collapse.Panel {...props} collapsible={disabled} extra={extraElement} header={headerElement} key={id}>{children}</Collapse.Panel>);
 }

@@ -37,6 +37,9 @@ export const StyledTableForm = styled.div`
   .ant-table-cell > .ant-tag {
     cursor: pointer;
   }
+  table > tbody > tr:last-child > td {
+    border-bottom: none;
+  }
   table > tbody > tr > td .ant-tag {
     margin: 0;
   }

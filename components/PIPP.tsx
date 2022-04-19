@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Button, Collapse, Input, Modal, Popover, Radio, Space } from 'antd';
 import { PageHeaderContainStep } from './common/Header';
 import { DocumentTable, setDataSource, StyledTableForm, TableFormHeader } from './common/Table';
-import { CollapseContainToggle } from './common/Collapse';
+import { CollapseForPIPP, CollapsePanelHeaderData } from './common/Collapse';
 // Data
 import { personalInfoProcessingPolicyTableHeader } from '../models/data';
 import { personalInfoProcessingPolicy } from '../models/temporary';
@@ -50,31 +50,12 @@ interface PIPPTableProps {
 interface CreateDocumentFormProps {
   onBack: () => void;
 }
-/** [Interface] Properties for collapse status extra */
-interface CollapseStatusExtraProps {
-  children?: JSX.Element | JSX.Element[];
-  collapsible?: any;
-  disabled?: boolean;
-  header: CollapseHeaderData;
-  id: string;
-  onChange: (active: boolean, target: string) => void;
-}
-/** [Interface] Collapse data */
-interface CollapseData {
-  content?: any;
-  header: CollapseHeaderData;
-}
-/** [Interface] Collapse header data */
-interface CollapseHeaderData {
-  description?: string;
-  id: number|string;
-  precedence?: string|number;
-  title: string;
-}
-/** [Interface] Radio option data */
-interface RadioOptionData {
-  label: string;
-  value: string;
+/** [Interface] Collapse headers data */
+interface PIPPBasicInfo {
+  cookie: CollapsePanelHeaderData;
+  advertising: CollapsePanelHeaderData;
+  thirdParty: CollapsePanelHeaderData;
+  etc: CollapsePanelHeaderData;
 }
 
 /**
@@ -159,56 +140,61 @@ export const CreateDocumentForm = ({ onBack }: CreateDocumentFormProps): JSX.Ele
   // Step data
   const steps: string[] = ["내용 입력", "처리방침 편집", "검토"];
   // Collapse content data
-  const panels: CollapseHeaderData[]  = [
-    { description: 'a', id: 0, title: '쿠키(cookie)를 사용하나요?' },
-    { description: 'b', id: 1, title: '타겟 광고를 위하여 사용자의 행태정보를 사용하나요?' },
-    { description: 'c', id: 2, precedence: 1, title: '사용자의 행태정보를 제3자(온라인 광고사업자 등)가 수집・처리할 수 있도록 허용한 경우가 있나요?' },
-    { description: 'd', id: 3, title: '별도의 사용자 동의 없이, 개인정보를 추가 이용 및 제공하는 경우가 있나요?' },
-  ]
-  // Set a local state (for open panel status)
+  const collapseItems: PIPPBasicInfo = {
+    cookie: {
+      description: 'a',
+      title: '쿠키(cookie)를 사용하나요?'
+    },
+    advertising: {
+      description: 'b',
+      title: '타겟 광고를 위하여 사용자의 행태정보를 사용하나요?'
+    },
+    thirdParty: {
+      description: 'c',
+      precedence: 'advertising',
+      title: '사용자의 행태정보를 제3자(온라인 광고사업자 등)가 수집・처리할 수 있도록 허용한 경우가 있나요?'
+    },
+    etc: {
+      description: 'd',
+      title: '별도의 사용자 동의 없이, 개인정보를 추가 이용 및 제공하는 경우가 있나요?'
+    }
+  }
 
+  // Set a local state (for open panel status)
+  const [openPanel, setOpenPanel] = useState<any>({ cookie: undefined, advertising: undefined, thirdParty: undefined, etc: undefined });
   // Set a local state
   const [data, setData] = useState<any>({
-    0: {
-      0: {
-        header: {
-          description: 'a',
-          title: '쿠키(cookie)를 사용하나요?',
-        },
-        open: undefined,
-      },
-      1: {
-        content: <></>,
-        header: {
-          description: 'a',
-          title: '타겟 광고를 위하여 사용자의 행태정보를 사용하나요?',
-        },
-        open: undefined,
-      },
-      2: {
-        content: <></>,
-        header: {
-          description: 'a',
-          title: '사용자의 행태정보를 제3자(온라인 광고사업자 등)가 수집・처리할 수 있도록 허용한 경우가 있나요?',
-        },
-        open: undefined,
-        precedence: 1
-      },
-      3: {
-        content: <></>,
-        header: {
-          description: 'a',
-          title: '별도의 사용자 동의 없이, 개인정보를 추가 이용 및 제공하는 경우가 있나요?',
-        },
-        open: undefined,
-      }
+    cookie: {
+      purpose: [],
+      method: [],
+      disadvantage: ''
     },
-    1: {}
+    advertising: {
+      items: [],
+      method: '',
+      purpose: [],
+      period: ''
+    },
+    thirdParty: {
+      company: [],
+      items: [],
+      method: '',
+      period: ''
+    },
+    etc: {
+      items: [],
+      purpose: [],
+      period: ''
+    }
   });
 
-  const [activeKey, setActiveKey] = useState<any>({ 0: undefined, 1: undefined, 2: undefined, 3: undefined });
-  const onActiveKey = (open: boolean, target: string): void => {
-    setActiveKey({...activeKey, [target]: open});
+  // Create an event handler
+  const onOpenPanel = (target: string, status: boolean): void => {
+    if (target === 'advertising' && !status) {
+      setOpenPanel({...openPanel, [target]: status, 'thirdParty': undefined});
+    } else {
+      setOpenPanel({...openPanel, [target]: status});
+    }
   }
 
   // Create an event handler (onMoveStep)
@@ -216,28 +202,24 @@ export const CreateDocumentForm = ({ onBack }: CreateDocumentFormProps): JSX.Ele
     if (type === 'prev') {
       current - 1 >= 0 ? setCurrent(current - 1) : undefined;
     } else {
-      // Step 내에 모든 입력 양식에 대해 입력 완료하였을 경우에만 다음 단계로 이동
-      if (Object.keys(data[current]).some((id: string): boolean => data[current][id].open === undefined)) {
+      if (current === 0 && Object.keys(openPanel).some((key: string): boolean => key === 'thirdParty' && openPanel.advertising === false ? false : openPanel[key] === undefined)) {
         createWarningMessage('모든 입력 양식에 대해 응답 및 작성을 해주세요.', 2)
       } else {
         current + 1 <= steps.length ? setCurrent(current + 1) : undefined;
       }
     }
   }
-  const onChange = (step: string, panelKey: number, value: any): void => {
-    setData({...data, [step]: {...data[step], [panelKey]: {...data[step][panelKey], ...value}}});
-  }
 
   // Set a hook
   useEffect(() => {
     if (current === 0) {
-      setContent(<CollapseContainToggle activeKey={activeKey} panels={panels} onActiveKey={onActiveKey} />);
+      setContent(<CollapseForPIPP collapseItems={collapseItems} openPanel={openPanel} onOpenPanel={onOpenPanel} />);
     } else if (current === 1) {
       setContent(<>Step 2</>);
     } else if (current === 2) {
       setContent(<>Step 3</>);
     }
-  }, [current]);
+  }, [current, openPanel]);
 
   // Return an element
   return (
@@ -246,61 +228,4 @@ export const CreateDocumentForm = ({ onBack }: CreateDocumentFormProps): JSX.Ele
       <>{content}</>
     </>
   );
-}
-/**
- * [Inner Component] Create a custom collapse
- */
-// const CustomCollapse = ({ data, onChange, step }: any): JSX.Element => {
-//   // Set a local state
-//   const [activeKey, setActiveKey] = useState<string[]>([]);
-//   // Create an event handler (onChange)
-//   const onChangeStep = (active: boolean, target: string) => {
-//     const index: number = activeKey.findIndex((key: string): boolean => key === target);
-//     if (active) {
-//       if (index === -1) {
-//         setActiveKey([...activeKey, target]);
-//         onChange(step, target, { open: true });
-//       }
-//     } else {
-//       if (index > -1) {
-//         index === activeKey.length -1 ? setActiveKey([...activeKey.slice(0, index)]) : setActiveKey([...activeKey.slice(0, index), ...activeKey.slice(index + 1)]);
-//         onChange(step, target, { open: false });
-//       }
-//     }
-//   }
-
-//   // Create the collapse panels
-//   const panels: JSX.Element[] = Object.keys(data).map((key: string, index: number): JSX.Element => (<CollapsePanel children={data[key].content} collapsible={data[key].precedence && !data[data[key].precedence].open ? 'disabled' : undefined} header={data[key].header} key={index} id={index.toString()} onChange={onChangeStep}></CollapsePanel>));
-//   // Return an element
-//   return (
-//     <StyledCollapse activeKey={activeKey}>{panels}</StyledCollapse>
-//   );
-// }
-/**
- * [Inner Component] Collapse panel
- */
-const CollapsePanel = ({ children, collapsible, header, id, onChange, ...props }: CollapseStatusExtraProps): JSX.Element => {
-  // Set a radio option data
-  const options: RadioOptionData[] = [{ label: '예', value: 'yes' }, { label: '아니요', value: 'no' }];
-
-  // Create an extra element
-  const extraElement: JSX.Element = (
-    <Radio.Group disabled={collapsible ? true : undefined} buttonStyle='outline' onChange={(e: any): void => onChange(e.target.value === 'yes' ? true : false, id)} options={options} optionType='button' />
-  );
-  // Create a header element
-  const headerElement: JSX.Element = (
-    <Space align='center'>
-      <>{header.title}</>
-      {header.description && header.description !== '' ? (
-        <Popover content={header.description}>
-          <span style={{ alignItems: 'center', color: '#949593', display: 'flex', fontSize: '14px', marginLeft: '0.25rem' }}>
-            <QuestionCircleOutlined />
-          </span>
-        </Popover>
-      ) : (<></>)}
-    </Space>
-  );
-
-  // Return an element
-  return (<Collapse.Panel collapsible={collapsible} extra={extraElement} header={headerElement} key={id} {...props}>{children}</Collapse.Panel>);
 }
