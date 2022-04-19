@@ -63,7 +63,7 @@ export const AddableSelect = ({ error, onChange, options, value }: GeneralPurpos
   // Create an event handler (onInputKeyDown)
   const onInputKeyDown = (e: any): void => (e.key === 'Enter' && e.target.value !== '') ? onChange(e.target.value) : undefined;
   // Return an element
-  return (<Select showSearch onSelect={(item: string): void => onChange(item)} options={selectOptions} onInputKeyDown={onInputKeyDown} status={error ? 'error' : undefined} style={{ width: '100%' }} value={value} />);
+  return (<Select onSelect={(item: string): void => onChange(item)} options={selectOptions} onInputKeyDown={onInputKeyDown} showSearch status={error ? 'error' : undefined} style={{ width: '100%' }} value={value} />);
 }
 /**
  * [Component] Addable tag select

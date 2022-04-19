@@ -73,16 +73,3 @@ export interface PersonalInformationConsignmentDF {
   location?: string;
   method?: string[];
 }
-/** [Interface] Select options for personal information (collection and usage) */
-export interface PersonalInformationSelectOptionTypes {
-  subject?: string[];
-  purpose?: string[];
-  items?: string[];
-}
-/** [Interface] Select options for false name information */
-export interface FalseNameInformationSelectOptionTypes {
-  subject?: string[];
-  basis?: string[];
-  purpose?: string[];
-  items?: string[];
-}
