@@ -116,8 +116,20 @@ export const personalInfoProcessingPolicy = [{
   uuid: 1
 }, {
   createAt: "2022-03-24 09:12",
-  latestAt: "2022-03-24 15:52",
+  latestAt: "2022-03-26 15:52",
   name: "토브데이터 개인정보 처리방침(2)",
   status: "complete",
   uuid: 2
+}, {
+  createAt: "2022-03-24 09:13",
+  latestAt: "2022-03-25 15:52",
+  name: "토브데이터 개인정보 처리방침(3)",
+  status: "processing",
+  uuid: 3
+}, {
+  createAt: "2022-03-25 09:12",
+  latestAt: "2022-03-27 15:52",
+  name: "토브데이터 개인정보 처리방침(4)",
+  status: "complete",
+  uuid: 4
 }];
