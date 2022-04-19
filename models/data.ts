@@ -83,7 +83,7 @@ export const provisionTableHeader: TableHeadersData = {
   },
   items: {
     description: "a",
-    display: "itemA",
+    display: "item",
     name: "제공 항목",
     required: true,
   },
@@ -116,13 +116,13 @@ export const expandProvisionTableHeader: TableHeadersData = {
   },
   method: {
     description: "a",
-    display: "string",
+    display: "list",
     name: "일시 및 방법",
     required: true,
   },
   charger: {
     description: "a",
-    display: "string",
+    display: "list",
     name: "담당자(연락처)",
     required: false,
   }
@@ -130,19 +130,19 @@ export const expandProvisionTableHeader: TableHeadersData = {
 export const consignmentTableHeader: TableHeadersData = {
   subject: {
     description: "a",
-    display: "string",
+    display: "selectA",
     name: "구분",
     required: true,
   },
   company: {
     description: "a",
-    display: "string",
+    display: "selectA",
     name: "위탁받는 자(수탁자)",
     required: true,
   },
   content: {
     description: "a",
-    display: "item",
+    display: "itemA",
     name: "위탁 업무",
     required: true,
   },
@@ -156,19 +156,19 @@ export const consignmentTableHeader: TableHeadersData = {
 export const expandConsignmentTableHeader: TableHeadersData = {
   country: {
     description: "a",
-    display: "string",
+    display: "selectA",
     name: "국가",
     required: true,
   },
   address: {
     description: "a",
-    display: "string",
+    display: "selectA",
     name: "위치(주소)",
     required: true,
   },
   method: {
     description: "a",
-    display: "string",
+    display: "list",
     name: "일시 및 방법",
     required: true,
   },
@@ -186,7 +186,7 @@ export const expandConsignmentTableHeader: TableHeadersData = {
   },
   charger: {
     description: "a",
-    display: "string",
+    display: "list",
     name: "담당자(연락처)",
     required: false,
   }

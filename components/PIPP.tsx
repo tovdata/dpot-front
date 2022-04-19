@@ -1,3 +1,4 @@
+Haemin Park, [Apr 19, 2022 5:06:45 PM]:
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 // Component
@@ -108,7 +109,7 @@ export const PIPPTable = ({ onSelect }: PIPPTableProps): JSX.Element => {
   // Set a hook
   useEffect(() => setFilter(data.filter((row: any): boolean => row.name.includes(value))), [data]);
 
-  // Create a table tools (for search)
+// Create a table tools (for search)
   const tableTools: JSX.Element = (
     <div style={{ display: 'flex' }}>
       <Input.Search onChange={onChangeFilterValue} onSearch={onSearch} placeholder='문서 검색' style={{ marginRight: '16px', minWidth: '266px' }} value={value} />
