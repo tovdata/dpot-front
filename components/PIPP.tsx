@@ -1,8 +1,7 @@
-Haemin Park, [Apr 19, 2022 5:06:45 PM]:
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { Button, Collapse, Input, Modal, Popover, Radio, Space } from 'antd';
+import { Button, Collapse, Input, Modal } from 'antd';
 import { PageHeaderContainStep } from './common/Header';
 import { DocumentTable, setDataSource, StyledTableForm, TableFormHeader } from './common/Table';
 import { CollapseForPIPP, CollapsePanelHeaderData } from './common/Collapse';
@@ -10,7 +9,7 @@ import { CollapseForPIPP, CollapsePanelHeaderData } from './common/Collapse';
 import { personalInfoProcessingPolicyTableHeader } from '../models/data';
 import { personalInfoProcessingPolicy } from '../models/temporary';
 // Icon
-import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { PlusOutlined } from '@ant-design/icons'
 // Module
 import { createWarningMessage } from './common/Notification';
 
