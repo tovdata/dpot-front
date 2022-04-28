@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { consignmentTableHeader, expandConsignmentTableHeader, expandProvisionTableHeader, provisionTableHeader } from "../models/data";
-import { GetPersonalInfoSelectOptionsSelector, GetPersonalInfoSelector } from '../models/state';
+import { GetCPIDefaultSelector, GetPersonalInfoSelectOptionsSelector, GetPersonalInfoSelector } from '../models/state';
 import { consignmentPersonalInfo, provisionPersonalInfo } from "../models/temporary";
 import { SelectOptionsByColumn } from '../models/type';
 import { ModalToInputURL } from './common/TestModal';
@@ -119,8 +119,10 @@ export const ConsignmentTable = () => {
   // Set a url value
   const [url, setUrl] = useState<string>('');
   // Get a state (for select options)
-  const ref: any = useRecoilValue(GetPersonalInfoSelectOptionsSelector);
-
+  const ref: any = {
+    'ppi': useRecoilValue(GetPersonalInfoSelector),
+    'cpi': useRecoilValue(GetCPIDefaultSelector)
+  }
   // Create an event handler (onAdd)
   const onAdd = (record: any): void => setData([...data, record]);
   // Create an event handler (onDelete)
@@ -129,7 +131,13 @@ export const ConsignmentTable = () => {
   const onSave = (index: number, record: any): boolean => {
     data.length - 1 === index ? setData([...data.slice(0, index), record]) : setData([...data.slice(0, index), record, ...data.slice(index + 1)]);
     return true;
-  }; // Return an element
+  };
+
+  // Set a default select options
+  const defaultSelectOptions: SelectOptionsByColumn = {
+    subject: ["이벤트 경품 물류 업무", "알림발송", "안심번호 서비스"]
+  };
+  // Return an element
   return (
     <>
       {isModalOpen &&
@@ -144,6 +152,7 @@ export const ConsignmentTable = () => {
       <EditableURLTableForm
         dataSource={data}
         url={url}
+        defaultSelectOptions={defaultSelectOptions}
         expandKey='isForeign'
         headers={consignmentTableHeader}
         innerHeaders={expandConsignmentTableHeader}
@@ -151,7 +160,7 @@ export const ConsignmentTable = () => {
         onDelete={onDelete}
         onSave={onSave}
         onClickURL={() => setIseModalOpen(true)}
-        tableName='provision'
+        tableName='cpi'
         title='개인정보 위탁'
         refData={ref} />
     </>);

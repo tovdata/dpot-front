@@ -339,6 +339,14 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
       });
       // Set a row
       setRow({ ...row, [key]: newItem });
+    } else if (tableName === 'cpi' && key === 'company') {
+      if (typeof item === 'string') {
+        const companys = refData['cpi'][row.subject];
+        const infos = companys ? companys[item] : null;
+        infos ? setRow({ ...row, [key]: item, 'country': infos.country, 'address': infos.address }) : setRow({ ...row, [key]: item });
+      } else {
+        setRow({ ...row, [key]: item });
+      }
     } else {
       // Set a row
       setRow({ ...row, [key]: item });
@@ -351,7 +359,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
       }
     }
     // Update the select options
-    changeSelectOptions(key, onUpdateSelectOptions, refData, tableName, item);
+    changeSelectOptions(key, onUpdateSelectOptions, refData, tableName, item, row);
   }
   /**
    * [Event Handler] Set a edit state
@@ -706,8 +714,9 @@ const createTableColumnProps = (key: string, name: string, description?: string)
  * @param ref 참조 데이터
  * @param tableName 테이블 구분을 위한 이름
  * @param value 현재 선택된 Select Option 값 (= 선택한 칼럼의 값)
+ * @param row 현재 편집 중인 row 정보
  */
-const changeSelectOptions = (key: string, onUpdate: (value: any) => void, ref: any, tableName: string, value?: string | string[]): void => {
+const changeSelectOptions = (key: string, onUpdate: (value: any) => void, ref: any, tableName: string, value?: string | string[], row?: any): void => {
   // 테이블 이름에 따른 처리
   switch (tableName) {
     case 'pi':
@@ -722,6 +731,24 @@ const changeSelectOptions = (key: string, onUpdate: (value: any) => void, ref: a
         if (value) {
           const [refRow] = Array.isArray(value) ? ref.filter((elem: any): boolean => value.includes(elem[key])) : ref.filter((elem: any): boolean => elem[key] === value);
           refRow ? onUpdate({ ['items']: refRow['essentialItems'].concat(refRow['selectionItems']) }) : onUpdate({ ['items']: [] });
+        }
+      }
+      break;
+    case 'cpi':
+      ref = ref['cpi'];
+      // "업무명"이 변경된 경우, 
+      // "업무명"에 따라 "수탁자" Select Options를 변경
+      if (key === 'subject') {
+        if (value && typeof value === "string") {
+          ref[value] ? onUpdate({ ['company']: Object.keys(ref[value]) }) : onUpdate({ ['company']: [] });
+        }
+      }
+      // "수탁자"가 변경될 경우,
+      // "수탁자"에 따라 "위탁 업무" Select Options를 변경
+      if (key === 'company') {
+        if (value && typeof value === "string" && ref[row.subject]) {
+          const infos = ref[row.subject][value];
+          infos?.content ? onUpdate({ ['content']: infos.content, ['charger']: infos.charger }) : onUpdate({ ['content']: [], ['charger']: [] });
         }
       }
       break;
@@ -775,6 +802,8 @@ const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableNam
     case 'fpni':
       options['items'] = extractProcessingItems(ref);
       break;
+    case 'cpi':
+      options['items'] = extractProcessingItems(ref['ppi']);
     default:
       break;
   }
