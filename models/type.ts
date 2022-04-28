@@ -4,6 +4,7 @@ export interface CommonElementProps {
 }
 /** [Interface] Table header */
 export interface TableHeaderData {
+  width?: string;
   description?: string;
   display: string;
   name: string;
