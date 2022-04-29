@@ -13,7 +13,7 @@ import { AiOutlineDownload, AiOutlineExport } from 'react-icons/ai';
 import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // Type
 import { SelectOptionsByColumn, TableHeaderData, TableHeadersData } from '../../models/type';
-import { LinkOutlined } from '@ant-design/icons';
+import { CloseOutlined, LinkOutlined } from '@ant-design/icons';
 
 // Styled element (OuterTable)
 const OuterTable = styled(Table)`
@@ -216,6 +216,7 @@ interface TableEditCellProps {
   onDelete: () => void;
   onEdit: () => void;
   onSave: () => void;
+  onCancel: () => void;
 }
 
 /** 
@@ -467,7 +468,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
           case 'itemA':
             if (row.uuid === record.uuid) {
               // Extract a options
-              const options: string[] = (key === 'essentialItems' || key === 'selectionItems') ? selectOptions['items'].filter((item: string): boolean => key === 'essentialItems' ? !row['selectionItems'].includes(item) : !row['essentialItems'].includes(item)) : selectOptions[key] ? selectOptions[key] : [];
+              const options: string[] = (key === 'essentialItems' || key === 'selectionItems') ? selectOptions['items']?.filter((item: string): boolean => key === 'essentialItems' ? !row['selectionItems'].includes(item) : !row['essentialItems'].includes(item)) : selectOptions[key] ? selectOptions[key] : [];
               // Return an element
               return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={options} value={row[key]} />);
             } else {
@@ -521,7 +522,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
         dataIndex: 'edit',
         key: 'edit',
         title: '',
-        render: (_: any, record: any, index: number): JSX.Element => (<TableEditCell edit={row.uuid === record.uuid} key={index} onDelete={() => { clearFocus(); onDelete(index); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { checkRequiredForRow() ? onSave(index, row) ? onEdit({}) : undefined : undefined }} />)
+        render: (_: any, record: any, index: number): JSX.Element => (<TableEditCell edit={row.uuid === record.uuid} key={index} onDelete={() => { clearFocus(); onDelete(index); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { checkRequiredForRow() ? onSave(index, row) ? onEdit({}) : undefined : undefined }} onCancel={() => { clearFocus(); onEdit({}); console.log(record) }} />)
       });
     }
     // Return
@@ -550,7 +551,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
     );
   // Return an element
   return expandKey ? (
-    <OuterTable columns={createColumns(headers, true)} dataSource={dataSource} expandable={{
+    <OuterTable columns={createColumns(headers, true)} dataSource={dataSource} defaultExpandAllRows expandable={{
       expandedRowRender: (record: any, index: number) => innerHeaders ? (<Table key={index} columns={createColumns(innerHeaders, false)} dataSource={row.uuid === record.uuid ? [row] : [record]} pagination={false} />) : (<></>),
       rowExpandable: (record: any) => (row.uuid === record.uuid) ? row[expandKey] : record[expandKey]
     }} footer={footer} pagination={pagination ? undefined : false} />
@@ -651,7 +652,7 @@ const URLTableFooter = ({ url }: URLTableFooterProps): JSX.Element => {
 /**
  * [Internal Component] Table edit cell
  */
-const TableEditCell = ({ edit, onDelete, onEdit, onSave }: TableEditCellProps): JSX.Element => {
+const TableEditCell = ({ edit, onDelete, onEdit, onSave, onCancel }: TableEditCellProps): JSX.Element => {
   return (
     <StyledTableEditCell>
       {edit ? (
@@ -660,6 +661,7 @@ const TableEditCell = ({ edit, onDelete, onEdit, onSave }: TableEditCellProps): 
           <Popconfirm title='해당 업무를 삭제하시겠습니까?' onConfirm={onDelete}>
             <AiOutlineDelete />
           </Popconfirm>
+          <CloseOutlined onClick={onCancel} />
         </>
       ) : (
         <AiOutlineEdit onClick={onEdit} />
@@ -713,7 +715,7 @@ export const setDataSource = (dataSource: any): any[] => {
  * @returns created columns
  */
 const createTableColumnProps = (key: string, name: string, description?: string, width?: string): any => {
-  return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true, width: width || '400px' };
+  return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true, width: width || '300px' };
 }
 /**
  * [Internal Function] 특정 컬럼(Column)의 Select Option 선택에 따라 다른 컬럼(Column)에 대한 Select Options을 변경하는 함수
@@ -799,7 +801,7 @@ const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableNam
   switch (tableName) {
     case 'pi':
       options['items'] = defaultSelectOptions && defaultSelectOptions['items'] ? defaultSelectOptions['items'] : [];
-      options['items'] = extractProcessingItems(dataSource).filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
+      options['items'] = extractProcessingItems(dataSource)?.filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
       break;
     case 'fni':
       const subjectOptions: string[] = ref.map((elem: any): string => elem.subject).filter((item: string): boolean => options['subject'] ? !options['subject'].includes(item) : true)

@@ -8,30 +8,35 @@ export const personalInfoTableHeader: TableHeadersData = {
     display: "selectA",
     name: "구분(업무명)",
     required: true,
+    width: '200px'
   },
   purpose: {
     description: "처리 목적 설명",
     display: "list",
     name: "처리 목적",
     required: true,
+    width: '350px'
   },
   essentialItems: {
     description: "필수항목 설명",
     display: "itemA",
     name: "필수항목",
     required: true,
+    width: '300px'
   },
   selectionItems: {
     description: "선택항목 설명",
     display: "itemA",
     name: "선택항목",
     required: false,
+    width: '300px'
   },
   period: {
     description: "보유 및 이용 기간 설명",
     display: "period",
     name: "보유 및 이용 기간",
     required: true,
+    width: '350px'
   }
 };
 /** [Table Header] False name information */
@@ -41,30 +46,35 @@ export const falseNameInfoTableHeader: TableHeadersData = {
     display: "select",
     name: "구분(업무명)",
     required: true,
+    width: '200px'
   },
   basis: {
     description: "처리 근거 설명",
     display: "select",
     name: "처리 근거",
     required: true,
+    width: '150px'
   },
   purpose: {
     description: "상세 목적 설명",
     display: "string",
     name: "상세 목적",
     required: true,
+    width: '400px'
   },
   items: {
     description: "처리항목 설명",
     display: "item",
     name: "처리항목",
     required: true,
+    width: '350px'
   },
   period: {
     description: "보유 및 이용 기간 설명",
     display: "list",
     name: "보유 및 이용 기간",
     required: true,
+    width: '350px'
   }
 };
 // provision of personal information
@@ -74,30 +84,35 @@ export const provisionTableHeader: TableHeadersData = {
     display: "string",
     name: "제공받는 자",
     required: true,
+    width: '200px'
   },
   purpose: {
     description: "a",
     display: "list",
     name: "제공 목적",
     required: true,
+    width: '350px'
   },
   items: {
     description: "a",
     display: "item",
     name: "제공 항목",
     required: true,
+    width: '300px'
   },
   period: {
     description: "a",
     display: "period",
     name: "보유 및 이용기간",
     required: true,
+    width: '350px'
   },
   isForeign: {
     description: "a",
     display: "checkbox",
     name: "국외여부",
     required: true,
+    width: '120px'
   }
 }
 // provision of personal additional information
@@ -107,24 +122,28 @@ export const expandProvisionTableHeader: TableHeadersData = {
     display: "string",
     name: "국가",
     required: true,
+    width: '150px'
   },
   address: {
     description: "a",
     display: "string",
     name: "위치(주소)",
     required: true,
+    width: '350px'
   },
   method: {
     description: "a",
     display: "list",
     name: "일시 및 방법",
     required: true,
+    width: '350px'
   },
   charger: {
     description: "a",
     display: "list",
     name: "담당자(연락처)",
     required: false,
+    width: '350px'
   }
 }
 export const consignmentTableHeader: TableHeadersData = {
@@ -133,24 +152,28 @@ export const consignmentTableHeader: TableHeadersData = {
     display: "selectA",
     name: "구분",
     required: true,
+    width: '350px'
   },
   company: {
     description: "a",
     display: "selectA",
     name: "위탁받는 자(수탁자)",
     required: true,
+    width: '200px'
   },
   content: {
     description: "a",
     display: "itemA",
     name: "위탁 업무",
     required: true,
+    width: '350px'
   },
   isForeign: {
     description: "a",
     display: "checkbox",
     name: "국외 여부",
     required: true,
+    width: '120px'
   }
 }
 export const expandConsignmentTableHeader: TableHeadersData = {
@@ -159,36 +182,42 @@ export const expandConsignmentTableHeader: TableHeadersData = {
     display: "selectA",
     name: "국가",
     required: true,
+    width: '150px'
   },
   address: {
     description: "a",
     display: "selectA",
     name: "위치(주소)",
     required: true,
+    width: '250px'
   },
   method: {
     description: "a",
     display: "list",
     name: "일시 및 방법",
     required: true,
+    width: '250px'
   },
   items: {
     description: "a",
     display: "item",
     name: "위탁 항목",
-    required: true
+    required: true,
+    width: '250px'
   },
   period: {
     description: "a",
     display: "list",
     name: "보유 및 이용기간",
     required: true,
+    width: '250px'
   },
   charger: {
     description: "a",
     display: "list",
     name: "담당자(연락처)",
     required: false,
+    width: '250px'
   }
 }
 export const personalInfoProcessingPolicyTableHeader: TableHeadersData = {
