@@ -73,3 +73,16 @@ export interface PersonalInformationConsignmentDF {
   location?: string;
   method?: string[];
 }
+/** [Interface] Per */
+export interface PersonalInformationProcessingPolicyDF {
+  additional: {
+    cookie: {
+      purpose: string[];
+      disadvantage: string[];
+      usage: boolean;
+    },
+    webLog: {
+      purpose: string[];
+    }
+  }
+}
