@@ -121,7 +121,7 @@ export const AddableSelect = ({ error, onChange, options, value }: GeneralPurpos
  */
 export const AddableTagSelect = ({ error, onChange, options, value }: GeneralPurposeSelectProps): JSX.Element => {
   // Create the select options
-  const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
+  const selectOptions: SelectOptionFormat[] = options?.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
   return (<Select style={{ 'width': '100%' }} mode='tags' onChange={onChange} options={selectOptions} status={error ? 'error' : undefined} tokenSeparators={[',']} value={value as string[]} />);
 }
