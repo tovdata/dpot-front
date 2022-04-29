@@ -1,11 +1,12 @@
 import { MutableRefObject, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { Col, Input, Row, Select } from 'antd';
+import { Col, Divider, Input, Row, Select, Space, Typography } from 'antd';
 // Module
 import { createWarningMessage } from './Notification';
 // Type
 import { SelectOptionsByColumn } from '../../models/type';
+import { PlusOutlined } from '@ant-design/icons';
 
 // Styled component (IFTTT form)
 const StyledIFTTTForm = styled.div`
@@ -18,9 +19,9 @@ const StyledIFTTTForm = styled.div`
 /** [Interface] Properties for general purpose select */
 interface GeneralPurposeSelectProps {
   error?: boolean;
-  onChange: (value: string|string[]) => void;
+  onChange: (value: string | string[]) => void;
   options: string[];
-  value: string|string[];
+  value: string | string[];
 }
 /** [Interface] IFTTT Data format */
 interface IFTTTData {
@@ -52,7 +53,7 @@ export const SingleSelect = ({ error, onChange, placeholder, refresh, options, v
   // Set the options for select box
   const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} status={error ? 'error' : undefined} style={{ width: '100%' }} value={value === '' ? undefined : value} />);
+  return (<Select style={{ 'width': '100%' }} key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} status={error ? 'error' : undefined} value={value === '' ? undefined : value} />);
 }
 /** 
  * [Component] Addable select
@@ -60,10 +61,60 @@ export const SingleSelect = ({ error, onChange, placeholder, refresh, options, v
 export const AddableSelect = ({ error, onChange, options, value }: GeneralPurposeSelectProps): JSX.Element => {
   // Create the select options
   const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
+
+  const { Option } = Select;
+  const [items, setItems] = useState(selectOptions.map(item => item.value));
+  const [name, setName] = useState('');
+
   // Create an event handler (onInputKeyDown)
-  const onInputKeyDown = (e: any): void => (e.key === 'Enter' && e.target.value !== '') ? onChange(e.target.value) : undefined;
+  const onInputKeyDown = (e: any): void => {
+    // e.stopPropagation(); // 창 닫기
+    addItem(e);
+  }
+  const onMouseDown = (e: any): void => {
+    e.stopPropagation();
+    const target = e.target.closest('.ant-select-item-option-content');
+    target && onChange(e.target.textContent);
+  }
+
+  const onNameChange = (event: any) => {
+    setName(event.target.value);
+  };
+  const addItem = (e: any) => {
+    e.preventDefault();
+    if (name) {
+      setItems([name, ...items]);
+      onChange(name)
+    }
+    setName('');
+  };
   // Return an element
-  return (<Select onSelect={(item: string): void => onChange(item)} options={selectOptions} onInputKeyDown={onInputKeyDown} showSearch status={error ? 'error' : undefined} style={{ width: '100%' }} value={value} />);
+  return (
+    <Select
+      style={{ 'width': '100%' }}
+      placeholder=""
+      value={value}
+      onMouseDown={onMouseDown}
+      dropdownRender={menu => (
+        <>
+          {menu}
+          <Divider style={{ margin: '8px 0' }} />
+          <Space align="center" style={{ padding: '0 8px 4px' }}>
+            <Input placeholder="" value={name} onChange={onNameChange} onPressEnter={onInputKeyDown} />
+            <Typography.Link onClick={addItem} style={{ whiteSpace: 'nowrap' }}>
+              <PlusOutlined />추가
+            </Typography.Link>
+          </Space>
+        </>
+      )}
+    >
+      {
+        items.map(item => (
+          <Option key={item}>{item}</Option>
+        ))
+      }
+    </Select >
+  )
 }
 /**
  * [Component] Addable tag select
@@ -72,7 +123,7 @@ export const AddableTagSelect = ({ error, onChange, options, value }: GeneralPur
   // Create the select options
   const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select mode='tags' onChange={onChange} options={selectOptions} status={error ? 'error' : undefined} style={{ width: '100%' }} tokenSeparators={[',']} value={value as string[]} />);
+  return (<Select style={{ 'width': '100%' }} mode='tags' onChange={onChange} options={selectOptions} status={error ? 'error' : undefined} tokenSeparators={[',']} value={value as string[]} />);
 }
 /**
  * [Component] Tag select
@@ -81,7 +132,7 @@ export const TagSelect = ({ error, onChange, options, value }: GeneralPurposeSel
   // Create the select options
   const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select mode='multiple' onChange={onChange} options={selectOptions} status={error ? 'error' : undefined} style={{ width: '100%' }} value={value as string[]} />);
+  return (<Select style={{ 'width': '100%' }} mode='multiple' onChange={onChange} options={selectOptions} status={error ? 'error' : undefined} value={value as string[]} />);
 }
 /**
  * [Component] IFTTT select
@@ -99,7 +150,7 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
   // Create an event handler (onChange)
   const onChange = (key: string, value: string): void => {
     // Change a value
-    const changed: IFTTTData = {...data, [key]: value};
+    const changed: IFTTTData = { ...data, [key]: value };
     setData(changed);
     // Hidden a second row
     if (changed.adverb === '시까지') {
@@ -114,7 +165,7 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
       // Create an item
       if (changed.digit <= 0) {
         createWarningMessage('0보다 큰 정수 값을 입력해주세요.', 1.6);
-        setData({...data, digit: 1});
+        setData({ ...data, digit: 1 });
       } else if (changed.digit > 0 && changed.unit !== '') {
         onAdd(`${changed.event}${changed.adverb} ${changed.digit}${changed.unit}`);
         // Update a state
@@ -131,10 +182,10 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
     <StyledIFTTTForm>
       <Row gutter={[4, 4]}>
         <Col span={16}>
-          <AddableSelect onChange={(value: string|string[]) => onChange('event', value as string)} options={options} value={data.event} />
+          <AddableSelect onChange={(value: string | string[]) => onChange('event', value as string)} options={options} value={data.event} />
         </Col>
         <Col span={8}>
-          <SingleSelect onChange={(value: string|string[]) => onChange('adverb', value as string)} refresh={refresh} options={['일로부터', '시까지']} placeholder='선택' value={data.adverb} />
+          <SingleSelect onChange={(value: string | string[]) => onChange('adverb', value as string)} refresh={refresh} options={['일로부터', '시까지']} placeholder='선택' value={data.adverb} />
         </Col>
         {hidden ? (
           <></>
@@ -144,7 +195,7 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
               <Input onChange={(e: any) => onChange('digit', e.target.value.toString())} type='number' value={data.digit} />
             </Col>
             <Col span={12}>
-              <SingleSelect onChange={(value: string|string[]) => onChange('unit', value as string)} options={['일', '개월', '년']} placeholder='선택' value={data.unit} />
+              <SingleSelect onChange={(value: string | string[]) => onChange('unit', value as string)} options={['일', '개월', '년']} placeholder='선택' value={data.unit} />
             </Col>
           </>
         )}

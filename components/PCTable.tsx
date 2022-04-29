@@ -4,8 +4,8 @@ import { consignmentTableHeader, expandConsignmentTableHeader, expandProvisionTa
 import { GetCPIDefaultSelector, GetPersonalInfoSelectOptionsSelector, GetPersonalInfoSelector } from '../models/state';
 import { consignmentPersonalInfo, provisionPersonalInfo } from "../models/temporary";
 import { SelectOptionsByColumn } from '../models/type';
-import { ModalToInputURL } from './common/TestModal';
-import { EditableURLTableForm, setDataSource } from "./common/TestTable";
+import { ModalToInputURL } from './common/Modal';
+import { EditableURLTableForm, setDataSource } from "./common/Table";
 
 
 // 개인정보 제공 테이블
