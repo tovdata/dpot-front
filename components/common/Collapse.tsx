@@ -69,7 +69,7 @@ export const CollapseForPIPP = ({ collapseItems, data, onChange }: any): JSX.Ele
     } else if (key === 'advertising') {
       children = (
         <CDPCollapsePanelContent items={[
-          { subject: '수집하는 형태정보 항목', children: (<AddableTagSelect onChange={(value: string|string[]): void => onChange('additionalInfo', key, 'item', value)} options={['이용자의 서비스 방문이력', '검색이력', '구매이력', '클릭내역', '광고식별자']} value={data[key].item} />) },
+          { subject: '수집하는 형태정보 항목', children: (<AddableTagSelect onChange={(value: string|string[]): void => onChange('additionalInfo', key, 'items', value)} options={['이용자의 서비스 방문이력', '검색이력', '구매이력', '클릭내역', '광고식별자']} value={data[key].items} />) },
           { subject: '형태정보 수집 방법', children: (<Input allowClear onChange={(e: any): void => onChange('additionalInfo', key, 'method', e.target.value)} value={data[key].method} />) },
           { subject: '형태정보 수집 목적', children: (<Input allowClear onChange={(e: any): void => onChange('additionalInfo', key, 'purpose', e.target.value)} value={data[key].purpose} />) },
           { subject: '보유 및 이용기간 및 이후 정보처리 방법', children: (<Input allowClear onChange={(e: any): void => onChange('additionalInfo', key, 'period', e.target.value)} placeholder='예) 수집일로부터 00일 후 파기' value={data[key].period} />) }
