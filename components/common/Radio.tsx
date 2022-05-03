@@ -40,6 +40,5 @@ export const YesOrNoRadioButton: React.FC<any> = ({ buttonStyle, onChange, size,
   // 라디오 버튼에 대한 옵션 생성
   const options: RadioOption[] = [{ label: '예', value: true }, {label: '아니오', value: false }];
   // 옵션에 대한 라디오 그룹 생성 및 반환
-  console.log(value)
   return (<RadioGroup buttonStyle={buttonStyle} onChange={onChange} options={options} optionType='button' size={size} fontSize={size} value={value} />);
 }
