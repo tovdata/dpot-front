@@ -1,10 +1,9 @@
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import React from 'react';
 // Component
-import { Collapse, Descriptions, Form, Input, Popover, Radio, Space } from 'antd';
+import { Collapse, Descriptions, Input, Popover, Radio, Space } from 'antd';
 // Icon
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { EditableInput } from './Input';
 import { AddableTagSelect } from './Select';
 
 // Styled element (collapse)
@@ -126,8 +125,8 @@ const CDPCollapsePanel: React.FC<CDPCollapsePanelProps> = ({ children, header, i
 const CDPCollapsePanelContent: React.FC<any> = ({ items }: any): JSX.Element => {
   return (
     <Descriptions bordered column={1} labelStyle={{ width: 200 }}>
-      {items.map((item: any): JSX.Element => (
-        <Descriptions.Item label={item.subject}>
+      {items.map((item: any, index: number): JSX.Element => (
+        <Descriptions.Item key={index} label={item.subject}>
           {item.children}
         </Descriptions.Item>
       ))}
