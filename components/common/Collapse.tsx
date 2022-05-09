@@ -50,8 +50,8 @@ export const CollapseForPIPP = ({ data, onChange }: any): JSX.Element => {
     <StyledCollapse activeKey={Object.keys(data).filter((key: string): boolean => data[key].usage)}>
       <CDPCollapsePanel header={{ description: 'a', title: '쿠키(cookie)를 사용하나요?' }} id='cookie' key='cookie' onChange={(category: string, value: any) => onChange('aInfo', category, 'usage', value)} status={data.cookie.usage}>
         <CDPCollapsePanelContent items={[
-          { subject: '사용목적', children: (<AddableTagSelect onChange={(value: string|string[]) => onChange(THIS_STEP, 'cookie', 'purpose', value)} options={['a', 'b', 'c']} value={data.cookie.purpose} />) },
-          { subject: '거부 시 불이익', children: (<AddableTagSelect onChange={(value: string|string[]) => onChange(THIS_STEP, 'cookie', 'disadvantage', value)} options={['a', 'b', 'c']} value={data.cookie.disadvantage} />) }
+          { subject: '사용목적', children: (<AddableTagSelect onChange={(value: string|string[]) => onChange(THIS_STEP, 'cookie', 'purpose', value)} options={['쿠키 사용 목적 1', '쿠키 사용 목적 2', '쿠키 사용 목적 3', '쿠키 사용 목적 4', '쿠키 사용 목적 5', '쿠키 사용 목적 6']} value={data.cookie.purpose} />) },
+          { subject: '거부 시 불이익', children: (<AddableTagSelect onChange={(value: string|string[]) => onChange(THIS_STEP, 'cookie', 'disadvantage', value)} options={['쿠키 거부 시 불이익 1', '쿠키 거부 시 불이익 2', '쿠키 거부 시 불이익 3', '쿠키 거부 시 불이익 4']} value={data.cookie.disadvantage} />) }
         ]} />
       </CDPCollapsePanel>
       <CDPCollapsePanel header={{ description: 'b', title: '웹 로그 분석도구를 사용하시나요? (ex. 구글 애널리틱스)' }} id='webLog' key='webLog' onChange={(category: string, value: any) => onChange('aInfo', category, 'usage', value)} status={data.webLog.usage}>
@@ -71,7 +71,7 @@ export const CollapseForPIPP = ({ data, onChange }: any): JSX.Element => {
       </CDPCollapsePanel>
       <CDPCollapsePanel header={{ description: 'd', title: '사용자의 행태정보를 제3자(온라인 광고사업자 등)가 수집・처리할 수 있도록 허용한 경우가 있나요?' }} id='thirdParty' key='thirdParty' onChange={(category: string, value: any) => onChange('aInfo', category, 'usage', value)} status={data.thirdParty.usage}>
         <CDPCollapsePanelContent items={[
-          { subject: '광고 사업자명', children: (<AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, 'thirdParty', 'company', value)} options={['이용자의 서비스 방문이력', '검색이력', '구매이력', '클릭내역', '광고식별자']} value={data.thirdParty.company} />) },
+          { subject: '광고 사업자명', children: (<AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, 'thirdParty', 'company', value)} options={['광고 사업자 1', '광고 사업자 2', '광고 사업자 3', '광고 사업자 4', '광고 사업자 5']} value={data.thirdParty.company} />) },
           { subject: '형태정보 항목', children: (<AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, 'thirdParty', 'items', value)} options={['이용자의 서비스 방문이력', '검색이력', '구매이력', '클릭내역', '광고식별자']} value={data.thirdParty.items} />) },
           { subject: '형태정보 수집 방법', children: (<Input allowClear onChange={(e: any): void => onChange(THIS_STEP, 'thirdParty', 'method', e.target.value)} value={data.thirdParty.method} />) },
           { subject: '보유 및 이용기간', children: (<Input allowClear onChange={(e: any): void => onChange(THIS_STEP, 'thirdParty', 'period', e.target.value)} placeholder='예) 3개월 또는 사용자 쿠키 삭제시까지' value={data.thirdParty.period} />) }

@@ -1,7 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
 // Component
-import { Divider } from 'antd';
+import { Col, Divider, Row, Tooltip } from 'antd';
+// Icon
+import IconPIItem from '../../public/images/piItem.svg';
+import IconPIPurpose from '../../public/images/piPurpose.svg';
+import IconPIPeriod from '../../public/images/period.svg';
+import IconProvision from '../../public/images/provision.svg';
+import IconConsignment from '../../public/images/consignment.svg';
+import IconComplaint from '../../public/images/complaint.svg';
 
 /**
  * 컴포넌트들의 Props 형식
@@ -39,6 +46,24 @@ interface DDRowItemListProps {
   level?: number;
   style?: React.CSSProperties;
 }
+/** [Interface] Properties for DRLabelingHeader */
+interface DRLabelingHeaderProps {
+  description?: string;
+  title: string;
+}
+/** [Interface] Properties for DRLabelingItem */
+interface DRLabelingItemProps {
+  tooltip?: string;
+  type: string;
+}
+/** [Interface] Properties for DTCForm */
+interface DTCFormProps {
+  children?: JSX.Element|JSX.Element[];
+}
+/** [Interface] Properties for DTCItem */
+interface DTCItemProps {
+  content?: string;
+}
 
 /** 
  * 입력 부분
@@ -47,6 +72,7 @@ interface DDRowItemListProps {
 export const DIRow = styled.div`
   .ant-collapse-content-box,
   .ant-collapse-header {
+    cursor: default !important;
     padding: 0 !important;
   }
   .ant-collapse-header > div {
@@ -154,3 +180,108 @@ export const DDRowTableForm = styled.div`
     padding: 0;
   }
 `;
+
+/** 
+ * 검토 부분
+ */
+/** [Component] 개인정보 처리방침 최종 검토 폼 Labeling header */
+export const DRLabelingHeader: React.FC<DRLabelingHeaderProps> = ({ description, title }: DRLabelingHeaderProps): JSX.Element => {
+  return (
+    <div style={{ marginBottom: 16, textAlign: 'center' }}>
+      <h3 style={{ color: '#0044CC', fontSize: 16, fontWeight: '700', lineHeight: '24px', marginBottom: description ? 6 : 0 }}>{title}</h3>
+      {description ? (
+        <p style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px', marginBottom: 0 }}>{description}</p>
+      ) : (<></>)}
+    </div>
+  );
+}
+export const DRLabelingContent = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 56px;
+`;
+/** [Component] 개인정보 처리방침 최종 검토 폼 Labeling item */
+export const DRLabelingItem: React.FC<DRLabelingItemProps> = ({ tooltip, type }: DRLabelingItemProps): JSX.Element => {
+  const size: number = 96;
+  // 유형에 따라 아이콘 정의
+  const labeling: any = { icon: undefined, label: '' };
+  switch (type) {
+    case 'item':
+      labeling.icon = (<IconPIItem height='100%' width='100%' />);
+      labeling.label = '일반 개인정보 수집';
+      break;
+    case 'purpose':
+      labeling.icon = (<IconPIPurpose height='100%' width='100%' />);
+      labeling.label = '개인정보 처리목적';
+      break;
+    case 'period':
+      labeling.icon = (<IconPIPeriod height='100%' width='100%' />);
+      labeling.label = '개인정보 보유기간';
+      break;
+    case 'provision':
+      labeling.icon = (<IconProvision height='100%' width='100%' />);
+      labeling.label = '개인정보의 제공';
+      break;
+    case 'consignment':
+      labeling.icon = (<IconConsignment height='100%' width='100%' />);
+      labeling.label = '처리 위탁';
+      break;
+    case 'complaint':
+      labeling.icon = (<IconComplaint height='100%' width='100%' />);
+      labeling.label = '고충처리부서';
+      break;
+    default:
+      break;
+  }
+  // Return an element
+  return (
+    <span style={{ cursor: 'pointer', marginLeft: 20, marginRight: 20, position: 'relative', userSelect: 'none' }}>
+      {tooltip ? (
+        <>
+          {labeling.icon ? (
+          <Tooltip placement='bottom' title={tooltip ? tooltip : ''}>
+            <span style={{ alignItems: 'center', display: 'flex', height: size, justifyContent: 'center', width: size }}>
+              {labeling.icon}
+            </span>
+          </Tooltip>
+        ) : (<></>)}
+        </>
+      ) : (
+        <>
+          {labeling.icon ? (
+          <span style={{ alignItems: 'center', display: 'flex', height: size, justifyContent: 'center', width: size }}>
+            {labeling.icon}
+          </span>
+        ) : (<></>)}
+        </>
+      )}
+      {labeling.label ? (
+        <p style={{ color: '#000000', fontSize: 13, fontWeight: '400', lineHeight: '22px', marginBottom: 0, textAlign: 'center' }}>{labeling.label}</p>
+      ) : (<></>)}
+    </span>
+  );
+}
+/** [Component] 개인정보 처리방침 최종 검토 문서에 대한 목차 */
+export const DTCForm: React.FC<DTCFormProps> = ({ children }: DTCFormProps): JSX.Element => {
+  return (
+    <div style={{ border: '1px solid #D9D9D9', marginBottom: 56, padding: '32px 16px' }}>
+      <h4 style={{ color: '#262626', fontSize: 16, fontWeight: '600', lineHeight: '24px', marginBottom: 24, textAlign: 'center' }}>목차</h4>
+      <Row gutter={[8, 8]}>
+        {children}
+      </Row>
+    </div>
+  );
+}
+/** [Component] 개인정보 처리방침 최종 검토 문서에 대한 목차 Item */
+export const DTCItem: React.FC<DTCItemProps> = ({ content }: DTCItemProps): JSX.Element => {
+  return (
+    <>
+      {content ? (
+        <Col span={12}>
+          <p style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 0, paddingLeft: 32, paddingRight: 32 }}>◾️ {content}</p>
+        </Col>
+      ) : (<></>)}
+    </>
+  );
+}

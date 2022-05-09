@@ -1,19 +1,22 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import styled from 'styled-components';
 // Component
-import { Button, Col, Collapse, Divider, Form, Input, Modal, Radio, Row, Space, Table, TreeSelect } from 'antd';
+import { Button, Col, Collapse, DatePicker, Form, Input, Modal, Radio, Row, Space, Table, Tooltip, TreeSelect } from 'antd';
 import { DocumentProcessingStatusHeader, PageHeaderContainStep } from './common/Header';
 import { DocumentTable, setDataSource, StyledTableForm, TableFormHeader } from './common/Table';
 import { CollapseForPIPP, CollapsePanelHeaderData } from './common/Collapse';
 import { createWarningMessage } from './common/Notification';
 import { YesOrNoRadioButton } from './common/Radio';
-import { TagSelect } from './common/Select';
-import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject } from './pipp/Documentation';
+import { AddableTagSelect, TagSelect } from './common/Select';
+import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject, DRLabelingContent, DRLabelingHeader, DRLabelingItem, DTCForm, DTCItem } from './pipp/Documentation';
 // Data
 import { statementForPIPP as stmt } from '../models/static';
-import { ChildrenInfoProcessingByRelation, PeriodForPersonalInfoByRelation, personalInfoProcessingPolicyTableHeader } from '../models/data';
+import { certificationForPIP, methodOfConfirmConsentOfLegalRepresentative, periodOfRetentionAndUseOfPersonalInformation, personalInfoProcessingPolicyTableHeader } from '../models/data';
 import { personalInfoProcessingPolicy } from '../models/temporary';
+// Icon
+import { AiOutlineMinusCircle } from 'react-icons/ai';
+// Module
+import moment from 'moment';
 
 /** [Interface] Properties for PIPP table */
 interface PIPPTableProps {
@@ -22,14 +25,6 @@ interface PIPPTableProps {
 /** [Interface] Properties for create a doucment form */
 interface CreateDocumentFormProps {
   onBack: () => void;
-}
-/** [Interface] Collapse headers data */
-interface PIPPBasicInfo {
-  cookie: CollapsePanelHeaderData;
-  webLog: CollapsePanelHeaderData;
-  advertising: CollapsePanelHeaderData;
-  thirdParty: CollapsePanelHeaderData;
-  additional: CollapsePanelHeaderData;
 }
 
 /**
@@ -87,6 +82,40 @@ export const CreateDocumentForm = ({ onBack }: CreateDocumentFormProps): JSX.Ele
   const steps: string[] = ["내용 입력", "처리방침 편집", "검토"];
 
   const [ref, setRef] = useState<any>({
+    pi: [{
+      basisOfCollection: ["통신비밀보호법", "전자금융거래법"],
+      collectionMethod: ["정보주체의 동의", "고객 문의"],
+      essentialItems: ["이름", "아이디", "비밀번호", "이메일주소", "CI(연계정보)"],
+      isProcess: false,
+      period: ["회원 탈퇴시까지", "재화 및 서비스 공급 완료시까지"],
+      purpose: ["본인 식별 및 인증", "회원 자격 유지 및 관리"],
+      retentionFormat: ["사내 DB"],
+      selectionItems: ["휴대전화번호", "생년월일"],
+      subject: "회원가입 및 관리",
+      uuid: "1"
+    }, {
+      basisOfCollection: ["통신비밀보호법", "전자금융거래법"],
+      collectionMethod: ["정보주체의 동의", "고객 문의"],
+      essentialItems: ["아이핀 번호", "주민등록번호", "신용카드정보", "결제기록"],
+      isProcess: false,
+      period: ["재화 및 서비스 공급 완료시까지", "요금결제 및 정산 완료시까지"],
+      purpose: ["이용자 식별", "본인 여부 및 연령 확인", "콘텐츠 제공", "구매 및 요금결제"],
+      retentionFormat: ["사내 DB"],
+      selectionItems: [],
+      subject: "재화 및 서비스 제공",
+      uuid: "2"
+    }, {
+      basisOfCollection: ["통신비밀보호법", "전자금융거래법"],
+      collectionMethod: ["정보주체의 동의", "고객 문의"],
+      essentialItems: ["방문 일시", "서비스 이용 기록", "IP Address"],
+      isProcess: false,
+      period: ["회원 탈퇴시까지"],
+      purpose: ["서비스 연구", "서비스 웹/앱 버전 개발"],
+      retentionFormat: ["사내 DB"],
+      selectionItems: [],
+      subject: "신규 서비스 개발",
+      uuid: "3"
+    }],
     ppi: [{
       uuid: "1",
       recipient: "금융결제원",
@@ -95,7 +124,7 @@ export const CreateDocumentForm = ({ onBack }: CreateDocumentFormProps): JSX.Ele
       period: ["출금이체 서비스 제공시까지", "출금동의 확인 목적 달성시까지"],
       isForeign: true,
       country: "미국",
-      address: "○시 ○구 ○동 건물명",
+      location: "○시 ○구 ○동 건물명",
       method: ["전용네트워크를 이용한 원격지로 수시 전송"],
       charger: ["aws-korea-privacy@amazon.com"],
     }, {
@@ -182,6 +211,16 @@ export const CreateDocumentForm = ({ onBack }: CreateDocumentFormProps): JSX.Ele
       },
       fni: {
         usage: undefined
+      },
+      cctv: {
+        usage: undefined
+      }
+    },
+    cInfo: {
+      applyAt: '',
+      previous: {
+        data: [],
+        usage: undefined
       }
     }
   });
@@ -231,7 +270,7 @@ export const CreateDocumentForm = ({ onBack }: CreateDocumentFormProps): JSX.Ele
           <CreatePIPP data={data} onChange={onChange} refTable={ref} />
         </div>
         <div style={{ display: current === 2 ? 'block' : 'none' }}>
-          <PreviewDocumentForPIPP data={data} refTable={ref} />
+          <ConfirmForDocumentation data={data} onChange={onChange} refTable={ref} />
         </div>
       </>
     </>
@@ -264,7 +303,7 @@ const CreatePIPP: React.FC<any> = ({ onChange, data, refTable }: any): JSX.Eleme
           <InputFormToCreateDocumentation data={data.dInfo} onChange={onChange} />
         </Col>
         <Col span={12} style={{ borderLeft: '1px solid rgba(156, 156, 156, 0.3)', height: '100%', overflowY: 'auto' }}>
-          <PreviewDocumentForPIPP data={data} refTable={refTable} />
+          <PreviewDocumentForPIPP data={data} refTable={refTable} stmt={stmt(data.dInfo.name)} />
         </Col>
       </Row>
       <Modal centered onCancel={onClose} onOk={onClose} title={modalTitles[refType]} visible={open} width='80%'>
@@ -276,6 +315,12 @@ const CreatePIPP: React.FC<any> = ({ onChange, data, refTable }: any): JSX.Eleme
 
 const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any): JSX.Element => {
   const THIS_STEP: string = 'dInfo';
+  // 예시 데이터 가공 (관계 법령에 따른 개인정보 보유 및 이용기간)
+  const exampleForPeriodPI: string[] = [];
+  Object.keys(periodOfRetentionAndUseOfPersonalInformation).forEach((law: string): number => exampleForPeriodPI.push(...periodOfRetentionAndUseOfPersonalInformation[law].map((item: string): string => `${law} : ${item}`)));
+  // 예시 데이터 가공 (법정대리인의 동의 확인 방법)
+  const exampleForMethodConsent: any[] = methodOfConfirmConsentOfLegalRepresentative.map((item: string): any => ({ title: item, value: item }));
+
   // Return an element
   return (
     <>
@@ -290,7 +335,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any):
         <DIRowHeader description='해당 서비스에서 개인정보를 수집・이용하는 모든 내용이 작성되어야 합니다. 수정을 원하시는 경우, "수정하기" 버튼을 눌러주세요.' title='개인정보의 처리목적, 수집 항목, 보유 및 이용기간' tools={<Button size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>} />
         <DIRowContent>
           <DIRowSubject title='관계 법령에 따른 개인정보의 보유 및 이용기간' />
-          <TreeSelect showArrow={false} treeData={PeriodForPersonalInfoByRelation} treeCheckable={true} showCheckedStrategy={TreeSelect.SHOW_PARENT} onChange={(value: string[]): void => onChange(THIS_STEP, 'period', undefined, value)} placeholder='예시에서 선택' style={{ width: '100%' }} value={data.period} />
+          <AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, 'period', undefined, value)} options={exampleForPeriodPI} value={data.period} />
         </DIRowContent>
       </DIRow>
       <DIRowDivider />
@@ -298,10 +343,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any):
         <Collapse activeKey={data.child.usage ? ['1'] : []} ghost>
           <Collapse.Panel header={<DIRowHeader style={{ marginBottom: 0 }} title='만 14세 미만 아동의 개인정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'child', 'usage', e.target.value)} size='small' value={data.child.usage} />} />} key='1' showArrow={false}>
             <DIRowSubject title='법정대리인의 동의 확인 방법' />
-            <TreeSelect showArrow={false} treeData={[
-              { title: '동의 내용을 게재한 인터넷 사이트에 법정대리인이 동의 여부를 표시하도록 하고 개인정보처리자가 그 동의 표시를 확인했음을 법정대리인의 휴대전화 문자메시지로 알리는 방법', value: '동의 내용을 게재한 인터넷 사이트에 법정대리인이 동의 여부를 표시하도록 하고 개인정보처리자가 그 동의 표시를 확인했음을 법정대리인의 휴대전화 문자메시지로 알리는 방법', key: '1' },
-              { title: '동의 내용을 게재한 인터넷 사이트에 법정대리인이 동의 여부를 표시하도록 하고 법정대리인의 신용카드·직불카드 등의 카드정보를 제공받는 방법', value: '동의 내용을 게재한 인터넷 사이트에 법정대리인이 동의 여부를 표시하도록 하고 법정대리인의 신용카드·직불카드 등의 카드정보를 제공받는 방법', key: '2' },
-            ]} treeCheckable={true} onChange={(value: string[]): void => onChange(THIS_STEP, 'child', 'method', value)} placeholder='예시에서 선택' style={{ width: '100%' }} value={data.child.method} />
+            <TreeSelect showArrow={false} treeData={exampleForMethodConsent} treeCheckable={true} onChange={(value: string[]): void => onChange(THIS_STEP, 'child', 'method', value)} placeholder='예시에서 선택' style={{ width: '100%' }} value={data.child.method} />
           </Collapse.Panel>
         </Collapse>
       </DIRow>
@@ -354,7 +396,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any):
                   <Input onChange={(e: any): void => onChange(THIS_STEP, 'safety', 'activity', e.target.value)} placeholder='개인정보보호 관련 SNS 운영, 투명성 보고서 발간, 자율규제단체 활동 등' value={data.safety.activity} />
                 </Form.Item>
                 <Form.Item label='국내외 개인정보보호 인증 획득'>
-                  <TagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, 'safety', 'certification', value)} options={['ISMS-P', 'ISO/IEC 27701', 'ISO/IEC 27001', 'ISO/IEC 27017', 'ISO/IEC 27018', 'ISMS-정보보호관리우수등급', 'ISMS-정보보호관리최우수등급', 'CSAP']} value={data.safety.certification} />
+                  <TagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, 'safety', 'certification', value)} options={certificationForPIP} value={data.safety.certification} />
                 </Form.Item>
               </Form>
             </Collapse.Panel>
@@ -391,24 +433,120 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any):
       </DIRow>
       <DIRowDivider />
       <DIRow style={{ marginBottom: 40 }}>
-        <DIRowHeader description='영상저보처리기기 운영에 관한 설명 영상저보처리기기 운영에 관한 설명' title='영상정보처리기기(CCTV)를 운영하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'fni', 'usage', e.target.value)} size='small' value={data.fni.usage} />} />
+        <DIRowHeader description='영상저보처리기기 운영에 관한 설명 영상저보처리기기 운영에 관한 설명' title='영상정보처리기기(CCTV)를 운영하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'cctv', 'usage', e.target.value)} size='small' value={data.fni.usage} />} />
       </DIRow>
     </>
   );
 } 
 
-const PreviewDocumentForPIPP: React.FC<any> = ({ data, refTable }: any): JSX.Element => {
+const PreviewDocumentForPIPP: React.FC<any> = ({ data, mode, refTable, stmt }: any): JSX.Element => {
+  // 개인정보 수집 및 이용 데이터 및 라벨링을 위한 데이터 가공 (개인정보 수집 항목)
+  const itemForPI: string[] = [];
+  const pi: any[] = refTable.pi.map((row: any): void => {
+    const edited: any = {};
+    Object.keys(row).forEach((key: string): void => {
+      if (key === 'essentialItems' && row[key].length > 0) {
+        if (edited.item === undefined) {
+          edited.item = [];
+        }
+        edited.item.push(`필수 : ${row[key].join(', ')}`);
+        row[key].forEach((item: string): number => !itemForPI.includes(item) ? itemForPI.push(item) : 0);
+      } else if (key === 'selectionItems' && row[key].length > 0) {
+        if (edited.item === undefined) {
+          edited.item = [];
+        }
+        edited.item.push(`선택 : ${row[key].join(', ')}`);
+        row[key].forEach((item: string): number => !itemForPI.includes(item) ? itemForPI.push(item) : 0);
+      } else {
+        edited[key] = row[key];
+      }
+    });
+    return edited;
+  });
+  // 라벨링을 위한 데이터 가공 (개인정보 처리목적)
+  const purposeForPI: string[] = [];
+  refTable.pi.forEach((row: any): void => row.purpose.forEach((item: string): number => !purposeForPI.includes(item) ? purposeForPI.push(item) : 0));
+  // 라벨링을 위한 데이터 가공 (개인정보 보유기간)
+  const periodForPI: string[] = [];
+  refTable.pi.forEach((row: any): void => row.period.forEach((item: string): number => !periodForPI.includes(item) ? periodForPI.push(item) : 0));
+  // 라벨링을 위한 데이터 가공 (개인정보의 제공)
+  const provision: string[] = refTable.ppi.map((row: any): string => row.recipient);
+  // 라벨링을 위한 데이터 가공 (처리 위탁)
+  const consignment: string[] = refTable.cpi.map((row: any): string => row.subject);
+
   return (
     <>
-      <h2 style={{ fontSize: 16, fontWeight: '700', lineHeight: '22px', marginBottom: 30, textAlign: 'center' }}>{data.dInfo.name} {stmt.title}</h2>
+      <h2 style={{ fontSize: 24, fontWeight: '700', lineHeight: '22px', marginBottom: 30, textAlign: 'center' }}>{stmt.title}</h2>
+      {mode && mode === 'review' ? (
+        <p style={{ color: '#262626', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 32, textAlign: 'right' }}>{data.cInfo.applyAt}</p>
+      ) : (<></>)}
       <DDRow>
-        <DDRowContent items={[`${data.dInfo.name}${stmt.introduction}`]} />
+        <DDRowContent items={[`${stmt.introduction}`]} />
       </DDRow>
+      {mode && mode === 'review' ? (
+        <>
+          <DRLabelingHeader description='세부항목은 개인정보 처리방침 본문 확인' title='주요 개인정보 처리 표시' />
+          <DRLabelingContent>
+            {itemForPI.length > 0 ? (
+              <DRLabelingItem type='item' tooltip={itemForPI.length > 5 ? `${itemForPI.slice(0, 5).join(', ')} 등` : itemForPI.join(', ')} />
+            ) : (<></>)}
+            {purposeForPI.length > 0 ? (
+              <DRLabelingItem type='purpose' tooltip={purposeForPI.length > 3 ? `${purposeForPI.slice(0, 3).join(', ')} 등` : purposeForPI.join(', ')} />
+            ) : (<></>)}
+            {periodForPI.length > 0 ? (
+              <DRLabelingItem type='period' tooltip={periodForPI.length > 2 ? `${periodForPI.slice(0, 2).join(', ')} 등` : periodForPI.join(', ')} />
+            ) : (<></>)}
+            {provision.length > 0 ? (
+              <DRLabelingItem type='provision' tooltip={provision.length > 2 ? `${provision.slice(0, 2).join(', ')} 등` : provision.join(', ')} />
+            ) : (<></>)}
+            {consignment.length > 0 ? (
+              <DRLabelingItem type='consignment' tooltip={consignment.length > 3 ? `${consignment.slice(0, 3).join(', ')} 등` : consignment.join(', ')} />
+            ) : (<></>)}
+            <DRLabelingItem type='complaint' tooltip='담당부서명, 연락처' />
+          </DRLabelingContent>
+        </>
+      ) : (<></>)}
+      {mode && mode === 'review' ? (
+        <DTCForm>
+          <DTCItem content='개인정보의 처리목적, 수집 항목, 보유 및 이용기간' />
+          {data.dInfo.child.usage ? (
+            <DTCItem content='만 14세 미만 아동의 개인정보 처리에 관한 사항' />
+          ) : (<></>)}
+          {data.dInfo.provision.usage ? (
+            <DTCItem content='개인정보의 제3자 제공' />
+          ) : (<></>)}
+          {data.dInfo.consignment.usage ? (
+            <DTCItem content='개인정보처리의 위탁' />
+          ) : (<></>)}
+          <DTCItem content='개인정보의 파기 및 절차' />
+          {data.dInfo.destructionUnused.type !== undefined && data.dInfo.destructionUnused.type !== 'none'  ? (
+            <DTCItem content='미이용자의 개인정보 파기 등에 관한 조치' />
+          ) : (<></>)}
+          <DTCItem content='정보주체와 법정대리인의 권리·의무 및 행사방법' />
+          {data.dInfo.safety.usage ? (
+            <DTCItem content='개인정보의 안전성 확보조치' />
+          ) : (<></>)}
+          <DTCItem content='개인정보의 자동 수집 장치의 설치·운영 및 거부에 관한 사항' />
+          <DTCItem content='행태정보의 수집·이용 및 거부 등에 관한 사항' />
+          <DTCItem content='추가적인 이용·제공 판단기준' />
+          {data.dInfo.fni.usage ? (
+            <DTCItem content='가명정보의 처리' />
+          ) : (<></>)}
+          <DTCItem content='개인정보보호책임자 및 개인정보 열람청구' />
+          <DTCItem content='권익침해 구제 방법' />
+        </DTCForm>
+      ) : (<></>)}
       <DDRow>
         <DDRowHeader title={stmt.pi.title} />
         <DDRowContent items={stmt.pi.content.common[1]} />
-        <ReadableTable />
-        <DDRowContent items={stmt.pi.content.common[2]} />
+        <ReadableTable columns={[
+          { title: '구분(업무명)', dataIndex: 'subject', key: 'subject' },
+          { title: '처리 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />) },
+          { title: '수집 항목', dataIndex: 'item', key: 'item', render: (value: string[]) => value.map((item: string, index: number): JSX.Element => <div key={index}>{item}</div>) },
+          { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />) },
+        ]} dataSource={pi} />
+        <DDRowContent items={stmt.pi.content.common[2]} style={{ marginBottom: 0 }} />
+        <DDRowItemList items={data.dInfo.period} />
       </DDRow>
       {data.dInfo.child.usage ? (
         <DDRow>
@@ -421,12 +559,24 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, refTable }: any): JSX.Ele
         <DDRow>
           <DDRowHeader title={stmt.ppi.title} />
           <DDRowContent items={stmt.ppi.content.common[1]} />
-          <ReadableTable pagination={false} columns={[
+          <ReadableTable columns={[
             { title: '제공받는 자', dataIndex: 'recipient', key: 'recipient' },
-            { title: '제공 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ul>{value.map((item: string, index: number): JSX.Element => <li key={index}>{item}</li>)}</ul>) },
+            { title: '제공 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />) },
             { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => (<>{value.join(', ')}</>) },
-            { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ul>{value.map((item: string, index: number): JSX.Element => <li key={index}>{item}</li>)}</ul>) },
+            { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />) },
           ]} dataSource={refTable.ppi.filter((item: any): any => !item.isForeign)} />
+          {refTable.ppi.some((item: any): boolean => item.isForeign) ? (
+            <>
+              <DDRowContent items={stmt.ppi.content.foreign[1]} />
+              <ReadableTable columns={[
+                { title: '업체명', dataIndex: 'recipient', key: 'recipient' },
+                { title: '국가', dataIndex: 'country', key: 'country' },
+                { title: '위치', dataIndex: 'location', key: 'location' },
+                { title: '일시 및 방법', dataIndex: 'method', key: 'method', render: (value: string[]) => (<ListInTable items={value} />) },
+                { title: '관리책임자의 연락처', dataIndex: 'charger', key: 'charger' }
+              ]} dataSource={refTable.ppi.filter((item: any): boolean => item.isForeign)} />
+            </>
+          ) : (<></>)}
           <DDRowContent items={stmt.ppi.content.common[2]} />
         </DDRow>
       ) : (<></>)}
@@ -435,11 +585,23 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, refTable }: any): JSX.Ele
           <DDRowHeader title={stmt.cpi.title} />
           <DDRowContent items={stmt.cpi.content.common[1]} />
           <ReadableTable columns={[
-            { title: '제공받는 자', dataIndex: 'company', key: 'company' },
-            { title: '제공 목적', dataIndex: 'content', key: 'content', render: (value: string[]) => (<ul>{value.map((item: string, index: number): JSX.Element => <li key={index}>{item}</li>)}</ul>) },
-            { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => (<>{value.join(', ')}</>) },
-            { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ul>{value.map((item: string, index: number): JSX.Element => <li key={index}>{item}</li>)}</ul>) },
+            { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company' },
+            { title: '위탁업무', dataIndex: 'content', key: 'content', render: (value: string[]) => (<ListInTable items={value} />) },
           ]} dataSource={refTable.cpi.filter((item: any): any => !item.isForeign)} />
+          {refTable.cpi.some((item: any): boolean => item.isForeign) ? (
+            <>
+              <DDRowContent items={stmt.cpi.content.foreign[1]} />
+              <ReadableTable columns={[
+                { title: '업체명', dataIndex: 'company', key: 'company' },
+                { title: '국가', dataIndex: 'country', key: 'country' },
+                { title: '위치', dataIndex: 'location', key: 'location' },
+                { title: '일시 및 방법', dataIndex: 'method', key: 'method', render: (value: string[]) => (<ListInTable items={value} />) },
+                { title: '이전 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => (<ListInTable items={value} />) },
+                { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />) },
+                { title: '관리책임자의 연락처', dataIndex: 'charger', key: 'charger' }
+              ]} dataSource={refTable.ppi.filter((item: any): boolean => item.isForeign)} />
+            </>
+          ) : (<></>)}
           <DDRowContent items={stmt.cpi.content.common[2]} />
         </DDRow>
       ) : (<></>)}
@@ -623,7 +785,11 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, refTable }: any): JSX.Ele
       <DDRow>
         <DDRowHeader title={stmt.charger.title} />
         <DDRowContent items={stmt.charger.content.common[1]} />
-        <ReadableTable />
+        <ReadableTable columns={[
+          { title: '구분', dataIndex: 'identity', key: 'identity' },
+          { title: '담당자', dataIndex: 'charger', key: 'charger' },
+          { title: '연락처', dataIndex: 'contact', key: 'contact' }
+        ]} />
         <DDRowContent items={stmt.charger.content.common[2]} />
       </DDRow>
       <DDRow>
@@ -637,10 +803,74 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, refTable }: any): JSX.Ele
   );
 }
 
+const ConfirmForDocumentation: React.FC<any> = ({ data, onChange, refTable }: any): JSX.Element => {
+  const THIS_STEP: string = 'cInfo';
+
+  const [visible, setVisible] = useState<boolean>(false);
+  const onOpen = (): void => setVisible(true);
+  const onClose = (): void => setVisible(false);
+
+  return (
+    <>
+      <DIRow>
+        <DIRowHeader description='개인정보 처리방침이 적용될 날짜를 선택하여 주세요.' title='개인정보 처리방침 최종 게재일' />
+        <DIRowContent>
+          <DatePicker allowClear disabledDate={(current: moment.Moment) => current && current < moment().endOf('day').days(0) } format='YYYY-MM-DD' mode='date' onChange={(value: any): void => onChange(THIS_STEP, 'applyAt', undefined, value.format('YYYY-MM-DD'))} style={{ width: '30%' }} />
+        </DIRowContent>
+      </DIRow>
+      <DIRowDivider />
+      <DIRow>
+        <Collapse activeKey={data[THIS_STEP].previous.usage ? ['1'] : []} ghost>
+          <Collapse.Panel header={<DIRowHeader description='개인정보 처리방침 갱신 시, 이전 처리방침도 반드시 확인할 수 있어야합니다. 따라서, 본 처리방침 이전에 게재되어 있는 처리방침의 URL을 입력하여 주세요.' title='이전 개인정보 처리방침이 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'previous', 'usage', e.target.value)} size='small' value={data[THIS_STEP].previous.usage} />} />} key='1' showArrow={false} >
+            <Row gutter={16}>
+              <Col span={8}>
+                <DIRowSubject title='적용일자' />
+              </Col>
+              <Col span={16}>
+                <DIRowSubject title='개인정보 처리방침 URL' />
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={8}>
+                <DatePicker allowClear format='YYYY-MM-DD' mode='date' style={{ width: '100%' }} />
+              </Col>
+              <Col span={12}>
+                <Input placeholder='http|https://' />
+              </Col>
+              <Col span={4}>
+                <div style={{ alignItems: 'center', display: 'flex', fontSize: 18, lineHeight: '16px', height: '100%' }}>
+                  <span style={{ color: '#8C8C8C', cursor: 'pointer' }}>
+                    <AiOutlineMinusCircle />
+                  </span>
+                </div>
+              </Col>
+            </Row>
+          </Collapse.Panel>
+        </Collapse>
+      </DIRow>
+      <DIRowDivider />
+      <DIRow>
+        <DIRowHeader description='최종 단계 완료시, 다음과 같이 개인정보처리방침이 생성됩니다. 게재 후에는 수정 및 삭제가 불가능합니다.' title='개인정보 처리방침 미리보기' />
+        <Button type='primary' onClick={onOpen}>작성정보 확인</Button>
+      </DIRow>
+      <Modal centered onCancel={onClose} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
+        <PreviewDocumentForPIPP data={data} mode='review' refTable={refTable} stmt={stmt(data.dInfo.name)} />
+      </Modal>
+    </>
+  );
+}
+
 const ReadableTable: React.FC<any> = ({ columns, dataSource }: any): JSX.Element => {
   return (
     <DDRowTableForm>
       <Table columns={columns} dataSource={dataSource} pagination={false} size='small' />
     </DDRowTableForm>
+  );
+}
+const ListInTable: React.FC<any> = ({ items }: any): JSX.Element => {
+  return (
+    <ul style={{ margin: 0, paddingLeft: 14 }}>
+      {items.map((item: string, index: number): JSX.Element => <li key={index}>{item}</li>)}
+    </ul>
   );
 }
