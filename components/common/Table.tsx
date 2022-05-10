@@ -8,7 +8,6 @@ import { FS_HXXS, LH_HXXS } from '../../static/font';
 // Icon
 import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
 import { IoAddCircle } from 'react-icons/io5';
-import { AiOutlineDownload, AiOutlineExport } from 'react-icons/ai';
 // Module
 import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // Type
@@ -156,10 +155,7 @@ const URLButton = styled(Button)`
   font-weight: 400;
   cursor: pointer;
 `;
-/** [Interface] Properties for document table */
-interface DocumentTableProps extends TableProps {
-  onDelete: (index: number) => void;
-}
+
 /** [Interface] Properties for editable table */
 interface EditableTableProps extends TableProps {
   defaultSelectOptions?: any;
@@ -174,7 +170,8 @@ interface EditableTableProps extends TableProps {
   tableName: string;
 }
 /** [Internal] Properties for table form */
-interface EditableTableFormProps extends EditableTableProps {
+interface TableFormProps {
+  children: JSX.Element|JSX.Element[];
   title: string;
 }
 /** [Interface] Properties for table */
@@ -218,6 +215,11 @@ interface TableEditCellProps {
   onSave: () => void;
   onCancel: () => void;
 }
+/** [Interface] Properties for url table form */
+interface UrlTableFormProps extends TableFormProps {
+  disabled?: boolean;
+  onClickURL: () => void;
+}
 
 /** 
  * [Component] Basic table (only read)
@@ -227,52 +229,6 @@ export const BasicTable = ({ dataSource, headers, pagination }: TableProps): JSX
   const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => createTableColumnProps(key, headers[key].name, headers[key].description, headers[key].width!));
   // Return an element
   return (<Table columns={columns} dataSource={dataSource} pagination={pagination ? undefined : false} />);
-}
-export const DocumentTable = ({ dataSource, headers, onDelete, pagination }: DocumentTableProps): JSX.Element => {
-  // Create the columns
-  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
-    // Extract a header
-    const header: TableHeaderData = headers[key];
-    // Create a column
-    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description, header.width!);
-    // Set a render
-    column.render = (item: any, _record: any, _index: number) => {
-      if (header.display === 'status') {
-        return item === 'processing' ? <Tag color='geekblue'>임시저장</Tag> : item === 'fail' ? <Tag color='red'>작성실패</Tag> : <Tag color='green'>게재완료</Tag>;
-      } else {
-        return item;
-      }
-    }
-    // Set a sort
-    column.sorter = (standard: any, target: any, sortOrder: string | null | undefined) => standard[key] < target[key] ? -1 : standard[key] > target[key] ? 1 : 0;
-    // Return
-    return column;
-  });
-  // Add a tool cell
-  columns.push({
-    dataIndex: 'tools',
-    key: 'tools',
-    render: (_item: any, record: any) => (
-      <>
-        <StyledTableToolCellItem>
-          <AiOutlineEdit />
-        </StyledTableToolCellItem>
-        <StyledTableToolCellItem>
-          <AiOutlineDownload />
-        </StyledTableToolCellItem>
-        <StyledTableToolCellItem>
-          <Popconfirm title='해당 문서를 삭제하시겠습니까?' onConfirm={() => onDelete(record)}>
-            <AiOutlineDelete />
-          </Popconfirm>
-        </StyledTableToolCellItem>
-      </>
-    )
-  });
-
-  // Return an element
-  return (
-    <Table columns={columns} dataSource={dataSource} pagination={pagination ? undefined : false} />
-  );
 }
 /**
  * [Component] Editable table
@@ -562,13 +518,13 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
 /**
  * [Component] Editable table form
  */
-export const EditableTableForm = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, refData, tableName, title }: EditableTableFormProps): JSX.Element => {
+export const EditableTableForm = ({ children, title }: TableFormProps): JSX.Element => {
   return (
     <StyledTableForm>
       <StyledTableFormHeader>
         <StyledTableTitle>{title}</StyledTableTitle>
       </StyledTableFormHeader>
-      <EditableTable dataSource={dataSource} defaultSelectOptions={defaultSelectOptions} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={refData} tableName={tableName} />
+      {children}
     </StyledTableForm>
   );
 }
@@ -576,15 +532,14 @@ export const EditableTableForm = ({ dataSource, defaultSelectOptions, expandKey,
 /**
  * [Component] Editable url table form
  */
-export const EditableURLTableForm = ({ dataSource, url, defaultSelectOptions, expandKey, headers, innerHeaders, onAdd, onDelete, onSave, onClickURL, refData, tableName, title }: EditableTableFormProps): JSX.Element => {
-  const isExistDataSource = dataSource?.length > 0 ? true : false;
+export const EditableURLTableForm = ({ children, disabled, onClickURL, title }: UrlTableFormProps): JSX.Element => {
   return (
     <StyledTableForm>
-      <StyledTableFormHeader flexStart={!isExistDataSource}>
+      <StyledTableFormHeader>
         <StyledTableTitle>{title}</StyledTableTitle>
-        <URLButton disabled={isExistDataSource} onClick={onClickURL}><LinkOutlined />URL 입력</URLButton>
+        <URLButton disabled={disabled} onClick={onClickURL}><LinkOutlined />URL 입력</URLButton>
       </StyledTableFormHeader>
-      <EditableTable dataSource={dataSource} url={url} defaultSelectOptions={defaultSelectOptions} expandKey={expandKey} headers={headers} innerHeaders={innerHeaders} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={refData} tableName={tableName} />
+      {children}
     </StyledTableForm>
   );
 }

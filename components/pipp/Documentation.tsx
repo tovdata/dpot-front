@@ -22,11 +22,8 @@ interface DIRowDividerProps {
   marginH?: number;
 }
 /** [Interface] Properties for DIRowHeader */
-interface DIRowHeaderProps extends DIRowSubjectProps {
+interface DIRowHeaderProps {
   description?: string;
-}
-/** [Interface] Properties for DIRowSubject */
-interface DIRowSubjectProps {
   style?: React.CSSProperties,
   title: string,
   tools?: JSX.Element|JSX.Element[];
@@ -93,26 +90,39 @@ export const DIRowDivider: React.FC<DIRowDividerProps> = ({ marginH }: DIRowDivi
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row header */
 export const DIRowHeader: React.FC<DIRowHeaderProps> = ({ description, style, title, tools }: DIRowHeaderProps): JSX.Element => {
+  // Description style
+  const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 12, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
+  // Return an element
   return (
     <div style={{ marginBottom: 8, width: '100%', ...style }}>
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
         <h2 style={{ color: '#002766', fontSize: 14, fontWeight: 400, lineHeight: '22px', marginBottom: 0 }}>{title}</h2>
         <>{tools}</>
       </div>
-      {description ? (
-        <p style={{ color: 'rgba(0, 0, 0, 0.45)', fontSize: 12, fontWeight: 400, lineHeight: '20px', marginBottom: 0, marginTop: 8 }}>{description}</p>
-      ) : (<></>)}
+      {description ? description.split('\\n').map((elem: string, index: number): JSX.Element => index === 0 ? (
+        <p style={{ ...dStyle, marginTop: 8 }}>{elem}</p>
+      ) : (
+        <p style={{ ...dStyle }}>{elem}</p>
+      )) : (<></>)}
     </div>
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row subject */
-export const DIRowSubject: React.FC<DIRowSubjectProps> = ({ style, title, tools }: DIRowSubjectProps): JSX.Element => {
+export const DIRowSubject: React.FC<DIRowHeaderProps> = ({ description, style, title, tools }: DIRowHeaderProps): JSX.Element => {
+  // Description style
+  const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 12, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
+  // Return an element
   return (
     <div style={{ marginBottom: 8, width: '100%', ...style }}>
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
         <h2 style={{ color: '#000000', fontSize: 14, fontWeight: 400, lineHeight: '22px', marginBottom: 0 }}>{title}</h2>
         <>{tools}</>
       </div>
+      {description ? description.split('\\n').map((elem: string, index: number): JSX.Element => index === 0 ? (
+        <p style={{ ...dStyle, marginTop: 8 }}>{elem}</p>
+      ) : (
+        <p style={{ ...dStyle }}>{elem}</p>
+      )) : (<></>)}
     </div>
   );
 }
