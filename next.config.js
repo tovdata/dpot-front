@@ -10,6 +10,8 @@ module.exports = {
           destination: 'https://dpot-dev.tovdata.com:8081/api/:path*',
         },
       ];
+    } else {
+      return [];
     }
   },
   images: {
