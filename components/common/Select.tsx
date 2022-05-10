@@ -69,7 +69,9 @@ export const AddableSelect = ({ error, onChange, options, value }: GeneralPurpos
   // Create an event handler (onInputKeyDown)
   const onInputKeyDown = (e: any): void => {
     // e.stopPropagation(); // 창 닫기
-    addItem(e);
+    if (!e.nativeEvent.isComposing) {
+      addItem(e);
+    }
   }
   const onMouseDown = (e: any): void => {
     e.stopPropagation();
