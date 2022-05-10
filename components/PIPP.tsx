@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 // Component
 import { Button, Col, Collapse, DatePicker, Form, Input, Modal, Radio, Row, Space, Table, Tooltip, TreeSelect } from 'antd';
 import { DocumentProcessingStatusHeader, PageHeaderContainStep } from './common/Header';
-import { DocumentTable, setDataSource, StyledTableForm, TableFormHeader } from './common/Table';
+import { setDataSource, StyledTableForm, TableFormHeader } from './common/Table';
 import { CollapseForPIPP, CollapsePanelHeaderData } from './common/Collapse';
 import { createWarningMessage } from './common/Notification';
 import { YesOrNoRadioButton } from './common/Radio';
@@ -11,12 +11,14 @@ import { AddableTagSelect, TagSelect } from './common/Select';
 import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject, DRLabelingContent, DRLabelingHeader, DRLabelingItem, DTCForm, DTCItem } from './pipp/Documentation';
 // Data
 import { statementForPIPP as stmt } from '../models/static';
-import { certificationForPIP, methodOfConfirmConsentOfLegalRepresentative, periodOfRetentionAndUseOfPersonalInformation, personalInfoProcessingPolicyTableHeader } from '../models/data';
+import { certificationForPIP, methodOfConfirmConsentOfLegalRepresentative, periodOfRetentionAndUseOfPersonalInformation } from '../models/data';
 import { personalInfoProcessingPolicy } from '../models/temporary';
 // Icon
 import { AiOutlineMinusCircle } from 'react-icons/ai';
 // Module
 import moment from 'moment';
+import { PITable } from './PITable';
+import { CPITableForm, PPITableForm } from './PCTable';
 
 /** [Interface] Properties for PIPP table */
 interface PIPPTableProps {
@@ -66,7 +68,6 @@ export const PIPPTable = ({ onSelect }: PIPPTableProps): JSX.Element => {
       <DocumentProcessingStatusHeader description='asdf' onClick={onCreate} status='processing' style={{ marginBottom: 90 }} title='개인정보 처리방침' />
       <StyledTableForm>
         <TableFormHeader title='개인정보 처리방침 이력' tools={tableTools} />
-        <DocumentTable dataSource={filter} headers={personalInfoProcessingPolicyTableHeader} onDelete={onDelete} pagination={true} />
       </StyledTableForm>
     </>
   );
@@ -212,6 +213,14 @@ export const CreateDocumentForm = ({ onBack }: CreateDocumentFormProps): JSX.Ele
       fni: {
         usage: undefined
       },
+      manager: {
+        charger: '',
+        dept: '',
+        deptContact: '',
+        requestDept: '',
+        requestCharger: '',
+        requestContact: ''
+      },
       cctv: {
         usage: undefined
       }
@@ -277,15 +286,42 @@ export const CreateDocumentForm = ({ onBack }: CreateDocumentFormProps): JSX.Ele
   );
 }
 
+const EditModal: React.FC<any> = ({ onClose, type, visible }: any): JSX.Element => {
+  // 모달 내용
+  const [title, setTitle] = useState<string>('');
+  const [content, setContent] = useState<JSX.Element>(<></>);
+  // 유형에 따라 모달의 제목과 내용 변경
+  useEffect(() => {
+    switch (type) {
+      case 'pi':
+        setTitle('개인정보 수집 및 이용');
+        setContent(<PITable />);
+        break;
+      case 'ppi':
+        setTitle('개인정보 제공');
+        setContent(<PPITableForm mode='modal' />);
+        break;
+      case 'cpi':
+        setTitle('개인정보 위탁');
+        setContent(<CPITableForm mode='modal' />);
+        break;
+      default:
+        setTitle('');
+        setContent(<></>);
+        break;
+    }
+  }, type);
+
+  return (
+    <Modal centered footer={false} onCancel={onClose} title={title} visible={visible} width='80%'>
+      {content}
+    </Modal>
+  );
+}
+
 const CreatePIPP: React.FC<any> = ({ onChange, data, refTable }: any): JSX.Element => {
   const [open, setOpen] = useState<boolean>(false);
   const [refType, setRefType] = useState<string>('');
-
-  const modalTitles: any = {
-    pi: "개인정보 수집 및 이용",
-    ppi: "개인정보 제공",
-    cpi: "개인정보 위탁"
-  }
 
   const onOpen = (type: string): void => {
     setRefType(type);
@@ -300,20 +336,18 @@ const CreatePIPP: React.FC<any> = ({ onChange, data, refTable }: any): JSX.Eleme
     <>
       <Row gutter={74} style={{ height: 'calc(100vh - 324px)' }}>
         <Col span={12} style={{ height: '100%', overflowY: 'auto' }}>
-          <InputFormToCreateDocumentation data={data.dInfo} onChange={onChange} />
+          <InputFormToCreateDocumentation data={data.dInfo} onChange={onChange} openModal={onOpen} />
         </Col>
         <Col span={12} style={{ borderLeft: '1px solid rgba(156, 156, 156, 0.3)', height: '100%', overflowY: 'auto' }}>
           <PreviewDocumentForPIPP data={data} refTable={refTable} stmt={stmt(data.dInfo.name)} />
         </Col>
       </Row>
-      <Modal centered onCancel={onClose} onOk={onClose} title={modalTitles[refType]} visible={open} width='80%'>
-        <ReadableTable dataSource={refTable[refType]} />
-      </Modal>
+      <EditModal onClose={onClose} type={refType} visible={open} />
     </>
   );
 }
 
-const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any): JSX.Element => {
+const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, openModal }: any): JSX.Element => {
   const THIS_STEP: string = 'dInfo';
   // 예시 데이터 가공 (관계 법령에 따른 개인정보 보유 및 이용기간)
   const exampleForPeriodPI: string[] = [];
@@ -325,7 +359,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any):
   return (
     <>
       <DIRow>
-        <DIRowHeader description='개인정보 처리방침에 사용될 개인정보처리자명 또는 서비스명을 입력해주세요.' title='개인정보 처리자명 또는 서비스명' />
+        <DIRowHeader description='개인정보 처리방침에 기재될 개인정보처리자명 또는 서비스명을 입력해주세요.\n작성된 명칭은 제목 및 본문에 기재되어 본 개인정보 처리방침의 적용 범위를 알려줍니다.' title='개인정보 처리자명 또는 서비스명' />
         <DIRowContent>
           <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'name', undefined, e.target.value)} placeholder='개인정보 처리자명 또는 서비스명' value={data.name} />
         </DIRowContent>
@@ -351,7 +385,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any):
       <DIRow>
         <Collapse activeKey={data.provision.usage ? ['1'] : []} ghost>
           <Collapse.Panel header={<DIRowHeader description='해당 서비스에서 개인정보를 제3자에게 제공하는 모든 내용이 작성되어야 합니다. 수정을 원하시는 경우, "수정하기" 버튼을 눌러주세요.' title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'provision', 'usage', e.target.value)} size='small' value={data.provision.usage} />} />} key='1' showArrow={false}>
-            <Button size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>
+            <Button onClick={(): void => openModal('ppi')} size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
       </DIRow>
@@ -359,7 +393,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any):
       <DIRow>
         <Collapse activeKey={data.consignment.usage ? ['1'] : []} ghost>
           <Collapse.Panel header={<DIRowHeader description='해당 서비스에서 개인정보를 제3자에게 위탁하는 모든 내용이 작성되어야 합니다. 수정을 원하시는 경우, "수정하기" 버튼을 눌러주세요.' title='위탁하는 개인정보가 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'consignment', 'usage', e.target.value)} size='small' value={data.consignment.usage} />} />} key='1' showArrow={false} >
-            <Button size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>
+            <Button onClick={(): void => openModal('cpi')} size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
       </DIRow>
@@ -425,7 +459,35 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any):
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader title='개인정보보호책임자 및 개인정보 열람청구' tools={<Button type='default' size='small' style={{ fontSize: 12 }}>수정하기</Button>} />
+        <DIRowHeader title='개인정보보호책임자 및 개인정보 열람청구' />
+        <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. (연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다)' title='개인정보보호 책임자' />
+        <Button size='small' style={{ fontSize: 12, marginBottom: 24 }} type='default'>수정하기</Button>
+        <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. (연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다)' title='개인정보보호 담당부서' />
+        <Row gutter={8} style={{ marginBottom: 24 }}>
+          <Col span={10}>
+            <label style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px' }}>부서명</label>
+            <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'dept', e.target.value)} placeholder='예 : 정보보안팀' value={data.manager.dept} />
+          </Col>
+          <Col span={14}>
+            <label style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px' }}>연락처</label>
+            <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'deptContact', e.target.value)} placeholder='예 : privacy@company.com' value={data.manager.deptContact} />
+          </Col>
+        </Row>
+        <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. (연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다)' title='개인정보 열람청구' />
+        <Row gutter={8}>
+          <Col span={7}>
+            <label style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px' }}>부서명</label>
+            <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'requestDept', e.target.value)} placeholder='예 : 정보보안팀' value={data.manager.requestDept} />
+          </Col>
+          <Col span={7}>
+            <label style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px' }}>담당자명</label>
+            <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'requestCharger', e.target.value)} placeholder='예 : 김OO' value={data.manager.requestCharger} />
+          </Col>
+          <Col span={10}>
+            <label style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px' }}>연락처</label>
+            <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'requestContact', e.target.value)} placeholder='예 : privacy@company.com' value={data.manager.requestContact} />
+          </Col>
+        </Row>
       </DIRow>
       <DIRowDivider />
       <DIRow>
@@ -440,6 +502,14 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange }: any):
 } 
 
 const PreviewDocumentForPIPP: React.FC<any> = ({ data, mode, refTable, stmt }: any): JSX.Element => {
+  // 
+  const managerTableData: any[] = [];
+  if (data.dInfo.manager.dept !== '' || data.dInfo.manager.deptContact !== '') {
+    managerTableData.push({ identity: '개인정보 담당부서', charger: data.dInfo.manager.dept !== '' ? [`부서명 : ${data.dInfo.manager.dept}`] : [], contact: data.dInfo.manager.deptContact });
+  }
+  if (data.dInfo.manager.requestDept !== '' || data.dInfo.manager.requestCharger !== '' || data.dInfo.manager.requestContact !== '') {
+    managerTableData.push({ identity: '개인정보 열람청구', charger: data.dInfo.manager.requestDept !== '' && data.dInfo.manager.requestCharger !== '' ? [`부서명 : ${data.dInfo.manager.requestDept}`, `담당자 성명 : ${data.dInfo.manager.requestCharger}`] : data.dInfo.manager.requestDept !== '' ? [`부서명 : ${data.dInfo.manager.requestDept}`] : data.dInfo.manager.requestCharger !== '' ? [`담당자 성명 : ${data.dInfo.manager.requestCharger}`] : [], contact: data.dInfo.manager.requestContact });
+  }
   // 개인정보 수집 및 이용 데이터 및 라벨링을 위한 데이터 가공 (개인정보 수집 항목)
   const itemForPI: string[] = [];
   const pi: any[] = refTable.pi.map((row: any): void => {
@@ -787,9 +857,9 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, mode, refTable, stmt }: a
         <DDRowContent items={stmt.charger.content.common[1]} />
         <ReadableTable columns={[
           { title: '구분', dataIndex: 'identity', key: 'identity' },
-          { title: '담당자', dataIndex: 'charger', key: 'charger' },
+          { title: '담당자', dataIndex: 'charger', key: 'charger', render: (value: string[]) => value.map((item: string, index: number): JSX.Element => (<p key={index} style={{ margin: 0 }}>{item}</p>)) },
           { title: '연락처', dataIndex: 'contact', key: 'contact' }
-        ]} />
+        ]} dataSource={managerTableData} />
         <DDRowContent items={stmt.charger.content.common[2]} />
       </DDRow>
       <DDRow>

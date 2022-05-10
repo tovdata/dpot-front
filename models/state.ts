@@ -1,6 +1,6 @@
 import { atom, selector } from 'recoil';
 // Data
-import { CompanyFromSubjectInCPI, personalInfoSelectOptions } from './data';
+import { companyFromSubjectInCPI, personalInfoSelectOptions } from './static/selectOption';
 import { personalInfo } from './temporary';
 
 /**
@@ -25,7 +25,7 @@ const PersonalInfoSelectOptionsAtom = atom<any>({
 /** 위탁 테이블에 관련된 기본 정보*/
 const DefaultCPIAtom = atom<any>({
   key: 'DefaultCPIAtom',
-  default: CompanyFromSubjectInCPI
+  default: companyFromSubjectInCPI
 })
 
 /** [Selector] Personal information selector for reference */
