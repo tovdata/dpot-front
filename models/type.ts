@@ -8,6 +8,7 @@ export interface TableHeaderData {
   display: string;
   name: string;
   required: boolean;
+  width?: string;
 }
 /** [Interface] Table headers */
 export interface TableHeadersData {
@@ -72,4 +73,17 @@ export interface PersonalInformationConsignmentDF {
   country?: string;
   location?: string;
   method?: string[];
+}
+/** [Interface] Per */
+export interface PersonalInformationProcessingPolicyDF {
+  additional: {
+    cookie: {
+      purpose: string[];
+      disadvantage: string[];
+      usage: boolean;
+    },
+    webLog: {
+      purpose: string[];
+    }
+  }
 }

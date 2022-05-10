@@ -8,30 +8,35 @@ export const personalInfoTableHeader: TableHeadersData = {
     display: "selectA",
     name: "구분(업무명)",
     required: true,
+    width: '200px'
   },
   purpose: {
     description: "처리 목적 설명",
     display: "list",
     name: "처리 목적",
     required: true,
+    width: '350px'
   },
   essentialItems: {
     description: "필수항목 설명",
     display: "itemA",
     name: "필수항목",
     required: true,
+    width: '300px'
   },
   selectionItems: {
     description: "선택항목 설명",
     display: "itemA",
     name: "선택항목",
     required: false,
+    width: '300px'
   },
   period: {
     description: "보유 및 이용 기간 설명",
     display: "period",
     name: "보유 및 이용 기간",
     required: true,
+    width: '350px'
   }
 };
 /** [Table Header] False name information */
@@ -41,30 +46,35 @@ export const falseNameInfoTableHeader: TableHeadersData = {
     display: "select",
     name: "구분(업무명)",
     required: true,
+    width: '200px'
   },
   basis: {
     description: "처리 근거 설명",
     display: "select",
     name: "처리 근거",
     required: true,
+    width: '150px'
   },
   purpose: {
     description: "상세 목적 설명",
     display: "string",
     name: "상세 목적",
     required: true,
+    width: '400px'
   },
   items: {
     description: "처리항목 설명",
     display: "item",
     name: "처리항목",
     required: true,
+    width: '350px'
   },
   period: {
     description: "보유 및 이용 기간 설명",
     display: "list",
     name: "보유 및 이용 기간",
     required: true,
+    width: '350px'
   }
 };
 // provision of personal information
@@ -74,30 +84,35 @@ export const provisionTableHeader: TableHeadersData = {
     display: "string",
     name: "제공받는 자",
     required: true,
+    width: '200px'
   },
   purpose: {
     description: "a",
     display: "list",
     name: "제공 목적",
     required: true,
+    width: '350px'
   },
   items: {
     description: "a",
     display: "item",
     name: "제공 항목",
     required: true,
+    width: '300px'
   },
   period: {
     description: "a",
     display: "period",
     name: "보유 및 이용기간",
     required: true,
+    width: '350px'
   },
   isForeign: {
     description: "a",
     display: "checkbox",
     name: "국외여부",
     required: true,
+    width: '120px'
   }
 }
 // provision of personal additional information
@@ -107,24 +122,28 @@ export const expandProvisionTableHeader: TableHeadersData = {
     display: "string",
     name: "국가",
     required: true,
+    width: '150px'
   },
   address: {
     description: "a",
     display: "string",
     name: "위치(주소)",
     required: true,
+    width: '350px'
   },
   method: {
     description: "a",
     display: "list",
     name: "일시 및 방법",
     required: true,
+    width: '350px'
   },
   charger: {
     description: "a",
     display: "list",
     name: "담당자(연락처)",
     required: false,
+    width: '350px'
   }
 }
 export const consignmentTableHeader: TableHeadersData = {
@@ -133,24 +152,28 @@ export const consignmentTableHeader: TableHeadersData = {
     display: "selectA",
     name: "구분",
     required: true,
+    width: '350px'
   },
   company: {
     description: "a",
     display: "selectA",
     name: "위탁받는 자(수탁자)",
     required: true,
+    width: '200px'
   },
   content: {
     description: "a",
     display: "itemA",
     name: "위탁 업무",
     required: true,
+    width: '350px'
   },
   isForeign: {
     description: "a",
     display: "checkbox",
     name: "국외 여부",
     required: true,
+    width: '120px'
   }
 }
 export const expandConsignmentTableHeader: TableHeadersData = {
@@ -159,36 +182,42 @@ export const expandConsignmentTableHeader: TableHeadersData = {
     display: "selectA",
     name: "국가",
     required: true,
+    width: '150px'
   },
   address: {
     description: "a",
     display: "selectA",
     name: "위치(주소)",
     required: true,
+    width: '250px'
   },
   method: {
     description: "a",
     display: "list",
     name: "일시 및 방법",
     required: true,
+    width: '250px'
   },
   items: {
     description: "a",
     display: "item",
     name: "위탁 항목",
-    required: true
+    required: true,
+    width: '250px'
   },
   period: {
     description: "a",
     display: "list",
     name: "보유 및 이용기간",
     required: true,
+    width: '250px'
   },
   charger: {
     description: "a",
     display: "list",
     name: "담당자(연락처)",
     required: false,
+    width: '250px'
   }
 }
 export const personalInfoProcessingPolicyTableHeader: TableHeadersData = {
@@ -256,3 +285,81 @@ export const personalInfoSelectOptions: any = {
     period: ["회원 탈퇴", "파기 요청", "서비스 종료"]
   }
 }
+
+/** 개인정보 위탁 테이블에서 업무명에 따른 예시   */
+export const CompanyFromSubjectInCPI = {
+  "이벤트 경품 물류 업무": {
+    "갤럭시아머니트리㈜": {
+      content: ["서비스 물품 및 이벤트 경품 배송 등의 물류 업무 (경품 종류: 모바일 쿠폰)", "휴대폰 소액 결제"],
+      country: "Korea1",
+      address: "address",
+      charger: ["1", "2", "3"]
+    }
+  },
+  "알림발송": {
+    "엔에이치엔㈜": {
+      content: ["SMS 및 메시지 발송", "(문자, 이메일, 알림톡)발송 서비스", "대량 메일 발송", "SMS", "LMS", "알림톡 발송", "SMS", "알림톡 등 메시지 발송 서비스 제공"],
+      country: "Korea2",
+      address: "address2",
+      charger: ["1", "2", "3"]
+    },
+    "㈜엘지씨엔에스": {
+      content: ["SMS 및 메시지 발송", "카카오톡 알림정보 전송. (문자, 이메일, 알림톡)발송 서비스"],
+      country: "Korea3",
+      address: "address3",
+      charger: ["1", "2", "3"]
+    },
+    "인포뱅크㈜": {
+      content: ["문자서비스 전송 시스템 운영", "문자메세지발송", "문자 수신(MO) 서비스", "SMS", "LMS 알림톡 발송"],
+      country: "Korea4",
+      address: "address4",
+      charger: ["1", "2", "3"]
+    },
+    "슈어엠㈜": {
+      content: ["문자메세지발송", "SMS", "LMS", "알림톡 발송"],
+      country: "Korea5",
+      address: "address5",
+      charger: ["1", "2"]
+    }
+  },
+  // "안심번호 서비스": {
+  //   company: ["㈜케이티", "에스케이텔링크㈜", "세종텔레콤㈜", "㈜LG유플러스"]
+  // }
+}
+
+/** 
+ * 개인정보 처리방침에서 사용되는 정적 데이터들
+ */
+/** 관계 법령에 따른 개인정보의 보유 및 이용기간 (개인정보 처리방침 Step2) */
+export const periodOfRetentionAndUseOfPersonalInformation: any = {
+  '전자상거래법': ['계약 또는 청약철회 등에 관한 기록(5년)', '대금결제 및 재화 등의 공급에 관한 기록(5년)', '소비자의 불만 또는 분쟁처리에 관한 기록(3년)', '표시∙광고에 관한 기록(6개월)'],
+  '정보통신망법': ['본인확인에 관한 기록(6개월)'],
+  '전자금융거래법': ['전자금융 거래에 관한 기록(5년)'],
+  '통신비밀보호법': ['웹사이트 방문 기록(3개월)'],
+  '위치정보법': ['개인위치정보에 관한 기록(6개월)'],
+  '신용정보법': ['신용정보의 수집·처리 및 이용 등에 관한 기록(3년)'],
+  '국세청고시': ['전자세금계산서 발급에 관한 기록(3년)'],
+  '법인세법': ['거래에 관한 장부 및 지출증명서류(5년) '],
+  '부가가치세법': ['세금계산서, 영수증 등 거래내역 관련 정보(5년)', '부가가치세의 과세표준과 세액의 신고자료 등(5년)']
+}
+/** 14세 미만 아동의 개인정보 처리 관련 법정대리인의 확인 방법 (개인정보 처리방침 Step2) */
+export const methodOfConfirmConsentOfLegalRepresentative: string[] = [
+  '동의 내용을 게재한 인터넷 사이트에 법정대리인이 동의 여부를 표시하도록 하고 개인정보처리자가 그 동의 표시를 확인했음을 법정대리인의 휴대전화 문자메시지로 알리는 방법',
+  '동의 내용을 게재한 인터넷 사이트에 법정대리인이 동의 여부를 표시하도록 하고 법정대리인의 신용카드·직불카드 등의 카드정보를 제공받는 방법',
+  '동의 내용을 게재한 인터넷 사이트에 법정대리인이 동의 여부를 표시하도록 하고 법정대리인의 휴대전화 본인인증 등을 통해 본인 여부를 확인하는 방법',
+  '동의 내용이 적힌 서면을 법정대리인에게 직접 발급하거나, 우편 또는 팩스를 통하여 전달하고 법정대리인이 동의 내용에 대하여 서명날인 후 제출하도록 하는 방법',
+  '동의 내용이 적힌 전자우편을 발송하여 법정대리인으로부터 동의의 의사표시가 적힌 전자우편을 전송받는 방법',
+  '전화를 통하여 동의 내용을 법정대리인에게 알리고 동의를 얻거나 인터넷주소 등 동의 내용을 확인할 수 있는 방법을 안내하고 재차 전화 통화를 통하여 동의를 얻는 방법',
+  '그 밖에 위와 준하는 방법으로 법정대리인에게 동의 내용을 알리고 동의의 의사표시를 확인하는 방법'
+];
+/** 안정성 확보 추가 조치 - 개인정보보호 인증 (개인정보 처리방침 Step2) */
+export const certificationForPIP: string[] = [
+  'ISMS-P',
+  'ISO/IEC 27701',
+  'ISO/IEC 27001',
+  'ISO/IEC 27017',
+  'ISO/IEC 27018',
+  'ISMS-정보보호관리우수등급',
+  'ISMS-정보보호관리최우수등급',
+  'CSAP'
+]

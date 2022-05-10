@@ -1,11 +1,11 @@
 // Component
-import { FalseNameInfoTable, PersonalInfoTable } from '../../components/PITable';
+import { FNITableForm, PITableForm } from '../../components/PITable';
 
 const Page = () => {
   return (
     <>
-      <PersonalInfoTable />
-      <FalseNameInfoTable />
+      <PITableForm />
+      <FNITableForm />
     </>
   )
 }
