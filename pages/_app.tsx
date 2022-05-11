@@ -1,6 +1,8 @@
 import type { AppProps } from 'next/app'
 // Component
 import Layout from '../components/common/Layout';
+// Font
+import '../public/fonts/pretendard.css';
 // Style
 import 'antd/dist/antd.css';
 import '../styles/globals.css'
@@ -19,9 +21,11 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
+        <div style={{ fontFamily: 'Pretendard' }}>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </div>
       </Hydrate>
     </QueryClientProvider>
   )
