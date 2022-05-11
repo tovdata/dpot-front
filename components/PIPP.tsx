@@ -10,7 +10,7 @@ import { YesOrNoRadioButton } from './common/Radio';
 import { AddableTagSelect, TagSelect } from './common/Select';
 import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject, DRLabelingContent, DRLabelingHeader, DRLabelingItem, DTCForm, DTCItem } from './pipp/Documentation';
 // Data
-import { statementForPIPP as stmt } from '../models/static';
+import { statementForPIPP as stmt } from '../models/static/statement';
 import { certificationForPIP, methodOfConfirmConsentOfLegalRepresentative, periodOfRetentionAndUseOfPersonalInformation } from '../models/data';
 import { personalInfoProcessingPolicy } from '../models/temporary';
 // Icon
@@ -366,7 +366,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, openMod
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader description='해당 서비스에서 개인정보를 수집・이용하는 모든 내용이 작성되어야 합니다. 수정을 원하시는 경우, "수정하기" 버튼을 눌러주세요.' title='개인정보의 처리목적, 수집 항목, 보유 및 이용기간' tools={<Button size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>} />
+        <DIRowHeader description='수집・이용하는 모든 개인정보에 대한 처리목적, 수집 항목, 보유 및 이용기간에 대한 내용을 작성해주세요.\n내용 수정을 원하시는 경우, "수정하기" 버튼을 눌러주세요.' title='개인정보의 처리목적, 수집 항목, 보유 및 이용기간' tools={<Button size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>} />
         <DIRowContent>
           <DIRowSubject title='관계 법령에 따른 개인정보의 보유 및 이용기간' />
           <AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, 'period', undefined, value)} options={exampleForPeriodPI} value={data.period} />
@@ -375,7 +375,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, openMod
       <DIRowDivider />
       <DIRow>
         <Collapse activeKey={data.child.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader style={{ marginBottom: 0 }} title='만 14세 미만 아동의 개인정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'child', 'usage', e.target.value)} size='small' value={data.child.usage} />} />} key='1' showArrow={false}>
+          <Collapse.Panel header={<DIRowHeader description='만 14세 미만 아동의 개인정보를 처리하고 있다면 그에 관한 안내를 개인정보 처리방침에 기재할 것을 권고하고 있습니다. 현재 "귀사"에서 적용하고 있는 "법정대리인의 동의 확인 방법"을 아래에서 선택하면, 개인정보 보호위원회에서 권장하는 안내 사항과 함께 기재됩니다.' style={{ marginBottom: 0 }} title='만 14세 미만 아동의 개인정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'child', 'usage', e.target.value)} size='small' value={data.child.usage} />} />} key='1' showArrow={false}>
             <DIRowSubject title='법정대리인의 동의 확인 방법' />
             <TreeSelect showArrow={false} treeData={exampleForMethodConsent} treeCheckable={true} onChange={(value: string[]): void => onChange(THIS_STEP, 'child', 'method', value)} placeholder='예시에서 선택' style={{ width: '100%' }} value={data.child.method} />
           </Collapse.Panel>
@@ -384,7 +384,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, openMod
       <DIRowDivider />
       <DIRow>
         <Collapse activeKey={data.provision.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='해당 서비스에서 개인정보를 제3자에게 제공하는 모든 내용이 작성되어야 합니다. 수정을 원하시는 경우, "수정하기" 버튼을 눌러주세요.' title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'provision', 'usage', e.target.value)} size='small' value={data.provision.usage} />} />} key='1' showArrow={false}>
+          <Collapse.Panel header={<DIRowHeader description='보유 및 이용 중인 개인정보를 제3자에게 제공하면 그에 관한 안내가 반드시 개인정보 처리방침에 기재되어 있어야 합니다. 개인정보를 제공한 적이 있는 관계사 중, "제공받는 자"의 "보유 및 이용 기간"이 현재에도 유효한 기관들에 대해서는 "제공받는 자의 처리 목적"과 제공된 항목을 포함한 모든 내용을 기재해야 합니다. (만약 제공된 개인정보가 국외에서 처리되고 있다면, 국외 이전에 관한 내용도 추가로 작성되어야 합니다.) 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'provision', 'usage', e.target.value)} size='small' value={data.provision.usage} />} />} key='1' showArrow={false}>
             <Button onClick={(): void => openModal('ppi')} size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
@@ -631,7 +631,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, mode, refTable, stmt }: a
           <DDRowContent items={stmt.ppi.content.common[1]} />
           <ReadableTable columns={[
             { title: '제공받는 자', dataIndex: 'recipient', key: 'recipient' },
-            { title: '제공 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />) },
+            { title: '제공받는 자의 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />) },
             { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => (<>{value.join(', ')}</>) },
             { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />) },
           ]} dataSource={refTable.ppi.filter((item: any): any => !item.isForeign)} />
