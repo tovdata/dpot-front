@@ -363,3 +363,10 @@ export const certificationForPIP: string[] = [
   'ISMS-정보보호관리최우수등급',
   'CSAP'
 ]
+
+/** API Response Status */
+export const API_STATUS_OK = 'OK';
+export const API_STATUS_ERROR = 'ERROR';
+export const API_STATUS_NOT_FOUND = 'NOT_FOUND';
+export const API_STATUS_REQUEST_ERROR = 'REQUEST_ERROR';
+export const API_STATUS_UNKNOWN_ERROR = 'UNKNOWN_ERROR';

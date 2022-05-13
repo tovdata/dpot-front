@@ -24,7 +24,7 @@ export interface SelectOptionsByColumn {
  */
 /** [Interface] Personal information (collection and usage) (abbreviation: PI) */
 export interface PersonalInformationDF {
-  uuid: string;
+  id: string;
   subject: string;
   purpose: string[];
   essentialItems: string[];
@@ -38,7 +38,7 @@ export interface PersonalInformationDF {
 }
 /** [Interface] False name information (abbreviation: FNI) */
 export interface FalseNameInformationDF {
-  uuid: string;
+  id: string;
   subject: string;
   basis: string;
   purpose: string;
@@ -48,7 +48,7 @@ export interface FalseNameInformationDF {
 }
 /** [Interface] Provision of personal information (abbreviation: PPI) */
 export interface PersonalInformationProvisonDF {
-  uuid: string;
+  id: string;
   recipient: string;
   purpose: string[];
   items: string[];
@@ -62,7 +62,7 @@ export interface PersonalInformationProvisonDF {
 }
 /** [Interface] Consignment of personal information (abbreviation: CPI) */
 export interface PersonalInformationConsignmentDF {
-  uuid: string;
+  id: string;
   subject: string;
   consignor: string;
   content: string[];

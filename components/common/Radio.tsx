@@ -15,6 +15,9 @@ const RadioGroup = styled(Radio.Group)<{fontSize: SizeType}>`
         return css`
           .ant-radio-button-wrapper {
             font-size: 12px;
+            height: 28px;
+            line-height: 26px;
+            padding: 0 12px;
           }
         `;
       }

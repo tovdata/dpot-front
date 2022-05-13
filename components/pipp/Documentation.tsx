@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 // Component
-import { Col, Divider, Row, Tooltip } from 'antd';
+import { Col, Divider, Modal, Row, Tooltip } from 'antd';
 // Icon
 import IconPIItem from '../../public/images/piItem.svg';
 import IconPIPurpose from '../../public/images/piPurpose.svg';
@@ -13,6 +13,15 @@ import IconComplaint from '../../public/images/complaint.svg';
 /**
  * 컴포넌트들의 Props 형식
  */
+interface ViewProps {
+  preview?: boolean;
+}
+/** [Interface] Properties for DIInputGroup */
+interface DIInputGroupProps {
+  children?: JSX.Element|JSX.Element[];
+  label?: string;
+  style?: React.CSSProperties;
+}
 /** [Interface] Properties for DIRowContent */
 interface DIRowContentProps {
   children?: JSX.Element|JSX.Element[];
@@ -29,45 +38,58 @@ interface DIRowHeaderProps {
   tools?: JSX.Element|JSX.Element[];
 }
 /** [Interface] Properties for DDRowContent */
-interface DDRowContentProps {
+interface DDRowContentProps extends ViewProps {
   items?: string[];
   style?: React.CSSProperties;
 }
 /** [Interface] Properties for DDRowHeader */
-interface DDRowHeaderProps {
+interface DDRowHeaderProps extends ViewProps {
   title: string;
 }
 /** [Interface] Properties for DDRowItemList */
-interface DDRowItemListProps {
+interface DDRowItemListProps extends ViewProps {
   items?: string[];
   level?: number;
   style?: React.CSSProperties;
 }
 /** [Interface] Properties for DRLabelingHeader */
-interface DRLabelingHeaderProps {
+interface DRLabelingHeaderProps extends ViewProps {
   description?: string;
   title: string;
 }
 /** [Interface] Properties for DRLabelingItem */
-interface DRLabelingItemProps {
+interface DRLabelingItemProps extends ViewProps {
   tooltip?: string;
   type: string;
 }
 /** [Interface] Properties for DTCForm */
-interface DTCFormProps {
+interface DTCFormProps extends ViewProps {
   children?: JSX.Element|JSX.Element[];
 }
 /** [Interface] Properties for DTCItem */
-interface DTCItemProps {
+interface DTCItemProps extends ViewProps {
   content?: string;
 }
 
 /** 
  * 입력 부분
  */
+/** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Input group */
+export const DIInputGroup: React.FC<DIInputGroupProps> = ({ children, label, style }: DIInputGroupProps): JSX.Element => {
+  return (
+    <div style={{ position: 'relative', ...style }}>
+      {label ? (
+        <label style={{ color: '#00000073', display: 'block', fontSize: 12, fontWeight: '500', lineHeight: '22px', marginBottom: 2 }}>{label}</label>
+      ) : (<></>)}
+      {children}
+    </div>
+  );
+}
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row */
 export const DIRow = styled.div`
-  .ant-collapse-content-box,
+  .ant-collapse-content-box {
+    padding: 8px 0 0 0 !important;;
+  }
   .ant-collapse-header {
     cursor: default !important;
     padding: 0 !important;
@@ -96,7 +118,7 @@ export const DIRowHeader: React.FC<DIRowHeaderProps> = ({ description, style, ti
   return (
     <div style={{ marginBottom: 8, width: '100%', ...style }}>
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
-        <h2 style={{ color: '#002766', fontSize: 14, fontWeight: 400, lineHeight: '22px', marginBottom: 0 }}>{title}</h2>
+        <h2 style={{ color: '#002766', fontSize: 14, fontWeight: 600, lineHeight: '22px', marginBottom: 0 }}>{title}</h2>
         <>{tools}</>
       </div>
       {description ? description.split('\\n').map((elem: string, index: number): JSX.Element => index === 0 ? (
@@ -138,23 +160,23 @@ export const DDRow = styled.div`
   margin-bottom: 40px;
 `;
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row content */
-export const DDRowContent: React.FC<DDRowContentProps> = ({ items, style }: DDRowContentProps): JSX.Element => {
+export const DDRowContent: React.FC<DDRowContentProps> = ({ items, preview, style }: DDRowContentProps): JSX.Element => {
   return items ? (
     <div style={{ marginBottom: 8, ...style }}>
-      {items.map((item: string, index: number): JSX.Element => (<p key={index} style={{ margin: 0 }}>{item}</p>))}
+      {items.map((item: string, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>{item}</p>))}
     </div>
   ) : (<></>);
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row header */
-export const DDRowHeader: React.FC<DDRowHeaderProps> = ({ title }: DDRowHeaderProps): JSX.Element => {
+export const DDRowHeader: React.FC<DDRowHeaderProps> = ({ preview, title }: DDRowHeaderProps): JSX.Element => {
   return (
-    <h2 style={{ color: '#000000', fontSize: 14, fontWeight: '600', lineHeight: '22px', marginBottom: 8 }}>
+    <h2 style={{ color: '#000000', fontSize: preview ? 14 : 16, fontWeight: '600', lineHeight: '22px', marginBottom: 8 }}>
       ◾️ {title}
     </h2>
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row item list */
-export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, style }: DDRowItemListProps): JSX.Element => {
+export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, preview, style }: DDRowItemListProps): JSX.Element => {
   // 목록 레벨에 따른 스타일 정의
   let styleByType: React.CSSProperties;
   switch(level) {
@@ -175,13 +197,13 @@ export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, styl
 export const DDRowTableForm = styled.div`
   margin-bottom: 8px;
   table .ant-table-thead > tr > th {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 400;
     line-height: 22px;
     text-align: center;
   }
   table .ant-table-tbody > tr > td {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 400;
     line-heignt: 20px;
   }
@@ -194,8 +216,13 @@ export const DDRowTableForm = styled.div`
 /** 
  * 검토 부분
  */
+export const DRModal = styled(Modal)`
+  .ant-modal-body {
+    padding: 7rem;
+  }
+`;
 /** [Component] 개인정보 처리방침 최종 검토 폼 Labeling header */
-export const DRLabelingHeader: React.FC<DRLabelingHeaderProps> = ({ description, title }: DRLabelingHeaderProps): JSX.Element => {
+export const DRLabelingHeader: React.FC<DRLabelingHeaderProps> = ({ description, preview, title }: DRLabelingHeaderProps): JSX.Element => {
   return (
     <div style={{ marginBottom: 16, textAlign: 'center' }}>
       <h3 style={{ color: '#0044CC', fontSize: 16, fontWeight: '700', lineHeight: '24px', marginBottom: description ? 6 : 0 }}>{title}</h3>
