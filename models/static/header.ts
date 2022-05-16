@@ -88,7 +88,7 @@ export const ppiTableHeader: TableHeadersData = {
   purpose: {
     description: 'a',
     display: 'list',
-    name: '제공 목적',
+    name: '제공받는자의 목적',
     required: true,
     width: '350px'
   },

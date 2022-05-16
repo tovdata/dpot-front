@@ -145,9 +145,11 @@ export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, title, st
         </Col>
       </Row>
       <StyledPageHeaderExtra>
-        {current > 0 ? <Button type='default' onClick={() => onMove('prev')}>이전</Button> : undefined}
-        <Button type='default'>임시저장</Button>
-        {current < steps.length - 1 ? <Button type='primary' onClick={() => onMove('next')}>다음</Button> : <Button type='primary'>완료</Button>}
+        {current > 0 ? <Button type='default' onClick={() => onMove('prev')}>이전</Button> : <span></span>}
+        <div>
+          <Button type='default'>임시저장</Button>
+          {current < steps.length - 1 ? <Button type='primary' onClick={() => onMove('next')} style={{ marginLeft: 16 }}>다음</Button> : <Button type='primary' style={{ marginLeft: 16 }}>완료</Button>}
+        </div>
       </StyledPageHeaderExtra>
     </StyledPageHeader>
   );

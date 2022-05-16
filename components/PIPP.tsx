@@ -1,20 +1,21 @@
-import React from 'react';
+import React, { Component, useRef } from 'react';
 import { useEffect, useState } from 'react';
 // Component
-import { Button, Col, Collapse, DatePicker, Form, Input, Modal, Radio, Row, Space, Table, Tooltip, TreeSelect } from 'antd';
+import { Button, Col, Collapse, DatePicker, Input, Modal, Radio, Result, Row, Space, Table, TreeSelect } from 'antd';
 import { DocumentProcessingStatusHeader, PageHeaderContainStep } from './common/Header';
 import { setDataSource, StyledTableForm, TableFormHeader } from './common/Table';
-import { CollapseForPIPP, CollapsePanelHeaderData } from './common/Collapse';
+import { CollapseForPIPP } from './common/Collapse';
 import { createWarningMessage } from './common/Notification';
 import { YesOrNoRadioButton } from './common/Radio';
 import { AddableTagSelect, TagSelect } from './common/Select';
-import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject, DRLabelingContent, DRLabelingHeader, DRLabelingItem, DTCForm, DTCItem } from './pipp/Documentation';
+import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DIInputGroup, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject, DRLabelingContent, DRLabelingHeader, DRLabelingItem, DRModal, DTCForm, DTCItem } from './pipp/Documentation';
+import { DragDropContext, Droppable, Draggable, resetServerContext } from 'react-beautiful-dnd';
 // Data
 import { statementForPIPP as stmt } from '../models/static/statement';
 import { certificationForPIP, methodOfConfirmConsentOfLegalRepresentative, periodOfRetentionAndUseOfPersonalInformation } from '../models/data';
 import { personalInfoProcessingPolicy } from '../models/temporary';
 // Icon
-import { AiOutlineMinusCircle } from 'react-icons/ai';
+import { AiOutlineMenu, AiOutlineMinusCircle } from 'react-icons/ai';
 // Module
 import moment from 'moment';
 import { PITable } from './PITable';
@@ -46,13 +47,6 @@ export const PIPPTable = ({ onSelect }: PIPPTableProps): JSX.Element => {
     onSelect({ name: name, uuid: 'new' });
   }
   const onChangeFilterValue = (e: any): void => setValue(e.target.value);
-  // Create an event handler (onDelete)
-  const onDelete = (record: any): void => {
-    const index: number = data.findIndex((item: any): boolean => item.uuid === record.uuid);
-    if (index > -1) {
-      data.length - 1 === index ? setData([...data.slice(0, index)]) : setData([...data.slice(0, index), ...data.slice(index + 1)]);
-    }
-  }
   // Create an event handler (onSearch)
   const onSearch = (): void => setFilter(setDataSource(data.filter((row: any): boolean => row.name.includes(value))));
   // Create an event handler (onShow)
@@ -69,6 +63,7 @@ export const PIPPTable = ({ onSelect }: PIPPTableProps): JSX.Element => {
       <StyledTableForm>
         <TableFormHeader title='개인정보 처리방침 이력' tools={tableTools} />
       </StyledTableForm>
+      <PIPPDocList />
     </>
   );
 }
@@ -220,9 +215,6 @@ export const CreateDocumentForm = ({ onBack }: CreateDocumentFormProps): JSX.Ele
         requestDept: '',
         requestCharger: '',
         requestContact: ''
-      },
-      cctv: {
-        usage: undefined
       }
     },
     cInfo: {
@@ -310,8 +302,8 @@ const EditModal: React.FC<any> = ({ onClose, type, visible }: any): JSX.Element 
         setContent(<></>);
         break;
     }
-  }, type);
-
+  }, [type]);
+  // Return an element
   return (
     <Modal centered footer={false} onCancel={onClose} title={title} visible={visible} width='80%'>
       {content}
@@ -339,7 +331,7 @@ const CreatePIPP: React.FC<any> = ({ onChange, data, refTable }: any): JSX.Eleme
           <InputFormToCreateDocumentation data={data.dInfo} onChange={onChange} openModal={onOpen} />
         </Col>
         <Col span={12} style={{ borderLeft: '1px solid rgba(156, 156, 156, 0.3)', height: '100%', overflowY: 'auto' }}>
-          <PreviewDocumentForPIPP data={data} refTable={refTable} stmt={stmt(data.dInfo.name)} />
+          <PreviewDocumentForPIPP data={data} preview={true} refTable={refTable} stmt={stmt(data.dInfo.name)} />
         </Col>
       </Row>
       <EditModal onClose={onClose} type={refType} visible={open} />
@@ -366,16 +358,16 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, openMod
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader description='수집・이용하는 모든 개인정보에 대한 처리목적, 수집 항목, 보유 및 이용기간에 대한 내용을 작성해주세요.\n내용 수정을 원하시는 경우, "수정하기" 버튼을 눌러주세요.' title='개인정보의 처리목적, 수집 항목, 보유 및 이용기간' tools={<Button size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>} />
+        <DIRowHeader description='이 부분은 개인정보 처리방침에서 가장 중요한 내용입니다.\n각 업무 안에서 처리하는 목적을 모두 나열하고, 필수항목과 선택항목을 나누어 기재해야 합니다. 보유 및 이용기간은 업무별로 필요한 기간을 정하여 작성해주시면 됩니다.(항목들을 이용하는 기간 뿐만 아니라 저장·보관하는 기간이 모두 포함됩니다.)' title='개인정보의 처리목적, 수집 항목, 보유 및 이용기간' tools={<Button onClick={(): void => openModal('pi')} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>} />
         <DIRowContent>
-          <DIRowSubject title='관계 법령에 따른 개인정보의 보유 및 이용기간' />
+          <DIRowSubject description='위에서 정한 기간과 별도로, 관련 법령에 따라 개인정보를 보유해야 하는 경우에는 해당되는 법령을 모두 기재해야 합니다. 아래 보기에서 선택하거나 형식에 맞춰 입력해주세요.' title='관계 법령에 따른 개인정보의 보유 및 이용기간' />
           <AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, 'period', undefined, value)} options={exampleForPeriodPI} value={data.period} />
         </DIRowContent>
       </DIRow>
       <DIRowDivider />
       <DIRow>
         <Collapse activeKey={data.child.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='만 14세 미만 아동의 개인정보를 처리하고 있다면 그에 관한 안내를 개인정보 처리방침에 기재할 것을 권고하고 있습니다. 현재 "귀사"에서 적용하고 있는 "법정대리인의 동의 확인 방법"을 아래에서 선택하면, 개인정보 보호위원회에서 권장하는 안내 사항과 함께 기재됩니다.' style={{ marginBottom: 0 }} title='만 14세 미만 아동의 개인정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'child', 'usage', e.target.value)} size='small' value={data.child.usage} />} />} key='1' showArrow={false}>
+          <Collapse.Panel header={<DIRowHeader description='만 14세 미만 아동의 개인정보를 처리하고 있다면 그에 관한 안내를 기재할 것을 권고하고 있습니다. 현재 법정대리인의 동의를 확인하기 위해 사용하는 방법을 아래에서 선택하면, 개인정보보호위원회에서 권장하는 안내 사항과 함께 입력됩니다.' style={{ marginBottom: 0 }} title='만 14세 미만 아동의 개인정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'child', 'usage', e.target.value)} size='small' value={data.child.usage} />} />} key='1' showArrow={false}>
             <DIRowSubject title='법정대리인의 동의 확인 방법' />
             <TreeSelect showArrow={false} treeData={exampleForMethodConsent} treeCheckable={true} onChange={(value: string[]): void => onChange(THIS_STEP, 'child', 'method', value)} placeholder='예시에서 선택' style={{ width: '100%' }} value={data.child.method} />
           </Collapse.Panel>
@@ -384,26 +376,26 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, openMod
       <DIRowDivider />
       <DIRow>
         <Collapse activeKey={data.provision.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='보유 및 이용 중인 개인정보를 제3자에게 제공하면 그에 관한 안내가 반드시 개인정보 처리방침에 기재되어 있어야 합니다. 개인정보를 제공한 적이 있는 관계사 중, "제공받는 자"의 "보유 및 이용 기간"이 현재에도 유효한 기관들에 대해서는 "제공받는 자의 처리 목적"과 제공된 항목을 포함한 모든 내용을 기재해야 합니다. (만약 제공된 개인정보가 국외에서 처리되고 있다면, 국외 이전에 관한 내용도 추가로 작성되어야 합니다.) 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'provision', 'usage', e.target.value)} size='small' value={data.provision.usage} />} />} key='1' showArrow={false}>
-            <Button onClick={(): void => openModal('ppi')} size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>
+          <Collapse.Panel header={<DIRowHeader description='제3자의 목적을 위해 개인정보를 제공하면 그에 관한 사항을 반드시 안내해야 합니다. \n개인정보를 제공한 건 중 아직 ‘제공받은 자의 보유 및 이용 기간’이 남아있는 건은 해당 내용을 모두 기재해야 합니다. 만약 제공된 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n※ 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' style={{ marginBottom: 0 }} title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'provision', 'usage', e.target.value)} size='small' value={data.provision.usage} />} />} key='1' showArrow={false}>
+            <Button onClick={(): void => openModal('ppi')} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
       </DIRow>
       <DIRowDivider />
       <DIRow>
         <Collapse activeKey={data.consignment.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='해당 서비스에서 개인정보를 제3자에게 위탁하는 모든 내용이 작성되어야 합니다. 수정을 원하시는 경우, "수정하기" 버튼을 눌러주세요.' title='위탁하는 개인정보가 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'consignment', 'usage', e.target.value)} size='small' value={data.consignment.usage} />} />} key='1' showArrow={false} >
-            <Button onClick={(): void => openModal('cpi')} size='small' style={{ fontSize: 12 }} type='default'>수정하기</Button>
+          <Collapse.Panel header={<DIRowHeader description='개인정보 처리를 위탁하고 있다면, 그에 관한 사항을 반드시 안내해야 합니다(예: AWS, 채널톡, Google Analytics 등). 만약 위탁한 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n개인정보 처리 업무를 위해 이용하고 있는 업체명과 위탁 업무 내용이 모두 기재되어있는지 확인해주세요.' style={{ marginBottom: 0 }} title='위탁하는 개인정보가 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'consignment', 'usage', e.target.value)} size='small' value={data.consignment.usage} />} />} key='1' showArrow={false} >
+            <Button onClick={(): void => openModal('cpi')} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader description='본 내용은 필수 항목으로 반드시 들어가야합니다.' title='개인정보의 파기' />
+        <DIRowHeader description='보유 및 이용기간이 끝난 개인정보의 파기에 관한 안내는 필수 기재사항입니다. 이에 관하여 ‘개인정보 보호법령에서 권장하는 파기방법과 절차를 준수하고 있다’는 내용을 자동으로 입력해드립니다.' style={{ marginBottom: 0 }} title='개인정보의 파기' />
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader description='개인정보 보호법에 따라, 서비스를 1년간 이용하지 않은 이용자의 정보는 파기하거나 분리보관해야합니다. 개인정보보호위원회에서는 이에 대한 조치 사항을 처리방침에 기재할 것을 권고하고 있으며, 필수 기재항목은 아닙니다.' title='미이용자의 개인정보 파기 등에 관한 조치' />
+        <DIRowHeader description='개인정보 보호법에 따라, 서비스를 1년간 이용하지 않은 이용자의 정보는 파기하거나 분리보관해야 합니다. 개인정보보호위원회에서는 이에 대한 조치 사항을 기재할 것을 권고하고 있으며, 필수 기재항목은 아닙니다.\n현재 1년간 이용하지 않은 이용자의 정보에 대해 어떤 조치를 취하고 계신지 아래에서 선택하시면, 그에 맞는 내용이 삽입되거나 삭제됩니다.' title='미이용자의 개인정보 파기 등에 관한 조치' />
         <Radio.Group onChange={(e: any): void => onChange(THIS_STEP, 'destructionUnused', 'type', e.target.value)}>
           <Space direction='vertical'>
             <Radio key='1' value='파기'>장기 미접속자의 개인정보를 파기합니다.</Radio>
@@ -414,95 +406,97 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, openMod
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader description='본 내용은 필수 항목으로 반드시 들어가야합니다.' title='정보주체와 법정대리인의 권리·의무 및 행사방법' />
+        <DIRowHeader description='이용자들이 본인의 개인정보를 열람·수정·파기 등을 요청할 수 있는 권리를 보장하는 방법에 관한 안내는 필수 기재사항입니다. 이에 관하여 ‘개인정보 보호법령에서 권장하는 방법을 준수하고 있다’는 내용을 자동으로 입력해드립니다.' title='정보주체와 법정대리인의 권리·의무 및 행사방법' />
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader description='본 내용은 필수 항목으로 반드시 들어가야합니다.' title='개인정보의 안전성 확보조치' />
+        <DIRowHeader description='회사가 개인정보의 안전을 위해 취하고 있는 조치는 필수 기재사항입니다. \n개인정보가 보관되는 물리적 공간(개인정보 처리시스템이 있는 전산실 또는 하드카피가 보관된 캐비넷 등)이 있는 경우, ‘예’를 선택하시면 이에 관한 내용도 입력됩니다. 추가로, 개인정보 보호에 관한 활동이나 인증을 받은 내용이 있다면 함께 기재해주세요.' title='개인정보의 안전성 확보조치' />
         <DIRowContent>
           <DIRowSubject title='개인정보를 저장하는 물리적인 공간(전산실, 자료보관실 등)이 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'safety', 'physical', e.target.value)} size='small' value={data.safety.physical} />} />
         </DIRowContent>
         <DIRowContent>
           <Collapse activeKey={data.safety.usage ? ['1'] : []} ghost>
-            <Collapse.Panel header={<DIRowSubject title='개인정보보호 활동을 하거나 국내외 개인정보보호 인증을 보유하고 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'safety', 'usage', e.target.value)} size='small' value={data.safety.usage} />} />} key='1' showArrow={false}>
-              <Form layout='vertical'>
-                <Form.Item label='개인정보보호 활동'>
-                  <Input onChange={(e: any): void => onChange(THIS_STEP, 'safety', 'activity', e.target.value)} placeholder='개인정보보호 관련 SNS 운영, 투명성 보고서 발간, 자율규제단체 활동 등' value={data.safety.activity} />
-                </Form.Item>
-                <Form.Item label='국내외 개인정보보호 인증 획득'>
-                  <TagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, 'safety', 'certification', value)} options={certificationForPIP} value={data.safety.certification} />
-                </Form.Item>
-              </Form>
+            <Collapse.Panel header={<DIRowSubject style={{ marginBottom: 0 }} title='개인정보보호 활동을 하거나 국내외 개인정보보호 인증을 보유하고 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'safety', 'usage', e.target.value)} size='small' value={data.safety.usage} />} />} key='1' showArrow={false}>
+              <DIInputGroup label='개인정보보호 활동' style={{ marginBottom: 8 }}>
+                <Input onChange={(e: any): void => onChange(THIS_STEP, 'safety', 'activity', e.target.value)} placeholder='개인정보보호 관련 SNS 운영, 투명성 보고서 발간, 자율규제단체 활동 등' value={data.safety.activity} />
+              </DIInputGroup>
+              <DIInputGroup label='국내외 개인정보보호 인증 획득'>
+                <AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, 'safety', 'certification', value)} options={certificationForPIP} value={data.safety.certification} />
+              </DIInputGroup>
             </Collapse.Panel>
           </Collapse>
         </DIRowContent> 
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader description='쿠키 등 자동 수집 장치를 사용하는 경우, 그에 대한 모든 내용이 작성되어야 합니다.' title='개인정보 자동 수집 장치의 설치·운영 및 거부에 관한 사항' />
+        <DIRowHeader description='쿠키(cookie)나 트래픽 분석도구(e.g., Google Analytics, Naver Analytics) 등과 같이 개인정보를 자동으로 수집하는 장치를 사용하는 경우, 설치·운영 및 그 거부에 관한 사항을 기재해야 합니다.\n수정이 필요한 경우, 이전 단계로 이동하여 내용을 변경하시면 자동으로 반영됩니다.' style={{ marginBottom: 0 }} title='개인정보 자동 수집 장치의 설치·운영 및 거부에 관한 사항' />
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader description='행태정보를 사용하는 경우, 그에 대한 모든 내용이 작성되어야 합니다.' title='행태정보의 수집·이용 및 거부 등에 관한 사항' />
+        <DIRowHeader description='이용자의 온라인 행태정보를 처리하고 이를 기반으로 ‘온라인 맞춤형 광고’ 등을 제공하는 경우, 그에 관한 사항을 기재하여야 합니다. 수정이 필요한 경우, 이전 단계로 이동하여 내용을 변경하시면 자동으로 반영됩니다.' style={{ marginBottom: 0 }} title='행태정보의 수집·이용 및 거부 등에 관한 사항' />
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader description='사용자의 동의 없이 추가 이용하는 경우, 그에 대한 모든 내용이 작성되어야 합니다.' title='추가적인 이용·제공 판단기준' />
+        <DIRowHeader description='정보주체의 동의 없이 개인정보를 추가적으로 이용·제공하는 경우, 개인정보 보호법령에 명시된 고려사항에 대해 이용이 가능하다고 판단한 기준을 기재해야 합니다.\n수정이 필요한 경우, 이전 단계로 이동하여 내용을 변경하시면 자동으로 반영됩니다.' style={{ marginBottom: 0 }} title='추가적인 이용·제공 판단기준' />
       </DIRow>
       <DIRowDivider />
       <DIRow>
         <Collapse activeKey={data.fni.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='가명정보를 사용하는 경우, 그에 대한 모든 내용이 작성되어야 합니다. 수정을 원하시는 경우, "수정하기" 버튼을 눌러주세요.' title='가명정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'fni', 'usage', e.target.value)} size='small' value={data.fni.usage} />} />} key='1' showArrow={false} >
-            <Button type='default' size='small' style={{ fontSize: 12 }}>수정하기</Button>
+          <Collapse.Panel header={<DIRowHeader description='개인정보처리자는 개인정보 보호법 제28조의2에 따라 개인정보를 가명처리 하거나 가명처리된 정보를 처리하는 경우, 이에 관한 내용을 개인정보 처리방침에 기재해야 합니다.\n‘수정하기’ 버튼을 눌러 내용을 변경하시면 자동으로 저장 및 반영됩니다.' style={{ marginBottom: 0 }} title='가명정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'fni', 'usage', e.target.value)} size='small' value={data.fni.usage} />} />} key='1' showArrow={false} >
+            <Button type='default' size='small' style={{ fontSize: 12, padding: '0 12px' }}>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
       </DIRow>
       <DIRowDivider />
       <DIRow>
         <DIRowHeader title='개인정보보호책임자 및 개인정보 열람청구' />
-        <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. (연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다)' title='개인정보보호 책임자' />
-        <Button size='small' style={{ fontSize: 12, marginBottom: 24 }} type='default'>수정하기</Button>
-        <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. (연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다)' title='개인정보보호 담당부서' />
+        <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. 연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다.' title='개인정보보호 책임자' />
+        <Button size='small' style={{ fontSize: 12, marginBottom: 24, padding: '0 12px' }} type='default'>수정하기</Button>
+        <DIRowSubject description='필요에 따라 개인정보보호 담당부서와 연락처 정보도 함께 안내하는 것을 권장합니다.' title='개인정보보호 담당부서' />
         <Row gutter={8} style={{ marginBottom: 24 }}>
           <Col span={10}>
-            <label style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px' }}>부서명</label>
-            <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'dept', e.target.value)} placeholder='예 : 정보보안팀' value={data.manager.dept} />
+            <DIInputGroup label='부서명'>
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'dept', e.target.value)} placeholder='예 : 정보보안팀' value={data.manager.dept} />
+            </DIInputGroup>
           </Col>
           <Col span={14}>
-            <label style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px' }}>연락처</label>
-            <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'deptContact', e.target.value)} placeholder='예 : privacy@company.com' value={data.manager.deptContact} />
+            <DIInputGroup label='연락처'>
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'deptContact', e.target.value)} placeholder='예 : privacy@company.com' value={data.manager.deptContact} />
+            </DIInputGroup>
           </Col>
         </Row>
-        <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. (연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다)' title='개인정보 열람청구' />
+        <DIRowSubject description='이용자들이 개인정보 열람청구를 신청할 수 있는 부서명과 담당자 및 연락처에 관한 안내는 필수 기재사항입니다.\n*필수기재' title='개인정보 열람청구' />
         <Row gutter={8}>
           <Col span={7}>
-            <label style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px' }}>부서명</label>
-            <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'requestDept', e.target.value)} placeholder='예 : 정보보안팀' value={data.manager.requestDept} />
+            <DIInputGroup label='부서명'>
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'requestDept', e.target.value)} placeholder='예 : 정보보안팀' value={data.manager.requestDept} />
+            </DIInputGroup>
           </Col>
           <Col span={7}>
-            <label style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px' }}>담당자명</label>
-            <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'requestCharger', e.target.value)} placeholder='예 : 김OO' value={data.manager.requestCharger} />
+            <DIInputGroup label='담당자명'>
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'requestCharger', e.target.value)} placeholder='예 : 김OO' value={data.manager.requestCharger} />
+            </DIInputGroup>
           </Col>
           <Col span={10}>
-            <label style={{ color: '#00000073', fontSize: 13, fontWeight: '400', lineHeight: '22px' }}>연락처</label>
-            <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'requestContact', e.target.value)} placeholder='예 : privacy@company.com' value={data.manager.requestContact} />
+            <DIInputGroup label='연락처'>
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, 'manager', 'requestContact', e.target.value)} placeholder='예 : privacy@company.com' value={data.manager.requestContact} />
+            </DIInputGroup>
           </Col>
         </Row>
       </DIRow>
       <DIRowDivider />
       <DIRow>
-        <DIRowHeader description='본 내용은 필수 항목으로 반드시 들어가야합니다.' title='권익침해 구제방법' />
+        <DIRowHeader description='이용자가 개인정보 침해에 대한 구제를 받을 수 있도록 법에 따른 전문기관 및 수사기관 등을 안내해야 합니다. 개인정보처리자를 통한 피해구제가 원만하게 이뤄지지 않을 경우, 정보주체가 추가적으로 피해 구제를 요청할 수 있는 방법에 관한 안내 또한 필수 기재사항입니다. 이에 관하여 개인정보보호위원회에서 권장하는 안내문을 자동으로 입력해드립니다.' style={{ marginBottom: 0 }} title='권익침해 구제방법' />
       </DIRow>
       <DIRowDivider />
-      <DIRow style={{ marginBottom: 40 }}>
-        <DIRowHeader description='영상저보처리기기 운영에 관한 설명 영상저보처리기기 운영에 관한 설명' title='영상정보처리기기(CCTV)를 운영하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'cctv', 'usage', e.target.value)} size='small' value={data.fni.usage} />} />
+      <DIRow style={{ marginBottom: 80 }}>
+        <DIRowHeader description='CCTV 운영자는 ‘영상정보처리기기 운영·관리 방침’을 별도로 정하여 공개해야 합니다. 개인정보 보호법 표준지침에 따라 개인정보 처리방침에 포함시켜 정할 수도 있으나, 가독성을 높이기 위해 별도의 문서로 마련할 것을 권장드립니다.\n‘영상정보처리기기 운영·관리 방침’ 작성 템플릿은 추후 서비스 제공 예정입니다.' style={{ marginBottom: 0 }} title='영상정보처리기기(CCTV)를 운영하나요?' />
       </DIRow>
     </>
   );
 } 
 
-const PreviewDocumentForPIPP: React.FC<any> = ({ data, mode, refTable, stmt }: any): JSX.Element => {
-  // 
+const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refTable, stmt }: any): JSX.Element => {
   const managerTableData: any[] = [];
   if (data.dInfo.manager.dept !== '' || data.dInfo.manager.deptContact !== '') {
     managerTableData.push({ identity: '개인정보 담당부서', charger: data.dInfo.manager.dept !== '' ? [`부서명 : ${data.dInfo.manager.dept}`] : [], contact: data.dInfo.manager.deptContact });
@@ -546,14 +540,14 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, mode, refTable, stmt }: a
 
   return (
     <>
-      <h2 style={{ fontSize: 24, fontWeight: '700', lineHeight: '22px', marginBottom: 30, textAlign: 'center' }}>{stmt.title}</h2>
-      {mode && mode === 'review' ? (
+      <h2 style={{ fontSize: preview ? 18 : 24, fontWeight: '700', lineHeight: '22px', marginBottom: 30, textAlign: 'center' }}>{stmt.title}</h2>
+      {!preview ? (
         <p style={{ color: '#262626', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 32, textAlign: 'right' }}>{data.cInfo.applyAt}</p>
       ) : (<></>)}
       <DDRow>
         <DDRowContent items={[`${stmt.introduction}`]} />
       </DDRow>
-      {mode && mode === 'review' ? (
+      {!preview ? (
         <>
           <DRLabelingHeader description='세부항목은 개인정보 처리방침 본문 확인' title='주요 개인정보 처리 표시' />
           <DRLabelingContent>
@@ -572,11 +566,11 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, mode, refTable, stmt }: a
             {consignment.length > 0 ? (
               <DRLabelingItem type='consignment' tooltip={consignment.length > 3 ? `${consignment.slice(0, 3).join(', ')} 등` : consignment.join(', ')} />
             ) : (<></>)}
-            <DRLabelingItem type='complaint' tooltip='담당부서명, 연락처' />
+            <DRLabelingItem type='complaint' tooltip={`담당부서명 : ${data.dInfo.manager.requestDept}, 연락처 : ${data.dInfo.manager.requestContact}`} />
           </DRLabelingContent>
         </>
       ) : (<></>)}
-      {mode && mode === 'review' ? (
+      {!preview ? (
         <DTCForm>
           <DTCItem content='개인정보의 처리목적, 수집 항목, 보유 및 이용기간' />
           {data.dInfo.child.usage ? (
@@ -885,13 +879,13 @@ const ConfirmForDocumentation: React.FC<any> = ({ data, onChange, refTable }: an
       <DIRow>
         <DIRowHeader description='개인정보 처리방침이 적용될 날짜를 선택하여 주세요.' title='개인정보 처리방침 최종 게재일' />
         <DIRowContent>
-          <DatePicker allowClear disabledDate={(current: moment.Moment) => current && current < moment().endOf('day').days(0) } format='YYYY-MM-DD' mode='date' onChange={(value: any): void => onChange(THIS_STEP, 'applyAt', undefined, value.format('YYYY-MM-DD'))} style={{ width: '30%' }} />
+          <DatePicker allowClear format='YYYY-MM-DD' mode='date' onChange={(value: any): void => onChange(THIS_STEP, 'applyAt', undefined, value.format('YYYY-MM-DD'))} style={{ width: '30%' }} />
         </DIRowContent>
       </DIRow>
       <DIRowDivider />
       <DIRow>
         <Collapse activeKey={data[THIS_STEP].previous.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='개인정보 처리방침 갱신 시, 이전 처리방침도 반드시 확인할 수 있어야합니다. 따라서, 본 처리방침 이전에 게재되어 있는 처리방침의 URL을 입력하여 주세요.' title='이전 개인정보 처리방침이 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'previous', 'usage', e.target.value)} size='small' value={data[THIS_STEP].previous.usage} />} />} key='1' showArrow={false} >
+          <Collapse.Panel header={<DIRowHeader description='개인정보 처리방침 갱신 시, 이전 처리방침도 반드시 확인할 수 있어야합니다. 따라서, 본 처리방침 이전에 게재되어 있는 처리방침의 URL을 입력하여 주세요.' style={{ marginBottom: 0 }} title='이전 개인정보 처리방침이 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => onChange(THIS_STEP, 'previous', 'usage', e.target.value)} size='small' value={data[THIS_STEP].previous.usage} />} />} key='1' showArrow={false} >
             <Row gutter={16}>
               <Col span={8}>
                 <DIRowSubject title='적용일자' />
@@ -923,9 +917,9 @@ const ConfirmForDocumentation: React.FC<any> = ({ data, onChange, refTable }: an
         <DIRowHeader description='최종 단계 완료시, 다음과 같이 개인정보처리방침이 생성됩니다. 게재 후에는 수정 및 삭제가 불가능합니다.' title='개인정보 처리방침 미리보기' />
         <Button type='primary' onClick={onOpen}>작성정보 확인</Button>
       </DIRow>
-      <Modal centered onCancel={onClose} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
-        <PreviewDocumentForPIPP data={data} mode='review' refTable={refTable} stmt={stmt(data.dInfo.name)} />
-      </Modal>
+      <DRModal centered onCancel={onClose} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
+        <PreviewDocumentForPIPP data={data} preview={false} refTable={refTable} stmt={stmt(data.dInfo.name)} />
+      </DRModal>
     </>
   );
 }
@@ -943,4 +937,122 @@ const ListInTable: React.FC<any> = ({ items }: any): JSX.Element => {
       {items.map((item: string, index: number): JSX.Element => <li key={index}>{item}</li>)}
     </ul>
   );
+}
+
+const TestingElement: React.FC<any> = (): JSX.Element => {
+  const [items, setItems] = useState<any[]>([
+    { id: '1', content: 'item 1' },
+    { id: '2', content: 'item 2' },
+    { id: '3', content: 'item 3' },
+    { id: '4', content: 'item 4' },
+    { id: '5', content: 'item 5' }
+  ]);
+
+  // 데이터 순서 변경 함수
+  const reorder = (list: any[], srcIdx: number, destIdx: number): any[] => {
+    // 데이터 배열 복사
+    const copy: any[] = Array.from(list);
+    // 드래그 드롭의 대상인 데이터 추출
+    const [extracted]: any[] = copy.splice(srcIdx, 1); console.log('extracted', extracted);
+    // 추출된 데이터를 목적 인덱스로 이동
+    copy.splice(destIdx, 0, extracted);
+    // 반환
+    return copy;
+  }
+
+  const onDrag = (elem: any) => {
+    if (!elem.destination) {
+      return;
+    }
+    const result: any[] = reorder(items, elem.source.index, elem.destination.index);
+    setItems(result);
+  }
+
+  return (
+    <DragDropContext onDragEnd={onDrag}>
+      <Droppable droppableId='droppable'>
+        {(provided: any) => (
+          <div {...provided.droppableProps} ref={provided.innerRef}>
+            {items.map((item: any, index: number): JSX.Element => (
+              <Draggable key={index} draggableId={item.id} index={index}>
+                {(provided: any) => (
+                  <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                    {item.content}
+                  </div>
+                )}
+              </Draggable>
+            ))}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+}
+
+class PIPPDocList extends Component {
+  constructor (props: any) {
+    super(props);
+    // Set a state
+    this.state = {
+      items: [{ applyAt: '', url: 'a' }, { applyAt: '', url: 'b' }, { applyAt: '', url: 'v' }, { applyAt: '', url: 'c' }, { applyAt: '', url: 'd' }]
+    };
+    this.onDragEnd = this.onDragEnd.bind(this);
+  }
+
+  onDragEnd (elem: any) {
+    if (!elem.destination) return;
+    // Reorder
+    const result: any [] = onReorder(this.state.items, elem.source.index, elem.destination.index);
+    // Update
+    this.setState({ items: result });
+  }
+
+  render() {
+    return (
+      <DragDropContext onDragEnd={this.onDragEnd}>
+        <Droppable droppableId="droppable">
+          {(provided: any) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              {this.state.items.map((item: any, index: number) => (
+                <Draggable key={item.id} draggableId={index.toString()} index={index}>
+                  {(provided: any) => (
+                    <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                      <div style={{ display: 'flex' }}>
+                        <span style={{ alignItems: 'center', display: 'flex', paddingRight: 16 }}>
+                          <AiOutlineMenu />
+                        </span>
+                        <Row gutter={16} style={{ flex: '1' }}>
+                          <Col span={10}>
+                            <DatePicker style={{ width: '100%' }} />
+                          </Col>
+                          <Col span={14}>
+                            <Input placeholder='http://' value={item.url} />
+                          </Col>
+                        </Row>
+                        <span  style={{ alignItems: 'center', display: 'flex', paddingLeft: 16 }}>
+                          <AiOutlineMinusCircle />
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    );
+  }
+};
+
+const onReorder = (list: any[], srcIdx: number, destIdx: number): any[] => {
+  // 데이터 배열 복사
+  const copy: any[] = Array.from(list);
+  // 드래그 드롭의 대상인 데이터 추출
+  const [extracted]: any[] = copy.splice(srcIdx, 1);
+  // 추출된 데이터를 목적 인덱스로 이동
+  copy.splice(destIdx, 0, extracted);
+  // 반환
+  return copy;
 }
