@@ -118,7 +118,7 @@ export const DIRowHeader: React.FC<DIRowHeaderProps> = ({ description, style, ti
   return (
     <div style={{ marginBottom: 8, width: '100%', ...style }}>
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
-        <h2 style={{ color: '#002766', fontSize: 14, fontWeight: 600, lineHeight: '22px', marginBottom: 0 }}>{title}</h2>
+        <h2 style={{ color: '#002766', fontSize: 15, fontWeight: 600, lineHeight: '22px', marginBottom: 0 }}>{title}</h2>
         <>{tools}</>
       </div>
       {description ? description.split('\\n').map((elem: string, index: number): JSX.Element => index === 0 ? (

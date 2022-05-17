@@ -1,14 +1,5 @@
 /** 안정성 확보 추가 조치 - 개인정보보호 인증 (개인정보 처리방침 생성 2단계) */
-export const certificationForPIP: string[] = [
-  'ISMS-P',
-  'ISO/IEC 27701',
-  'ISO/IEC 27001',
-  'ISO/IEC 27017',
-  'ISO/IEC 27018',
-  'ISMS-정보보호관리우수등급',
-  'ISMS-정보보호관리최우수등급',
-  'CSAP'
-];
+export const certificationForPIP: string[] = ['ISMS-P', 'ISO/IEC 27701', 'ISO/IEC 27017', 'ePRIVACY', 'ePRIVACY PLUS', 'PRIVACY'];
 /** 개인정보 위탁 (개인정보 제공 및 위탁 페이지) */
 export const infoFromSubjectInCPI = {
   "본인확인": {
