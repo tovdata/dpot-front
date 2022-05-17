@@ -1,6 +1,6 @@
 import { Tabs } from "antd";
 import styled from "styled-components";
-import { CPITableForm, PFNITableForm, PPITableForm } from "../../components/PCTable";
+import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from "../../components/PCTable";
 
 const { TabPane } = Tabs;
 
@@ -17,6 +17,7 @@ const Page = () => {
         </CustomTabPane>
         <CustomTabPane tab="위탁" key="2">
           <CPITableForm />
+          <CFNITableForm />
         </CustomTabPane>
       </Tabs>
     </>
