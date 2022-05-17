@@ -123,7 +123,7 @@ export const eppiTableHeader: TableHeadersData = {
     required: true,
     width: '150px'
   },
-  address: {
+  location: {
     description: 'a',
     display: 'string',
     name: '위치(주소)',
@@ -152,21 +152,21 @@ export const cpiTableHeader: TableHeadersData = {
     display: 'selectA',
     name: '구분',
     required: true,
-    width: '350px'
+    width: '300px'
   },
   company: {
     description: 'a',
     display: 'selectA',
     name: '위탁받는 자(수탁자)',
     required: true,
-    width: '200px'
+    width: '300px'
   },
   content: {
     description: 'a',
     display: 'itemA',
     name: '위탁 업무',
     required: true,
-    width: '350px'
+    width: '600px'
   },
   isForeign: {
     description: 'a',
@@ -180,14 +180,14 @@ export const cpiTableHeader: TableHeadersData = {
 export const ecpiTableHeader: TableHeadersData = {
   country: {
     description: 'a',
-    display: 'selectA',
+    display: 'string',
     name: '국가',
     required: true,
     width: '150px'
   },
-  address: {
+  location: {
     description: 'a',
-    display: 'selectA',
+    display: 'string',
     name: '위치(주소)',
     required: true,
     width: '250px'

@@ -21,6 +21,19 @@ const StyledSideMenu = styled.div<SideMenuProps>`
   position: relative;
   width: ${OPEN_SIDE_WIDTH}px;
   transition: all 0.42s;
+  &::-webkit-scrollbar {
+  /* 스크롤바 너비 조절하는 부분 */
+    width: 8px; 
+  }
+  &::-webkit-scrollbar,
+  &::-webkit-scrollbar-thumb {
+    overflow:visible;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,.2); 
+  }
+
   .ant-menu-item {
     padding-left: 2.125rem !important;
   }
@@ -169,15 +182,15 @@ const SideMenu = ({ isFixed, open, onOpen }: SideMenuProps): JSX.Element => {
             <Menu.Item key='/pim/cu' icon={<AiOutlineDatabase size={20} />}>
               <Link href='/pim/cu'>수집・이용</Link>
             </Menu.Item>
-            <Menu.Item key='/pim/pc' icon={<AiOutlinePartition size={20}/>}>
+            <Menu.Item key='/pim/pc' icon={<AiOutlinePartition size={20} />}>
               <Link href='/pim/pc'>제공・위탁</Link>
             </Menu.Item>
-            <Menu.Item key='/pim/dest' icon={<AiOutlineFire size={20}/>}>
+            <Menu.Item key='/pim/dest' icon={<AiOutlineFire size={20} />}>
               <Link href='/pim/dest'>파기</Link>
             </Menu.Item>
           </Menu.ItemGroup>
           <Menu.ItemGroup title='문서관리'>
-            <Menu.Item key='/doc/consent' icon={<AiOutlineCheckCircle size={20}/>}>
+            <Menu.Item key='/doc/consent' icon={<AiOutlineCheckCircle size={20} />}>
               <Link href='/doc/consent'>동의서</Link>
             </Menu.Item>
             <Menu.Item key='/doc/pipp' icon={<AiOutlineSolution />}>

@@ -286,46 +286,6 @@ export const personalInfoSelectOptions: any = {
   }
 }
 
-/** 개인정보 위탁 테이블에서 업무명에 따른 예시   */
-export const CompanyFromSubjectInCPI = {
-  "이벤트 경품 물류 업무": {
-    "갤럭시아머니트리㈜": {
-      content: ["서비스 물품 및 이벤트 경품 배송 등의 물류 업무 (경품 종류: 모바일 쿠폰)", "휴대폰 소액 결제"],
-      country: "Korea1",
-      address: "address",
-      charger: ["1", "2", "3"]
-    }
-  },
-  "알림발송": {
-    "엔에이치엔㈜": {
-      content: ["SMS 및 메시지 발송", "(문자, 이메일, 알림톡)발송 서비스", "대량 메일 발송", "SMS", "LMS", "알림톡 발송", "SMS", "알림톡 등 메시지 발송 서비스 제공"],
-      country: "Korea2",
-      address: "address2",
-      charger: ["1", "2", "3"]
-    },
-    "㈜엘지씨엔에스": {
-      content: ["SMS 및 메시지 발송", "카카오톡 알림정보 전송. (문자, 이메일, 알림톡)발송 서비스"],
-      country: "Korea3",
-      address: "address3",
-      charger: ["1", "2", "3"]
-    },
-    "인포뱅크㈜": {
-      content: ["문자서비스 전송 시스템 운영", "문자메세지발송", "문자 수신(MO) 서비스", "SMS", "LMS 알림톡 발송"],
-      country: "Korea4",
-      address: "address4",
-      charger: ["1", "2", "3"]
-    },
-    "슈어엠㈜": {
-      content: ["문자메세지발송", "SMS", "LMS", "알림톡 발송"],
-      country: "Korea5",
-      address: "address5",
-      charger: ["1", "2"]
-    }
-  },
-  // "안심번호 서비스": {
-  //   company: ["㈜케이티", "에스케이텔링크㈜", "세종텔레콤㈜", "㈜LG유플러스"]
-  // }
-}
 
 /** 
  * 개인정보 처리방침에서 사용되는 정적 데이터들
