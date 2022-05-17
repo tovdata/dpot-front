@@ -1,5 +1,4 @@
 import { useState } from 'react';
-
 // Component
 import { CreateDocumentForm, PIPPTable } from '../../components/PIPP';
 

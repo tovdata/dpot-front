@@ -163,7 +163,7 @@ interface EditableTableProps extends TableProps {
 }
 /** [Internal] Properties for table form */
 interface TableFormProps {
-  children: JSX.Element|JSX.Element[];
+  children: JSX.Element | JSX.Element[];
   title: string;
   style?: React.CSSProperties;
 }
@@ -299,7 +299,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
       if (typeof item === 'string') {
         const companys = refData['cpi'][row.subject];
         const infos = companys ? companys[item] : null;
-        infos ? setRow({ ...row, [key]: item, 'country': infos.country, 'address': infos.address, 'charger': infos.charger }) : setRow({ ...row, [key]: item });
+        infos ? setRow({ ...row, [key]: item, 'isForeign': infos.isForeign, 'country': infos.country, 'location': infos.location, 'charger': infos.charger }) : setRow({ ...row, [key]: item });
       } else {
         setRow({ ...row, [key]: item });
       }
@@ -512,7 +512,9 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
   return expandKey ? (
     <OuterTable columns={createColumns(headers, true)} dataSource={dataSource} defaultExpandAllRows expandable={{
       expandedRowRender: (record: any, index: number) => innerHeaders ? (<Table key={index} columns={createColumns(innerHeaders, false)} dataSource={row.id === record.id ? [row] : [record]} pagination={false} />) : (<></>),
-      rowExpandable: (record: any) => (row.id === record.id) ? row[expandKey] : record[expandKey]
+      rowExpandable: (record: any) => {
+        return (row.id === record.id) ? row[expandKey] : record[expandKey]
+      }
     }} footer={footer} loading={isLoading} pagination={pagination ? undefined : false} />
   ) : (
     <Table columns={createColumns(headers, true)} dataSource={dataSource} footer={footer} loading={isLoading} pagination={pagination ? undefined : false} />
@@ -702,20 +704,20 @@ const changeSelectOptions = (key: string, onUpdate: (value: any) => void, ref: a
       }
       break;
     case 'cpi':
-      ref = ref['cpi'];
+      const cpiRef = ref['cpi'];
       // "업무명"이 변경된 경우, 
       // "업무명"에 따라 "수탁자" Select Options를 변경
       if (key === 'subject') {
         if (value && typeof value === "string") {
-          ref[value] ? onUpdate({ ['company']: Object.keys(ref[value]) }) : onUpdate({ ['company']: [] });
+          cpiRef[value] ? onUpdate({ ['company']: Object.keys(cpiRef[value]) }) : onUpdate({ ['company']: [] });
         }
       }
       // "수탁자"가 변경될 경우,
       // "수탁자"에 따라 "위탁 업무" Select Options를 변경
       if (key === 'company') {
-        if (value && typeof value === "string" && ref[row.subject]) {
-          const infos = ref[row.subject][value];
-          infos?.content ? onUpdate({ ['content']: infos.content }) : onUpdate({ ['content']: [], ['charger']: [] });
+        if (value && typeof value === "string" && cpiRef[row.subject]) {
+          const infos = cpiRef[row.subject][value];
+          infos?.content ? onUpdate({ ['content']: infos.content, ['period']: infos.period, ['method']: infos.method }) : onUpdate({ ['content']: [], ['charger']: [] });
         }
       }
       break;
@@ -760,6 +762,7 @@ const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableNam
   const options: SelectOptionsByColumn = {};
   // 각 컬럼(Column)에 따라 부모 컴포넌트로부터 받은 기본 옵션을 포함한 Select 옵션 설정
   Object.keys(headers).forEach((key: string): string[] => defaultSelectOptions && defaultSelectOptions[key] ? options[key] = [...defaultSelectOptions[key]] : []);
+  let items: any = [];
   // 테이블에 따라 초기 각각의 컬럼(Column)의 Select 옵션 설정
   switch (tableName) {
     case 'pi':
@@ -771,11 +774,20 @@ const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableNam
       options['subject'] ? options['subject'].push(...subjectOptions) : options['subject'] = [...subjectOptions];
       break;
     case 'ppi':
-    case 'fpni':
       options['items'] = extractProcessingItems(ref);
       break;
+    case 'pfni':
+      const pfniItems = ref?.map((ppi: any) => ppi.items);
+      // items 중복 체크 후, items 값 추가
+      pfniItems.forEach((pfniArr: any) => pfniArr.forEach((pfniItem: any) => !items.includes(pfniItem) && items.push(pfniItem)));
+      options['items'] = items;
+      break;
     case 'cpi':
-      options['items'] = extractProcessingItems(ref['ppi']);
+      const ppiItems = ref['ppi']?.map((ppi: any) => ppi.items);
+      // items 중복 체크 후, items 값 추가
+      ppiItems.forEach((ppiArr: any) => ppiArr.forEach((ppiItem: any) => !items.includes(ppiItem) && items.push(ppiItem)));
+      options['items'] = items;
+      break;
     default:
       break;
   }

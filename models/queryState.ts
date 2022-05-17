@@ -2,10 +2,10 @@ import { QueryClient, UseMutateFunction } from "react-query";
 import { setDataSource } from "../components/common/Table";
 import { API_STATUS_ERROR, API_STATUS_NOT_FOUND, API_STATUS_REQUEST_ERROR, API_STATUS_UNKNOWN_ERROR } from "./data";
 // 기본 Server URL (환경설정에 따라 다름)
-const baseUrl: string = process.env.NODE_ENV === 'development' ? 'https://dpot-dev.tovdata.com:8081/api/' : '/';
+const baseUrl: string = 'https://dpot-dev.tovdata.com:8081/api/';
 
 /** 테이블 유형 */
-export type PIMType = 'pi'|'fni'|'ppi'|'pfni'|'cpi'|'cfni'|'dpi';
+export type PIMType = 'pi' | 'fni' | 'ppi' | 'pfni' | 'cpi' | 'cfni' | 'dpi';
 export const API_DT_PI: PIMType = 'pi';
 export const API_DT_FNI: PIMType = 'fni';
 export const API_DT_PPI: PIMType = 'ppi';
@@ -25,6 +25,10 @@ interface ListDF {
 /** API로 반환된 데이터 형태 (String) */
 interface StringDF {
   S: string;
+}
+/** API로 반환된 데이터 형태 (Boolean) */
+interface BooleanDF {
+  BOOL: boolean;
 }
 /** POST 요청 시, 필요한 데이터 형식 */
 interface RequestDF {
@@ -53,6 +57,8 @@ const processET = (rawData: any[]): any[] => {
         extracted[key] = ((temp as ListDF).L).map((elem: StringDF): string => elem.S);
       } else if ('S' in temp) {
         extracted[key] = (temp as StringDF).S;
+      } else if ('BOOL' in temp) {
+        extracted[key] = (temp as BooleanDF).BOOL;
       }
     }
     // 추출 및 가공된 데이터 저장
