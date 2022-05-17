@@ -862,7 +862,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refTable, stmt }
             <>
               <DDRowItemList items={['가명정보 처리의 위탁에 관한 사항']} style={{ marginBottom: 4 }} />
               <ReadableTable columns={[
-                { title: '위탁받는 자(수탁자)', dataIndex: 'recipient', key: 'recipent' },
+                { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company' },
                 { title: '위탁 업무', dataIndex: 'content', key: 'content' }
               ]} dataSource={refTable.cfni} />
             </>
