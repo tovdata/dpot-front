@@ -6,7 +6,7 @@ import { ModalToInputURL } from './common/Modal';
 import { EditableTable, EditableURLTableForm } from "./common/Table";
 // Data (header)
 import { cpiTableHeader, ecpiTableHeader, eppiTableHeader, ppiTableHeader } from '../models/static/header';
-import { API_DT_CPI, API_DT_PFNI, API_DT_PPI, getListForPIM, processPIMData, setQueryData } from '../models/queryState';
+import { API_DT_CFNI, API_DT_CPI, API_DT_PFNI, API_DT_PI, API_DT_PPI, getListForPIM, processPIMData, setQueryData } from '../models/queryState';
 // Type
 import { SelectOptionsByColumn } from '../models/type';
 // Status
@@ -19,7 +19,7 @@ const PPITable: React.FC<any> = ({ url }: any): JSX.Element => {
   // 서버로부터 데이블 데이터 가져오기
   const { isLoading, data } = useQuery(API_DT_PPI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PPI));
   // Get a state (for select options)
-  const ref: any = useRecoilValue(GetPersonalInfoSelector);
+  const { isLoading: piLoading, data: piData } = useQuery(API_DT_PI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PI));
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
   const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PPI, val.mode, val.data));
@@ -44,7 +44,7 @@ const PPITable: React.FC<any> = ({ url }: any): JSX.Element => {
   };
 
   // Return an element
-  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={ppiTableHeader} innerHeaders={eppiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={piLoading ? [] : piData} tableName={TYPE_PPI} url={url} />);
+  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={ppiTableHeader} innerHeaders={eppiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={piLoading ? [] : piData} tableName={API_DT_PPI} url={url} />);
 }
 /**
  * [Component] 개인정보 제공 테이블 Form
@@ -72,7 +72,7 @@ export const PFNITable: React.FC<any> = ({ url }: any) => {
   // 서버로부터 데이블 데이터 가져오기
   const { isLoading, data } = useQuery(API_DT_PFNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PFNI));
   // Get a state (for select options)
-  const ref: any = useRecoilValue(GetPersonalInfoSelector);
+  const { isLoading: pfniLoading, data: pfniData } = useQuery(API_DT_PFNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PFNI));
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
   const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PFNI, val.mode, val.data));
@@ -98,7 +98,7 @@ export const PFNITable: React.FC<any> = ({ url }: any) => {
   };
 
   // Return an element
-  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={ppiTableHeader} innerHeaders={eppiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={fniLoading ? [] : fniData} tableName={TYPE_PFNI} url={url} />);
+  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={ppiTableHeader} innerHeaders={eppiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={pfniLoading ? [] : pfniData} tableName={API_DT_PFNI} url={url} />);
 };
 /**
  * [Component] 개인정보 제공 테이블 Form
@@ -125,10 +125,11 @@ export const PFNITableForm: React.FC<any> = ({ mode }: any): JSX.Element => {
 export const CPITable: React.FC<any> = ({ url }: any): JSX.Element => {
   // 서버로부터 데이블 데이터 가져오기
   const { isLoading, data } = useQuery(API_DT_CPI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_CPI));
+  const { isLoading: ppiLoading, data: ppiData } = useQuery(API_DT_PPI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PPI));
   // Get a state (for select options)
   const ref: any = {
     'ppi': ppiLoading ? [] : ppiData,
-    'cpi': useRecoilValue(GetCPIDefaultSelector)
+    'cpi': isLoading ? []: data
   }
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = {
@@ -155,7 +156,7 @@ export const CPITable: React.FC<any> = ({ url }: any): JSX.Element => {
   }
 
   // Return an element
-  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={cpiTableHeader} innerHeaders={ecpiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={ref} tableName={TYPE_CPI} url={url} />);
+  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={cpiTableHeader} innerHeaders={ecpiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={ref} tableName={API_DT_CPI} url={url} />);
 }
 /**
  * [Component] 개인정보 위탁 테이블 Form
@@ -181,29 +182,29 @@ export const CPITableForm: React.FC<any> = ({ mode }: any): JSX.Element => {
  */
 export const CFNITable: React.FC<any> = ({ url }: any): JSX.Element => {
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(TYPE_CFNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_CFNI));
+  const { isLoading, data } = useQuery(API_DT_CFNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_CFNI));
 
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_CFNI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_CFNI, val.mode, val.data));
 
   // [Event handler] 행(Row) 추가 이벤트
-  const onAdd = (record: any): void => setQueryData(queryClient, TYPE_CFNI, mutate, 'create', record);
+  const onAdd = (record: any): void => setQueryData(queryClient, API_DT_CFNI, mutate, 'create', record);
   // [Event handler] 행(Row) 삭제 이벤트
-  const onDelete = (record: any): void => setQueryData(queryClient, TYPE_CFNI, mutate, 'delete', record);
+  const onDelete = (record: any): void => setQueryData(queryClient, API_DT_CFNI, mutate, 'delete', record);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = (record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
-      setQueryData(queryClient, TYPE_CFNI, mutate, 'add', record);
+      setQueryData(queryClient, API_DT_CFNI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, TYPE_CFNI, mutate, 'save', record);
+      setQueryData(queryClient, API_DT_CFNI, mutate, 'save', record);
       return true;
     }
   }
 
   // Return an element
-  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} expandKey='isForeign' headers={cpiTableHeader} innerHeaders={ecpiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={[]} tableName={TYPE_CFNI} url={url} />);
+  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} expandKey='isForeign' headers={cpiTableHeader} innerHeaders={ecpiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={[]} tableName={API_DT_CFNI} url={url} />);
 }
 /**
  * [Component] 개인정보 위탁 테이블 Form
