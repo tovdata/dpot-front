@@ -6,6 +6,14 @@ const baseUrl: string = process.env.NODE_ENV === 'development' ? 'https://dpot-d
 
 /** 테이블 유형 */
 export type PIMType = 'pi'|'fni'|'ppi'|'pfni'|'cpi'|'cfni'|'dpi';
+export const API_DT_PI: PIMType = 'pi';
+export const API_DT_FNI: PIMType = 'fni';
+export const API_DT_PPI: PIMType = 'ppi';
+export const API_DT_CPI: PIMType = 'cpi';
+export const API_DT_PFNI: PIMType = 'pfni';
+export const API_DT_CFNI: PIMType = 'cfni';
+export const API_DT_LIST: PIMType[] = [API_DT_PI, API_DT_FNI, API_DT_PPI, API_DT_CPI, API_DT_PFNI, API_DT_CFNI];
+
 /** API로 반환된 데이터 형태 (Map) */
 interface MapDF {
   M: any;

@@ -10,18 +10,14 @@ import { GetPersonalInfoSelectOptionsSelector, GetPersonalInfoSelector } from '.
 // Type
 import { SelectOptionsByColumn } from '../models/type';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { getListForPIM, PIMType, processPIMData, setQueryData } from '../models/queryState';
-
-// Set a type
-const TYPE_PI: PIMType = 'pi';
-const TYPE_FNI: PIMType = 'fni';
+import { API_DT_PI, API_DT_FNI, getListForPIM, processPIMData, setQueryData } from '../models/queryState';
 
 /**
  * [Component] 가명정보 수집 및 이용 테이블
  */
 export const FNITable: React.FC<any> = (): JSX.Element => {
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(TYPE_FNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_FNI));
+  const { isLoading, data } = useQuery(API_DT_FNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_FNI));
   // Get a state (for select options)
   const ref: any = useRecoilValue(GetPersonalInfoSelector);
   // 기본적인 셀렉트 옵션 데이터 (정적)
@@ -31,19 +27,19 @@ export const FNITable: React.FC<any> = (): JSX.Element => {
 
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_FNI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_FNI, val.mode, val.data));
 
   // [Event handler] 행(Row) 추가 이벤트
-  const onAdd = (record: any): void => setQueryData(queryClient, TYPE_FNI, mutate, 'create', record);
+  const onAdd = (record: any): void => setQueryData(queryClient, API_DT_FNI, mutate, 'create', record);
   // [Event handler] 행(Row) 삭제 이벤트
-  const onDelete = (record: any): void => setQueryData(queryClient, TYPE_FNI, mutate, 'delete', record);
+  const onDelete = (record: any): void => setQueryData(queryClient, API_DT_FNI, mutate, 'delete', record);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = (record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
-      setQueryData(queryClient, TYPE_FNI, mutate, 'add', record);
+      setQueryData(queryClient, API_DT_FNI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, TYPE_FNI, mutate, 'save', record);
+      setQueryData(queryClient, API_DT_FNI, mutate, 'save', record);
       return true;
     }
   }
@@ -66,7 +62,7 @@ export const FNITableForm: React.FC<any> = (): JSX.Element => {
  */
 export const PITable: React.FC<any> = (): JSX.Element => {
   // 서버로부터 테이블 데이터 가져오기
-  const { isLoading, data } = useQuery(TYPE_PI, () => getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_PI));
+  const { isLoading, data } = useQuery(API_DT_PI, () => getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PI));
   // 셀렉트 옵션 데이터 가져오기 (Using recoil)
   const ref: any = useRecoilValue(GetPersonalInfoSelectOptionsSelector);
   // 기본적인 셀렉트 옵션 데이터 (정적)
@@ -76,22 +72,22 @@ export const PITable: React.FC<any> = (): JSX.Element => {
   };
 
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_PI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PI, val.mode, val.data));
 
   // [Event handler] 행(Row) 추가 이벤트
-  const onAdd = (record: any): void => setQueryData(queryClient, TYPE_PI, mutate, 'create', record);
+  const onAdd = (record: any): void => setQueryData(queryClient, API_DT_PI, mutate, 'create', record);
   // [Event handler] 행(Row) 삭제 이벤트
-  const onDelete = (record: any): void => setQueryData(queryClient, TYPE_PI, mutate, 'delete', record);
+  const onDelete = (record: any): void => setQueryData(queryClient, API_DT_PI, mutate, 'delete', record);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = (record: any): boolean => {
     if (record.essentialItems.length === 0 && record.selectionItems.length === 0) {
       createSimpleWarningNotification('필수 항목과 선택 항목 중에서 하나의 항목을 필수로 입력해야 합니다.');
       return false;
     } else if (new RegExp('^npc_').test(record.id)) {
-      setQueryData(queryClient, TYPE_PI, mutate, 'add', record);
+      setQueryData(queryClient, API_DT_PI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, TYPE_PI, mutate, 'save', record);
+      setQueryData(queryClient, API_DT_PI, mutate, 'save', record);
       return true;
     }
   }

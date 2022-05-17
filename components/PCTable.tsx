@@ -6,42 +6,36 @@ import { ModalToInputURL } from './common/Modal';
 import { EditableTable, EditableURLTableForm } from "./common/Table";
 // Data (header)
 import { cpiTableHeader, ecpiTableHeader, eppiTableHeader, ppiTableHeader } from '../models/static/header';
-import { getListForPIM, PIMType, processPIMData, setQueryData } from '../models/queryState';
+import { API_DT_CPI, API_DT_PFNI, API_DT_PPI, getListForPIM, processPIMData, setQueryData } from '../models/queryState';
 // Type
 import { SelectOptionsByColumn } from '../models/type';
 // Status
 import { GetCPIDefaultSelector, GetPersonalInfoSelector } from '../models/state';
-
-// Set a type
-const TYPE_PPI: PIMType = 'ppi';
-const TYPE_CPI: PIMType = 'cpi';
-const TYPE_PFNI: PIMType = 'pfni';
-const TYPE_CFNI: PIMType = 'cfni';
 
 /** 
  * [Component] 개인정보 제공 테이블
  */
 const PPITable: React.FC<any> = ({ url }: any): JSX.Element => {
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(TYPE_PPI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_PPI));
+  const { isLoading, data } = useQuery(API_DT_PPI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PPI));
   // Get a state (for select options)
   const ref: any = useRecoilValue(GetPersonalInfoSelector);
 
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_PPI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PPI, val.mode, val.data));
 
   // [Event handler] 행(Row) 추가 이벤트
-  const onAdd = (record: any): void => setQueryData(queryClient, TYPE_PPI, mutate, 'create', record);
+  const onAdd = (record: any): void => setQueryData(queryClient, API_DT_PPI, mutate, 'create', record);
   // [Event handler] 행(Row) 삭제 이벤트
-  const onDelete = (record: any): void => setQueryData(queryClient, TYPE_PPI, mutate, 'delete', record);
+  const onDelete = (record: any): void => setQueryData(queryClient, API_DT_PPI, mutate, 'delete', record);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = (record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
-      setQueryData(queryClient, TYPE_PPI, mutate, 'add', record);
+      setQueryData(queryClient, API_DT_PPI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, TYPE_PPI, mutate, 'save', record);
+      setQueryData(queryClient, API_DT_PPI, mutate, 'save', record);
       return true;
     }
   };
@@ -73,25 +67,25 @@ export const PPITableForm: React.FC<any> = ({ mode }: any): JSX.Element => {
  */
 export const PFNITable: React.FC<any> = ({ url }: any) => {
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(TYPE_PFNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_PFNI));
+  const { isLoading, data } = useQuery(API_DT_PFNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PFNI));
   // Get a state (for select options)
   const ref: any = useRecoilValue(GetPersonalInfoSelector);
 
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_PFNI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PFNI, val.mode, val.data));
 
   // [Event handler] 행(Row) 추가 이벤트
-  const onAdd = (record: any): void => setQueryData(queryClient, TYPE_PFNI, mutate, 'create', record);
+  const onAdd = (record: any): void => setQueryData(queryClient, API_DT_PFNI, mutate, 'create', record);
   // [Event handler] 행(Row) 삭제 이벤트
-  const onDelete = (record: any): void => setQueryData(queryClient, TYPE_PFNI, mutate, 'delete', record);
+  const onDelete = (record: any): void => setQueryData(queryClient, API_DT_PFNI, mutate, 'delete', record);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = (record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
-      setQueryData(queryClient, TYPE_PFNI, mutate, 'add', record);
+      setQueryData(queryClient, API_DT_PFNI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, TYPE_PFNI, mutate, 'save', record);
+      setQueryData(queryClient, API_DT_PFNI, mutate, 'save', record);
       return true;
     }
   };
@@ -123,7 +117,7 @@ export const PFNITableForm: React.FC<any> = ({ mode }: any): JSX.Element => {
  */
 export const CPITable: React.FC<any> = ({ url }: any): JSX.Element => {
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(TYPE_CPI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_CPI));
+  const { isLoading, data } = useQuery(API_DT_CPI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_CPI));
   // Get a state (for select options)
   const ref: any = {
     'ppi': useRecoilValue(GetPersonalInfoSelector),
@@ -136,19 +130,19 @@ export const CPITable: React.FC<any> = ({ url }: any): JSX.Element => {
 
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', TYPE_CPI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_CPI, val.mode, val.data));
 
   // [Event handler] 행(Row) 추가 이벤트
-  const onAdd = (record: any): void => setQueryData(queryClient, TYPE_CPI, mutate, 'create', record);
+  const onAdd = (record: any): void => setQueryData(queryClient, API_DT_CPI, mutate, 'create', record);
   // [Event handler] 행(Row) 삭제 이벤트
-  const onDelete = (record: any): void => setQueryData(queryClient, TYPE_CPI, mutate, 'delete', record);
+  const onDelete = (record: any): void => setQueryData(queryClient, API_DT_CPI, mutate, 'delete', record);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = (record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
-      setQueryData(queryClient, TYPE_CPI, mutate, 'add', record);
+      setQueryData(queryClient, API_DT_CPI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, TYPE_CPI, mutate, 'save', record);
+      setQueryData(queryClient, API_DT_CPI, mutate, 'save', record);
       return true;
     }
   }
