@@ -1,6 +1,6 @@
 import { useState } from 'react';
 // Component
-import { CreateDocumentForm, PIPPTable } from '../../components/PIPP';
+import { CreatePIPPForm, PIPPMain } from '../../components/PIPP';
 
 /** [Interface] Document info */
 interface DocumentInfo {
@@ -22,9 +22,9 @@ const Page = () => {
   return (
     <>
       {doc.uuid === '' ? (
-        <PIPPTable onCreate={onCreate} />
+        <PIPPMain onCreate={onCreate} />
       ) : (
-        <CreateDocumentForm onBack={onBack} />
+        <CreatePIPPForm onBack={onBack} />
       )}
     </>
   );
