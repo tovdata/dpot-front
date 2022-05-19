@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 // Component
 import { Col, Divider, Modal, Row, Tooltip } from 'antd';
 // Icon
@@ -15,6 +15,7 @@ import IconComplaint from '../../public/images/complaint.svg';
  */
 interface ViewProps {
   preview?: boolean;
+  self?: any;
 }
 /** [Interface] Properties for DIInputGroup */
 interface DIInputGroupProps {
@@ -33,6 +34,7 @@ interface DIRowDividerProps {
 /** [Interface] Properties for DIRowHeader */
 interface DIRowHeaderProps {
   description?: string;
+  required?: boolean;
   style?: React.CSSProperties,
   title: string,
   tools?: JSX.Element|JSX.Element[];
@@ -50,6 +52,7 @@ interface DDRowHeaderProps extends ViewProps {
 interface DDRowItemListProps extends ViewProps {
   items?: string[];
   level?: number;
+  links?: string[];
   style?: React.CSSProperties;
 }
 /** [Interface] Properties for DRLabelingHeader */
@@ -77,7 +80,7 @@ interface DTCItemProps extends ViewProps {
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Input group */
 export const DIInputGroup: React.FC<DIInputGroupProps> = ({ children, label, style }: DIInputGroupProps): JSX.Element => {
   return (
-    <div style={{ position: 'relative', ...style }}>
+    <div style={{ fontFamily: 'Pretendard', position: 'relative', ...style }}>
       {label ? (
         <label style={{ color: '#00000073', display: 'block', fontSize: 12, fontWeight: '500', lineHeight: '22px', marginBottom: 2 }}>{label}</label>
       ) : (<></>)}
@@ -101,49 +104,59 @@ export const DIRow = styled.div`
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row content */
 export const DIRowContent: React.FC<DIRowContentProps> = ({ children }: DIRowContentProps): JSX.Element => {
   return (
-    <div style={{ position: 'relative' }}>{children}</div>
+    <div style={{ fontFamily: 'Pretendard', position: 'relative' }}>{children}</div>
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row divider */
 export const DIRowDivider: React.FC<DIRowDividerProps> = ({ marginH }: DIRowDividerProps): JSX.Element => {
   return (
-    <Divider dashed style={{ marginBottom: marginH ? marginH : 30, marginTop: marginH ? marginH : 30 }} />
+    <Divider dashed style={{ fontFamily: 'Pretendard', marginBottom: marginH ? marginH : 30, marginTop: marginH ? marginH : 30 }} />
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row header */
-export const DIRowHeader: React.FC<DIRowHeaderProps> = ({ description, style, title, tools }: DIRowHeaderProps): JSX.Element => {
+export const DIRowHeader: React.FC<DIRowHeaderProps> = ({ description, required, style, title, tools }: DIRowHeaderProps): JSX.Element => {
   // Description style
   const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 12, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
   // Return an element
   return (
-    <div style={{ marginBottom: 8, width: '100%', ...style }}>
+    <div style={{ fontFamily: 'Pretendard', marginBottom: 8, width: '100%', ...style }}>
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
-        <h2 style={{ color: '#002766', fontSize: 15, fontWeight: 600, lineHeight: '22px', marginBottom: 0 }}>{title}</h2>
+        <h2 style={{ color: '#002766', fontSize: 15, fontWeight: 600, lineHeight: '22px', marginBottom: 0 }}>
+          {title}
+          {required ? (
+            <span style={{ color: '#FF4D4F', marginLeft: 6 }}>*</span>
+          ) : (<></>)}
+        </h2>
         <>{tools}</>
       </div>
       {description ? description.split('\\n').map((elem: string, index: number): JSX.Element => index === 0 ? (
-        <p style={{ ...dStyle, marginTop: 8 }}>{elem}</p>
+        <p key={index} style={{ ...dStyle, marginTop: 8 }}>{elem}</p>
       ) : (
-        <p style={{ ...dStyle }}>{elem}</p>
+        <p key={index} style={{ ...dStyle }}>{elem}</p>
       )) : (<></>)}
     </div>
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row subject */
-export const DIRowSubject: React.FC<DIRowHeaderProps> = ({ description, style, title, tools }: DIRowHeaderProps): JSX.Element => {
+export const DIRowSubject: React.FC<DIRowHeaderProps> = ({ description, required, style, title, tools }: DIRowHeaderProps): JSX.Element => {
   // Description style
   const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 12, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
   // Return an element
   return (
     <div style={{ marginBottom: 8, width: '100%', ...style }}>
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
-        <h2 style={{ color: '#000000', fontSize: 14, fontWeight: 400, lineHeight: '22px', marginBottom: 0 }}>{title}</h2>
+        <h2 style={{ color: '#000000', fontSize: 14, fontWeight: 400, lineHeight: '22px', marginBottom: 0 }}>
+          {title}
+          {required ? (
+            <span style={{ color: '#FF4D4F', marginLeft: 6 }}>*</span>
+          ) : (<></>)}
+        </h2>
         <>{tools}</>
       </div>
       {description ? description.split('\\n').map((elem: string, index: number): JSX.Element => index === 0 ? (
-        <p style={{ ...dStyle, marginTop: 8 }}>{elem}</p>
+        <p key={index} style={{ ...dStyle, marginTop: 8 }}>{elem}</p>
       ) : (
-        <p style={{ ...dStyle }}>{elem}</p>
+        <p key={index} style={{ ...dStyle }}>{elem}</p>
       )) : (<></>)}
     </div>
   );
@@ -153,30 +166,32 @@ export const DIRowSubject: React.FC<DIRowHeaderProps> = ({ description, style, t
  * 미리보기 부분
  */
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row */
-export const DDRow = styled.div`
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 22px;
-  margin-bottom: 40px;
-`;
+export const DDRow: React.FC<any> = ({ children, self }: any): JSX.Element => {
+  return (
+    <div ref={self} style={{ fontFamily: 'Pretendard', fontSize: 13, fontWeight: '400', lineHeight: '22px', marginBottom: 40 }}>
+      {children}
+    </div>
+  );
+}
+
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row content */
 export const DDRowContent: React.FC<DDRowContentProps> = ({ items, preview, style }: DDRowContentProps): JSX.Element => {
   return items ? (
     <div style={{ marginBottom: 8, ...style }}>
-      {items.map((item: string, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>{item}</p>))}
+      {items.map((item: string|JSX.Element, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>{item}</p>))}
     </div>
   ) : (<></>);
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row header */
-export const DDRowHeader: React.FC<DDRowHeaderProps> = ({ preview, title }: DDRowHeaderProps): JSX.Element => {
+export const DDRowHeader: React.FC<DDRowHeaderProps> = ({ preview, self, title }: DDRowHeaderProps): JSX.Element => {
   return (
-    <h2 style={{ color: '#000000', fontSize: preview ? 14 : 16, fontWeight: '600', lineHeight: '22px', marginBottom: 8 }}>
+    <h2 ref={self} style={{ color: '#000000', fontSize: preview ? 14 : 16, fontWeight: '600', lineHeight: '22px', marginBottom: 8 }}>
       ◾️ {title}
     </h2>
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row item list */
-export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, preview, style }: DDRowItemListProps): JSX.Element => {
+export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, links, preview, style }: DDRowItemListProps): JSX.Element => {
   // 목록 레벨에 따른 스타일 정의
   let styleByType: React.CSSProperties;
   switch(level) {
@@ -190,7 +205,14 @@ export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, prev
   // Return an element
   return items ? (
     <ul style={{ ...styleByType, ...style }}>
-      {items.map((item: string, index: number): JSX.Element => (<li key={index}>{item}</li>))}
+      {items.map((item: string, index: number): JSX.Element => (
+        <li key={index} style={{ fontSize: 14 }}>
+          {item}
+          {links && links[index] ? (
+            <a target='_blank' href={links[index]} style={{ marginLeft: 6, textDecoration: 'underline' }} rel='noreferrer'>보기</a>
+          ) : (<></>)}
+        </li>
+      ))}
     </ul>
   ) : (<></>);
 }

@@ -3,33 +3,33 @@ export const defaultPIPPData: any = {
     cookie: {
       purpose: [],
       disadvantage: [],
-      usage: 'none'
+      usage: undefined
     },
     webLog: {
       purpose: [],
       method: [],
       disadvantage: '서비스 이용에 불이익은 없습니다. 다만, 서비스 개선을 위한 통계 분석에 영향을 미칠 수 있습니다.',
-      usage: 'none'
+      usage: undefined
     },
     advertising: {
       items: [],
       method: '이용자가 서비스 방문 및 실행 시 자동 수집',
       purpose: '이용자의 관심, 성향에 기반한 개인 맞춤형 상품추천 서비스(광고 포함)를 제공',
       period: '',
-      usage: 'none'
+      usage: undefined
     },
     thirdParty: {
       company: [],
       items: [],
       method: '이용자가 당사 웹 사이트를 방문하거나 앱을 실행할 때, 자동 수집 및 전송',
       period: '',
-      usage: 'none'
+      usage: undefined
     },
     additional: {
       items: [],
       purpose: [],
       period: '',
-      usage: 'none'
+      usage: undefined
     }
   },
   dInfo: {
@@ -37,30 +37,31 @@ export const defaultPIPPData: any = {
     period: [],
     child: {
       method: [],
-      usage: 'none'
+      usage: undefined
     },
     provision: {
-      usage: 'none'
+      usage: undefined
     },
     consignment: {
-      usage: 'none'
+      usage: undefined
     },
     destructionUnused: {
-      type: 'none'
+      type: undefined
     },
     safety: {
-      physical: 'none',
+      physical: undefined,
       activity: '',
       certification: [],
-      usage: 'none'
+      usage: undefined
     },
     fni: {
-      usage: 'none'
+      usage: undefined
     },
     manager: {
       charger: {
         name: '',
-        position: ''
+        position: '',
+        contact: ''
       },
       department: {
         name: '',
@@ -77,7 +78,7 @@ export const defaultPIPPData: any = {
     applyAt: '',
     previous: {
       url: '',
-      usage: 'none'
+      usage: undefined
     }
   }
 }

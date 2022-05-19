@@ -11,6 +11,7 @@ import { GetPersonalInfoSelectOptionsSelector, GetPersonalInfoSelector } from '.
 import { SelectOptionsByColumn } from '../models/type';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { API_DT_PI, API_DT_FNI, getListForPIM, processPIMData, setQueryData } from '../models/queryState';
+import { Button } from 'antd';
 
 /**
  * [Component] 가명정보 수집 및 이용 테이블
@@ -51,8 +52,12 @@ export const FNITable: React.FC<any> = (): JSX.Element => {
  * [Component] 가명정보 수집 및 이용 테이블 Form
  */
 export const FNITableForm: React.FC<any> = (): JSX.Element => {
+  const tools: JSX.Element = (
+    <Button type='default'>가명정보 입력 가이드</Button>
+  );
+  // 컴포넌트 반환
   return (
-    <EditableTableForm style={{ marginBottom: '4.625rem' }} title='가명정보 수집・이용 현황'>
+    <EditableTableForm description='통계작성, 과학적 연구, 공익적 기록보존을 위한 경우에는 사용자의 동의없이 가명정보를 처리할 수 있어요.\n보유중인 개인정보를 가명처리하여 이용하거나, 가명정보를 제공받아 사내에서 이용하고 있는 경우, 업무별로 나누어 가명정보 현황을 입력하세요.' style={{ marginBottom: '4.625rem' }} title='가명정보 수집・이용 현황' tools={tools}>
       <FNITable />
     </EditableTableForm>
   );
@@ -99,8 +104,12 @@ export const PITable: React.FC<any> = (): JSX.Element => {
  * [Component] 개인정보 수집 및 이용 테이블 Form
  */
 export const PITableForm: React.FC<any> = (): JSX.Element => {
+  const tools: JSX.Element = (
+    <Button type='default'>현황 정보 입력 가이드</Button>
+  );
+  // 컴포넌트 반환
   return (
-    <EditableTableForm title='개인정보 수집・이용 현황'>
+    <EditableTableForm description='사용자로부터 직접 입력 받거나, 제3자로부터 제공받아 사내에서 이용하고 있는 개인정보 현황을 업무별로 나누어 입력하세요.' title='개인정보 수집・이용 현황' tools={tools}>
       <PITable />
     </EditableTableForm>
   );
