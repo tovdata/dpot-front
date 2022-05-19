@@ -1,9 +1,14 @@
 import { QueryClient, UseMutateFunction } from "react-query";
 import { setDataSource } from "../components/common/Table";
-import { API_STATUS_ERROR, API_STATUS_NOT_FOUND, API_STATUS_REQUEST_ERROR, API_STATUS_UNKNOWN_ERROR } from "./data";
 // 기본 Server URL (환경설정에 따라 다름)
 const baseUrl: string = 'https://dpot-dev.tovdata.com:8081/api/';
 
+/** API Response Status */
+export const API_STATUS_OK = 'OK';
+export const API_STATUS_ERROR = 'ERROR';
+export const API_STATUS_NOT_FOUND = 'NOT_FOUND';
+export const API_STATUS_REQUEST_ERROR = 'REQUEST_ERROR';
+export const API_STATUS_UNKNOWN_ERROR = 'UNKNOWN_ERROR';
 /** 테이블 유형 */
 export type PIMType = 'pi' | 'fni' | 'ppi' | 'pfni' | 'cpi' | 'cfni' | 'dpi';
 export const API_DT_PI: PIMType = 'pi';

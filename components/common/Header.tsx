@@ -131,7 +131,7 @@ export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, title, st
   // Return an element
   return (
     <StyledPageHeader>
-      <Row style={{ marginBottom: '4.5rem' }}>
+      <Row style={{ marginBottom: '2.5rem' }}>
         <Col flex='auto'>
           <StyledPageHeaderHeading>
             <StyledPageBackIcon onClick={onBackRoute}>

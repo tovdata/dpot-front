@@ -57,11 +57,8 @@ export const StyledTableForm = styled.div`
   }
 `;
 // Styled element (TableFormHeader)
-const StyledTableFormHeader = styled('div') <{ flexStart?: boolean }>`
-  align-items: center;
-  display: flex;
-  justify-content: ${props => props.flexStart ? 'flex-start' : 'space-between'};
-  margin-bottom: 1.75rem;
+const StyledTableFormHeader = styled.div`
+  margin-bottom: 28px;
   user-select: none;
 `;
 // Styled element (TableTitle)
@@ -69,6 +66,7 @@ const StyledTableTitle = styled.h2`
   font-size: ${FS_HXXS};
   font-weight: 600;
   line-height: ${LH_HXXS};
+  margin-bottom: 0;
 `;
 // Styled element (TableTools)
 const StyledTableTools = styled.div``;
@@ -164,7 +162,9 @@ interface EditableTableProps extends TableProps {
 /** [Internal] Properties for table form */
 interface TableFormProps {
   children: JSX.Element | JSX.Element[];
+  description?: string;
   title: string;
+  tools?: JSX.Element | JSX.Element[];
   style?: React.CSSProperties;
 }
 /** [Interface] Properties for table */
@@ -175,6 +175,7 @@ interface TableProps {
 }
 /** [Interface] Properties for table form */
 interface TableFormHeaderProps {
+  description?: string;
   title: string;
   tools?: JSX.Element | JSX.Element[];
 }
@@ -523,39 +524,32 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
 /**
  * [Component] Editable table form
  */
-export const EditableTableForm = ({ children, style, title }: TableFormProps): JSX.Element => {
+export const EditableTableForm = ({ children, description, style, title, tools }: TableFormProps): JSX.Element => {
   return (
     <StyledTableForm style={style}>
-      <StyledTableFormHeader>
-        <StyledTableTitle>{title}</StyledTableTitle>
-      </StyledTableFormHeader>
+      <TableFormHeader description={description} title={title} tools={tools} />
       {children}
     </StyledTableForm>
   );
 }
 
 /**
- * [Component] Editable url table form
- */
-export const EditableURLTableForm = ({ children, disabled, onClickURL, style, title }: UrlTableFormProps): JSX.Element => {
-  return (
-    <StyledTableForm style={style}>
-      <StyledTableFormHeader>
-        <StyledTableTitle>{title}</StyledTableTitle>
-        <URLButton disabled={disabled} onClick={onClickURL}><LinkOutlined />URL 입력</URLButton>
-      </StyledTableFormHeader>
-      {children}
-    </StyledTableForm>
-  );
-}
-/**
  * [Component] Table form header
  */
-export const TableFormHeader = ({ title, tools }: TableFormHeaderProps): JSX.Element => {
+export const TableFormHeader = ({ description, title, tools }: TableFormHeaderProps): JSX.Element => {
   return (
     <StyledTableFormHeader>
-      <StyledTableTitle>{title}</StyledTableTitle>
-      <StyledTableTools>{tools}</StyledTableTools>
+      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
+        <StyledTableTitle>{title}</StyledTableTitle>
+        <StyledTableTools>{tools}</StyledTableTools>
+      </div>
+      {description ? (
+        <div style={{ marginTop: 8 }}>
+          {description.split('\\n').map((elem: string, index: number): JSX.Element => (
+            <p key={index} style={{ color: '#8C8C8C', fontSize: 14, fontWeight: '500', lineHeight: '22px', margin: 0 }}>{elem}</p>
+          ))}
+        </div>
+      ) : (<></>)}
     </StyledTableFormHeader>
   );
 }
@@ -567,11 +561,11 @@ const TableHeader = ({ description, name }: TableHeaderProps): JSX.Element => {
     <StyledTableHeader>
       <>{name}</>
       {description ? (
-        <Popover content={description} trigger='hover'>
+        <Tooltip title={description} trigger='hover'>
           <StyledTableHeaderQuestionItem>
             <AiOutlineQuestionCircle />
           </StyledTableHeaderQuestionItem>
-        </Popover>
+        </Tooltip>
       ) : (<></>)}
     </StyledTableHeader>
   );
