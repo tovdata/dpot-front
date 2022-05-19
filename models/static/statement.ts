@@ -164,8 +164,8 @@ export const statementForPIPP = (company: string): any => {
         },
         app: {
           1: [
-            'Safari App을 사용하는 경우 쿠키 설정 방법  보기',
-            'Chrome App을 사용하는 경우 쿠키 설정 방법  보기',
+            'Safari App을 사용하는 경우 쿠키 설정 방법',
+            'Chrome App을 사용하는 경우 쿠키 설정 방법',
             'Naver App을 사용하는 경우 쿠키 설정 방법: 설정 > 인터넷 사용 기록 > 쿠키 삭제',
             'Android : 설정 > 애플리케이션 > 서비스 선택 > 저장공간 > 캐시 삭제',
             'iOS: 설정 > 개인 정보 보호 > 추적 > 서비스 앱 비활성화 선택'
@@ -173,10 +173,18 @@ export const statementForPIPP = (company: string): any => {
         },
         web: {
           1: [
-            'Internet Explorer를 사용하는 경우 쿠키 설정 방법  보기',
-            'Safari를 사용하는 경우 쿠키 설정 방법  보기',
-            'FireFox를 사용하는 경우 쿠키 설정 방법  보기',
-            'Chrome 브라우저를 사용하는 경우 쿠키 설정 방법  보기'
+            'Internet Explorer를 사용하는 경우 쿠키 설정 방법',
+            'Safari를 사용하는 경우 쿠키 설정 방법',
+            'FireFox를 사용하는 경우 쿠키 설정 방법',
+            'Chrome 브라우저를 사용하는 경우 쿠키 설정 방법'
+          ],
+          link: [
+            'https://support.microsoft.com/ko-kr/windows/%EC%BF%A0%ED%82%A4-%EC%82%AD%EC%A0%9C-%EB%B0%8F-%EA%B4%80%EB%A6%AC-168dab11-0753-043d-7c16-ede5947fc64d',
+            'https://support.apple.com/ko-kr/guide/safari/sfri11471/mac',
+            'https://support.mozilla.org/ko/kb/clear-cookies-and-site-data-firefox?redirectslug=delete-cookies-remove-info-websites-stored&redirectlocale=ko',
+            'https://support.google.com/chrome/answer/95647?co=GENIE.Platform%3DDesktop&hl=ko',
+            'https://support.apple.com/ko-kr/HT201265',
+            'https://support.google.com/chrome/answer/95647?hl=ko&co=GENIE.Platform%3DAndroid'
           ]
         }
       }
@@ -296,7 +304,7 @@ export const statementForPIPP = (company: string): any => {
         }
       }
     },
-    charger: {
+    manager: {
       title: '개인정보보호책임자 및 개인정보 열람청구',
       content: {
         common: {

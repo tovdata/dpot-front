@@ -1,4 +1,4 @@
-import { MutableRefObject, useRef, useState } from 'react';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
 import { Col, Divider, Input, Row, Select, Space, Typography } from 'antd';
@@ -60,10 +60,10 @@ export const SingleSelect = ({ error, onChange, placeholder, refresh, options, v
  */
 export const AddableSelect = ({ error, onChange, options, value }: GeneralPurposeSelectProps): JSX.Element => {
   // Create the select options
-  const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
+  // const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
 
   const { Option } = Select;
-  const [items, setItems] = useState(selectOptions.map(item => item.value));
+  const [items, setItems] = useState(options);
   const [name, setName] = useState('');
 
   // Create an event handler (onInputKeyDown)
@@ -90,6 +90,9 @@ export const AddableSelect = ({ error, onChange, options, value }: GeneralPurpos
     }
     setName('');
   };
+
+  useEffect(() =>setItems(options), [options]);
+
   // Return an element
   return (
     <Select

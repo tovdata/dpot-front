@@ -1,50 +1,204 @@
 /** 안정성 확보 추가 조치 - 개인정보보호 인증 (개인정보 처리방침 생성 2단계) */
-export const certificationForPIP: string[] = [
-  'ISMS-P',
-  'ISO/IEC 27701',
-  'ISO/IEC 27001',
-  'ISO/IEC 27017',
-  'ISO/IEC 27018',
-  'ISMS-정보보호관리우수등급',
-  'ISMS-정보보호관리최우수등급',
-  'CSAP'
-];
+export const certificationForPIP: string[] = ['ISMS-P', 'ISO/IEC 27701', 'ISO/IEC 27017', 'ePRIVACY', 'ePRIVACY PLUS', 'PRIVACY'];
 /** 개인정보 위탁 (개인정보 제공 및 위탁 페이지) */
-export const companyFromSubjectInCPI = {
-  "이벤트 경품 물류 업무": {
-    "갤럭시아머니트리㈜": {
-      content: ["서비스 물품 및 이벤트 경품 배송 등의 물류 업무 (경품 종류: 모바일 쿠폰)", "휴대폰 소액 결제"],
-      country: "Korea1",
-      address: "address",
-      charger: ["1", "2", "3"]
+export const infoFromSubjectInCPI = {
+  "본인확인": {
+    "나이스평가정보(주)": {
+      content: ["본인 식별 및 인증", "성인인증"]
+    },
+    "에스씨아이평가정보(주)": {
+      content: ["본인 식별 및 인증", "성인인증"]
+    },
+    "한국모바일인증(주)": {
+      content: ["본인 식별 및 인증", "성인인증"]
+    },
+    "(주)드림시큐리티": {
+      content: ["본인 식별 및 인증", "성인인증"]
+    },
+    "코리아크레딧뷰로(주)": {
+      content: ["본인 식별 및 인증", "성인인증"]
+    },
+  },
+  "안심번호 서비스": {
+    "(주)LG유플러스": {
+      content: ["안심번호 서비스 제공"]
+    },
+    "(주)케이티": {
+      content: ["안심번호 서비스 제공"]
+    },
+    "SK텔레콤(주)": {
+      content: ["안심번호 서비스 제공"]
+    },
+    "세종텔레콤(주)": {
+      content: ["안심번호 서비스 제공"]
     }
   },
-  "알림발송": {
+  "결제 및 요금정산": {
+    "(주)케이지모빌리언스": {
+      content: ["전자 결제 대행", "요금 정산", "간편결제 서비스 제공"]
+    },
+    "나이스페이먼츠(주)": {
+      content: ["전자 결제 대행", "요금 정산", "간편결제 서비스 제공"]
+    },
+    "(주)다날": {
+      content: ["전자 결제 대행", "요금 정산", "간편결제 서비스 제공"]
+    },
+    "(주)페이플": {
+      content: ["전자 결제 대행", "요금 정산", "간편결제 서비스 제공"]
+    },
+    "(주)카카오페이": {
+      content: ["전자 결제 대행", "요금 정산", "카카오페이를 통한 간편결제 서비스 제공"]
+    },
+    "토스페이먼츠(주)": {
+      content: ["전자 결제 대행", "요금 정산", "계좌 유효성 체크", "토스(toss)를 통한 간편결제 서비스 제공"]
+    },
+    "네이버파이낸셜(주)": {
+      content: ["전자 결제 대행", "요금 정산", "네이버페이를 통한 간편결제 서비스 제공"]
+    },
+    "엔에이치엔페이코(주)": {
+      content: ["전자 결제 대행", "요금 정산", "페이코(payco)를 통한 간편결제 서비스 제공"]
+    },
+    "엔에이치엔한국사이버결제(주)": {
+      content: ["전자 결제 대행", "요금 정산"]
+    },
+    "Google LLC": {
+      content: ["구글 플레이 스토어(Google Play)를 통한 결제 및 청구서 발송"],
+      isForeign: true,
+      country: "USA",
+      address: "1600 Amphitheatre Parkwa Mountain View, CA 94043, USA",
+      method: ["서비스 이용 시점에 서버를 통해 전송"],
+      period: ["법정 의무 보유기간 만료 시까지"],
+      charger: ["googlekrsupport@google.com"]
+    },
+    "Apple Inc.": {
+      content: ["애플 앱 스토어(App Store)를 통한 결제 및 청구서 발송"],
+      isForeign: true,
+      country: "USA",
+      address: "One Apple Park Way Cupertino, CA 95014, USA",
+      method: ["서비스 이용 시점에 서버를 통해 전송"],
+      period: ["법정 의무 보유기간 만료 시까지"],
+      charger: ["https://www.apple.com/legal/privacy/contact/"]
+    }
+  },
+  "고객 상담 및 문의": {
+    "(주)트랜스코스모스코리아": {
+      content: ["고객 상담 및 문의 응대", "콜센터 업무의 일체", "고객 민원 처리"]
+    },
+    "효성아이티엑스(주)": {
+      content: ["고객 상담 및 문의 응대", "콜센터 업무의 일체"]
+    },
+    "(주)메타엠": {
+      content: ["고객 상담 및 문의 응대", "콜센터 업무의 일체"]
+    },
+    "(주)유베이스": {
+      content: ["고객 상담 및 문의 응대", "콜센터 업무의 일체"]
+    },
+    "(주)채널코퍼레이션": {
+      content: ["채널톡을 통한 고객 문의 접수 및 상담"]
+    }
+  },
+  "상품 배송": {
+    "씨제이대한통운(주)": {
+      content: ["물품 배송 및 반품처리", "배송조회"]
+    },
+    "(주)굿스플로": {
+      content: ["택배 업무 처리 자동화(배송정보 전달, 송장 등록)"]
+    },
+    "롯데글로벌로지스(주)": {
+      content: ["물품 배송 및 반품처리", "배송조회"]
+    },
+    "(주)한진": {
+      content: ["물품 배송 및 반품처리", "배송조회"]
+    },
+    "우정사업본부": {
+      content: ["우체국 택배를 이용한 물품 배송 및 반품처리", "배송조회"]
+    },
+    "로젠(주)": {
+      content: ["물품 배송 및 반품처리", "배송조회"]
+    }
+  },
+  "클라우드 및 인프라": {
+    "Amazon Web Services, Inc.": {
+      content: ["AWS를 통한 서비스 운영 환경 제공", "데이터 보관"],
+      isForeign: true,
+      country: "USA",
+      address: "us-west-2",
+      method: ["서비스 이용 시점에 서버를 통해 전송"],
+      period: ["위탁 계약 종료 시까지", "파기 요청 시까지", "회원 탈퇴 시까지"],
+      charger: ["aws-korea-privacy@amazon.com"]
+    },
+    "Microsoft Corporation": {
+      content: ["Azure를 통한 서비스 운영 환경 제공", "데이터 보관"],
+      isForeign: true,
+      country: "USA",
+      address: "Central USA (Iowa)",
+      method: ["서비스 이용 시점에 서버를 통해 전송"],
+      period: ["위탁 계약 종료 시까지", "파기 요청 시까지", "회원 탈퇴 시까지"]
+    },
+    "Google LLC": {
+      content: ["GCP(Google Cloud Platform)를 통한 서비스 운영 환경 제공", "데이터 보관"],
+      isForeign: true,
+      country: "USA",
+      address: "1600 Amphitheatre Parkwa Mountain View, CA 94043, USA",
+      method: ["서비스 이용 시점에 서버를 통해 전송"],
+      period: ["위탁 계약 종료 시까지", "파기 요청 시까지", "회원 탈퇴 시까지"]
+    },
+    "네이버클라우드(주)": {
+      content: ["클라우드 컴퓨팅을 통한 서비스 인프라 제공"]
+    },
+    "(주)케이티클라우드": {
+      content: ["클라우드 컴퓨팅을 통한 서비스 인프라 제공"]
+    },
+    "(주)아임웹": {
+      content: ["홈페이지 개발 및 운영"]
+    }
+  },
+  "알림 발송": {
     "엔에이치엔㈜": {
-      content: ["SMS 및 메시지 발송", "(문자, 이메일, 알림톡)발송 서비스", "대량 메일 발송", "SMS", "LMS", "알림톡 발송", "SMS", "알림톡 등 메시지 발송 서비스 제공"],
-      country: "Korea2",
-      address: "address2",
-      charger: ["1", "2", "3"]
+      content: ["문자메세지 발송", "알림톡 전송", "이메일 전송"]
     },
     "㈜엘지씨엔에스": {
-      content: ["SMS 및 메시지 발송", "카카오톡 알림정보 전송. (문자, 이메일, 알림톡)발송 서비스"],
-      country: "Korea3",
-      address: "address3",
-      charger: ["1", "2", "3"]
+      content: ["문자메세지 발송", "알림톡 전송", "이메일 전송"]
     },
     "인포뱅크㈜": {
-      content: ["문자서비스 전송 시스템 운영", "문자메세지발송", "문자 수신(MO) 서비스", "SMS", "LMS 알림톡 발송"],
-      country: "Korea4",
-      address: "address4",
-      charger: ["1", "2", "3"]
-    },
-    "슈어엠㈜": {
-      content: ["문자메세지발송", "SMS", "LMS", "알림톡 발송"],
-      country: "Korea5",
-      address: "address5",
-      charger: ["1", "2"]
+      content: ["문자메세지 발송", "알림톡 전송", "이메일 전송"]
     }
   },
+  "홍보 및 마케팅": {
+    "(주)트랜스코스모스코리아": {
+      content: ["텔레마케팅"]
+    },
+    "(주)유베이스": {
+      content: ["텔레마케팅"]
+    },
+    "(주)한국고용정보": {
+      content: ["텔레마케팅"]
+    }
+  },
+  "방문 트래픽·로그 분석": {
+    "Google LLC": {
+      content: ["Google Analytics를 통한 서비스 이용/방문 트래픽 통계 분석", "Firebase Analytics를 통한 서비스 이용 트래픽 통계 분석"],
+      isForeign: true,
+      country: "USA",
+      address: "1601 Amphitheatre Parkwa Mountain View, CA 94043, USA",
+      method: ["서비스 이용 시점에 서버를 통해 전송"],
+      period: ["위탁 계약 종료 시까지", "파기 요청 시까지"],
+      charger: ["googlekrsupport@google.com"]
+    },
+    "네이버(주)": {
+      content: ["Naver Analytics를 통한 서비스 이용 트래픽 통계 분석"]
+    },
+    "Amplitude, Inc.": {
+      content: ["Amplitude Analytics를 통한 서비스 이용 트래픽 통계 분석"],
+      isForeign: true,
+      country: "USA",
+      address: "201 3rd Street, Suite 200 San Francisco, CA 94103, USA",
+      method: ["서비스 이용 시점에 서버를 통해 전송"],
+      period: ["위탁 계약 종료 시까지", "파기 요청 시까지"],
+      charger: ["privacy@amplitude.com"]
+    }
+  }
+
   // "안심번호 서비스": {
   //   company: ["㈜케이티", "에스케이텔링크㈜", "세종텔레콤㈜", "㈜LG유플러스"]
   // }

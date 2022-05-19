@@ -43,7 +43,24 @@ const StyledSider = styled.div<SiderProps>`
   `}
   ${(props: any) => props.pos <= 56 && css`
     height: calc(100vh - 56px + ${props.pos}px);
-`}
+  `}
+
+  .scroll-bar{
+    width:8px;
+    height:100%;
+    position:absolute;
+    top:0;
+    right:0;
+    -webkit-transition: all .5s;
+    opacity: 1;
+    /* 배경색을 상자색과 똑같이 맞춰준다 */
+    background-color:white;
+  }
+  &:hover{
+    .scroll-bar{
+      opacity: 0;
+    }
+  }
 `;
 
 /** [Interface] Menu open status */
@@ -85,6 +102,7 @@ const Layout = ({ children }: CommonElementProps): JSX.Element => {
         <StyledContainer>
           <StyledSider open={openMenu} pos={scrollPos}>
             <SideMenu isFixed={isFixed} onOpen={onOpenMenu} open={openMenu} />
+            <div className='scroll-bar' />
           </StyledSider>
           <StyledContent>{children}</StyledContent>
         </StyledContainer>
