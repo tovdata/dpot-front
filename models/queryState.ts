@@ -73,6 +73,22 @@ const processET = (rawData: any[]): any[] => {
   return row;
 }
 /**
+ * [Function] 개인정보 처리방침 상태에 대해 API 요청하는 함수
+ * @param serviceId 현재 서비스 ID
+ * @returns API로부터 응답받은 데이터
+ */
+ export const getStatusForPIPP = async (serviceId: string): Promise<any> => {
+  const response = await fetch(`${baseUrl}service/${serviceId}/pipp`);
+  // 응답 데이터를 JSON 형태로 변환
+  const json = await response.json();
+  // 에러 확인
+  if (catchAPIRequestError(json.status, json.message)) {
+    return '';
+  } else {
+    return '';
+  }
+}
+/**
  * [Function] 개인정보 관리 탭 내에 존재하는 테이블 데이터 목록에 대해 API 요청하는 함수
  * @param serviceId 현재 서비스 ID
  * @param type 개인정보 관리 내 테이블 유형
@@ -163,7 +179,7 @@ export const setQueryData = (queryClient: QueryClient, type: string, mutate: Use
         const json: any = await response.json();
         // 에러 처리
         if (!catchAPIRequestError(json.status, json.message)) {
-          queryClient.setQueryData(type, (oldData: any): any => updateData(mode, oldData, mode === 'create' ? json.data.id : record.id, record));
+          queryClient.setQueryData(type, (oldData: any): any => updateData(mode, oldData, mode === 'add' ? json.data.id : record.id, record));
         }
       },
       onError: (response) => {

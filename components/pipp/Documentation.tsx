@@ -17,6 +17,12 @@ interface ViewProps {
   preview?: boolean;
   self?: any;
 }
+/** [Interface] Properties for DDRow or DIRow */
+interface RowProps {
+  children?: JSX.Element|JSX.Element[];
+  self?: React.MutableRefObject<any>;
+  style?: React.CSSProperties;
+}
 /** [Interface] Properties for DIInputGroup */
 interface DIInputGroupProps {
   children?: JSX.Element|JSX.Element[];
@@ -80,7 +86,7 @@ interface DTCItemProps extends ViewProps {
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Input group */
 export const DIInputGroup: React.FC<DIInputGroupProps> = ({ children, label, style }: DIInputGroupProps): JSX.Element => {
   return (
-    <div style={{ fontFamily: 'Pretendard', position: 'relative', ...style }}>
+    <div style={{ position: 'relative', ...style }}>
       {label ? (
         <label style={{ color: '#00000073', display: 'block', fontSize: 12, fontWeight: '500', lineHeight: '22px', marginBottom: 2 }}>{label}</label>
       ) : (<></>)}
@@ -89,7 +95,7 @@ export const DIInputGroup: React.FC<DIInputGroupProps> = ({ children, label, sty
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row */
-export const DIRow = styled.div`
+const StyledDIRow = styled.div`
   .ant-collapse-content-box {
     padding: 8px 0 0 0 !important;;
   }
@@ -101,16 +107,24 @@ export const DIRow = styled.div`
     margin-bottom: 0;
   }
 `;
+export const DIRow: React.FC<RowProps> = ({ children, self }: RowProps): JSX.Element => {
+  return (
+    <StyledDIRow ref={self}>
+      {children}
+    </StyledDIRow>
+  )
+}
+
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row content */
 export const DIRowContent: React.FC<DIRowContentProps> = ({ children }: DIRowContentProps): JSX.Element => {
   return (
-    <div style={{ fontFamily: 'Pretendard', position: 'relative' }}>{children}</div>
+    <div style={{ position: 'relative' }}>{children}</div>
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row divider */
 export const DIRowDivider: React.FC<DIRowDividerProps> = ({ marginH }: DIRowDividerProps): JSX.Element => {
   return (
-    <Divider dashed style={{ fontFamily: 'Pretendard', marginBottom: marginH ? marginH : 30, marginTop: marginH ? marginH : 30 }} />
+    <Divider dashed style={{ marginBottom: marginH ? marginH : 30, marginTop: marginH ? marginH : 30 }} />
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row header */
@@ -119,7 +133,7 @@ export const DIRowHeader: React.FC<DIRowHeaderProps> = ({ description, required,
   const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 12, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
   // Return an element
   return (
-    <div style={{ fontFamily: 'Pretendard', marginBottom: 8, width: '100%', ...style }}>
+    <div style={{ marginBottom: 8, width: '100%', ...style }}>
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
         <h2 style={{ color: '#002766', fontSize: 15, fontWeight: 600, lineHeight: '22px', marginBottom: 0 }}>
           {title}
@@ -166,9 +180,9 @@ export const DIRowSubject: React.FC<DIRowHeaderProps> = ({ description, required
  * 미리보기 부분
  */
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row */
-export const DDRow: React.FC<any> = ({ children, self }: any): JSX.Element => {
+export const DDRow: React.FC<RowProps> = ({ children, self }: RowProps): JSX.Element => {
   return (
-    <div ref={self} style={{ fontFamily: 'Pretendard', fontSize: 13, fontWeight: '400', lineHeight: '22px', marginBottom: 40 }}>
+    <div ref={self} style={{ fontSize: 13, fontWeight: '400', lineHeight: '22px', marginBottom: 40 }}>
       {children}
     </div>
   );

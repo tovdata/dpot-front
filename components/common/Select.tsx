@@ -21,6 +21,7 @@ interface GeneralPurposeSelectProps {
   error?: boolean;
   onChange: (value: string | string[]) => void;
   options: string[];
+  placeholder?: string;
   value: string | string[];
 }
 /** [Interface] IFTTT Data format */
@@ -58,7 +59,7 @@ export const SingleSelect = ({ error, onChange, placeholder, refresh, options, v
 /** 
  * [Component] Addable select
  */
-export const AddableSelect = ({ error, onChange, options, value }: GeneralPurposeSelectProps): JSX.Element => {
+export const AddableSelect = ({ error, onChange, options, placeholder, value }: GeneralPurposeSelectProps): JSX.Element => {
   // Create the select options
   // const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
 
@@ -97,7 +98,7 @@ export const AddableSelect = ({ error, onChange, options, value }: GeneralPurpos
   return (
     <Select
       style={{ 'width': '100%' }}
-      placeholder=""
+      placeholder={placeholder}
       value={value}
       onMouseDown={onMouseDown}
       dropdownRender={menu => (
@@ -124,20 +125,20 @@ export const AddableSelect = ({ error, onChange, options, value }: GeneralPurpos
 /**
  * [Component] Addable tag select
  */
-export const AddableTagSelect = ({ error, onChange, options, value }: GeneralPurposeSelectProps): JSX.Element => {
+export const AddableTagSelect = ({ error, onChange, options, placeholder, value }: GeneralPurposeSelectProps): JSX.Element => {
   // Create the select options
   const selectOptions: SelectOptionFormat[] = options?.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select style={{ 'width': '100%' }} mode='tags' onChange={onChange} options={selectOptions} status={error ? 'error' : undefined} tokenSeparators={[',']} value={value as string[]} />);
+  return (<Select style={{ 'width': '100%' }} mode='tags' onChange={onChange} options={selectOptions} placeholder={placeholder} status={error ? 'error' : undefined} tokenSeparators={[',']} value={value as string[]} />);
 }
 /**
  * [Component] Tag select
  */
-export const TagSelect = ({ error, onChange, options, value }: GeneralPurposeSelectProps): JSX.Element => {
+export const TagSelect = ({ error, onChange, options, placeholder, value }: GeneralPurposeSelectProps): JSX.Element => {
   // Create the select options
   const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select style={{ 'width': '100%' }} mode='multiple' onChange={onChange} options={selectOptions} status={error ? 'error' : undefined} value={value as string[]} />);
+  return (<Select style={{ 'width': '100%' }} mode='multiple' onChange={onChange} options={selectOptions} placeholder={placeholder} status={error ? 'error' : undefined} value={value as string[]} />);
 }
 /**
  * [Component] IFTTT select
