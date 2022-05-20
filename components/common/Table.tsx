@@ -138,12 +138,6 @@ const StyledTableFooter = styled.span`
     margin-right: 0.625rem;
   }
 `;
-// Styled element (URL Button)
-const URLButton = styled(Button)`
-  margin-left: 1rem;
-  font-weight: 400;
-  cursor: pointer;
-`;
 
 /** [Interface] Properties for editable table */
 interface EditableTableProps extends TableProps {
@@ -279,7 +273,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
    * @param required required
    * @param type column type
    */
-  const onChange = (key: string, item: string[] | string, required: boolean, type?: string): void => {
+  const onChange = (key: string, item: any, required: boolean, type?: string): void => {
     if (type && type === 'item') {
       const newItem: string[] = (item as string[]).map((value: string): string => {
         if (RegExp('^주민.*번호$').test(value)) {
@@ -482,7 +476,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
         dataIndex: 'id',
         key: 'id',
         title: '',
-        render: (_: any, record: any, index: number): JSX.Element => (<TableEditCell edit={row.id === record.id} key={index} onDelete={() => { clearFocus(); onDelete(row); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { checkRequiredForRow() ? onSave(row) ? onEdit({}) : undefined : undefined }} onCancel={() => { clearFocus(); onEdit({}); onRollback(record) }} />)
+        render: (_: any, record: any, index: number): JSX.Element => (<TableEditCell edit={row.id === record.id} key={index} onDelete={() => { clearFocus(); onDelete(record); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { checkRequiredForRow() ? onSave(row) ? onEdit({}) : undefined : undefined }} onCancel={() => { clearFocus(); onEdit({}); onRollback(record) }} />)
       });
     }
     // Return
@@ -612,13 +606,15 @@ const TableEditCell = ({ edit, onDelete, onEdit, onSave, onCancel }: TableEditCe
       {edit ? (
         <>
           <AiOutlineSave onClick={onSave} />
-          <Popconfirm title='해당 업무를 삭제하시겠습니까?' onConfirm={onDelete}>
-            <AiOutlineDelete />
-          </Popconfirm>
           <CloseOutlined onClick={onCancel} />
         </>
       ) : (
-        <AiOutlineEdit onClick={onEdit} />
+        <>
+          <AiOutlineEdit onClick={onEdit} />
+          <Popconfirm title='해당 업무를 삭제하시겠습니까?' onConfirm={onDelete}>
+            <AiOutlineDelete />
+          </Popconfirm>
+        </>
       )}
     </StyledTableEditCell>
   )

@@ -11,6 +11,8 @@ import { SelectOptionsByColumn } from '../models/type';
 // Status
 import { Button, Popover, Tooltip } from 'antd';
 import { LinkOutlined } from '@ant-design/icons';
+import { useRecoilValue } from 'recoil';
+import { GetCPIDefaultSelector } from '../models/state';
 
 /** [Interface] Properties for LinkButton */
 interface LinkButtonProps {
@@ -50,7 +52,11 @@ const PPITable: React.FC<any> = ({ url }: any): JSX.Element => {
       setQueryData(queryClient, API_DT_PPI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, API_DT_PPI, mutate, 'save', record);
+      if (!record.isForeign) {
+        setQueryData(queryClient, API_DT_PPI, mutate, 'save', { ...record, country: '', location: '', method: [], charger: [] });
+      } else {
+        setQueryData(queryClient, API_DT_PPI, mutate, 'save', record);
+      }
       return true;
     }
   };
@@ -79,7 +85,7 @@ export const PPITableForm: React.FC<any> = ({ mode }: any): JSX.Element => {
   );
   // 컴포넌트 반환
   return (
-    <EditableTableForm description='‘개인정보 제3자 제공’이란, 제3자의 목적을 위해 개인정보를 외부에 제공하는 것을 말해요.\n각 제공 건에 대해 아래의 내용을 입력해주세요. 국외로 제공되는 경우에는 ‘국외 여부’에 체크한 뒤 추가 정보도 입력해야 해요.\n제3자 제공내역이 정리된 별도의 페이지가 있다면, 우측에 ‘링크(URL)’ 버튼을 클릭하여 연결시킬 수 있어요.' title={mode ? '' : '개인정보 제 3자 제공'} tools={tools}>
+    <EditableTableForm description='‘개인정보 제3자 제공’이란, 제3자의 목적을 위해 개인정보를 외부에 제공하는 것을 말해요.\n각 제공 건에 대해 아래의 내용을 입력해주세요. 국외로 제공되는 경우에는 ‘국외 여부’에 체크한 뒤 추가 정보도 입력해야 해요.\n제3자 제공내역이 정리된 별도의 페이지가 있다면, 우측에 ‘링크(URL)’ 버튼을 클릭하여 연결시킬 수 있어요.' title={mode ? '' : '개인정보 제3자 제공'} tools={tools}>
       {isModalOpen ? (
         <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url} open={isModalOpen} onClose={() => { setIsModalOpen(false) }} onSave={setUrl} />
       ) : (<></>)}
@@ -109,7 +115,11 @@ export const PFNITable: React.FC<any> = ({ url }: any) => {
       setQueryData(queryClient, API_DT_PFNI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, API_DT_PFNI, mutate, 'save', record);
+      if (!record.isForeign) {
+        setQueryData(queryClient, API_DT_PFNI, mutate, 'save', { ...record, country: '', location: '', method: [], charger: [] });
+      } else {
+        setQueryData(queryClient, API_DT_PFNI, mutate, 'save', record);
+      }
       return true;
     }
   };
@@ -136,7 +146,7 @@ export const PFNITableForm: React.FC<any> = ({ mode }: any): JSX.Element => {
   );
   // 컴포넌트 반환
   return (
-    <EditableTableForm style={ mode ? undefined : { marginBottom: '4.625rem' }} title={mode ? '' : '가명정보 제 3자 제공'} tools={tools}>
+    <EditableTableForm style={ mode ? undefined : { marginBottom: '4.625rem' }} title={mode ? '' : '가명정보 제3자 제공'} tools={tools}>
       {isModalOpen ? (
         <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url} open={isModalOpen} onClose={() => { setIsModalOpen(false) }} onSave={setUrl} />
       ) : (<></>)}
@@ -154,7 +164,7 @@ export const CPITable: React.FC<any> = ({ url }: any): JSX.Element => {
   // Get a state (for select options)
   const ref: any = {
     'ppi': ppiLoading ? [] : ppiData,
-    'cpi': isLoading ? []: data
+    'cpi': useRecoilValue(GetCPIDefaultSelector)
   }
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = {
@@ -175,7 +185,11 @@ export const CPITable: React.FC<any> = ({ url }: any): JSX.Element => {
       setQueryData(queryClient, API_DT_CPI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, API_DT_CPI, mutate, 'save', record);
+      if (!record.isForeign) {
+        setQueryData(queryClient, API_DT_CPI, mutate, 'save', { ...record, country: '', location: '', method: [], items: [], period: [], charger: [] });
+      } else {
+        setQueryData(queryClient, API_DT_CPI, mutate, 'save', record);
+      }
       return true;
     }
   }
@@ -226,7 +240,11 @@ export const CFNITable: React.FC<any> = ({ url }: any): JSX.Element => {
       setQueryData(queryClient, API_DT_CFNI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, API_DT_CFNI, mutate, 'save', record);
+      if (!record.isForeign) {
+        setQueryData(queryClient, API_DT_CFNI, mutate, 'save', { ...record, country: '', location: '', method: [], items: [], period: [], charger: [] });
+      } else {
+        setQueryData(queryClient, API_DT_CFNI, mutate, 'save', record);
+      }
       return true;
     }
   }

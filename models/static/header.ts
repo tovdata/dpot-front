@@ -7,35 +7,35 @@ export const piTableHeader: TableHeadersData = {
     display: 'selectA',
     name: '구분(업무명)',
     required: true,
-    width: '200px'
+    width: '400px'
   },
   purpose: {
     description: '업무 안에서 개인정보를 처리하는 목적을 모두 입력해주세요. 예시에서 고르거나, 직접 추가할 수 있어요.',
     display: 'list',
     name: '처리 목적',
     required: true,
-    width: '350px'
+    width: '700px'
   },
   essentialItems: {
     description: '업무 처리에 반드시 필요한 항목을 모두 입력해요.',
     display: 'itemA',
     name: '필수항목',
     required: true,
-    width: '300px'
+    width: '600px'
   },
   selectionItems: {
     description: '반드시 필요하진 않지만, 사용자로부터 선택적으로 제공받는 항목을 모두 입력해요.',
     display: 'itemA',
     name: '선택항목',
     required: false,
-    width: '300px'
+    width: '600px'
   },
   period: {
     description: '업무처리에 필요한 최소한의 기간을 구체적으로 정해주세요.',
     display: 'period',
     name: '보유 및 이용 기간',
     required: true,
-    width: '350px'
+    width: '700px'
   }
 };
 /** 가명정보 수집 및 이용 */
@@ -45,35 +45,35 @@ export const fniTableHeader: TableHeadersData = {
     display: 'select',
     name: '구분(업무명)',
     required: true,
-    width: '200px'
+    width: '400px'
   },
   basis: {
     description: '처리 근거 설명',
     display: 'select',
     name: '처리 근거',
     required: true,
-    width: '150px'
+    width: '300px'
   },
   purpose: {
     description: '근거에 따라 가명정보를 처리하는 목적을 구체적으로 적어주세요.',
     display: 'string',
     name: '상세 목적',
     required: true,
-    width: '400px'
+    width: '800px'
   },
   items: {
     description: '개인정보 수집・이용 현황 표에 입력된 항목만 선택할 수 있어요.',
     display: 'item',
     name: '처리항목',
     required: true,
-    width: '350px'
+    width: '700px'
   },
   period: {
     description: '목적 달성을 위해 가명정보의 처리가 필요한 기간을 입력해요.',
     display: 'list',
     name: '보유 및 이용 기간',
     required: true,
-    width: '350px'
+    width: '700px'
   }
 };
 /** 개인정보 제공 */
@@ -83,35 +83,35 @@ export const ppiTableHeader: TableHeadersData = {
     display: 'string',
     name: '제공받는 자',
     required: true,
-    width: '200px'
+    width: '400px'
   },
   purpose: {
     description: '개인정보를 ‘제공받은 자의 목적’을 모두 입력해주세요. 예시에서 고르거나, 직접 추가할 수 있어요.',
     display: 'list',
     name: '제공받는자의 목적',
     required: true,
-    width: '350px'
+    width: '700px'
   },
   items: {
     description: '개인정보 수집・이용 현황 표에 입력된 항목만 선택할 수 있어요. 제3자에게 제공하는 항목을 빠짐없이 선택해주세요!',
     display: 'item',
     name: '제공 항목',
     required: true,
-    width: '300px'
+    width: '600px'
   },
   period: {
     description: '개인정보를 제공받은 자가 보유하고 이용하는 기간을 입력해요.',
     display: 'period',
     name: '보유 및 이용기간',
     required: true,
-    width: '350px'
+    width: '700px'
   },
   isForeign: {
     description: '제공된 개인정보가 국외에서 처리된다면 체크해주세요.',
     display: 'checkbox',
     name: '국외여부',
     required: true,
-    width: '120px'
+    width: '240px'
   }
 }
 /** 개인정보 국외 제공 */
@@ -121,28 +121,28 @@ export const eppiTableHeader: TableHeadersData = {
     display: 'string',
     name: '국가',
     required: true,
-    width: '150px'
+    width: '300px'
   },
   location: {
     description: '개인정보를 제공받은 자가 위치한 주소',
     display: 'string',
     name: '위치(주소)',
     required: true,
-    width: '350px'
+    width: '700px'
   },
   method: {
     description: '개인정보를 제공하는 시기(수시 혹은 정기 등)와 방법',
     display: 'list',
     name: '일시 및 방법',
     required: true,
-    width: '350px'
+    width: '700px'
   },
   charger: {
     description: '개인정보를 제공받은 자의 담당자/연락처(유선, 이메일 등)',
     display: 'list',
     name: '담당자(연락처)',
     required: false,
-    width: '350px'
+    width: '700px'
   }
 }
 /** 가명정보 제공 */
