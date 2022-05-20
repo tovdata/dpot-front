@@ -65,7 +65,7 @@ export const infoFromSubjectInCPI = {
       content: ["구글 플레이 스토어(Google Play)를 통한 결제 및 청구서 발송"],
       isForeign: true,
       country: "USA",
-      address: "1600 Amphitheatre Parkwa Mountain View, CA 94043, USA",
+      location: "1600 Amphitheatre Parkwa Mountain View, CA 94043, USA",
       method: ["서비스 이용 시점에 서버를 통해 전송"],
       period: ["법정 의무 보유기간 만료 시까지"],
       charger: ["googlekrsupport@google.com"]
@@ -74,7 +74,7 @@ export const infoFromSubjectInCPI = {
       content: ["애플 앱 스토어(App Store)를 통한 결제 및 청구서 발송"],
       isForeign: true,
       country: "USA",
-      address: "One Apple Park Way Cupertino, CA 95014, USA",
+      location: "One Apple Park Way Cupertino, CA 95014, USA",
       method: ["서비스 이용 시점에 서버를 통해 전송"],
       period: ["법정 의무 보유기간 만료 시까지"],
       charger: ["https://www.apple.com/legal/privacy/contact/"]
@@ -122,7 +122,7 @@ export const infoFromSubjectInCPI = {
       content: ["AWS를 통한 서비스 운영 환경 제공", "데이터 보관"],
       isForeign: true,
       country: "USA",
-      address: "us-west-2",
+      location: "us-west-2",
       method: ["서비스 이용 시점에 서버를 통해 전송"],
       period: ["위탁 계약 종료 시까지", "파기 요청 시까지", "회원 탈퇴 시까지"],
       charger: ["aws-korea-privacy@amazon.com"]
@@ -131,7 +131,7 @@ export const infoFromSubjectInCPI = {
       content: ["Azure를 통한 서비스 운영 환경 제공", "데이터 보관"],
       isForeign: true,
       country: "USA",
-      address: "Central USA (Iowa)",
+      location: "Central USA (Iowa)",
       method: ["서비스 이용 시점에 서버를 통해 전송"],
       period: ["위탁 계약 종료 시까지", "파기 요청 시까지", "회원 탈퇴 시까지"]
     },
@@ -139,7 +139,7 @@ export const infoFromSubjectInCPI = {
       content: ["GCP(Google Cloud Platform)를 통한 서비스 운영 환경 제공", "데이터 보관"],
       isForeign: true,
       country: "USA",
-      address: "1600 Amphitheatre Parkwa Mountain View, CA 94043, USA",
+      location: "1600 Amphitheatre Parkwa Mountain View, CA 94043, USA",
       method: ["서비스 이용 시점에 서버를 통해 전송"],
       period: ["위탁 계약 종료 시까지", "파기 요청 시까지", "회원 탈퇴 시까지"]
     },
@@ -180,7 +180,7 @@ export const infoFromSubjectInCPI = {
       content: ["Google Analytics를 통한 서비스 이용/방문 트래픽 통계 분석", "Firebase Analytics를 통한 서비스 이용 트래픽 통계 분석"],
       isForeign: true,
       country: "USA",
-      address: "1601 Amphitheatre Parkwa Mountain View, CA 94043, USA",
+      location: "1601 Amphitheatre Parkwa Mountain View, CA 94043, USA",
       method: ["서비스 이용 시점에 서버를 통해 전송"],
       period: ["위탁 계약 종료 시까지", "파기 요청 시까지"],
       charger: ["googlekrsupport@google.com"]
@@ -192,7 +192,7 @@ export const infoFromSubjectInCPI = {
       content: ["Amplitude Analytics를 통한 서비스 이용 트래픽 통계 분석"],
       isForeign: true,
       country: "USA",
-      address: "201 3rd Street, Suite 200 San Francisco, CA 94103, USA",
+      location: "201 3rd Street, Suite 200 San Francisco, CA 94103, USA",
       method: ["서비스 이용 시점에 서버를 통해 전송"],
       period: ["위탁 계약 종료 시까지", "파기 요청 시까지"],
       charger: ["privacy@amplitude.com"]
