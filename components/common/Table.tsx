@@ -657,7 +657,7 @@ export const setDataSource = (dataSource: any): any[] => {
  * @returns created columns
  */
 const createTableColumnProps = (key: string, name: string, description?: string, width?: string): any => {
-  return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true, width: width || '300px' };
+  return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true, width: '300px' };
 }
 /**
  * [Internal Function] 특정 컬럼(Column)의 Select Option 선택에 따라 다른 컬럼(Column)에 대한 Select Options을 변경하는 함수
