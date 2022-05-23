@@ -20,6 +20,7 @@ const StyledIFTTTForm = styled.div`
 interface GeneralPurposeSelectProps {
   error?: boolean;
   onChange: (value: string | string[]) => void;
+  onClick?: () => void;
   options: string[];
   placeholder?: string;
   value: string | string[];
@@ -125,11 +126,11 @@ export const AddableSelect = ({ error, onChange, options, placeholder, value }: 
 /**
  * [Component] Addable tag select
  */
-export const AddableTagSelect = ({ error, onChange, options, placeholder, value }: GeneralPurposeSelectProps): JSX.Element => {
+export const AddableTagSelect = ({ error, onChange, onClick, options, placeholder, value }: GeneralPurposeSelectProps): JSX.Element => {
   // Create the select options
   const selectOptions: SelectOptionFormat[] = options?.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select style={{ 'width': '100%' }} mode='tags' onChange={onChange} options={selectOptions} placeholder={placeholder} status={error ? 'error' : undefined} tokenSeparators={[',']} value={value as string[]} />);
+  return (<Select style={{ 'width': '100%' }} mode='tags' onChange={onChange} onClick={onClick} options={selectOptions} placeholder={placeholder} status={error ? 'error' : undefined} tokenSeparators={[',']} value={value as string[]} />);
 }
 /**
  * [Component] Tag select

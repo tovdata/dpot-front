@@ -86,7 +86,7 @@ export const PITable: React.FC<any> = (): JSX.Element => {
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = (record: any): boolean => {
     if (record.essentialItems.length === 0 && record.selectionItems.length === 0) {
-      createSimpleWarningNotification('필수 항목과 선택 항목 중에서 하나의 항목을 필수로 입력해야 합니다.');
+      createSimpleWarningNotification('필수 항목과 선택 항목 중에서 하나의 항목을 필수로 입력해야 합니다.', 2, 'topRight');
       return false;
     } else if (new RegExp('^npc_').test(record.id)) {
       setQueryData(queryClient, API_DT_PI, mutate, 'add', record);

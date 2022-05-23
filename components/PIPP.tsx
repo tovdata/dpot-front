@@ -5,7 +5,7 @@ import { Button, Col, Collapse, DatePicker, Input, Modal, Radio, Row, Space, Tab
 import { PageHeaderContainStep } from './common/Header';
 import { StyledTableForm, TableFormHeader } from './common/Table';
 import { CollapseForPIPP } from './common/Collapse';
-import { createWarningMessage } from './common/Notification';
+import { createSimpleWarningNotification, createWarningMessage } from './common/Notification';
 import { YesOrNoRadioButton } from './common/Radio';
 import { AddableTagSelect } from './common/Select';
 import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DIInputGroup, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject, DRLabelingContent, DRLabelingHeader, DRLabelingItem, DRModal, DTCForm, DTCItem } from './pipp/Documentation';
@@ -17,10 +17,9 @@ import { defaultPIPPData } from '../models/static/data';
 import { EditOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons';
 import { FiEdit } from 'react-icons/fi';
 // Module
-import moment from 'moment';
 import { FNITable, PITable } from './PITable';
-import { CPITableForm, PFNITable, PPITableForm } from './PCTable';
-import { QueryClient, useQueries, useQuery } from 'react-query';
+import { CFNITable, CPITableForm, PFNITable, PPITableForm } from './PCTable';
+import { QueryClient, useQueries } from 'react-query';
 import { API_DT_CPI, API_DT_FNI, API_DT_LIST, API_DT_PPI, getListForPIM, PIMType } from '../models/queryState';
 
 /** [Interface] Properties for PIPPMain */
@@ -32,10 +31,8 @@ interface MainPageHeaderProps {
   onCreate: (value: any) => void;
   status: string;
 }
-/** [Interface] Properties for create a doucment form */
-interface CreateDocumentFormProps {
-  onBack: () => void;
-}
+/** [Type] Scroll position */
+type ScrollPosition = 'start'|'end';
 
 /**
  * [Component] 개인정보 처리방침 메인 페이지
@@ -80,28 +77,18 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
   const [data, setData] = useState<any>(defaultPIPPData);
   // Focus에 따른 스크롤 이동을 위한 엘리멘트 참조 객체
   const refs: any = {
-    input: {
-      name: useRef<any>(),
-      pi: useRef<any>(),
-      child: useRef<any>(),
-      ppi: useRef<any>(),
-      cpi: useRef<any>(), 
-      destructionUnused: useRef<any>(),
-      safety: useRef<any>(),
-      fni: useRef<any>(),
-      manager: useRef<any>()
-    },
-    preview: {
-      name: useRef<any>(),
-      pi: useRef<any>(),
-      child: useRef<any>(),
-      ppi: useRef<any>(),
-      cpi: useRef<any>(), 
-      destructionUnused: useRef<any>(),
-      safety: useRef<any>(),
-      fni: useRef<any>(),
-      manager: useRef<any>()
-    }
+    input: useRef([]),
+    preview: useRef([])
+    // index
+    // 0 : name
+    // 1 : pi
+    // 2 : child
+    // 3 : ppi
+    // 4 : cpi
+    // 5 : destructionUnused
+    // 6 : safety
+    // 7 : fni
+    // 8 : manager
   };
   // 최종 문서 확인 모달을 위한 visible 상태
   const [visible, setVisible] = useState<boolean>(false);
@@ -119,7 +106,7 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
     }
   }
   /** [Event handler] 포커스에 따라 스코롤 이동 이벤트 (Prview part) */
-  const onFocus = (type: string, id: string) => { refs[type][id].current ? refs[type][id].current.scrollIntoView((type === 'preview' && (id === 'pi' || id === 'ppi' || id === 'cpi' || id === 'fni')) ? { block: 'start' } : { behavior: 'smooth' , block: 'start' }) : undefined };
+  const onFocus = (type: string, index: number, pos?: ScrollPosition) => { refs[type].current[index] ? refs[type].current[index].scrollIntoView((type === 'preview' && (index === 1 || index === 3 || index === 4 || index === 7)) ? { block: pos ? pos : 'start' } : { behavior: 'smooth' , block: pos ? pos : 'start' }) : undefined };
   /** [Event handler] 단계 이동 이벤트 */
   const onMoveStep = (type: string): void => {
     if (type === 'prev') {
@@ -129,7 +116,7 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
         const aInfo: any = data.aInfo;
         // 모든 질문에 대한 응답 확인
         if (Object.keys(aInfo).some((key: string): boolean => aInfo[key].usage === undefined)) {
-          createWarningMessage('모든 사항에 대해 입력해주세요', 2);
+          createSimpleWarningNotification('모든 사항에 대해 입력해주세요', 2, 'bottomRight');
         } else if (aInfo.cookie.usage && (aInfo.cookie.purpose.length === 0 || aInfo.cookie.disadvantage.length === 0)) {
           createWarningMessage('쿠키 사용 질의에 대한 응답을 입력해주세요', 2);
         } else if (aInfo.webLog.usage && (aInfo.webLog.purpose.length === 0 || aInfo.webLog.method.length === 0 || blankCheck(data.aInfo.webLog.disadvantage))) {
@@ -139,7 +126,7 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
         } else if (aInfo.thirdParty.usage && (aInfo.thirdParty.company.length === 0 || aInfo.thirdParty.items.length === 0 || blankCheck(aInfo.thirdParty.method) || blankCheck(aInfo.thirdParty.period))) {
           createWarningMessage('제 3자 허용 질의에 대한 응답을 입력해주세요', 2);
         } else if (aInfo.additional.usage && (aInfo.additional.items.length === 0 || aInfo.additional.purpose.length === 0 || blankCheck(aInfo.additional.period))) {
-          createWarningMessage('추가 이용 및 제공 질의에 대한 응답을 입력해주세요', 2);
+          createSimpleWarningNotification('추가 이용 및 제공 질의에 대한 응답을 입력해주세요', 2);
         } else {
           stepIndex + 1 <= steps.length ? setStepIndex(stepIndex + 1) : undefined;
         }
@@ -147,37 +134,37 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
         const dInfo: any = data.dInfo;
         if (blankCheck(dInfo.name)) {
           createWarningMessage('개인정보 처리자명 또는 서비스명을 입력해주세요', 2);
-          onFocus('input', 'name');
+          onFocus('input', 0);
         } else if (dInfo.period.length === 0) {
           createWarningMessage('관계 법령에 따른 개인정보의 보유 및 이용기간에 대한 응답을 해주세요', 2);
-          onFocus('input', 'pi');
+          onFocus('input', 1);
         } else if (dInfo.child.usage === undefined) {
           createWarningMessage('만 14세 미만 아동의 개인정보 처리 사항에 대해 응답해주세요', 2);
-          onFocus('input', 'child');
+          onFocus('input', 2);
         } else if (dInfo.child.usage && dInfo.child.method.length === 0) {
           createWarningMessage('법정대리인의 동의 확인 방법을 지정해주세요', 2);
-          onFocus('input', 'child');
+          onFocus('input', 2);
         } else if (dInfo.provision.usage === undefined) {
           createWarningMessage('개인정보 제공 여부에 대해 응답해주세요', 2);
-          onFocus('input', 'ppi');
+          onFocus('input', 3);
         } else if (dInfo.consignment.usage === undefined) {
           createWarningMessage('개인정보 위탁 여부에 대해 응답해주세요', 2);
-          onFocus('input', 'cpi');
+          onFocus('input', 4);
         } else if (dInfo.destructionUnused.type === undefined) {
           createWarningMessage('미이용자의 개인정보 파기 등에 관한 조치에 대해 응답해주세요', 2);
-          onFocus('input', 'destructionUnused');
+          onFocus('input', 5);
         } else if (dInfo.safety.usage && (blankCheck(dInfo.safety.activity) || dInfo.safety.certification.length === 0)) {
           createWarningMessage('개인정보보호 활동 내역 또는 국내외 개인정보보호 인증에 대한 입력을 해주세요', 2);
-          onFocus('input', 'safety');
+          onFocus('input', 6);
         } else if (dInfo.fni.usage === undefined) {
           createWarningMessage('가명정보 처리 여부에 대해 응답해주세요', 2);
-          onFocus('input', 'fni');
+          onFocus('input', 7);
         } else if (blankCheck(dInfo.manager.charger.name) || blankCheck(dInfo.manager.charger.position)) {
           createWarningMessage('개인정보보호 책임자에 대한 정보를 입력해주세요', 2);
-          onFocus('input', 'manager');
+          onFocus('input', 8);
         } else if (blankCheck(dInfo.manager.request.department) || blankCheck(dInfo.manager.request.charger) || blankCheck(dInfo.manager.request.contact)) {
           createWarningMessage('개인벙보 열람청구에 대한 정보를 입력해주세요', 2);
-          onFocus('input', 'manager');
+          onFocus('input', 8);
         }
         else {
           stepIndex + 1 <= steps.length ? setStepIndex(stepIndex + 1) : undefined;
@@ -304,21 +291,22 @@ export const EditableModal: React.FC<any> = ({ onClose, type, visible }: any): J
         break;
       case 'ppi':
         setTitle('개인정보 제공');
-        setContent(<PPITableForm mode='modal' />);
+        setContent(<PPITableForm modal={true} />);
         break;
       case 'cpi':
         setTitle('개인정보 위탁');
-        setContent(<CPITableForm mode='modal' />);
+        setContent(<CPITableForm modal={true} />);
         break;
       case 'fni':
         setTitle('가명정보');
         setContent(
           <>
             <h2 style={{ fontSize: 15, fontWeight: '500', marginBottom: 4 }}>가명정보 수집 및 이용</h2>
-            <FNITable mode='modal' />
+            <FNITable modal={true} />
             <h2 style={{ fontSize: 15, fontWeight: '500', marginBottom: 4, marginTop: 20 }}>가명정보 제공</h2>
-            <PFNITable mode='modal' />
+            <PFNITable modal={true} />
             <h2 style={{ fontSize: 15, fontWeight: '500', marginBottom: 4, marginTop: 20 }}>가명정보 위탁</h2>
+            <CFNITable modal={true} />
           </>
         );
         break;
@@ -377,42 +365,42 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, onFocus
   // Return an element
   return (
     <>
-      <DIRow self={refElements && refElements['name'] ? refElements['name'] : undefined}>
+      <DIRow self={refElements ? (el: any) => (refElements.current[0] = el) : undefined}>
         <DIRowHeader description='개인정보 처리방침에 기재될 개인정보처리자명 또는 서비스명을 입력해주세요.\n작성된 명칭은 제목 및 본문에 기재되어 본 개인정보 처리방침의 적용 범위를 알려줍니다.' required title='개인정보 처리자명 또는 서비스명' />
         <DIRowContent>
-          <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'name')} onClick={() => onFocus('preview', 'name')} placeholder='개인정보 처리자명 또는 서비스명' value={data.name} />
+          <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'name')} onClick={() => onFocus('preview', 0)} placeholder='개인정보 처리자명 또는 서비스명' value={data.name} />
         </DIRowContent>
       </DIRow>
       <DIRowDivider />
-      <DIRow self={refElements && refElements['pi'] ? refElements['pi'] : undefined}>
-        <DIRowHeader description='이 부분은 개인정보 처리방침에서 가장 중요한 내용입니다.\n각 업무 안에서 처리하는 목적을 모두 나열하고, 필수항목과 선택항목을 나누어 기재해야 합니다. 보유 및 이용기간은 업무별로 필요한 기간을 정하여 작성해주시면 됩니다.(항목들을 이용하는 기간 뿐만 아니라 저장·보관하는 기간이 모두 포함됩니다.)' required title='개인정보의 처리목적, 수집 항목, 보유 및 이용기간' tools={<Button onClick={(): void => { openModal('pi'); onFocus('preview', 'pi'); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>} />
+      <DIRow self={refElements ? (el: any) => (refElements.current[1] = el) : undefined}>
+        <DIRowHeader description='이 부분은 개인정보 처리방침에서 가장 중요한 내용입니다.\n각 업무 안에서 처리하는 목적을 모두 나열하고, 필수항목과 선택항목을 나누어 기재해야 합니다. 보유 및 이용기간은 업무별로 필요한 기간을 정하여 작성해주시면 됩니다.(항목들을 이용하는 기간 뿐만 아니라 저장·보관하는 기간이 모두 포함됩니다.)' required title='개인정보의 처리목적, 수집 항목, 보유 및 이용기간' tools={<Button onClick={(): void => { openModal('pi'); onFocus('preview', 1); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>} />
         <DIRowContent>
           <DIRowSubject description='위에서 정한 기간과 별도로, 관련 법령에 따라 개인정보를 보유해야 하는 경우에는 해당되는 법령을 모두 기재해야 합니다. 아래 보기에서 선택하거나 형식에 맞춰 입력해주세요.' required title='관계 법령에 따른 개인정보의 보유 및 이용기간' />
-          <AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, value, 'period')} options={exampleForPeriodPI} value={data.period} />
+          <AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, value, 'period')} onClick={() => onFocus('preview', 1, 'end')} options={exampleForPeriodPI} value={data.period} />
         </DIRowContent>
       </DIRow>
       <DIRowDivider />
-      <DIRow self={refElements && refElements['child'] ? refElements['child'] : undefined}>
+      <DIRow self={refElements ? (el: any) => (refElements.current[2] = el) : undefined}>
         <Collapse activeKey={data.child.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='만 14세 미만 아동의 개인정보를 처리하고 있다면 그에 관한 안내를 기재할 것을 권고하고 있습니다. 현재 법정대리인의 동의를 확인하기 위해 사용하는 방법을 아래에서 선택하면, 개인정보보호위원회에서 권장하는 안내 사항과 함께 입력됩니다.' required style={{ marginBottom: 0 }} title='만 14세 미만 아동의 개인정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => { onChange(THIS_STEP, e.target.value, 'child', 'usage'); e.target.value ? onFocus('preview', 'child') : undefined }} size='small' value={data.child.usage} />} />} key='1' showArrow={false}>
+          <Collapse.Panel header={<DIRowHeader description='만 14세 미만 아동의 개인정보를 처리하고 있다면 그에 관한 안내를 기재할 것을 권고하고 있습니다. 현재 법정대리인의 동의를 확인하기 위해 사용하는 방법을 아래에서 선택하면, 개인정보보호위원회에서 권장하는 안내 사항과 함께 입력됩니다.' required style={{ marginBottom: 0 }} title='만 14세 미만 아동의 개인정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => { onChange(THIS_STEP, e.target.value, 'child', 'usage'); e.target.value ? onFocus('preview', 2) : undefined }} size='small' value={data.child.usage} />} />} key='1' showArrow={false}>
             <DIRowSubject required title='법정대리인의 동의 확인 방법' />
             <TreeSelect showArrow={false} treeData={exampleForMethodConsent} treeCheckable={true} onChange={(value: string[]): void => onChange(THIS_STEP, value, 'child', 'method')} placeholder='예시에서 선택' style={{ width: '100%' }} value={data.child.method} />
           </Collapse.Panel>
         </Collapse>
       </DIRow>
       <DIRowDivider />
-      <DIRow self={refElements && refElements['provision'] ? refElements['provision'] : undefined}>
+      <DIRow self={refElements ? (el: any) => (refElements.current[3] = el) : undefined}>
         <Collapse activeKey={data.provision.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='제3자의 목적을 위해 개인정보를 제공하면 그에 관한 사항을 반드시 안내해야 합니다. \n개인정보를 제공한 건 중 아직 ‘제공받은 자의 보유 및 이용 기간’이 남아있는 건은 해당 내용을 모두 기재해야 합니다. 만약 제공된 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n※ 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' required style={{ marginBottom: 0 }} title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton disabled={refTable.ppi !== []} onChange={(e: any): void => { onFocus('preview', 'provision'); onChange(THIS_STEP,  e.target.value, 'provision', 'usage') }} size='small' value={data.provision.usage} />} />} key='1' showArrow={false}>
-            <Button onClick={(): void => { openModal('ppi'); onFocus('preview', 'ppi'); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
+          <Collapse.Panel header={<DIRowHeader description='제3자의 목적을 위해 개인정보를 제공하면 그에 관한 사항을 반드시 안내해야 합니다. \n개인정보를 제공한 건 중 아직 ‘제공받은 자의 보유 및 이용 기간’이 남아있는 건은 해당 내용을 모두 기재해야 합니다. 만약 제공된 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n※ 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' required style={{ marginBottom: 0 }} title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton disabled={refTable.ppi !== []} onChange={(e: any): void => { onFocus('preview', 3); onChange(THIS_STEP,  e.target.value, 'provision', 'usage') }} size='small' value={data.provision.usage} />} />} key='1' showArrow={false}>
+            <Button onClick={(): void => { openModal('ppi'); onFocus('preview', 3); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
       </DIRow>
       <DIRowDivider />
-      <DIRow self={refElements && refElements['consignment'] ? refElements['consignment'] : undefined}>
+      <DIRow self={refElements ? (el: any) => (refElements.current[4] = el) : undefined}>
         <Collapse activeKey={data.consignment.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='개인정보 처리를 위탁하고 있다면, 그에 관한 사항을 반드시 안내해야 합니다(예: AWS, 채널톡, Google Analytics 등). 만약 위탁한 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n개인정보 처리 업무를 위해 이용하고 있는 업체명과 위탁 업무 내용이 모두 기재되어있는지 확인해주세요.' required style={{ marginBottom: 0 }} title='위탁하는 개인정보가 있나요?' tools={<YesOrNoRadioButton disabled={refTable.cpi !== []} onChange={(e: any): void => { onFocus('preview', 'consignment'); onChange(THIS_STEP, e.target.value, 'consignment', 'usage') }} size='small' value={data.consignment.usage} />} />} key='1' showArrow={false} >
-            <Button onClick={(): void => { openModal('cpi'); onFocus('preview', 'cpi'); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
+          <Collapse.Panel header={<DIRowHeader description='개인정보 처리를 위탁하고 있다면, 그에 관한 사항을 반드시 안내해야 합니다(예: AWS, 채널톡, Google Analytics 등). 만약 위탁한 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n개인정보 처리 업무를 위해 이용하고 있는 업체명과 위탁 업무 내용이 모두 기재되어있는지 확인해주세요.' required style={{ marginBottom: 0 }} title='위탁하는 개인정보가 있나요?' tools={<YesOrNoRadioButton disabled={refTable.cpi !== []} onChange={(e: any): void => { onFocus('preview', 4); onChange(THIS_STEP, e.target.value, 'consignment', 'usage') }} size='small' value={data.consignment.usage} />} />} key='1' showArrow={false} >
+            <Button onClick={(): void => { openModal('cpi'); onFocus('preview', 4); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
       </DIRow>
@@ -421,9 +409,9 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, onFocus
         <DIRowHeader description='보유 및 이용기간이 끝난 개인정보의 파기에 관한 안내는 필수 기재사항입니다. 이에 관하여 ‘개인정보 보호법령에서 권장하는 파기방법과 절차를 준수하고 있다’는 내용을 자동으로 입력해드립니다.' style={{ marginBottom: 0 }} title='개인정보의 파기' />
       </DIRow>
       <DIRowDivider />
-      <DIRow self={refElements && refElements['destructionUnused'] ? refElements['destructionUnused'] : undefined}>
+      <DIRow self={refElements ? (el: any) => (refElements.current[5] = el) : undefined}>
         <DIRowHeader description='개인정보 보호법에 따라, 서비스를 1년간 이용하지 않은 이용자의 정보는 파기하거나 분리보관해야 합니다. 개인정보보호위원회에서는 이에 대한 조치 사항을 기재할 것을 권고하고 있으며, 필수 기재항목은 아닙니다.\n현재 1년간 이용하지 않은 이용자의 정보에 대해 어떤 조치를 취하고 계신지 아래에서 선택하시면, 그에 맞는 내용이 삽입되거나 삭제됩니다.' required title='미이용자의 개인정보 파기 등에 관한 조치' />
-        <Radio.Group onChange={(e: any): void => { onFocus('preview', 'destructionUnused'); onChange(THIS_STEP, e.target.value, 'destructionUnused', 'type') }} value={data.destructionUnused.type}>
+        <Radio.Group onChange={(e: any): void => { onFocus('preview', 5); onChange(THIS_STEP, e.target.value, 'destructionUnused', 'type') }} value={data.destructionUnused.type}>
           <Space direction='vertical'>
             <Radio key='1' value='destruction'>장기 미접속자의 개인정보를 파기합니다.</Radio>
             <Radio key='2' value='separation'>장기 미접속자의 개인정보를 분리보관합니다.</Radio>
@@ -436,14 +424,14 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, onFocus
         <DIRowHeader description='이용자들이 본인의 개인정보를 열람·수정·파기 등을 요청할 수 있는 권리를 보장하는 방법에 관한 안내는 필수 기재사항입니다. 이에 관하여 ‘개인정보 보호법령에서 권장하는 방법을 준수하고 있다’는 내용을 자동으로 입력해드립니다.' title='정보주체와 법정대리인의 권리·의무 및 행사방법' />
       </DIRow>
       <DIRowDivider />
-      <DIRow self={refElements && refElements['safety'] ? refElements['safety'] : undefined}>
+      <DIRow self={refElements ? (el: any) => (refElements.current[6] = el) : undefined}>
         <DIRowHeader description='회사가 개인정보의 안전을 위해 취하고 있는 조치는 필수 기재사항입니다. \n개인정보가 보관되는 물리적 공간(개인정보 처리시스템이 있는 전산실 또는 하드카피가 보관된 캐비넷 등)이 있는 경우, ‘예’를 선택하시면 이에 관한 내용도 입력됩니다. 추가로, 개인정보 보호에 관한 활동이나 인증을 받은 내용이 있다면 함께 기재해주세요.' title='개인정보의 안전성 확보조치' />
         <DIRowContent>
-          <DIRowSubject title='개인정보를 저장하는 물리적인 공간(전산실, 자료보관실 등)이 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => { onChange(THIS_STEP, e.target.value, 'safety', 'physical'); e.target.value ? onFocus('preview', 'safety') : undefined }} size='small' value={data.safety.physical} />} />
+          <DIRowSubject title='개인정보를 저장하는 물리적인 공간(전산실, 자료보관실 등)이 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => { onChange(THIS_STEP, e.target.value, 'safety', 'physical'); e.target.value ? onFocus('preview', 6) : undefined }} size='small' value={data.safety.physical} />} />
         </DIRowContent>
         <DIRowContent>
           <Collapse activeKey={data.safety.usage ? ['1'] : []} ghost>
-            <Collapse.Panel header={<DIRowSubject style={{ marginBottom: 0 }} title='개인정보보호 활동을 하거나 국내외 개인정보보호 인증을 보유하고 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void =>  { onChange(THIS_STEP, e.target.value, 'safety', 'usage'); e.target.value ? onFocus('preview', 'safety') : undefined }} size='small' value={data.safety.usage} />} />} key='1' showArrow={false}>
+            <Collapse.Panel header={<DIRowSubject style={{ marginBottom: 0 }} title='개인정보보호 활동을 하거나 국내외 개인정보보호 인증을 보유하고 있나요?' tools={<YesOrNoRadioButton onChange={(e: any): void =>  { onChange(THIS_STEP, e.target.value, 'safety', 'usage'); e.target.value ? onFocus('preview', 6) : undefined }} size='small' value={data.safety.usage} />} />} key='1' showArrow={false}>
               <DIInputGroup label='개인정보보호 활동' style={{ marginBottom: 8 }}>
                 <Input onChange={(e: any): void => onChange(THIS_STEP, e.target.value, 'safety', 'activity')} placeholder='개인정보보호 관련 SNS 운영, 투명성 보고서 발간, 자율규제단체 활동 등' value={data.safety.activity} />
               </DIInputGroup>
@@ -467,31 +455,31 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, onFocus
         <DIRowHeader description='정보주체의 동의 없이 개인정보를 추가적으로 이용·제공하는 경우, 개인정보 보호법령에 명시된 고려사항에 대해 이용이 가능하다고 판단한 기준을 기재해야 합니다.\n수정이 필요한 경우, 이전 단계로 이동하여 내용을 변경하시면 자동으로 반영됩니다.' style={{ marginBottom: 0 }} title='추가적인 이용·제공 판단기준' />
       </DIRow>
       <DIRowDivider />
-      <DIRow self={refElements && refElements['fni'] ? refElements['fni'] : undefined}>
+      <DIRow self={refElements ? (el: any) => (refElements.current[7] = el) : undefined}>
         <Collapse activeKey={data.fni.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='개인정보처리자는 개인정보 보호법 제28조의2에 따라 개인정보를 가명처리 하거나 가명처리된 정보를 처리하는 경우, 이에 관한 내용을 개인정보 처리방침에 기재해야 합니다.\n‘수정하기’ 버튼을 눌러 내용을 변경하시면 자동으로 저장 및 반영됩니다.' required style={{ marginBottom: 0 }} title='가명정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => { onChange(THIS_STEP, e.target.value, 'fni', 'usage'); e.target.value ? onFocus('preview', 'fni') : undefined }} size='small' value={data.fni.usage} />} />} key='1' showArrow={false} >
-            <Button onClick={(): void => { openModal('fni'); onFocus('preview', 'fni'); }} type='default' size='small' style={{ fontSize: 12, padding: '0 12px' }}>수정하기</Button>
+          <Collapse.Panel header={<DIRowHeader description='개인정보처리자는 개인정보 보호법 제28조의2에 따라 개인정보를 가명처리 하거나 가명처리된 정보를 처리하는 경우, 이에 관한 내용을 개인정보 처리방침에 기재해야 합니다.\n‘수정하기’ 버튼을 눌러 내용을 변경하시면 자동으로 저장 및 반영됩니다.' required style={{ marginBottom: 0 }} title='가명정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => { onChange(THIS_STEP, e.target.value, 'fni', 'usage'); e.target.value ? onFocus('preview', 7) : undefined }} size='small' value={data.fni.usage} />} />} key='1' showArrow={false} >
+            <Button onClick={(): void => { openModal('fni'); onFocus('preview', 7); }} type='default' size='small' style={{ fontSize: 12, padding: '0 12px' }}>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
       </DIRow>
       <DIRowDivider />
-      <DIRow self={refElements && refElements['manager'] ? refElements['manager'] : undefined}>
+      <DIRow self={refElements ? (el: any) => (refElements.current[8] = el) : undefined}>
         <DIRowHeader title='개인정보보호책임자 및 개인정보 열람청구' />
         <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. 연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다.' required title='개인정보보호 책임자' />
         <Row gutter={8} style={{ marginBottom: 24 }}>
           <Col span={7}>
             <DIInputGroup label='직책'>
-              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'charger', 'position')} onClick={() => onFocus('preview', 'manager')} value={data.manager.charger.position} />
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'charger', 'position')} onClick={() => onFocus('preview', 8)} value={data.manager.charger.position} />
             </DIInputGroup>
           </Col>
           <Col span={7}>
             <DIInputGroup label='성명'>
-              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'charger', 'name')} onClick={() => onFocus('preview', 'manager')} value={data.manager.charger.name} />
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'charger', 'name')} onClick={() => onFocus('preview', 8)} value={data.manager.charger.name} />
             </DIInputGroup>
           </Col>
           <Col span={10}>
             <DIInputGroup label='연락처'>
-              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'charger', 'contact')} onClick={() => onFocus('preview', 'manager')} placeholder='예 : privacy@company.com' value={data.manager.charger.contact} />
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'charger', 'contact')} onClick={() => onFocus('preview', 8)} placeholder='예 : privacy@company.com' value={data.manager.charger.contact} />
             </DIInputGroup>
           </Col>
         </Row>
@@ -500,12 +488,12 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, onFocus
         <Row gutter={8} style={{ marginBottom: 24 }}>
           <Col span={10}>
             <DIInputGroup label='부서명'>
-              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'department', 'name')} onClick={() => onFocus('preview', 'manager')} placeholder='예 : 정보보안팀' value={data.manager.department.name} />
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'department', 'name')} onClick={() => onFocus('preview', 8)} placeholder='예 : 정보보안팀' value={data.manager.department.name} />
             </DIInputGroup>
           </Col>
           <Col span={14}>
             <DIInputGroup label='연락처'>
-              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'department', 'contact')} onClick={() => onFocus('preview', 'manager')} placeholder='예 : privacy@company.com' value={data.manager.department.contact} />
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'department', 'contact')} onClick={() => onFocus('preview', 8)} placeholder='예 : privacy@company.com' value={data.manager.department.contact} />
             </DIInputGroup>
           </Col>
         </Row>
@@ -513,17 +501,17 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, onFocus
         <Row gutter={8}>
           <Col span={7}>
             <DIInputGroup label='부서명'>
-              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'request', 'department')} onClick={() => onFocus('preview', 'manager')} placeholder='예 : 정보보안팀' value={data.manager.request.department} />
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'request', 'department')} onClick={() => onFocus('preview', 8)} placeholder='예 : 정보보안팀' value={data.manager.request.department} />
             </DIInputGroup>
           </Col>
           <Col span={7}>
             <DIInputGroup label='담당자명'>
-              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'request', 'charger')} onClick={() => onFocus('preview', 'manager')} placeholder='예 : 김OO' value={data.manager.request.charger} />
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'request', 'charger')} onClick={() => onFocus('preview', 8)} placeholder='예 : 김OO' value={data.manager.request.charger} />
             </DIInputGroup>
           </Col>
           <Col span={10}>
             <DIInputGroup label='연락처'>
-              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'request', 'contact')} onClick={() => onFocus('preview', 'manager')} placeholder='예 : privacy@company.com' value={data.manager.request.contact} />
+              <Input allowClear onChange={(e: any) => onChange(THIS_STEP, e.target.value, 'manager', 'request', 'contact')} onClick={() => onFocus('preview', 8)} placeholder='예 : privacy@company.com' value={data.manager.request.contact} />
             </DIInputGroup>
           </Col>
         </Row>
@@ -587,7 +575,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
   // 컴포넌트 반환
   return (
     <>
-      <h2 ref={refElements && refElements['name'] ? refElements['name'] : undefined} style={{ fontSize: preview ? 18 : 24, fontWeight: '700', lineHeight: '22px', marginBottom: 30, textAlign: 'center' }}>{stmt.title}</h2>
+      <h2 ref={refElements ? (el: any) => (refElements.current[0] = el) : undefined} style={{ fontSize: preview ? 18 : 24, fontWeight: '700', lineHeight: '22px', marginBottom: 30, textAlign: 'center' }}>{stmt.title}</h2>
       {!preview ? (
         <p style={{ color: '#262626', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 32, textAlign: 'right' }}>{data.cInfo.applyAt}</p>
       ) : (<></>)}
@@ -648,7 +636,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
         </DTCForm>
       ) : (<></>)}
       <DDRow>
-        <DDRowHeader self={refElements && refElements['pi'] ? refElements['pi'] : undefined} title={stmt.pi.title} />
+        <DDRowHeader self={refElements ? (el: any) => (refElements.current[1] = el) : undefined} title={stmt.pi.title} />
         <DDRowContent items={stmt.pi.content.common[1]} />
         <ReadableTable columns={[
           { title: '구분(업무명)', dataIndex: 'subject', key: 'subject' },
@@ -659,7 +647,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
         <DDRowContent items={stmt.pi.content.common[2]} style={{ marginBottom: 0 }} />
         <DDRowItemList items={data.dInfo.period} />
       </DDRow>
-      <DDRow self={refElements && refElements['child'] ? refElements['child'] : undefined}>
+      <DDRow self={refElements ? (el: any) => (refElements.current[2] = el) : undefined}>
         {data.dInfo.child.usage ? (
           <>
             <DDRowHeader title={stmt.child.title} />
@@ -668,7 +656,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
           </>
         ) : (<></>)}
       </DDRow>
-      <DDRow self={refElements && refElements['ppi'] ? refElements['ppi'] : undefined}>
+      <DDRow self={refElements ? (el: any) => (refElements.current[3] = el) : undefined}>
         {data.dInfo.provision.usage ? (
           <>
             <DDRowHeader title={stmt.ppi.title} />
@@ -691,11 +679,11 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
                 ]} dataSource={refTable.ppi ? refTable.ppi.filter((item: any): boolean => item.isForeign) : []} />
               </>
             ) : (<></>) : (<></>)}
-            <DDRowContent items={stmt.ppi.content.common[2]} />
+            <DDRowContent items={stmt.ppi.content.common[2]} links={stmt.ppi.content.common.link} />
           </>
         ) : (<></>)}
       </DDRow>
-      <DDRow self={refElements && refElements['cpi'] ? refElements['cpi'] : undefined}>
+      <DDRow self={refElements ? (el: any) => (refElements.current[4] = el) : undefined}>
         {data.dInfo.consignment.usage ? (
           <>
             <DDRowHeader title={stmt.cpi.title} />
@@ -727,7 +715,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
         <DDRowContent items={stmt.dpi.content.common[1]} style={{ marginBottom: 0 }} />
         <DDRowItemList items={stmt.dpi.content.common[2]} />
       </DDRow>
-      <DDRow self={refElements && refElements['destructionUnused'] ? refElements['destructionUnused'] : undefined}>
+      <DDRow self={refElements ? (el: any) => (refElements.current[5] = el) : undefined}>
         {data.dInfo.destructionUnused.type !== undefined && data.dInfo.destructionUnused.type !== 'none' ? (
           <>
             <DDRowHeader title={stmt.dpiUnused.title} />
@@ -743,7 +731,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
         <DDRowHeader title={stmt.agent.title} />
         <DDRowContent items={stmt.agent.content.common[1]} />
       </DDRow>
-      <DDRow self={refElements && refElements['safety'] ? refElements['safety'] : undefined}>
+      <DDRow self={refElements ? (el: any) => (refElements.current[6] = el) : undefined}>
         <DDRowHeader title={stmt.safety.title} />
         <DDRowContent items={stmt.safety.content.common[1]} style={{ marginBottom: 0 }} />
         {data.dInfo.safety.physical ? (
@@ -891,7 +879,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
           <DDRowContent items={stmt.additional.content.none[1]}></DDRowContent>
         )}
       </DDRow>
-      <DDRow self={refElements && refElements['fni'] ? refElements['fni'] : undefined}>
+      <DDRow self={refElements ? (el: any) => (refElements.current[7] = el) : undefined}>
         {data.dInfo.fni.usage ? (
           <>
             <DDRowHeader title={stmt.fni.title} />
@@ -934,7 +922,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
           </>
         ) : (<></>)}
       </DDRow>
-      <DDRow self={refElements && refElements['manager'] ? refElements['manager'] : undefined}>
+      <DDRow self={refElements ? (el: any) => (refElements.current[8] = el) : undefined}>
         <DDRowHeader title={stmt.manager.title} />
         <DDRowContent items={stmt.manager.content.common[1]} />
         <ReadableTable columns={[

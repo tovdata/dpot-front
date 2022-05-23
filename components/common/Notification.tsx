@@ -1,16 +1,21 @@
 // Component
 import { message, notification } from 'antd';
+// Type
+import { NotificationPlacement } from 'antd/lib/notification';
 
 /**
  * [Function] Create a simple warning notification
- * @param message notification message
+ * @param title notification title
  * @param duration duration (milliseconds)
+ * @param placement placement
+ * @param description description
  */
-export const createSimpleWarningNotification = (message: string, duration?: number): void => {
+export const createSimpleWarningNotification = (title: string, duration: number = 2.4, placement: NotificationPlacement = 'bottomRight', description?: string): void => {
   notification.warning({
-    description: message,
-    duration: duration ? duration : 2.4,
-    message: 'Wanring'
+    description: description,
+    duration: duration,
+    message: title,
+    placement: placement
   });
 }
 /**
