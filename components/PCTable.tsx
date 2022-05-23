@@ -5,7 +5,7 @@ import { ModalToInputURL } from './common/Modal';
 import { EditableTable, EditableTableForm } from "./common/Table";
 // Data (header)
 import { cpiTableHeader, ecpiTableHeader, eppiTableHeader, ppiTableHeader } from '../models/static/header';
-import { API_DT_CFNI, API_DT_CPI, API_DT_PFNI, API_DT_PI, API_DT_PPI, getListForPIM, processPIMData, setQueryData } from '../models/queryState';
+import { API_DT_CFNI, API_DT_CPI, API_DT_FNI, API_DT_PFNI, API_DT_PI, API_DT_PPI, getListForPIM, processPIMData, setQueryData } from '../models/queryState';
 // Type
 import { SelectOptionsByColumn } from '../models/type';
 // Status
@@ -83,11 +83,14 @@ export const PPITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
       <LinkButton onClick={() => setIsModalOpen(true)} url={url} />
     </div>
   );
+  const onSaveHandler = (url: string) => {
+    setUrl(url);
+  }
   // 컴포넌트 반환
   return (
     <EditableTableForm description='‘개인정보 제3자 제공’이란, 제3자의 목적을 위해 개인정보를 외부에 제공하는 것을 말해요.\n각 제공 건에 대해 아래의 내용을 입력해주세요. 국외로 제공되는 경우에는 ‘국외 여부’에 체크한 뒤 추가 정보도 입력해야 해요.\n제3자 제공내역이 정리된 별도의 페이지가 있다면, 우측에 ‘링크(URL)’ 버튼을 클릭하여 연결시킬 수 있어요.' modal={modal} title='개인정보 제3자 제공' tools={tools}>
       {isModalOpen ? (
-        <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url} open={isModalOpen} onClose={() => { setIsModalOpen(false) }} onSave={setUrl} />
+        <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url} open={isModalOpen} onClose={() => { setIsModalOpen(false) }} onSave={(url) => onSaveHandler(url)} />
       ) : (<></>)}
       <PPITable />
     </EditableTableForm>
@@ -100,11 +103,10 @@ export const PFNITable: React.FC<any> = ({ url }: any) => {
   // 서버로부터 데이블 데이터 가져오기
   const { isLoading, data } = useQuery(API_DT_PFNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PFNI));
   // Get a state (for select options)
-  const { isLoading: pfniLoading, data: pfniData } = useQuery(API_DT_PFNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PFNI));
+  const { isLoading: fniLoading, data: fniData } = useQuery(API_DT_FNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_FNI));
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
   const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PFNI, val.mode, val.data));
-
   // [Event handler] 행(Row) 추가 이벤트
   const onAdd = (record: any): void => setQueryData(queryClient, API_DT_PFNI, mutate, 'create', record);
   // [Event handler] 행(Row) 삭제 이벤트
@@ -130,7 +132,7 @@ export const PFNITable: React.FC<any> = ({ url }: any) => {
   };
 
   // Return an element
-  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={ppiTableHeader} innerHeaders={eppiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={pfniLoading ? [] : pfniData} tableName={API_DT_PFNI} url={url} />);
+  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={ppiTableHeader} innerHeaders={eppiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={fniLoading ? [] : fniData} tableName={API_DT_PFNI} url={url} />);
 };
 /**
  * [Component] 개인정보 제공 테이블 Form
@@ -146,7 +148,7 @@ export const PFNITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
   );
   // 컴포넌트 반환
   return (
-    <EditableTableForm modal={modal} style={ modal ? undefined : { marginBottom: '4.625rem' }} title='가명정보 제3자 제공' tools={tools}>
+    <EditableTableForm modal={modal} style={modal ? undefined : { marginBottom: '4.625rem' }} title='가명정보 제3자 제공' tools={tools}>
       {isModalOpen ? (
         <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url} open={isModalOpen} onClose={() => { setIsModalOpen(false) }} onSave={setUrl} />
       ) : (<></>)}
@@ -207,7 +209,10 @@ export const CPITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
   const [url, setUrl] = useState<string>('');
   // 헤더에 들어갈 버튼 정의
   const tools: JSX.Element = (
-    <LinkButton onClick={() => setIsModalOpen(true)} url={url} />
+    <div>
+      <Button style={{ marginRight: 8 }} type='default'>위탁 정보 입력 가이드</Button>
+      <LinkButton onClick={() => setIsModalOpen(true)} url={url} />
+    </div>
   );
   // 컴포넌트 반환
   return (
@@ -263,13 +268,12 @@ export const CFNITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
   // 헤더에 들어갈 버튼 정의
   const tools: JSX.Element = (
     <div>
-      <Button style={{ marginRight: 8 }} type='default'>위탁 정보 입력 가이드</Button>
       <LinkButton onClick={() => setIsModalOpen(true)} url={url} />
     </div>
   );
   // 컴포넌트 반환
   return (
-    <EditableTableForm modal={modal} style={ modal ? undefined : { marginBottom: '4.625rem' }} title='가명정보 위탁' tools={tools}>
+    <EditableTableForm modal={modal} style={modal ? undefined : { marginBottom: '4.625rem' }} title='가명정보 위탁' tools={tools}>
       {isModalOpen ? (
         <ModalToInputURL discription='위탁 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url} open={isModalOpen} onClose={() => { setIsModalOpen(false) }} onSave={setUrl} />
       ) : (<></>)}
