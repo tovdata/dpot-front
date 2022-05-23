@@ -7,6 +7,7 @@ export interface TableHeaderData {
   description?: string;
   display: string;
   name: string;
+  placeholder?: string;
   required: boolean;
   width?: string;
 }

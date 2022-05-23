@@ -6,7 +6,7 @@ import { fniTableHeader, piTableHeader } from '../models/static/header';
 // Module
 import { createSimpleWarningNotification } from './common/Notification';
 // State
-import { GetPersonalInfoSelectOptionsSelector, GetPersonalInfoSelector } from '../models/state';
+import { GetPersonalInfoSelectOptionsSelector } from '../models/state';
 // Type
 import { SelectOptionsByColumn } from '../models/type';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -20,7 +20,7 @@ export const FNITable: React.FC<any> = (): JSX.Element => {
   // 서버로부터 데이블 데이터 가져오기
   const { isLoading, data } = useQuery(API_DT_FNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_FNI));
   // Get a state (for select options)
-  const ref: any = useRecoilValue(GetPersonalInfoSelector);
+  const { isLoading: piLoading, data: piData } = useQuery(API_DT_PI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PI));
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = {
     basis: ['과학적 연구', '통계 작성', '공익적 기록 및 보존', '기타']
@@ -46,7 +46,7 @@ export const FNITable: React.FC<any> = (): JSX.Element => {
   }
 
   // Return an element
-  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} headers={fniTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={ref} tableName='fni' />);
+  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} headers={fniTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={piLoading ? [] : piData} tableName={API_DT_FNI} />);
 }
 /**
  * [Component] 가명정보 수집 및 이용 테이블 Form

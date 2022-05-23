@@ -13,6 +13,7 @@ import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
 const GlobalStyle = createGlobalStyle`
   body {
     font-family: Pretendard;
+    box-size: border-box;
   }
   body * {
     font-family: Pretendard !important;

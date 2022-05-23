@@ -147,8 +147,14 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
         } else if (dInfo.provision.usage === undefined) {
           createWarningMessage('개인정보 제공 여부에 대해 응답해주세요', 2);
           onFocus('input', 3);
+        } else if (dInfo.consignment.usage && ref.ppi.length === 0) {
+          createWarningMessage('개인정보 제공에 대한 데이터가 없습니다', 2);
+          onFocus('input', 3);
         } else if (dInfo.consignment.usage === undefined) {
           createWarningMessage('개인정보 위탁 여부에 대해 응답해주세요', 2);
+          onFocus('input', 4);
+        } else if (dInfo.consignment.usage && ref.cpi.length === 0) {
+          createWarningMessage('개인정보 위탁에 대한 데이터가 없습니다', 2);
           onFocus('input', 4);
         } else if (dInfo.destructionUnused.type === undefined) {
           createWarningMessage('미이용자의 개인정보 파기 등에 관한 조치에 대해 응답해주세요', 2);
@@ -362,7 +368,6 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, onFocus
   Object.keys(periodOfRetentionAndUseOfPersonalInformation).forEach((law: string): number => exampleForPeriodPI.push(...periodOfRetentionAndUseOfPersonalInformation[law].map((item: string): string => `${law} : ${item}`)));
   // 예시 데이터 가공 (법정대리인의 동의 확인 방법)
   const exampleForMethodConsent: any[] = methodOfConfirmConsentOfLegalRepresentative.map((item: string): any => ({ title: item, value: item }));
-
   // Return an element
   return (
     <>
@@ -392,7 +397,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, onFocus
       <DIRowDivider />
       <DIRow self={refElements ? (el: any) => (refElements.current[3] = el) : undefined}>
         <Collapse activeKey={data.provision.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='제3자의 목적을 위해 개인정보를 제공하면 그에 관한 사항을 반드시 안내해야 합니다. \n개인정보를 제공한 건 중 아직 ‘제공받은 자의 보유 및 이용 기간’이 남아있는 건은 해당 내용을 모두 기재해야 합니다. 만약 제공된 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n※ 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' required style={{ marginBottom: 0 }} title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton disabled={refTable.ppi !== []} onChange={(e: any): void => { onFocus('preview', 3); onChange(THIS_STEP,  e.target.value, 'provision', 'usage') }} size='small' value={data.provision.usage} />} />} key='1' showArrow={false}>
+          <Collapse.Panel header={<DIRowHeader description='제3자의 목적을 위해 개인정보를 제공하면 그에 관한 사항을 반드시 안내해야 합니다. \n개인정보를 제공한 건 중 아직 ‘제공받은 자의 보유 및 이용 기간’이 남아있는 건은 해당 내용을 모두 기재해야 합니다. 만약 제공된 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n※ 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' required style={{ marginBottom: 0 }} title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton disabled={refTable.ppi.length !== 0} onChange={(e: any): void => { onFocus('preview', 3); onChange(THIS_STEP,  e.target.value, 'provision', 'usage') }} size='small' value={data.provision.usage === undefined ? undefined : data.provision.usage} />} />} key='1' showArrow={false}>
             <Button onClick={(): void => { openModal('ppi'); onFocus('preview', 3); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
@@ -400,7 +405,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, onFocus
       <DIRowDivider />
       <DIRow self={refElements ? (el: any) => (refElements.current[4] = el) : undefined}>
         <Collapse activeKey={data.consignment.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='개인정보 처리를 위탁하고 있다면, 그에 관한 사항을 반드시 안내해야 합니다(예: AWS, 채널톡, Google Analytics 등). 만약 위탁한 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n개인정보 처리 업무를 위해 이용하고 있는 업체명과 위탁 업무 내용이 모두 기재되어있는지 확인해주세요.' required style={{ marginBottom: 0 }} title='위탁하는 개인정보가 있나요?' tools={<YesOrNoRadioButton disabled={refTable.cpi !== []} onChange={(e: any): void => { onFocus('preview', 4); onChange(THIS_STEP, e.target.value, 'consignment', 'usage') }} size='small' value={data.consignment.usage} />} />} key='1' showArrow={false} >
+          <Collapse.Panel header={<DIRowHeader description='개인정보 처리를 위탁하고 있다면, 그에 관한 사항을 반드시 안내해야 합니다(예: AWS, 채널톡, Google Analytics 등). 만약 위탁한 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n개인정보 처리 업무를 위해 이용하고 있는 업체명과 위탁 업무 내용이 모두 기재되어있는지 확인해주세요.' required style={{ marginBottom: 0 }} title='위탁하는 개인정보가 있나요?' tools={<YesOrNoRadioButton disabled={refTable.cpi.length !== 0} onChange={(e: any): void => { onFocus('preview', 4); onChange(THIS_STEP, e.target.value, 'consignment', 'usage') }} size='small' value={data.consignment.usage === undefined ? undefined : data.consignment.usage} />} />} key='1' showArrow={false} >
             <Button onClick={(): void => { openModal('cpi'); onFocus('preview', 4); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
@@ -458,7 +463,7 @@ const InputFormToCreateDocumentation: React.FC<any> = ({ data, onChange, onFocus
       <DIRowDivider />
       <DIRow self={refElements ? (el: any) => (refElements.current[7] = el) : undefined}>
         <Collapse activeKey={data.fni.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='개인정보처리자는 개인정보 보호법 제28조의2에 따라 개인정보를 가명처리 하거나 가명처리된 정보를 처리하는 경우, 이에 관한 내용을 개인정보 처리방침에 기재해야 합니다.\n‘수정하기’ 버튼을 눌러 내용을 변경하시면 자동으로 저장 및 반영됩니다.' required style={{ marginBottom: 0 }} title='가명정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => { onChange(THIS_STEP, e.target.value, 'fni', 'usage'); e.target.value ? onFocus('preview', 7) : undefined }} size='small' value={data.fni.usage} />} />} key='1' showArrow={false} >
+          <Collapse.Panel header={<DIRowHeader description='개인정보처리자는 개인정보 보호법 제28조의2에 따라 개인정보를 가명처리 하거나 가명처리된 정보를 처리하는 경우, 이에 관한 내용을 개인정보 처리방침에 기재해야 합니다.\n‘수정하기’ 버튼을 눌러 내용을 변경하시면 자동으로 저장 및 반영됩니다.' required style={{ marginBottom: 0 }} title='가명정보를 처리하나요?' tools={<YesOrNoRadioButton disabled={refTable.fni.length !== 0} onChange={(e: any): void => { onChange(THIS_STEP, e.target.value, 'fni', 'usage'); e.target.value ? onFocus('preview', 7) : undefined }} size='small' value={data.fni.usage} />} />} key='1' showArrow={false} >
             <Button onClick={(): void => { openModal('fni'); onFocus('preview', 7); }} type='default' size='small' style={{ fontSize: 12, padding: '0 12px' }}>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
@@ -640,10 +645,10 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
         <DDRowHeader self={refElements ? (el: any) => (refElements.current[1] = el) : undefined} title={stmt.pi.title} />
         <DDRowContent items={stmt.pi.content.common[1]} />
         <ReadableTable columns={[
-          { title: '구분(업무명)', dataIndex: 'subject', key: 'subject' },
-          { title: '처리 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />) },
-          { title: '수집 항목', dataIndex: 'item', key: 'item', render: (value: string[]) => value.map((item: string, index: number): JSX.Element => <div key={index}>{item}</div>) },
-          { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />) },
+          { title: '구분(업무명)', dataIndex: 'subject', key: 'subject', width: '16%' },
+          { title: '처리 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
+          { title: '수집 항목', dataIndex: 'item', key: 'item', render: (value: string[]) => value.map((item: string, index: number): JSX.Element => <div key={index}>{item}</div>), width: '36%' },
+          { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
         ]} dataSource={pi} />
         <DDRowContent items={stmt.pi.content.common[2]} style={{ marginBottom: 0 }} />
         <DDRowItemList items={data.dInfo.period} />
@@ -663,20 +668,20 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
             <DDRowHeader title={stmt.ppi.title} />
             <DDRowContent items={stmt.ppi.content.common[1]} />
             <ReadableTable columns={[
-              { title: '제공받는 자', dataIndex: 'recipient', key: 'recipient' },
-              { title: '제공받는 자의 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />) },
-              { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => (<>{value.join(', ')}</>) },
-              { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />) },
+              { title: '제공받는 자', dataIndex: 'recipient', key: 'recipient', width: '16%' },
+              { title: '제공받는 자의 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
+              { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => (<>{value.join(', ')}</>), width: '36%' },
+              { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
             ]} dataSource={refTable.ppi} />
             {refTable.ppi ? refTable.ppi.some((item: any): boolean => item.isForeign) ? (
               <>
                 <DDRowContent items={stmt.ppi.content.foreign[1]} />
                 <ReadableTable columns={[
-                  { title: '업체명', dataIndex: 'recipient', key: 'recipient' },
-                  { title: '국가', dataIndex: 'country', key: 'country' },
-                  { title: '위치', dataIndex: 'location', key: 'location' },
-                  { title: '일시 및 방법', dataIndex: 'method', key: 'method', render: (value: string[]) => (<ListInTable items={value} />) },
-                  { title: '관리책임자의 연락처', dataIndex: 'charger', key: 'charger' }
+                  { title: '업체명', dataIndex: 'recipient', key: 'recipient', width: '15%', },
+                  { title: '국가', dataIndex: 'country', key: 'country', width: '11%' },
+                  { title: '위치', dataIndex: 'location', key: 'location', width: '22%' },
+                  { title: '일시 및 방법', dataIndex: 'method', key: 'method', render: (value: string[]) => (<ListInTable items={value} />), width: '30%' },
+                  { title: '관리책임자의 연락처', dataIndex: 'charger', key: 'charger', width: '22%' }
                 ]} dataSource={refTable.ppi ? refTable.ppi.filter((item: any): boolean => item.isForeign) : []} />
               </>
             ) : (<></>) : (<></>)}
@@ -690,8 +695,8 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
             <DDRowHeader title={stmt.cpi.title} />
             <DDRowContent items={stmt.cpi.content.common[1]} />
             <ReadableTable columns={[
-              { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company' },
-              { title: '위탁업무', dataIndex: 'content', key: 'content', render: (value: string[]) => (<ListInTable items={value} />) },
+              { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company', width: '42%' },
+              { title: '위탁업무', dataIndex: 'content', key: 'content', render: (value: string[]) => (<ListInTable items={value} />), width: '58%' },
             ]} dataSource={refTable.cpi} />
             {refTable.cpi ? refTable.cpi.some((item: any): boolean => item.isForeign) ? (
               <>
@@ -804,10 +809,10 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
             <DDRowContent items={stmt.shape.content.advertising.common[1]} />
             <ReadableTable
               columns={[
-                { title: '행태정보 수집 항목', dataIndex: 'items', key: 'items' },
-                { title: '수집 방법', dataIndex: 'method', key: 'method' },
-                { title: '수집 목적', dataIndex: 'purpose', key: 'purpose' },
-                { title: '보유 및 이용기간', dataIndex: 'period', key: 'period' }]}
+                { title: '행태정보 수집 항목', dataIndex: 'items', key: 'items', width: '24%' },
+                { title: '수집 방법', dataIndex: 'method', key: 'method', width: '26%' },
+                { title: '수집 목적', dataIndex: 'purpose', key: 'purpose', width: '26%' },
+                { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', width: '24%' }]}
               dataSource={[
                 { 
                   key: '1',
@@ -834,10 +839,10 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
             <DDRowContent items={stmt.shape.content.advertising.common[1]} />
             <ReadableTable
               columns={[
-                { title: '행태정보 수집 항목', dataIndex: 'items', key: 'items' },
-                { title: '수집 방법', dataIndex: 'method', key: 'method' },
-                { title: '수집 목적', dataIndex: 'purpose', key: 'purpose' },
-                { title: '보유 및 이용기간', dataIndex: 'period', key: 'period' }]}
+                { title: '행태정보 수집 항목', dataIndex: 'items', key: 'items', width: '24%' },
+                { title: '수집 방법', dataIndex: 'method', key: 'method', width: '26%' },
+                { title: '수집 목적', dataIndex: 'purpose', key: 'purpose', width: '26%' },
+                { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', width: '24%' }]}
               dataSource={[
                 {
                   key: '1',
@@ -878,9 +883,9 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
             <DDRowContent items={stmt.additional.content.common[1]} />
             <ReadableTable
               columns={[
-                { title: '항목', dataIndex: 'items', key: 'items' },
-                { title: '이용·제공 목적', dataIndex: 'purpose', key: 'purpose' },
-                { title: '보유 및 이용기간', dataIndex: 'period', key: 'period' }]}
+                { title: '항목', dataIndex: 'items', key: 'items', width: '24%' },
+                { title: '이용·제공 목적', dataIndex: 'purpose', key: 'purpose', width: '38%' },
+                { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', width: '38%' }]}
               dataSource={[
                 { 
                   key: '1',
@@ -905,10 +910,10 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
               <>
                 <DDRowItemList items={['가명정보의 처리에 관한 사항']} style={{ marginBottom: 4 }} />
                 <ReadableTable columns={[
-                  { title: '구분', dataIndex: 'subject', key: 'subject' },
-                  { title: '처리 목적', dataIndex: 'purpose', key: 'purpose' },
-                  { title: '처리 항목', dataIndex: 'items', key: 'items', render: (value: string[]): JSX.Element => (<>{value.join(', ')}</>) },
-                  { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]): JSX.Element => (<ListInTable items={value} />) }
+                  { title: '구분', dataIndex: 'subject', key: 'subject', width: '20%' },
+                  { title: '처리 목적', dataIndex: 'purpose', key: 'purpose', width: '30%' },
+                  { title: '처리 항목', dataIndex: 'items', key: 'items', render: (value: string[]): JSX.Element => (<>{value.join(', ')}</>), width: '24%' },
+                  { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]): JSX.Element => (<ListInTable items={value} />), width: '26%' }
                 ]} dataSource={refTable.fni} />
               </>
             ) : (<></>)}
@@ -916,10 +921,10 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
               <>
                 <DDRowItemList items={['가명정보의 제3자 제공에 관한 사항']} style={{ marginBottom: 4 }} />
                 <ReadableTable columns={[
-                  { title: '제공받는 자', dataIndex: 'recipient', key: 'recipent' },
-                  { title: '제공 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]): JSX.Element => (<ListInTable items={value} />) },
-                  { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]): JSX.Element => (<>{value.join(', ')}</>) },
-                  { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]): JSX.Element => (<ListInTable items={value} />) }
+                  { title: '제공받는 자', dataIndex: 'recipient', key: 'recipent', width: '20%' },
+                  { title: '제공 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]): JSX.Element => (<ListInTable items={value} />), width: '30%' },
+                  { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]): JSX.Element => (<>{value.join(', ')}</>), width: '24%' },
+                  { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]): JSX.Element => (<ListInTable items={value} />), width: '26%' }
                 ]} dataSource={refTable.pfni} />
               </>
             ) : (<></>)}
@@ -927,8 +932,8 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
               <>
                 <DDRowItemList items={['가명정보 처리의 위탁에 관한 사항']} style={{ marginBottom: 4 }} />
                 <ReadableTable columns={[
-                  { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company' },
-                  { title: '위탁 업무', dataIndex: 'content', key: 'content' }
+                  { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company', width: '42%' },
+                  { title: '위탁 업무', dataIndex: 'content', key: 'content', width: '58%' }
                 ]} dataSource={refTable.cfni} />
               </>
             ) : (<></>)}
@@ -943,9 +948,9 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
         <DDRowHeader title={stmt.manager.title} />
         <DDRowContent items={stmt.manager.content.common[1]} />
         <ReadableTable columns={[
-          { title: '구분', dataIndex: 'identity', key: 'identity' },
-          { title: '담당자', dataIndex: 'charger', key: 'charger', render: (value: string[]) => value.map((item: string, index: number): JSX.Element => (<p key={index} style={{ margin: 0 }}>{item}</p>)) },
-          { title: '연락처', dataIndex: 'contact', key: 'contact' }
+          { title: '구분', dataIndex: 'identity', key: 'identity', width: '26%' },
+          { title: '담당자', dataIndex: 'charger', key: 'charger', render: (value: string[]) => value.map((item: string, index: number): JSX.Element => (<p key={index} style={{ margin: 0 }}>{item}</p>)), width: '40%' },
+          { title: '연락처', dataIndex: 'contact', key: 'contact', width: '34%' }
         ]} dataSource={managerTableData} />
         <DDRowContent items={stmt.manager.content.common[2]} />
       </DDRow>

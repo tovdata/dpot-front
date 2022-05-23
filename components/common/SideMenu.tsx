@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import styled, { css } from 'styled-components'
 // Component
-import { Divider, Menu } from 'antd';
+import { Menu } from 'antd';
 // Icon
 import { AiOutlineArrowLeft } from 'react-icons/ai';
 import { IoBusinessOutline } from 'react-icons/io5';
@@ -73,23 +73,23 @@ const StyledSideMenuToggle = styled.div<MenuOpenStatus>`
   align-items: center;
   background-color: #ffffff;
   border: 1px solid #0050B3;
-  border-radius: 0.25rem;
+  border-radius: 4px;
   color: #0050B3;
   cursor: pointer;
   display: flex;
   font-size: 12px;
   justify-content: center;
-  height: 1.125rem;
+  height: 18px;
   position: absolute;
-  right: 1.125rem;
+  right: 18px;
   transition: transform 0.42s, background-color 0.29s, color: 0.29s;;
   top: 11px;
-  width: 1.125rem;
+  width: 18px;
   z-index: 11;
   ${(props: any) => !props.open && css`
     background-color: #0050B3;
     color: #ffffff;
-    right: 2.08rem;
+    right: 26px;
     svg {
       transform: rotate(180deg);
     }

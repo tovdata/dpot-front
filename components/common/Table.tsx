@@ -71,13 +71,13 @@ const StyledCustomTableFooter = styled.span`
 const StyledEmptyTableFooter = styled(StyledCustomTableFooter)`
   .message{
     color:#BFBFBF;
-    font-weight: bold;
+    font-weight: 500;
     margin: 1rem 0;
   }
   button{
     border-color: #096DD9;
     color:#096DD9;
-    font-weight: bold;
+    font-weight: 500;
   }
 `;
 // Styled element (Empty url table fotter)
@@ -391,7 +391,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
       // Extract a header data
       const header: TableHeaderData = headers[key];
       // Create a column
-      const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description, header.width!);
+      const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description, header.width);
       // Set a render for column
       column.render = (item: any, record: any, index: number): JSX.Element => {
         switch (header.display) {
@@ -464,7 +464,8 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
         dataIndex: 'id',
         key: 'id',
         title: '',
-        render: (_: any, record: any, index: number): JSX.Element => (<TableEditCell edit={row.id === record.id} key={index} onDelete={() => { clearFocus(); onDelete(record); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { checkRequiredForRow() ? onSave(row) ? onEdit({}) : undefined : undefined }} onCancel={() => { clearFocus(); onEdit({}); onRollback(record) }} />)
+        render: (_: any, record: any, index: number): JSX.Element => (<TableEditCell edit={row.id === record.id} key={index} onDelete={() => { clearFocus(); onDelete(record); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { checkRequiredForRow() ? onSave(row) ? onEdit({}) : undefined : undefined }} onCancel={() => { clearFocus(); onEdit({}); onRollback(record) }} />),
+        width: '4%'
       });
     }
     // Return
@@ -612,7 +613,7 @@ const TableEditCell = ({ edit, onDelete, onEdit, onSave, onCancel }: TableEditCe
       ) : (
         <>
           <AiOutlineEdit onClick={onEdit} />
-          <Popconfirm title='해당 업무를 삭제하시겠습니까?' onConfirm={onDelete}>
+          <Popconfirm placement='topRight' title='해당 업무를 삭제하시겠습니까?' onConfirm={onDelete}>
             <AiOutlineDelete />
           </Popconfirm>
         </>
@@ -666,7 +667,7 @@ export const setDataSource = (dataSource: any): any[] => {
  * @returns created columns
  */
 const createTableColumnProps = (key: string, name: string, description?: string, width?: string): any => {
-  return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true, width: '300px' };
+  return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true, width: width ? width : '4%' };
 }
 /**
  * [Internal Function] 특정 컬럼(Column)의 Select Option 선택에 따라 다른 컬럼(Column)에 대한 Select Options을 변경하는 함수
@@ -763,6 +764,8 @@ const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableNam
     case 'fni':
       const subjectOptions: string[] = ref.map((elem: any): string => elem.subject).filter((item: string): boolean => options['subject'] ? !options['subject'].includes(item) : true)
       options['subject'] ? options['subject'].push(...subjectOptions) : options['subject'] = [...subjectOptions];
+      // options['items'] = [];
+      // options['items'] = extractProcessingItems(ref)?.filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
       break;
     case 'ppi':
       options['items'] = extractProcessingItems(ref);

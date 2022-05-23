@@ -55,7 +55,7 @@ export const SingleSelect = ({ error, onChange, placeholder, refresh, options, v
   // Set the options for select box
   const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select style={{ 'width': '100%' }} key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} status={error ? 'error' : undefined} value={value === '' ? undefined : value} />);
+  return (<Select style={{ 'width': '90%' }} key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} status={error ? 'error' : undefined} value={value === '' ? undefined : value} />);
 }
 /** 
  * [Component] Addable select
@@ -161,19 +161,22 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
     setData(changed);
     // Hidden a second row
     if (changed.adverb === '시까지') {
-      onAdd(`${changed.event} ${changed.adverb}`);
+      if (!blankCheck(changed.event)) {
+        onAdd(`${changed.event} ${changed.adverb}`);
+        // Reset a value
+        setData(defaultValue);
+        // Update a variable for refresh
+        refresh.current++
+      }
       // Update a state
       setHidden(true);
-      setData(defaultValue);
-      // Update a variable for refresh
-      refresh.current++
     } else if (changed.adverb === '일로부터') {
       setHidden(false);
       // Create an item
       if (changed.digit <= 0) {
         createWarningMessage('0보다 큰 정수 값을 입력해주세요.', 1.6);
         setData({ ...data, digit: 1 });
-      } else if (changed.digit > 0 && changed.unit !== '') {
+      } else if (changed.digit > 0 && !blankCheck(changed.unit) && !blankCheck(changed.event)) {
         onAdd(`${changed.event}${changed.adverb} ${changed.digit}${changed.unit}`);
         // Update a state
         setHidden(true);
@@ -202,11 +205,16 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
               <Input onChange={(e: any) => onChange('digit', e.target.value.toString())} type='number' value={data.digit} />
             </Col>
             <Col span={12}>
-              <SingleSelect onChange={(value: string | string[]) => onChange('unit', value as string)} options={['일', '개월', '년']} placeholder='선택' value={data.unit} />
+              <SingleSelect onChange={(value: string | string[]) => onChange('unit', value as string)} options={['일', '개월', '년']} placeholder='기간' value={data.unit} />
             </Col>
           </>
         )}
       </Row>
     </StyledIFTTTForm>
   );
+}
+
+const blankCheck = (value: string): boolean => {
+  const blankPattern: RegExp = /^\s+|\s+$/g;
+  return value.trim().replace(blankPattern, '') === '';
 }
