@@ -107,9 +107,9 @@ const StyledDIRow = styled.div`
     margin-bottom: 0;
   }
 `;
-export const DIRow: React.FC<RowProps> = ({ children, self }: RowProps): JSX.Element => {
+export const DIRow: React.FC<RowProps> = ({ children, self, style }: RowProps): JSX.Element => {
   return (
-    <StyledDIRow ref={self}>
+    <StyledDIRow ref={self} style={style}>
       {children}
     </StyledDIRow>
   )

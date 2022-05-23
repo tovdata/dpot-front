@@ -179,6 +179,7 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
       }
     }
   }
+  const onSave = (): void => console.log(data);
   /** [Event handler] 모달 열기 */
   const onOpen = (): void => setVisible(true);
    /** [Event handler] 모달 닫기 */
@@ -207,7 +208,7 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
         }
       });
       // 참조 데이터 갱신
-      setRef(tempRef)
+      setRef(tempRef);
       // 상태 데이터 갱신
       setData({ ...data, dInfo: { ...tempData } });
     }
@@ -227,7 +228,7 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
   // 컴포넌트 반환
   return (
     <>
-      <PageHeaderContainStep current={stepIndex} goTo='/doc/pipp' onBack={onBack} onMove={onMoveStep} title='개인정보 처리방침 만들기' steps={steps} />
+      <PageHeaderContainStep current={stepIndex} goTo='/doc/pipp' onBack={onBack} onMove={onMoveStep} onSave={onSave} title='개인정보 처리방침 만들기' steps={steps} />
       <div style={{ display: stepIndex === 0 ? 'block' : 'none', marginBottom: '3rem' }}>
         <CollapseForPIPP data={data.aInfo} items={itemForPI} onChange={onChange} />
       </div>
@@ -752,7 +753,26 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
       </DDRow>
       <DDRow>
         <DDRowHeader title={stmt.auto.title} />
-        {data.aInfo.cookie.usage ? (
+        {data.aInfo.cookie.usage && data.aInfo.webLog.usage ? (
+          <>
+            <DDRowContent items={stmt.auto.content.cookie[1]} style={{ marginBottom: 0 }} />
+            <DDRowContent items={[
+              `1) 쿠키의 사용 목적 : ${data.aInfo.cookie.purpose.join(', ')}`,
+              `2) 쿠키 저장 거부 시 불이익 : ${data.aInfo.cookie.disadvantage.join(', ')}`,
+              '3) 쿠키의 설치·운영 및 거부 : 브라우저나 앱의 종류에 따라 아래의 방법으로 쿠키의 저장을 거부할 수 있습니다.'
+            ]} style={{ marginBottom: 0 }} />
+            <DDRowItemList items={stmt.auto.content.web[1].concat(stmt.auto.content.app[1])} links={stmt.auto.content.web.link} />
+            <DDRowContent items={stmt.auto.content.webLog[1]} style={{ marginBottom: 0 }} />
+            <DDRowContent items={[
+              `1) 웹 로그 분석 도구의 사용 목적 : ${data.aInfo.webLog.purpose.join(', ')}`,
+              '2) 웹 로그 분석 도구의 거부∙차단 방법 :'
+            ]} style={{ marginBottom: 0 }} />
+            <DDRowItemList items={data.aInfo.webLog.method} />
+            <DDRowContent items={[
+              `3) 거부 시 불이익 : ${data.aInfo.webLog.disadvantage}`
+            ]} />
+          </>
+        ) : data.aInfo.cookie.usage ? (
           <>
             <DDRowContent items={stmt.auto.content.cookie[1]} style={{ marginBottom: 0 }} />
             <DDRowContent items={[
@@ -762,10 +782,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
             ]} style={{ marginBottom: 0 }} />
             <DDRowItemList items={stmt.auto.content.web[1].concat(stmt.auto.content.app[1])} links={stmt.auto.content.web.link} />
           </>
-        ) : (
-          <DDRowContent items={stmt.auto.content.common[1]} />
-        )}
-        {data.aInfo.webLog.usage ? (
+        ) : data.aInfo.webLog.usage ? (
           <>
             <DDRowContent items={stmt.auto.content.webLog[1]} style={{ marginBottom: 0 }} />
             <DDRowContent items={[
@@ -777,7 +794,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
               `3) 거부 시 불이익 : ${data.aInfo.webLog.disadvantage}`
             ]} />
           </>
-        ) : (<></>)}
+        ) : (<DDRowContent items={stmt.auto.content.none[1]} />)}
       </DDRow>
       <DDRow>
         <DDRowHeader title={stmt.shape.title} />
@@ -855,9 +872,9 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
         )}
       </DDRow>
       <DDRow>
-        <DDRowHeader title={stmt.additional.title} />
         {data.aInfo.additional.usage ? (
           <>
+            <DDRowHeader title={stmt.additional.title} />
             <DDRowContent items={stmt.additional.content.common[1]} />
             <ReadableTable
               columns={[
@@ -876,7 +893,7 @@ const PreviewDocumentForPIPP: React.FC<any> = ({ data, preview, refElements, ref
             <DDRowItemList items={stmt.additional.content.common[3]} />
           </>
         ) : (
-          <DDRowContent items={stmt.additional.content.none[1]}></DDRowContent>
+          <></>
         )}
       </DDRow>
       <DDRow self={refElements ? (el: any) => (refElements.current[7] = el) : undefined}>

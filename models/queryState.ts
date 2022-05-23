@@ -77,7 +77,7 @@ const processET = (rawData: any[]): any[] => {
  * @param serviceId 현재 서비스 ID
  * @returns API로부터 응답받은 데이터
  */
- export const getStatusForPIPP = async (serviceId: string): Promise<any> => {
+export const getStatusForPIPP = async (serviceId: string): Promise<any> => {
   const response = await fetch(`${baseUrl}service/${serviceId}/pipp`);
   // 응답 데이터를 JSON 형태로 변환
   const json = await response.json();
@@ -87,6 +87,27 @@ const processET = (rawData: any[]): any[] => {
   } else {
     return '';
   }
+}
+/**
+ * [Function] 개인정보 처리방침에 대한 임시 저장을 위해 API 요청하는 함수
+ * @param serviceId 현재 서비스 ID
+ * @param data 임시 저장을 위한 데이터
+ * @param init 초기 저장 여부
+ * @returns API로부터 응답받은 데이터
+ */
+export const saveDocumentationForPIPP = async (serviceId: string, data: any, init?: boolean): Promise<any> => {
+  // 초기 저장인지 아닌지를 확인하여 API 호출을 위한 URL 정의
+  const url: string = init ? `${baseUrl}pipp/new` : `${baseUrl}pipp/${serviceId}`;
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: init ? 'POST' : 'PUT'
+  };
+  // 응답 데이터 반환
+  return await fetch(url, request);
 }
 /**
  * [Function] 개인정보 관리 탭 내에 존재하는 테이블 데이터 목록에 대해 API 요청하는 함수
