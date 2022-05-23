@@ -335,6 +335,15 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
    */
   const checkRequiredForRow = (): boolean => {
     const state: any = {};
+    let innerResult;
+    // Check a required inner
+    if (expandKey && row[expandKey] && innerHeaders) {
+      innerResult = Object.keys(innerHeaders).map((key: string): boolean => {
+        const warning: boolean = checkRequired(innerHeaders[key].name, row[key], innerHeaders[key].required);
+        state[key] = warning;
+        return warning;
+      })
+    }
     // Check a required
     const result: boolean[] = Object.keys(headers).map((key: string): boolean => {
       const warning: boolean = checkRequired(headers[key].name, row[key], headers[key].required);
@@ -346,7 +355,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
     // Set a state
     setFocus(state);
     // Return
-    return !result.includes(true);
+    return !result.includes(true) && !innerResult?.includes(true);
   }
   /**
    * [Inner Function] Check a required for column
@@ -357,7 +366,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
    */
   const checkRequired = (columnName: string, item: string[] | string, required: boolean): boolean => {
     // Check a warning
-    const warning: boolean = required && ((typeof item === 'string' && item === '') || (Array.isArray(item) && item.length === 0));
+    const warning: boolean = required && ((typeof item === 'string' && item === '') || (Array.isArray(item) && item.length === 0)) || item === undefined && required;
     // Alert a message
     if (warning) {
       createWarningMessage(`해당 필드(${columnName})는 필수로 입력해야 합니다.`, 1.6, columnName);
@@ -418,7 +427,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
               return (
                 <>
                   <Space size={[6, 6]} style={{ marginBottom: '10px' }} wrap>
-                    {row[key].map((elem: string, index: number): JSX.Element => (<Tag closable key={index} onClose={(e: any): void => { e.preventDefault(); onChange(key, row[key].length - 1 === index ? [...row[key].slice(0, index)] : [...row[key].slice(0, index), ...row[key].slice(index + 1)], header.required) }}>{elem}</Tag>))}
+                    {row[key]?.map((elem: string, index: number): JSX.Element => (<Tag closable key={index} onClose={(e: any): void => { e.preventDefault(); onChange(key, row[key].length - 1 === index ? [...row[key].slice(0, index)] : [...row[key].slice(0, index), ...row[key].slice(index + 1)], header.required) }}>{elem}</Tag>))}
                   </Space>
                   <IFTTTSelect onAdd={(value: string): void => { row[key].some((item: string): boolean => item === value) ? createWarningMessage('동일한 기간이 존재합니다!', 1.6) : onChange(key, [...row[key], value], header.required) }} options={selectOptions[key] ? selectOptions[key] : []} />
                 </>
@@ -617,7 +626,7 @@ const TableEditCell = ({ edit, onDelete, onEdit, onSave, onCancel }: TableEditCe
 const TableContentForList = ({ items }: TableContentForListProps): JSX.Element => {
   return (
     <StyledList>
-      {items.map((key: string, index: number): JSX.Element => (<StyledListItem key={index}>{key}</StyledListItem>))}
+      {items?.map((key: string, index: number): JSX.Element => (<StyledListItem key={index}>{key}</StyledListItem>))}
     </StyledList>
   );
 }
@@ -759,7 +768,7 @@ const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableNam
       options['items'] = extractProcessingItems(ref);
       break;
     case 'pfni':
-      const pfniItems = ref?.map((ppi: any) => ppi.items);
+      const pfniItems = ref?.map((fni: any) => fni.items);
       // items 중복 체크 후, items 값 추가
       pfniItems.forEach((pfniArr: any) => pfniArr.forEach((pfniItem: any) => !items.includes(pfniItem) && items.push(pfniItem)));
       options['items'] = items;

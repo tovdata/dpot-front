@@ -141,7 +141,7 @@ export const eppiTableHeader: TableHeadersData = {
     description: '개인정보를 제공받은 자의 담당자/연락처(유선, 이메일 등)',
     display: 'list',
     name: '담당자(연락처)',
-    required: false,
+    required: true,
     width: '700px'
   }
 }
@@ -210,7 +210,7 @@ export const epfniTableHeader: TableHeadersData = {
     description: '가명정보를 제공받은 자의 담당자/연락처(유선, 이메일 등)',
     display: 'list',
     name: '담당자(연락처)',
-    required: false,
+    required: true,
     width: '350px'
   }
 }
@@ -286,7 +286,7 @@ export const ecpiTableHeader: TableHeadersData = {
     description: '수탁 업체 담당자/연락처(유선, 이메일 등)',
     display: 'list',
     name: '담당자(연락처)',
-    required: false,
+    required: true,
     width: '250px'
   }
 }
@@ -362,7 +362,7 @@ export const ecfniTableHeader: TableHeadersData = {
     description: '수탁 업체 담당자/연락처(유선, 이메일 등)',
     display: 'list',
     name: '담당자(연락처)',
-    required: false,
+    required: true,
     width: '250px'
   }
 }

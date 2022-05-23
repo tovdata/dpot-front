@@ -185,6 +185,15 @@ export const infoFromSubjectInCPI = {
       period: ["위탁 계약 종료 시까지", "파기 요청 시까지"],
       charger: ["googlekrsupport@google.com"]
     },
+    "Roxr Software Ltd": {
+      centent: ["Clicky를 통한 서비스 이용 트래픽 통계 분석"],
+      isForeign: true,
+      country: "USA",
+      location: "10883 SE Main St #201 Milwaukie, OR, 97222, USA",
+      method: ["서비스 이용 시점에 서버를 통해 전송"],
+      period: ["위탁 계약 종료 시까지", "파기 요청 시까지"],
+      charger: ["privacy@getclicky.com"]
+    },
     "네이버(주)": {
       content: ["Naver Analytics를 통한 서비스 이용 트래픽 통계 분석"]
     },
