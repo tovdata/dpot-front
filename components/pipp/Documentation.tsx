@@ -16,11 +16,12 @@ import IconComplaint from '../../public/images/complaint.svg';
 interface ViewProps {
   preview?: boolean;
   self?: any;
+  style?: React.CSSProperties;
 }
 /** [Interface] Properties for DDRow or DIRow */
 interface RowProps {
   children?: JSX.Element|JSX.Element[];
-  self?: React.MutableRefObject<any>;
+  self?: any;
   style?: React.CSSProperties;
 }
 /** [Interface] Properties for DIInputGroup */
@@ -48,7 +49,7 @@ interface DIRowHeaderProps {
 /** [Interface] Properties for DDRowContent */
 interface DDRowContentProps extends ViewProps {
   items?: string[];
-  style?: React.CSSProperties;
+  links?: string[];
 }
 /** [Interface] Properties for DDRowHeader */
 interface DDRowHeaderProps extends ViewProps {
@@ -59,7 +60,6 @@ interface DDRowItemListProps extends ViewProps {
   items?: string[];
   level?: number;
   links?: string[];
-  style?: React.CSSProperties;
 }
 /** [Interface] Properties for DRLabelingHeader */
 interface DRLabelingHeaderProps extends ViewProps {
@@ -189,10 +189,15 @@ export const DDRow: React.FC<RowProps> = ({ children, self }: RowProps): JSX.Ele
 }
 
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row content */
-export const DDRowContent: React.FC<DDRowContentProps> = ({ items, preview, style }: DDRowContentProps): JSX.Element => {
+export const DDRowContent: React.FC<DDRowContentProps> = ({ items, links, preview, style }: DDRowContentProps): JSX.Element => {
   return items ? (
     <div style={{ marginBottom: 8, ...style }}>
-      {items.map((item: string|JSX.Element, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>{item}</p>))}
+      {items.map((item: string|JSX.Element, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>
+        {item}
+        {links && links[index] ? (
+          <a target='_blank' href={links[index]} style={{ marginLeft: 6, textDecoration: 'underline' }} rel='noreferrer'>보기</a>
+        ) : (<></>)}
+      </p>))}
     </div>
   ) : (<></>);
 }

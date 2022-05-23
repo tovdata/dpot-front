@@ -1,7 +1,7 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography, Button } from 'antd';
+import { TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography, Button } from 'antd';
 import { AddableSelect, AddableTagSelect, SingleSelect, TagSelect, IFTTTSelect } from './Select';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
@@ -12,7 +12,7 @@ import { IoAddCircle } from 'react-icons/io5';
 import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // Type
 import { SelectOptionsByColumn, TableHeaderData, TableHeadersData } from '../../models/type';
-import { CloseOutlined, LinkOutlined } from '@ant-design/icons';
+import { CloseOutlined } from '@ant-design/icons';
 
 // Styled element (OuterTable)
 const OuterTable = styled(Table)`
@@ -36,24 +36,6 @@ export const StyledTableForm = styled.div`
   }
   .ant-form-item {
     margin: 0;
-  }
-  .ant-table-cell {
-    user-select: none;
-  }
-  .ant-table-cell > .ant-tag {
-    cursor: pointer;
-  }
-  table > tbody > tr:last-child > td {
-    border-bottom: none;
-  }
-  table > tbody > tr > td .ant-tag {
-    margin: 0;
-  }
-  .ant-table > .ant-table-footer {
-    background-color: #ffffff;
-    border: 1px dashed #D9D9D9;
-    padding-bottom: 8px;
-    padding-top: 8px;
   }
 `;
 // Styled element (TableFormHeader)
@@ -157,6 +139,7 @@ interface EditableTableProps extends TableProps {
 interface TableFormProps {
   children: JSX.Element | JSX.Element[];
   description?: string;
+  modal?: boolean;
   title: string;
   tools?: JSX.Element | JSX.Element[];
   style?: React.CSSProperties;
@@ -170,6 +153,7 @@ interface TableProps {
 /** [Interface] Properties for table form */
 interface TableFormHeaderProps {
   description?: string;
+  modal?: boolean;
   title: string;
   tools?: JSX.Element | JSX.Element[];
 }
@@ -202,11 +186,6 @@ interface TableEditCellProps {
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
-}
-/** [Interface] Properties for url table form */
-interface UrlTableFormProps extends TableFormProps {
-  disabled?: boolean;
-  onClickURL: () => void;
 }
 
 /** 
@@ -258,7 +237,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
 
     // Check a editing status
     if (row.id !== undefined) {
-      createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.');
+      createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.', 2.4, 'topRight');
     } else {
       // Add a row
       onAdd(record);
@@ -518,10 +497,10 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
 /**
  * [Component] Editable table form
  */
-export const EditableTableForm = ({ children, description, style, title, tools }: TableFormProps): JSX.Element => {
+export const EditableTableForm = ({ children, description, modal, style, title, tools }: TableFormProps): JSX.Element => {
   return (
     <StyledTableForm style={style}>
-      <TableFormHeader description={description} title={title} tools={tools} />
+      <TableFormHeader description={description} modal={modal} title={title} tools={tools} />
       {children}
     </StyledTableForm>
   );
@@ -530,14 +509,27 @@ export const EditableTableForm = ({ children, description, style, title, tools }
 /**
  * [Component] Table form header
  */
-export const TableFormHeader = ({ description, title, tools }: TableFormHeaderProps): JSX.Element => {
+export const TableFormHeader = ({ description, modal, title, tools }: TableFormHeaderProps): JSX.Element => {
   return (
     <StyledTableFormHeader>
-      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
-        <StyledTableTitle>{title}</StyledTableTitle>
-        <StyledTableTools>{tools}</StyledTableTools>
-      </div>
-      {description ? (
+      {modal ? (
+        <></>
+      ) : (
+        <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
+          <StyledTableTitle>{title}</StyledTableTitle>
+          <StyledTableTools>{tools}</StyledTableTools>
+        </div>
+      )}
+      {description ? modal ? (
+        <div style={{ alignItems: 'start', display: 'flex', justifyContent: 'space-between' }}>
+          <div>
+            {description.split('\\n').map((elem: string, index: number): JSX.Element => (
+              <p key={index} style={{ color: '#8C8C8C', fontSize: 14, fontWeight: '500', lineHeight: '22px', margin: 0 }}>{elem}</p>
+            ))}
+          </div>
+          <StyledTableTools>{tools}</StyledTableTools>
+        </div>
+      ) : (
         <div style={{ marginTop: 8 }}>
           {description.split('\\n').map((elem: string, index: number): JSX.Element => (
             <p key={index} style={{ color: '#8C8C8C', fontSize: 14, fontWeight: '500', lineHeight: '22px', margin: 0 }}>{elem}</p>
