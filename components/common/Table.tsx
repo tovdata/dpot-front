@@ -1,7 +1,7 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { Popover, TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography, Button } from 'antd';
+import { TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography, Button } from 'antd';
 import { AddableSelect, AddableTagSelect, SingleSelect, TagSelect, IFTTTSelect } from './Select';
 // Font
 import { FS_HXXS, LH_HXXS } from '../../static/font';
@@ -12,7 +12,7 @@ import { IoAddCircle } from 'react-icons/io5';
 import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // Type
 import { SelectOptionsByColumn, TableHeaderData, TableHeadersData } from '../../models/type';
-import { CloseOutlined, LinkOutlined } from '@ant-design/icons';
+import { CloseOutlined } from '@ant-design/icons';
 
 // Styled element (OuterTable)
 const OuterTable = styled(Table)`
@@ -36,24 +36,6 @@ export const StyledTableForm = styled.div`
   }
   .ant-form-item {
     margin: 0;
-  }
-  .ant-table-cell {
-    user-select: none;
-  }
-  .ant-table-cell > .ant-tag {
-    cursor: pointer;
-  }
-  table > tbody > tr:last-child > td {
-    border-bottom: none;
-  }
-  table > tbody > tr > td .ant-tag {
-    margin: 0;
-  }
-  .ant-table > .ant-table-footer {
-    background-color: #ffffff;
-    border: 1px dashed #D9D9D9;
-    padding-bottom: 8px;
-    padding-top: 8px;
   }
 `;
 // Styled element (TableFormHeader)
@@ -157,6 +139,7 @@ interface EditableTableProps extends TableProps {
 interface TableFormProps {
   children: JSX.Element | JSX.Element[];
   description?: string;
+  modal?: boolean;
   title: string;
   tools?: JSX.Element | JSX.Element[];
   style?: React.CSSProperties;
@@ -170,6 +153,7 @@ interface TableProps {
 /** [Interface] Properties for table form */
 interface TableFormHeaderProps {
   description?: string;
+  modal?: boolean;
   title: string;
   tools?: JSX.Element | JSX.Element[];
 }
@@ -202,11 +186,6 @@ interface TableEditCellProps {
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
-}
-/** [Interface] Properties for url table form */
-interface UrlTableFormProps extends TableFormProps {
-  disabled?: boolean;
-  onClickURL: () => void;
 }
 
 /** 
@@ -258,7 +237,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
 
     // Check a editing status
     if (row.id !== undefined) {
-      createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.');
+      createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.', 2.4, 'topRight');
     } else {
       // Add a row
       onAdd(record);
@@ -356,6 +335,15 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
    */
   const checkRequiredForRow = (): boolean => {
     const state: any = {};
+    let innerResult;
+    // Check a required inner
+    if (expandKey && row[expandKey] && innerHeaders) {
+      innerResult = Object.keys(innerHeaders).map((key: string): boolean => {
+        const warning: boolean = checkRequired(innerHeaders[key].name, row[key], innerHeaders[key].required);
+        state[key] = warning;
+        return warning;
+      })
+    }
     // Check a required
     const result: boolean[] = Object.keys(headers).map((key: string): boolean => {
       const warning: boolean = checkRequired(headers[key].name, row[key], headers[key].required);
@@ -367,7 +355,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
     // Set a state
     setFocus(state);
     // Return
-    return !result.includes(true);
+    return !result.includes(true) && !innerResult?.includes(true);
   }
   /**
    * [Inner Function] Check a required for column
@@ -378,7 +366,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
    */
   const checkRequired = (columnName: string, item: string[] | string, required: boolean): boolean => {
     // Check a warning
-    const warning: boolean = required && ((typeof item === 'string' && item === '') || (Array.isArray(item) && item.length === 0));
+    const warning: boolean = required && ((typeof item === 'string' && item === '') || (Array.isArray(item) && item.length === 0)) || item === undefined && required;
     // Alert a message
     if (warning) {
       createWarningMessage(`해당 필드(${columnName})는 필수로 입력해야 합니다.`, 1.6, columnName);
@@ -439,7 +427,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
               return (
                 <>
                   <Space size={[6, 6]} style={{ marginBottom: '10px' }} wrap>
-                    {row[key].map((elem: string, index: number): JSX.Element => (<Tag closable key={index} onClose={(e: any): void => { e.preventDefault(); onChange(key, row[key].length - 1 === index ? [...row[key].slice(0, index)] : [...row[key].slice(0, index), ...row[key].slice(index + 1)], header.required) }}>{elem}</Tag>))}
+                    {row[key]?.map((elem: string, index: number): JSX.Element => (<Tag closable key={index} onClose={(e: any): void => { e.preventDefault(); onChange(key, row[key].length - 1 === index ? [...row[key].slice(0, index)] : [...row[key].slice(0, index), ...row[key].slice(index + 1)], header.required) }}>{elem}</Tag>))}
                   </Space>
                   <IFTTTSelect onAdd={(value: string): void => { row[key].some((item: string): boolean => item === value) ? createWarningMessage('동일한 기간이 존재합니다!', 1.6) : onChange(key, [...row[key], value], header.required) }} options={selectOptions[key] ? selectOptions[key] : []} />
                 </>
@@ -518,10 +506,10 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
 /**
  * [Component] Editable table form
  */
-export const EditableTableForm = ({ children, description, style, title, tools }: TableFormProps): JSX.Element => {
+export const EditableTableForm = ({ children, description, modal, style, title, tools }: TableFormProps): JSX.Element => {
   return (
     <StyledTableForm style={style}>
-      <TableFormHeader description={description} title={title} tools={tools} />
+      <TableFormHeader description={description} modal={modal} title={title} tools={tools} />
       {children}
     </StyledTableForm>
   );
@@ -530,14 +518,27 @@ export const EditableTableForm = ({ children, description, style, title, tools }
 /**
  * [Component] Table form header
  */
-export const TableFormHeader = ({ description, title, tools }: TableFormHeaderProps): JSX.Element => {
+export const TableFormHeader = ({ description, modal, title, tools }: TableFormHeaderProps): JSX.Element => {
   return (
     <StyledTableFormHeader>
-      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
-        <StyledTableTitle>{title}</StyledTableTitle>
-        <StyledTableTools>{tools}</StyledTableTools>
-      </div>
-      {description ? (
+      {modal ? (
+        <></>
+      ) : (
+        <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
+          <StyledTableTitle>{title}</StyledTableTitle>
+          <StyledTableTools>{tools}</StyledTableTools>
+        </div>
+      )}
+      {description ? modal ? (
+        <div style={{ alignItems: 'start', display: 'flex', justifyContent: 'space-between' }}>
+          <div>
+            {description.split('\\n').map((elem: string, index: number): JSX.Element => (
+              <p key={index} style={{ color: '#8C8C8C', fontSize: 14, fontWeight: '500', lineHeight: '22px', margin: 0 }}>{elem}</p>
+            ))}
+          </div>
+          <StyledTableTools>{tools}</StyledTableTools>
+        </div>
+      ) : (
         <div style={{ marginTop: 8 }}>
           {description.split('\\n').map((elem: string, index: number): JSX.Element => (
             <p key={index} style={{ color: '#8C8C8C', fontSize: 14, fontWeight: '500', lineHeight: '22px', margin: 0 }}>{elem}</p>
@@ -625,7 +626,7 @@ const TableEditCell = ({ edit, onDelete, onEdit, onSave, onCancel }: TableEditCe
 const TableContentForList = ({ items }: TableContentForListProps): JSX.Element => {
   return (
     <StyledList>
-      {items.map((key: string, index: number): JSX.Element => (<StyledListItem key={index}>{key}</StyledListItem>))}
+      {items?.map((key: string, index: number): JSX.Element => (<StyledListItem key={index}>{key}</StyledListItem>))}
     </StyledList>
   );
 }
@@ -767,7 +768,7 @@ const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableNam
       options['items'] = extractProcessingItems(ref);
       break;
     case 'pfni':
-      const pfniItems = ref?.map((ppi: any) => ppi.items);
+      const pfniItems = ref?.map((fni: any) => fni.items);
       // items 중복 체크 후, items 값 추가
       pfniItems.forEach((pfniArr: any) => pfniArr.forEach((pfniItem: any) => !items.includes(pfniItem) && items.push(pfniItem)));
       options['items'] = items;
