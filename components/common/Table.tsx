@@ -127,7 +127,6 @@ interface EditableTableProps extends TableProps {
   expandKey?: string;
   innerHeaders?: TableHeadersData;
   isLoading?: boolean;
-  url?: string;
   onAdd: (record: any) => void;
   onDelete: (value: any) => void;
   onSave: (value: any) => boolean;
@@ -200,7 +199,7 @@ export const BasicTable = ({ dataSource, headers, pagination }: TableProps): JSX
 /**
  * [Component] Editable table
  */
-export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey, headers, innerHeaders, isLoading, onAdd, onDelete, onSave, pagination, refData, tableName }: EditableTableProps): JSX.Element => {
+export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, isLoading, onAdd, onDelete, onSave, pagination, refData, tableName }: EditableTableProps): JSX.Element => {
   // Set a default focus and default record for columns in row
   const defaultFocusState: any = {};
   const defaultRecord: any = {};
@@ -475,16 +474,7 @@ export const EditableTable = ({ dataSource, url, defaultSelectOptions, expandKey
   // Set a footer (add an add button)
   const footer = (): JSX.Element => (<TableFooterContainAddButton onClick={onCreate} />);
 
-  // URL 정보가 존재하는 경우 URL 정보를 보여준다.
-  if (url && url != '') {
-    return (
-      <>
-        <EmptyTable columns={createColumns(headers, true)} dataSource={dataSource} pagination={pagination ? undefined : false} />
-        <URLTableFooter url={url} />
-      </>
-    );
-  }
-  // URL 정보가 존재하지 않고, 테이블 정보도 없는 경우 빈 테이블 UI를 보여준다.
+  // 테이블 정보가 없는 경우 빈 테이블 UI를 보여준다.
   if (dataSource?.length === 0)
     return (
       <>
@@ -777,7 +767,8 @@ const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableNam
       options['items'] = items;
       break;
     case 'cpi':
-      const ppiItems = ref['ppi']?.map((ppi: any) => ppi.items);
+      const ppiRef = ref['ppi']?.filter((ppi: any) => ppi.url === undefined);
+      const ppiItems = ppiRef?.map((ppi: any) => ppi.items);
       // items 중복 체크 후, items 값 추가
       ppiItems.forEach((ppiArr: any) => ppiArr.forEach((ppiItem: any) => !items.includes(ppiItem) && items.push(ppiItem)));
       options['items'] = items;
