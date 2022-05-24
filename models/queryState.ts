@@ -19,6 +19,8 @@ export const API_DT_PFNI: PIMType = 'pfni';
 export const API_DT_CFNI: PIMType = 'cfni';
 export const API_DT_LIST: PIMType[] = [API_DT_PI, API_DT_FNI, API_DT_PPI, API_DT_CPI, API_DT_PFNI, API_DT_CFNI];
 
+/** PIPP 진행 상태  */
+type PIPPStatus = 'none'|'progress'|'publish';
 /** API로 반환된 데이터 형태 (Map) */
 interface MapDF {
   M: any;
@@ -73,38 +75,71 @@ const processET = (rawData: any[]): any[] => {
   return row;
 }
 /**
- * [Function] 개인정보 처리방침 상태에 대해 API 요청하는 함수
+ * [Function] 개인정보 처리방침 상태에 대해 API 요청하는 함수 (임시저장)
  * @param serviceId 현재 서비스 ID
- * @returns API로부터 응답받은 데이터
+ * @returns 개인정보 처리방침 진행 상태 [none|processing|publish]
  */
-export const getStatusForPIPP = async (serviceId: string): Promise<any> => {
-  const response = await fetch(`${baseUrl}service/${serviceId}/pipp`);
+export const getStatusForPIPP = async (serviceId: string): Promise<PIPPStatus> => {
+  const response = await fetch(`${baseUrl}pipp/${serviceId}`);
   // 응답 데이터를 JSON 형태로 변환
   const json = await response.json();
   // 에러 확인
   if (catchAPIRequestError(json.status, json.message)) {
-    return '';
+    return 'none';
+  } else if ('id' in json.data) {
+    if ('publish' in json.data) {
+      return json.data.publish ? 'publish' : 'progress';
+    } else {
+      return 'none';
+    }
   } else {
-    return '';
+    return 'none';
+  }
+}
+/**
+ * [Function] 개인정보 처리방침 생성 과정에 필요한 데이터를 가져오는 함수 (임시저장된 데이터)
+ * @param serviceId 해당 서비스 ID
+ * @returns 개인정보 처리방침 생성 데이터
+ */
+export const getDataForPIPP = async (serviceId: string): Promise<any> => {
+  const response = await fetch(`${baseUrl}pipp/${serviceId}`);
+  // 응답 데이터를 JSON 형태로 변환
+  const json = await response.json();
+  // 에러 확인
+  if (catchAPIRequestError(json.status, json.message)) {
+    return {};
+  } else if ('id' in json.data) {
+    return json.data.data;
+  } else {
+    return {};
   }
 }
 /**
  * [Function] 개인정보 처리방침에 대한 임시 저장을 위해 API 요청하는 함수
  * @param serviceId 현재 서비스 ID
  * @param data 임시 저장을 위한 데이터
- * @param init 초기 저장 여부
+ * @param status 데이터 저장 상태 (생성 완료일 경우, status = 'publish')
  * @returns API로부터 응답받은 데이터
  */
-export const saveDocumentationForPIPP = async (serviceId: string, data: any, init?: boolean): Promise<any> => {
+export const saveDocumentationForPIPP = async (serviceId: string, data: any, status: string): Promise<any> => {
   // 초기 저장인지 아닌지를 확인하여 API 호출을 위한 URL 정의
-  const url: string = init ? `${baseUrl}pipp/new` : `${baseUrl}pipp/${serviceId}`;
+  const url: string = status === 'create' ? `${baseUrl}pipp/new` : `${baseUrl}pipp/${serviceId}`;
+  // 초기 저장 여부에 따라 요청 데이터 생성
+  const body: any = status === 'create' ? {
+    serviceId: serviceId,
+    data: data,
+    publish: false
+  } : {
+    data: data,
+    publish: status === 'publish' ? true : false
+  };
   // API 호출에 필요한 Request 생성
   const request: RequestDF = {
-    body: JSON.stringify(data),
+    body: JSON.stringify(body),
     headers: {
       'Content-Type': 'application/json'
     },
-    method: init ? 'POST' : 'PUT'
+    method: status === 'create' ? 'POST' : 'PUT'
   };
   // 응답 데이터 반환
   return await fetch(url, request);

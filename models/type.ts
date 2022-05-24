@@ -88,3 +88,6 @@ export interface PersonalInformationProcessingPolicyDF {
     }
   }
 }
+
+/** [Type] Documentation process status */
+export type DocProgressStatus = 'none'|'create'|'update';

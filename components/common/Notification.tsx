@@ -19,6 +19,21 @@ export const createSimpleWarningNotification = (title: string, duration: number 
   });
 }
 /**
+ * [Function] Create a notification
+ * @param title notification title
+ * @param duration duration (milliseconds)
+ * @param placement placement
+ * @param description description
+ */
+export const createNotification = (title: string, duration: number = 2.4, placement: NotificationPlacement = 'topRight', description?: string): void => {
+  notification.success({
+    description: description,
+    duration: duration,
+    message: title,
+    placement: placement
+  });
+}
+/**
  * [Function] Create a warning message
  * @param content message content
  * @param duration duration (seconds)

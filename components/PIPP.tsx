@@ -5,7 +5,7 @@ import { Button, Col, Collapse, DatePicker, Input, Modal, Radio, Row, Space, Tab
 import { PageHeaderContainStep } from './common/Header';
 import { StyledTableForm, TableFormHeader } from './common/Table';
 import { CollapseForPIPP } from './common/Collapse';
-import { createSimpleWarningNotification, createWarningMessage } from './common/Notification';
+import { createNotification, createSimpleWarningNotification, createWarningMessage } from './common/Notification';
 import { YesOrNoRadioButton } from './common/Radio';
 import { AddableTagSelect } from './common/Select';
 import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DIInputGroup, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject, DRLabelingContent, DRLabelingHeader, DRLabelingItem, DRModal, DTCForm, DTCItem } from './pipp/Documentation';
@@ -19,17 +19,15 @@ import { FiEdit } from 'react-icons/fi';
 // Module
 import { FNITable, PITable } from './PITable';
 import { CFNITable, CPITableForm, PFNITable, PPITableForm } from './PCTable';
-import { QueryClient, useQueries } from 'react-query';
-import { API_DT_CPI, API_DT_FNI, API_DT_LIST, API_DT_PPI, getListForPIM, PIMType } from '../models/queryState';
+import { QueryClient, useQueries, useQuery } from 'react-query';
+import { API_DT_CPI, API_DT_FNI, API_DT_LIST, API_DT_PPI, getDataForPIPP, getListForPIM, PIMType, saveDocumentationForPIPP } from '../models/queryState';
+// Type
+import { DocProgressStatus } from '../models/type';
 
-/** [Interface] Properties for PIPPMain */
-interface PIPPMainProps {
-  onCreate: (value: any) => void;
-}
-/** [Interface] Properties for MainPageHeader */
-interface MainPageHeaderProps {
-  onCreate: (value: any) => void;
-  status: string;
+/** [Interface] PIPP process */
+interface PIPPProcess {
+  onProcess: (process: DocProgressStatus) => void;
+  status?: string;
 }
 /** [Type] Scroll position */
 type ScrollPosition = 'start'|'end';
@@ -37,13 +35,10 @@ type ScrollPosition = 'start'|'end';
 /**
  * [Component] 개인정보 처리방침 메인 페이지
  */
-export const PIPPMain: React.FC<PIPPMainProps> = ({ onCreate }: PIPPMainProps): JSX.Element => {
-  // 개인정보 처리방침에 대한 처리 상태 [init | process | complete]
-  const [status, setStatus] = useState<string>('process');
-  // 컴포넌트 반환
+export const PIPPMain: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProcess): JSX.Element => {
   return (
     <>
-      <MainPageHeader onCreate={onCreate} status={status} />
+      <MainPageHeader onProcess={onProcess} status={status} />
       <StyledTableForm>
         <TableFormHeader title='개인정보 처리방침 이력' />
         <Table columns={[
@@ -59,7 +54,9 @@ export const PIPPMain: React.FC<PIPPMainProps> = ({ onCreate }: PIPPMainProps): 
 /**
  * [Component] 개인정보 처리방침 생성 페이지
  */
-export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
+export const CreatePIPPForm: React.FC<any> = ({ onBack, progress }: any): JSX.Element => {
+  const { isLoading, data: loadData } = useQuery('pipp', async () => await getDataForPIPP('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+
   // 단계에 대한 Title
   const steps: string[] = ['입력사항 확인', '처리방침 편집', '최종 확인'];
   // 현재 Step, 쿼리 상태, 참조 데이터에 대한 상태 생성
@@ -73,8 +70,6 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
     pfni: [],
     cfni: []
   });
-  // 처리방침 생성 과정에서 사용될 데이터 구조
-  const [data, setData] = useState<any>(defaultPIPPData);
   // Focus에 따른 스크롤 이동을 위한 엘리멘트 참조 객체
   const refs: any = {
     input: useRef([]),
@@ -92,8 +87,14 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
   };
   // 최종 문서 확인 모달을 위한 visible 상태
   const [visible, setVisible] = useState<boolean>(false);
+  // 처리방침 생성 과정에서 사용될 데이터 구조
+  const [data, setData] = useState<any>(defaultPIPPData);
 
-  // const { isLoading, data: status } = useQuery('pipp', async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', 'pipp'));
+  useEffect(() => {
+    if (progress === 'update' && loadData) {
+      setData(loadData);
+    }
+  }, [isLoading]);
 
   /** [Event handler] 데이터 변경 이벤트 */
   const onChange = (step: string, value: any, category: string, property?: string, subProperty?: string): void => {
@@ -185,7 +186,18 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
       }
     }
   }
-  const onSave = (): void => console.log(data);
+  /** [Event handler] 임시 저장 이벤트 */
+  const onSave = async (): Promise<void> => {
+    const response = await saveDocumentationForPIPP('b7dc6570-4be9-4710-85c1-4c3788fcbd12', data, progress);
+    if (response) {
+      const result = await response.json();
+      if (result.status === "OK") {
+        createNotification('임시 저장 완료');
+      } else {
+        createSimpleWarningNotification('임시 저장 실패');
+      }
+    }
+  };
   /** [Event handler] 모달 열기 */
   const onOpen = (): void => setVisible(true);
    /** [Event handler] 모달 닫기 */
@@ -230,7 +242,6 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
       row['selectionItems'].forEach((item: string): number => !itemForPI.includes(item) ? itemForPI.push(item) : 0);
     }
   });
-
   // 컴포넌트 반환
   return (
     <>
@@ -253,7 +264,7 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack }: any): JSX.Element => {
 /**
  * [Internal Component] 개인정보 처리방침 메인 페이지 Header (현재 문서 작성에 대한 상태에 따라 내용 변경)
  */
-const MainPageHeader: React.FC<MainPageHeaderProps> = ({ onCreate, status }: MainPageHeaderProps): JSX.Element => {
+const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProcess): JSX.Element => {
   return (
     <div style={{ marginBottom: 84, userSelect: 'none' }}>
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 36 }}>
@@ -263,21 +274,26 @@ const MainPageHeader: React.FC<MainPageHeaderProps> = ({ onCreate, status }: Mai
       <div style={{ alignItems: 'center', backgroundColor: '#FAFAFA', border: '1px dashed #8C8C8C', borderRadius: 8, display: 'flex', justifyContent: 'space-between', padding: '42px 34px' }}>
         <span style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
           <FiEdit style={{ color: '#8C8C8C', fontSize: 20, marginRight: 24 }} />
-          <p style={{ color: '#434343', fontSize: 14, fontWeight: '600', lineHeight: '22px', marginBottom: 0 }}>{status === 'none' ?
-            (<>개인정보 관리 탭에서 입력한 내용을 기반으로, 개인정보 처리방침을 만들어보세요!</>) :
-            status === 'process' ? (<>현재 작성 중인 개인정보 처리방침이 있어요.<br/>계속해서 작성하기를 원하시는 경우 ‘이어 만들기’ 버튼을<br/>처음부터 새로 만들기 원하신다면 ‘문서 생성하기’ 버튼을 눌러주세요.</>) :
-            (<>처리하는 개인정보에 대한 내용이 변경된 경우, 개인정보 처리방침을 업데이트해야 합니다.<br/>‘문서 업데이트’ 기능으로 간단히 수정해보세요 !</>)
-          }</p>
+          <p style={{ color: '#434343', fontSize: 14, fontWeight: '600', lineHeight: '22px', marginBottom: 0 }}>
+            {status === undefined || status === 'none' ? (
+              <>개인정보 관리 탭에서 입력한 내용을 기반으로, 개인정보 처리방침을 만들어보세요!</>
+            ) : status === 'progress' ? (
+              <>현재 작성 중인 개인정보 처리방침이 있어요.<br/>계속해서 작성하기를 원하시는 경우 ‘이어 만들기’ 버튼을<br/>처음부터 새로 만들기 원하신다면 ‘문서 생성하기’ 버튼을 눌러주세요.</>
+            ) : (
+              <>처리하는 개인정보에 대한 내용이 변경되면, 개인정보 처리방침을 업데이트해야 됩니다.<br/>‘문서 업데이트’ 기능으로 간단히 수정해보세요!</>
+            )}
+          </p>
         </span>
-        {status === 'none' ?
-          (<Button icon={<PlusOutlined />} onClick={() => onCreate({ uuid: '1', status: '' })} type='primary'>문서 생성하기</Button>) :
-          status === 'process' ? (
-            <span>
-              <Button icon={<EditOutlined />} onClick={() => onCreate({ uuid: '1', status: '' })} type='primary' style={{ marginRight: 16 }}>이어 만들기</Button>
-              <Button icon={<PlusOutlined />} onClick={() => onCreate({ uuid: '1', status: '' })} type='default'>문서 생성하기</Button>
-            </span>
-          ) : (<Button icon={<RedoOutlined />} onClick={() => onCreate({ uuid: '1', status: '' })} type='primary'>문서 업데이트</Button>)
-        }
+        {status === undefined || status === 'none' ? (
+          <Button icon={<PlusOutlined />} onClick={() => onProcess('create')} type='primary'>문서 생성하기</Button>
+        ) : status === 'progress' ? (
+          <span>
+            <Button icon={<EditOutlined />} onClick={() => onProcess('update')} type='primary' style={{ marginRight: 16 }}>이어 만들기</Button>
+            <Button icon={<PlusOutlined />} onClick={() => onProcess('create')} type='default'>문서 생성하기</Button>
+          </span>
+        ) : (
+          <Button icon={<RedoOutlined />} onClick={() => onProcess('update')} type='primary'>문서 업데이트</Button>
+        )}
         </div>
     </div>
   );
@@ -1029,9 +1045,13 @@ const ReadableTable: React.FC<any> = ({ columns, dataSource }: any): JSX.Element
 }
 const ListInTable: React.FC<any> = ({ items }: any): JSX.Element => {
   return (
-    <ul style={{ margin: 0, paddingLeft: 14 }}>
-      {items.map((item: string, index: number): JSX.Element => <li key={index}>{item}</li>)}
-    </ul>
+    <>
+      {items ? (
+        <ul style={{ margin: 0, paddingLeft: 14 }}>
+          {items.map((item: string, index: number): JSX.Element => <li key={index}>{item}</li>)}
+        </ul>
+      ) : (<></>)}
+    </>
   );
 }
 
