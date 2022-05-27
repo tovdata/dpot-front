@@ -4,23 +4,25 @@ import { EditableTable, EditableTableForm } from './common/Table';
 // Data
 import { fniTableHeader, piTableHeader } from '../models/static/header';
 // Module
-import { createSimpleWarningNotification } from './common/Notification';
+import { warningNotification } from './common/Notification';
 // State
 import { GetPersonalInfoSelectOptionsSelector } from '../models/state';
 // Type
 import { SelectOptionsByColumn } from '../models/type';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { API_DT_PI, API_DT_FNI, getListForPIM, processPIMData, setQueryData } from '../models/queryState';
+import { getListForPIM, processPIMData, setQueryData } from '../models/queryState';
+import { SERVICE_PI,SERVICE_FNI } from '../models/queries/type';
 import { Button } from 'antd';
-
+// API
+import { getFNIDatas, getPIDatas, setDataByTableType } from '../models/queries/api';
 /**
  * [Component] 가명정보 수집 및 이용 테이블
  */
 export const FNITable: React.FC<any> = (): JSX.Element => {
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(API_DT_FNI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_FNI));
+  const { isLoading, data } = useQuery(SERVICE_FNI, async () => await getFNIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   // Get a state (for select options)
-  const { isLoading: piLoading, data: piData } = useQuery(API_DT_PI, async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PI));
+  const { isLoading: piLoading, data: piData } = useQuery(SERVICE_PI, async () => await getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = {
     basis: ['과학적 연구', '통계 작성', '공익적 기록 및 보존', '기타']
@@ -28,25 +30,25 @@ export const FNITable: React.FC<any> = (): JSX.Element => {
 
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_FNI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_FNI, val.mode, val.data));
 
   // [Event handler] 행(Row) 추가 이벤트
-  const onAdd = (record: any): void => setQueryData(queryClient, API_DT_FNI, mutate, 'create', record);
+  const onAdd = (record: any): void => setQueryData(queryClient, SERVICE_FNI, mutate, 'create', record);
   // [Event handler] 행(Row) 삭제 이벤트
-  const onDelete = (record: any): void => setQueryData(queryClient, API_DT_FNI, mutate, 'delete', record);
+  const onDelete = (record: any): void => setQueryData(queryClient, SERVICE_FNI, mutate, 'delete', record);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = (record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
-      setQueryData(queryClient, API_DT_FNI, mutate, 'add', record);
+      setQueryData(queryClient, SERVICE_FNI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, API_DT_FNI, mutate, 'save', record);
+      setQueryData(queryClient, SERVICE_FNI, mutate, 'save', record);
       return true;
     }
   }
 
   // Return an element
-  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} headers={fniTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={piLoading ? [] : piData} tableName={API_DT_FNI} />);
+  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} headers={fniTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={piLoading ? [] : piData} tableName={SERVICE_FNI} />);
 }
 /**
  * [Component] 가명정보 수집 및 이용 테이블 Form
@@ -57,7 +59,7 @@ export const FNITableForm: React.FC<any> = (): JSX.Element => {
   );
   // 컴포넌트 반환
   return (
-    <EditableTableForm description='통계작성, 과학적 연구, 공익적 기록보존을 위한 경우에는 사용자의 동의없이 가명정보를 처리할 수 있어요.\n보유중인 개인정보를 가명처리하여 이용하거나, 가명정보를 제공받아 사내에서 이용하고 있는 경우, 업무별로 나누어 가명정보 현황을 입력하세요.' style={{ marginBottom: '4.625rem' }} title='가명정보 수집・이용 현황' tools={tools}>
+    <EditableTableForm description='통계작성, 과학적 연구, 공익적 기록보존을 위한 경우에는 사용자의 동의없이 가명정보를 처리할 수 있어요.\n보유중인 개인정보를 가명처리하여 이용하거나, 가명정보를 제공받아 사내에서 이용하고 있는 경우, 업무별로 나누어 가명정보 현황을 입력하세요.' title='가명정보 수집・이용 현황' tools={tools}>
       <FNITable />
     </EditableTableForm>
   );
@@ -67,7 +69,7 @@ export const FNITableForm: React.FC<any> = (): JSX.Element => {
  */
 export const PITable: React.FC<any> = (): JSX.Element => {
   // 서버로부터 테이블 데이터 가져오기
-  const { isLoading, data } = useQuery(API_DT_PI, () => getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PI));
+  const { isLoading, data } = useQuery(SERVICE_PI, () => getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   // 셀렉트 옵션 데이터 가져오기 (Using recoil)
   const ref: any = useRecoilValue(GetPersonalInfoSelectOptionsSelector);
   // 기본적인 셀렉트 옵션 데이터 (정적)
@@ -77,22 +79,22 @@ export const PITable: React.FC<any> = (): JSX.Element => {
   };
 
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => processPIMData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', API_DT_PI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_PI, val.mode, val.data));
 
   // [Event handler] 행(Row) 추가 이벤트
-  const onAdd = (record: any): void => setQueryData(queryClient, API_DT_PI, mutate, 'create', record);
+  const onAdd = (record: any): void => setQueryData(queryClient, SERVICE_PI, mutate, 'create', record);
   // [Event handler] 행(Row) 삭제 이벤트
-  const onDelete = (record: any): void => setQueryData(queryClient, API_DT_PI, mutate, 'delete', record);
+  const onDelete = (record: any): void => setQueryData(queryClient, SERVICE_PI, mutate, 'delete', record);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = (record: any): boolean => {
     if (record.essentialItems.length === 0 && record.selectionItems.length === 0) {
-      createSimpleWarningNotification('필수 항목과 선택 항목 중에서 하나의 항목을 필수로 입력해야 합니다.', 2, 'topRight');
+      warningNotification('필수 항목과 선택 항목 중에서 하나의 항목을 필수로 입력해야 합니다.');
       return false;
     } else if (new RegExp('^npc_').test(record.id)) {
-      setQueryData(queryClient, API_DT_PI, mutate, 'add', record);
+      setQueryData(queryClient, SERVICE_PI, mutate, 'add', record);
       return true;
     } else {
-      setQueryData(queryClient, API_DT_PI, mutate, 'save', record);
+      setQueryData(queryClient, SERVICE_PI, mutate, 'save', record);
       return true;
     }
   }

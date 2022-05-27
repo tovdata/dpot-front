@@ -110,7 +110,7 @@ export const ppiTableHeader: TableHeadersData = {
     description: '제공된 개인정보가 국외에서 처리된다면 체크해주세요.',
     display: 'checkbox',
     name: '국외여부',
-    required: true,
+    required: false,
     width: '9%'
   }
 }
@@ -241,7 +241,7 @@ export const cpiTableHeader: TableHeadersData = {
     description: '위탁한 개인정보가 국외에서 처리된다면 체크해주세요.',
     display: 'checkbox',
     name: '국외 여부',
-    required: true,
+    required: false,
     width: '9%'
   }
 }
@@ -294,14 +294,14 @@ export const ecpiTableHeader: TableHeadersData = {
 export const cfniTableHeader: TableHeadersData = {
   subject: {
     description: '편리한 입력을 위해 위탁업무를 구분했어요. 위탁업무의 종류를 선택하거나 입력하세요.',
-    display: 'selectA',
+    display: 'string',
     name: '구분',
     required: true,
     width: '28%'
   },
   company: {
     description: '수탁 업체의 이름을 선택하거나 정확히 입력해주세요. ‘~등’ 또는 ‘A업체 등 0개사’로 축약하면 안돼요!',
-    display: 'selectA',
+    display: 'string',
     name: '위탁받는 자(수탁자)',
     required: true,
     width: '28%'
@@ -317,7 +317,7 @@ export const cfniTableHeader: TableHeadersData = {
     description: '위탁한 가명정보가 국외에서 처리된다면 체크해주세요.',
     display: 'checkbox',
     name: '국외 여부',
-    required: true,
+    required: false,
     width: '9%'
   }
 }

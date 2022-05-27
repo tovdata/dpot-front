@@ -9,8 +9,8 @@ const CustomTabPane = styled(TabPane)`
 `;
 const Page = () => {
   return (
-    <>
-      <Tabs defaultActiveKey="1" style={{ marginTop: -28 }}>
+    <div style={{ paddingBottom: 74, paddingTop: 36 }}>
+      <Tabs defaultActiveKey="1">
         <CustomTabPane tab="제공" key="1">
           <PPITableForm />
           <PFNITableForm />
@@ -20,7 +20,7 @@ const Page = () => {
           <CFNITableForm />
         </CustomTabPane>
       </Tabs>
-    </>
+    </div>
   )
 }
 

@@ -29,7 +29,7 @@ const StyledContainer = styled.div`
 const StyledContent = styled.div`
   display: block;
   flex: 1;
-  padding: 4.625rem 4rem 0 4rem;
+  padding: 0 4rem;
   position: relative;
 `;
 // Styled element (Sider)

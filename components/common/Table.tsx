@@ -9,18 +9,12 @@ import { FS_HXXS, LH_HXXS } from '../../static/font';
 import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
 import { IoAddCircle } from 'react-icons/io5';
 // Module
-import { createWarningMessage, createSimpleWarningNotification } from './Notification';
+import { createWarningMessage, warningNotification } from './Notification';
 // Type
 import { SelectOptionsByColumn, TableHeaderData, TableHeadersData } from '../../models/type';
+import { changeSelectOptions, extractProcessingItems, resetSelectOptions } from '../../utils/table';
 import { CloseOutlined } from '@ant-design/icons';
 
-// Styled element (OuterTable)
-const OuterTable = styled(Table)`
-  border-collapse: collapse;
-  .ant-table-expanded-row > td {
-    border-bottom: 1px solid #d9d9d9;
-  }
-`;
 // styled element (EmptyTable)
 const EmptyTable = styled(Table)`
   .ant-table-placeholder{
@@ -80,11 +74,6 @@ const StyledEmptyTableFooter = styled(StyledCustomTableFooter)`
     font-weight: 500;
   }
 `;
-// Styled element (Empty url table fotter)
-const StyledURLTableFooter = styled(StyledCustomTableFooter)`
-  padding-top: 1rem;
-  color:#BFBFBF;
-`;
 // Styled element (TableHeaderQuestionItem)
 const StyledTableHeaderQuestionItem = styled.span`
   align-items: center;
@@ -124,8 +113,6 @@ const StyledTableFooter = styled.span`
 /** [Interface] Properties for editable table */
 interface EditableTableProps extends TableProps {
   defaultSelectOptions?: any;
-  expandKey?: string;
-  innerHeaders?: TableHeadersData;
   isLoading?: boolean;
   onAdd: (record: any) => void;
   onDelete: (value: any) => void;
@@ -165,10 +152,6 @@ interface TableHeaderProps {
 interface TableFooterContainAddButtonProps {
   onClick: () => void;
 }
-/** [Interface] Properties for table footer */
-interface URLTableFooterProps {
-  url: string
-}
 /** [Interface] Properties for table content for item  */
 interface TableContentForItemProps {
   items: string[];
@@ -199,7 +182,7 @@ export const BasicTable = ({ dataSource, headers, pagination }: TableProps): JSX
 /**
  * [Component] Editable table
  */
-export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, isLoading, onAdd, onDelete, onSave, pagination, refData, tableName }: EditableTableProps): JSX.Element => {
+export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoading, onAdd, onDelete, onSave, pagination, refData, tableName }: EditableTableProps): JSX.Element => {
   // Set a default focus and default record for columns in row
   const defaultFocusState: any = {};
   const defaultRecord: any = {};
@@ -209,14 +192,6 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
     const type: string = headers[key].display;
     defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'itemA' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
   });
-  // Extract a focus state by inner header key
-  if (innerHeaders) {
-    Object.keys(innerHeaders).forEach((key: string): void => {
-      defaultFocusState[key] = false;
-      const type: string = innerHeaders[key].display;
-      defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'itemA' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
-    });
-  }
 
   // Set a ref
   const newProjectCnt: MutableRefObject<number> = useRef(0);
@@ -236,7 +211,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
 
     // Check a editing status
     if (row.id !== undefined) {
-      createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.', 2.4, 'topRight');
+      warningNotification('작성 중인 내용을 먼저 저장해주세요.');
     } else {
       // Add a row
       onAdd(record);
@@ -268,24 +243,11 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
       });
       // Set a row
       setRow({ ...row, [key]: newItem });
-    } else if (tableName === 'cpi' && key === 'company') {
-      if (typeof item === 'string') {
-        const companys = refData['cpi'][row.subject];
-        const infos = companys ? companys[item] : null;
-        infos ? setRow({ ...row, [key]: item, 'isForeign': infos.isForeign, 'country': infos.country, 'location': infos.location, 'charger': infos.charger }) : setRow({ ...row, [key]: item });
-      } else {
-        setRow({ ...row, [key]: item });
-      }
     } else {
       // Set a row
       setRow({ ...row, [key]: item });
-      if (innerHeaders && Object.keys(innerHeaders).includes(key)) {
-        // Check a required
-        setFocus({ ...focus, [key]: checkRequired(innerHeaders[key].name, item, required) });
-      } else {
-        // Check a required
-        setFocus({ ...focus, [key]: checkRequired(headers[key].name, item, required) });
-      }
+      // Check a required
+      setFocus({ ...focus, [key]: checkRequired(headers[key].name, item, required) });
     }
     // Update the select options
     changeSelectOptions(key, onUpdateSelectOptions, refData, tableName, item, row);
@@ -305,7 +267,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
    */
   const onEdit = (record: any): void => {
     clearFocus();
-    (row.id && record.id && row.id !== record.id) ? createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.') : setRow(record);
+    (row.id && record.id && row.id !== record.id) ? warningNotification('작성 중인 내용을 먼저 저장해주세요.') : setRow(record);
     // Update the select options
     changeSelectOptions('subject', onUpdateSelectOptions, refData, tableName, record.subject);
   }
@@ -334,15 +296,6 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
    */
   const checkRequiredForRow = (): boolean => {
     const state: any = {};
-    let innerResult;
-    // Check a required inner
-    if (expandKey && row[expandKey] && innerHeaders) {
-      innerResult = Object.keys(innerHeaders).map((key: string): boolean => {
-        const warning: boolean = checkRequired(innerHeaders[key].name, row[key], innerHeaders[key].required);
-        state[key] = warning;
-        return warning;
-      })
-    }
     // Check a required
     const result: boolean[] = Object.keys(headers).map((key: string): boolean => {
       const warning: boolean = checkRequired(headers[key].name, row[key], headers[key].required);
@@ -354,24 +307,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
     // Set a state
     setFocus(state);
     // Return
-    return !result.includes(true) && !innerResult?.includes(true);
-  }
-  /**
-   * [Inner Function] Check a required for column
-   * @param columnName column key
-   * @param item column value
-   * @param required required
-   * @returns check result
-   */
-  const checkRequired = (columnName: string, item: string[] | string, required: boolean): boolean => {
-    // Check a warning
-    const warning: boolean = required && ((typeof item === 'string' && item === '') || (Array.isArray(item) && item.length === 0)) || item === undefined && required;
-    // Alert a message
-    if (warning) {
-      createWarningMessage(`해당 필드(${columnName})는 필수로 입력해야 합니다.`, 1.6, columnName);
-    }
-    // Return
-    return warning;
+    return !result.includes(true);
   }
   /**
    * [Inner Function] Clear a state for focus
@@ -473,24 +409,16 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, expandKey, hea
 
   // Set a footer (add an add button)
   const footer = (): JSX.Element => (<TableFooterContainAddButton onClick={onCreate} />);
-
   // 테이블 정보가 없는 경우 빈 테이블 UI를 보여준다.
   if (dataSource?.length === 0)
     return (
       <>
-        <EmptyTable columns={createColumns(headers, true)} dataSource={dataSource} pagination={pagination ? undefined : false} />
+        <EmptyTable columns={createColumns(headers, true)} dataSource={dataSource} loading={isLoading} pagination={pagination ? undefined : false}/>  
         <EmptyTableFooter onClick={onCreate} />
       </>
-    );
+  );
   // Return an element
-  return expandKey ? (
-    <OuterTable columns={createColumns(headers, true)} dataSource={dataSource} defaultExpandAllRows expandable={{
-      expandedRowRender: (record: any, index: number) => innerHeaders ? (<Table key={index} columns={createColumns(innerHeaders, false)} dataSource={row.id === record.id ? [row] : [record]} pagination={false} />) : (<></>),
-      rowExpandable: (record: any) => {
-        return (row.id === record.id) ? row[expandKey] : record[expandKey]
-      }
-    }} footer={footer} loading={isLoading} pagination={pagination ? undefined : false} />
-  ) : (
+  return (
     <Table columns={createColumns(headers, true)} dataSource={dataSource} footer={footer} loading={isLoading} pagination={pagination ? undefined : false} />
   );
 }
@@ -512,15 +440,7 @@ export const EditableTableForm = ({ children, description, modal, style, title, 
 export const TableFormHeader = ({ description, modal, title, tools }: TableFormHeaderProps): JSX.Element => {
   return (
     <StyledTableFormHeader>
-      {modal ? (
-        <></>
-      ) : (
-        <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
-          <StyledTableTitle>{title}</StyledTableTitle>
-          <StyledTableTools>{tools}</StyledTableTools>
-        </div>
-      )}
-      {description ? modal ? (
+      {modal ? description ? (
         <div style={{ alignItems: 'start', display: 'flex', justifyContent: 'space-between' }}>
           <div>
             {description.split('\\n').map((elem: string, index: number): JSX.Element => (
@@ -530,12 +450,28 @@ export const TableFormHeader = ({ description, modal, title, tools }: TableFormH
           <StyledTableTools>{tools}</StyledTableTools>
         </div>
       ) : (
-        <div style={{ marginTop: 8 }}>
-          {description.split('\\n').map((elem: string, index: number): JSX.Element => (
-            <p key={index} style={{ color: '#8C8C8C', fontSize: 14, fontWeight: '500', lineHeight: '22px', margin: 0 }}>{elem}</p>
-          ))}
+        <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
+          <p style={{ fontSize: 15, fontWeight: '500', margin: 0 }}>{title}</p>
+          <StyledTableTools>{tools}</StyledTableTools>
         </div>
-      ) : (<></>)}
+      ) : description ? (
+        <>
+          <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <StyledTableTitle>{title}</StyledTableTitle>
+            <StyledTableTools>{tools}</StyledTableTools>
+          </div>
+          <div>
+            {description.split('\\n').map((elem: string, index: number): JSX.Element => (
+              <p key={index} style={{ color: '#8C8C8C', fontSize: 14, fontWeight: '500', lineHeight: '22px', margin: 0 }}>{elem}</p>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
+          <StyledTableTitle>{title}</StyledTableTitle>
+          <StyledTableTools>{tools}</StyledTableTools>
+        </div>
+      )}
     </StyledTableFormHeader>
   );
 }
@@ -559,7 +495,7 @@ const TableHeader = ({ description, name }: TableHeaderProps): JSX.Element => {
 /**
  * [Internal Component] Table footer containing an additional button
  */
-const TableFooterContainAddButton = ({ onClick }: TableFooterContainAddButtonProps): JSX.Element => {
+export const TableFooterContainAddButton = ({ onClick }: TableFooterContainAddButtonProps): JSX.Element => {
   return (
     <StyledTableFooter onClick={onClick}>
       <IoAddCircle />
@@ -572,7 +508,7 @@ const TableFooterContainAddButton = ({ onClick }: TableFooterContainAddButtonPro
  * [Internal Component] Table footer of empty table
  * @param onClick click handler
  */
-const EmptyTableFooter = ({ onClick }: TableFooterContainAddButtonProps): JSX.Element => {
+export const EmptyTableFooter = ({ onClick }: TableFooterContainAddButtonProps): JSX.Element => {
   return (
     <StyledEmptyTableFooter>
       <span className='message'>내용이 없습니다.</span>
@@ -580,19 +516,10 @@ const EmptyTableFooter = ({ onClick }: TableFooterContainAddButtonProps): JSX.El
     </StyledEmptyTableFooter>
   );
 }
-
-/**
- * [Internal Component] URL table footer of empty table
- */
-const URLTableFooter = ({ url }: URLTableFooterProps): JSX.Element => {
-  return (
-    <StyledURLTableFooter>{url}</StyledURLTableFooter>
-  );
-}
 /**
  * [Internal Component] Table edit cell
  */
-const TableEditCell = ({ edit, onDelete, onEdit, onSave, onCancel }: TableEditCellProps): JSX.Element => {
+export const TableEditCell = ({ edit, onDelete, onEdit, onSave, onCancel }: TableEditCellProps): JSX.Element => {
   return (
     <StyledTableEditCell>
       {edit ? (
@@ -603,7 +530,7 @@ const TableEditCell = ({ edit, onDelete, onEdit, onSave, onCancel }: TableEditCe
       ) : (
         <>
           <AiOutlineEdit onClick={onEdit} />
-          <Popconfirm placement='topRight' title='해당 업무를 삭제하시겠습니까?' onConfirm={onDelete}>
+          <Popconfirm cancelText='아니오' placement='topRight' title='현재 행을 삭제하시겠습니까?' okText='예' onConfirm={onDelete}>
             <AiOutlineDelete />
           </Popconfirm>
         </>
@@ -614,7 +541,7 @@ const TableEditCell = ({ edit, onDelete, onEdit, onSave, onCancel }: TableEditCe
 /**
  * [Internal Component] Table content for list
  */
-const TableContentForList = ({ items }: TableContentForListProps): JSX.Element => {
+export const TableContentForList = ({ items }: TableContentForListProps): JSX.Element => {
   return (
     <StyledList>
       {items?.map((key: string, index: number): JSX.Element => (<StyledListItem key={index}>{key}</StyledListItem>))}
@@ -624,7 +551,7 @@ const TableContentForList = ({ items }: TableContentForListProps): JSX.Element =
 /**
  * [Internal Component] Table content for tags
  */
-const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.Element => {
+export const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.Element => {
   return (
     <Space size={[6, 6]} wrap>
       {items.map((item: string, index: number): JSX.Element => (
@@ -641,141 +568,31 @@ const TableContentForTags = ({ items, tooltip }: TableContentForItemProps): JSX.
 }
 
 /**
- * [Function] Set a data source 
- * @param dataSource raw data source
- * @returns data source
- */
-export const setDataSource = (dataSource: any): any[] => {
-  return dataSource.map((item: any): any => { return { ...item, key: item.id } });
-}
-/**
- * [Internal Function] Create a table column(= header) property
+ * [Function] Create a table column(= header) property
  * @param key unique key
  * @param name header name
  * @param description header description
  * @param width column width
  * @returns created columns
  */
-const createTableColumnProps = (key: string, name: string, description?: string, width?: string): any => {
+export const createTableColumnProps = (key: string, name: string, description?: string, width?: string): any => {
   return { dataIndex: key, key: key, title: <TableHeader description={description} name={name} />, visible: true, width: width ? width : '4%' };
 }
+
 /**
- * [Internal Function] 특정 컬럼(Column)의 Select Option 선택에 따라 다른 컬럼(Column)에 대한 Select Options을 변경하는 함수
- * @param key 컬럼 구분을 위한 이름
- * @param onUpdate Select Option 갱신을 위한 Hanlder
- * @param ref 참조 데이터
- * @param tableName 테이블 구분을 위한 이름
- * @param value 현재 선택된 Select Option 값 (= 선택한 칼럼의 값)
+ * [Function] Check a required for column
+ * @param columnName column key
+ * @param item column value
+ * @param required required
+ * @returns check result
  */
-const changeSelectOptions = (key: string, onUpdate: (value: any) => void, ref: any, tableName: string, value?: string | string[], row?: any): void => {
-  // 테이블 이름에 따른 처리
-  switch (tableName) {
-    case 'pi':
-      // "업무명"이 변경된 경우, "업무명"에 따라 "목적"과 "항목(필수 및 선택)"에 대한 Select Options을 변경
-      if (key === 'subject') {
-        value && ref[value as string] ? onUpdate({ purpose: ref[value as string].purpose, items: ref[value as string].items, period: ref[value as string].period }) : onUpdate({ purpose: [], items: [], period: [] });
-      }
-      break;
-    case 'fni':
-      // "업무명"이 변경된 경우, "업무명"에 따라 "목적"과 "처리항목"에 대한 Select Options을 변경
-      if (key === 'subject') {
-        if (value) {
-          const [refRow] = Array.isArray(value) ? ref.filter((elem: any): boolean => value.includes(elem[key])) : ref.filter((elem: any): boolean => elem[key] === value);
-          refRow ? onUpdate({ ['items']: refRow['essentialItems'].concat(refRow['selectionItems']) }) : onUpdate({ ['items']: [] });
-        }
-      }
-      break;
-    case 'cpi':
-      const cpiRef = ref['cpi'];
-      // "업무명"이 변경된 경우, 
-      // "업무명"에 따라 "수탁자" Select Options를 변경
-      if (key === 'subject') {
-        if (value && typeof value === "string") {
-          cpiRef[value] ? onUpdate({ ['company']: Object.keys(cpiRef[value]) }) : onUpdate({ ['company']: [] });
-        }
-      }
-      // "수탁자"가 변경될 경우,
-      // "수탁자"에 따라 "위탁 업무" Select Options를 변경
-      if (key === 'company') {
-        if (value && typeof value === "string" && cpiRef[row.subject]) {
-          const infos = cpiRef[row.subject][value];
-          infos?.content ? onUpdate({ ['content']: infos.content, ['period']: infos.period, ['method']: infos.method }) : onUpdate({ ['content']: [], ['charger']: [] });
-        }
-      }
-      break;
-    default:
-      break;
+  export const checkRequired = (columnName: string, item: string[] | string, required: boolean): boolean => {
+  // Check a warning
+  const warning: boolean = required && ((typeof item === 'string' && item === '') || (Array.isArray(item) && item.length === 0)) || item === undefined && required;
+  // Alert a message
+  if (warning) {
+    createWarningMessage(`해당 필드(${columnName})는 필수로 입력해야 합니다.`, 1.6, columnName);
   }
-}
-/**
- * [Internal Function] 테이블 데이터로부터 필수항목 및 선택항목을 추출하는 함수 (개인정보 수집 및 이용 테이블에서만 사용)
- * @param dataSource 테이블 데이터 소스
- * @returns 추출된 항목 데이터
- */
-const extractProcessingItems = (dataSource: any[]): string[] => {
-  const options: SelectOptionsByColumn = {};
-  for (const row of dataSource) {
-    // 테이블 데이터 소스로부터 필수항목(essentialItems)과 선택항목(selectionItems) 데이터 추출 (중복 제거)
-    if (('essentialItems' in row) || ('selectionItems' in row)) {
-      if (('items' in options) === false) options['items'] = [];
-      // 필수항목(essentialItems) 데이터 추출 (중복 제거)
-      if ('essentialItems' in row) {
-        options['items'].push(...row['essentialItems'].filter((item: string): boolean => !options['items'].includes(item)));
-      }
-      // 선택항목(selectionItems) 데이터 추출 (중복 제거)
-      if ('selectionItems' in row) {
-        options['items'].push(...row['selectionItems'].filter((item: string): boolean => !options['items'].includes(item)));
-      }
-    }
-  }
-  // 반환
-  return options['items'];
-}
-/**
- * [Internal Function] 테이블 칼럼(Column)별 Select 옵션 초기화 함수
- * @param dataSource 테이블 데이터 소스
- * @param headers 테이블 헤더 데이터
- * @param tableName 테이블 구분을 위한 이름
- * @param ref 참조 데이터
- * @param defaultSelectOptions 기본으로 제공될 각 칼럼(Column)별 Select 옵션 데이터
- * @returns 각 칼럼(Column)별 Select 옵션 데이터
- */
-const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableName: string, ref: any, defaultSelectOptions?: SelectOptionsByColumn): SelectOptionsByColumn => {
-  const options: SelectOptionsByColumn = {};
-  // 각 컬럼(Column)에 따라 부모 컴포넌트로부터 받은 기본 옵션을 포함한 Select 옵션 설정
-  Object.keys(headers).forEach((key: string): string[] => defaultSelectOptions && defaultSelectOptions[key] ? options[key] = [...defaultSelectOptions[key]] : []);
-  let items: any = [];
-  // 테이블에 따라 초기 각각의 컬럼(Column)의 Select 옵션 설정
-  switch (tableName) {
-    case 'pi':
-      options['items'] = defaultSelectOptions && defaultSelectOptions['items'] ? defaultSelectOptions['items'] : [];
-      options['items'] = extractProcessingItems(dataSource)?.filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
-      break;
-    case 'fni':
-      const subjectOptions: string[] = ref.map((elem: any): string => elem.subject).filter((item: string): boolean => options['subject'] ? !options['subject'].includes(item) : true)
-      options['subject'] ? options['subject'].push(...subjectOptions) : options['subject'] = [...subjectOptions];
-      // options['items'] = [];
-      // options['items'] = extractProcessingItems(ref)?.filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
-      break;
-    case 'ppi':
-      options['items'] = extractProcessingItems(ref);
-      break;
-    case 'pfni':
-      const pfniItems = ref?.map((fni: any) => fni.items);
-      // items 중복 체크 후, items 값 추가
-      pfniItems.forEach((pfniArr: any) => pfniArr.forEach((pfniItem: any) => !items.includes(pfniItem) && items.push(pfniItem)));
-      options['items'] = items;
-      break;
-    case 'cpi':
-      const ppiRef = ref['ppi']?.filter((ppi: any) => ppi.url === undefined);
-      const ppiItems = ppiRef?.map((ppi: any) => ppi.items);
-      // items 중복 체크 후, items 값 추가
-      ppiItems.forEach((ppiArr: any) => ppiArr.forEach((ppiItem: any) => !items.includes(ppiItem) && items.push(ppiItem)));
-      options['items'] = items;
-      break;
-    default:
-      break;
-  }
-  // 반환
-  return options;
+  // Return
+  return warning;
 }

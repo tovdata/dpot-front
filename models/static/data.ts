@@ -39,10 +39,10 @@ export const defaultPIPPData: any = {
       method: [],
       usage: undefined
     },
-    provision: {
+    ppi: {
       usage: undefined
     },
-    consignment: {
+    cpi: {
       usage: undefined
     },
     destructionUnused: {

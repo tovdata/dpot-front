@@ -1,5 +1,5 @@
 /** 안정성 확보 추가 조치 - 개인정보보호 인증 (개인정보 처리방침 생성 2단계) */
-export const certificationForPIP: string[] = ['ISMS-P', 'ISO/IEC 27701', 'ISO/IEC 27017', 'ePRIVACY', 'ePRIVACY PLUS', 'PRIVACY'];
+export const certificationForPIPP: string[] = ['ISMS-P', 'ISO/IEC 27701', 'ISO/IEC 27017', 'ePRIVACY', 'ePRIVACY PLUS', 'PRIVACY'];
 /** 개인정보 위탁 (개인정보 제공 및 위탁 페이지) */
 export const infoFromSubjectInCPI = {
   "본인확인": {
@@ -274,5 +274,23 @@ export const personalInfoSelectOptions: any = {
     purpose: ["웹/앱 방문에 관한 통계 및 분석"],
     items: ["IP 주소", "쿠키", "방문 일시", "서비스 이용기록", "접속 로그", "불량 이용 기록", "IMEI", "OS종류", "OS버전", "디바이스 종류", "광고식별자", "UUID", "위치정보", "이동통신사", "푸시 토큰"],
     period: ["회원 탈퇴", "파기 요청", "서비스 종료"]
+  }
+};
+/** 개인정보 처리방침 생성 과정에서 추가적으로 입력받는 데이터들에 대한 예시 (개인정보 처리방침 1단계) */
+export const additionalInfoOptions: any = {
+  cookie: {
+    purpose: ["이용자의 환경설정 유지", "서비스 편의 기능 제공", "이용자의 서비스 이용 통계 분석을 통한 서비스 개선", "맞춤형 서비스 제공", "관심 분야 분석을 통한 타겟 마케팅", "각종 이벤트 참여 정도 파악"],
+    disadvantage: ["로그인이 필요한 일부 서비스 이용에 어려움이 있을 수 있습니다", "리워드 지급에 제한이 생길 수 있습니다", "맞춤형 서비스 이용에 어려움이 있을 수 있습니다"]
+  },
+  webLog: {
+    purpose: ["이용자의 서비스 이용 통계 분석을 통한 서비스 개선", "맞춤형 서비스 및 혜택 제공", "맞춤형 광고 제공"],
+    method: ["[Google Analytics] https://tools.google.com/dlpage/gaoptout", "[Firebase Analytics] https://tools.google.com/dlpage/gaoptout", "[Clicky] https://clicky.com/optout?optin=1", "[Internet Explorer] 도구 → 인터넷 옵션 → 개인정보 → 설정 → 고급 → '쿠키의 차단' 선택", "[Microsoft Edge] 설정 → 개인정보, 검색 및 서비스 → 추적방지 →'추적방지 엄격' 선택, 'Inprivate를 검색할 때 항상 엄격 추적 방지 사용', '추적 안함 요청보내기' 선택", "[Chrome] 설정 → 개인정보 및 보안 → 쿠키 및 기타 사이 데이터 →'쿠키 차단' 선택", "[Firefox] 우클릭 → 페이지 정보 → 권한 → 쿠키 저장 → '기본 설정 이용' 해제, '차단' 선택", "[안드로이드] 브라우저 설정 → 인터넷 사용 기록/개인정보 및 보안 설정 → '쿠키의 허용' 끔, '타사 쿠키 차단'", "[아이폰] 설정 → 개인정보보호 → 추적 → '앱이 추적을 요청하도록 허용' 끔"],
+  },
+  advertising: {
+    items: ["이용자의 서비스 방문이력", "검색이력", "구매이력", "클릭내역", "광고식별자"],
+  },
+  thirdParty: {
+    company: ["Facebook", "Google", "Adjust", "Braze", "AppsFlyer", "Unity", "Criteo", "Airbridge", "Vungle", "AppLovin", "IGAWorks", "TNK Factory", "Metapsplus", "Youappi", "Fyber", "AdColony"],
+    items: ["이용자의 서비스 방문이력", "검색이력", "구매이력", "클릭내역", "광고식별자"]
   }
 };

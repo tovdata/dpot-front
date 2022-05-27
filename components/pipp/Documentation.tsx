@@ -194,7 +194,7 @@ export const DDRowContent: React.FC<DDRowContentProps> = ({ items, links, previe
     <div style={{ marginBottom: 8, ...style }}>
       {items.map((item: string|JSX.Element, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>
         {item}
-        {links && links[index] ? (
+        {links && links[index] && links[index] !== '' ? (
           <a target='_blank' href={links[index]} style={{ marginLeft: 6, textDecoration: 'underline' }} rel='noreferrer'>보기</a>
         ) : (<></>)}
       </p>))}
@@ -227,7 +227,7 @@ export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, link
       {items.map((item: string, index: number): JSX.Element => (
         <li key={index} style={{ fontSize: 14 }}>
           {item}
-          {links && links[index] ? (
+          {links && links[index] && links[index] !== '' ? (
             <a target='_blank' href={links[index]} style={{ marginLeft: 6, textDecoration: 'underline' }} rel='noreferrer'>보기</a>
           ) : (<></>)}
         </li>
@@ -235,7 +235,7 @@ export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, link
     </ul>
   ) : (<></>);
 }
-export const DDRowTableForm = styled.div`
+export const DDRowTableForm = styled.div<{ preview?: boolean }>`
   margin-bottom: 8px;
   table .ant-table-thead > tr > th {
     font-size: 13px;
@@ -252,6 +252,11 @@ export const DDRowTableForm = styled.div`
     margin: 0;
     padding: 0;
   }
+  ${(props: any) => props.preview && css`
+    table .ant-table-body > tr > td {
+      font-size: 12px
+    }
+  `}
 `;
 
 /** 
@@ -273,12 +278,6 @@ export const DRLabelingHeader: React.FC<DRLabelingHeaderProps> = ({ description,
     </div>
   );
 }
-export const DRLabelingContent = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 56px;
-`;
 /** [Component] 개인정보 처리방침 최종 검토 폼 Labeling item */
 export const DRLabelingItem: React.FC<DRLabelingItemProps> = ({ tooltip, type }: DRLabelingItemProps): JSX.Element => {
   const size: number = 96;
@@ -315,25 +314,13 @@ export const DRLabelingItem: React.FC<DRLabelingItemProps> = ({ tooltip, type }:
   // Return an element
   return (
     <span style={{ cursor: 'pointer', marginLeft: 20, marginRight: 20, position: 'relative', userSelect: 'none' }}>
-      {tooltip ? (
-        <>
-          {labeling.icon ? (
-          <Tooltip placement='bottom' title={tooltip ? tooltip : ''}>
-            <span style={{ alignItems: 'center', display: 'flex', height: size, justifyContent: 'center', width: size }}>
-              {labeling.icon}
-            </span>
-          </Tooltip>
-        ) : (<></>)}
-        </>
-      ) : (
-        <>
-          {labeling.icon ? (
-          <span style={{ alignItems: 'center', display: 'flex', height: size, justifyContent: 'center', width: size }}>
+      <>
+        {labeling.icon ? (
+          <span style={{ alignItems: 'center', display: 'flex', height: size, justifyContent: 'center', width: size }} title={tooltip ? tooltip : ''}>
             {labeling.icon}
           </span>
         ) : (<></>)}
-        </>
-      )}
+      </>
       {labeling.label ? (
         <p style={{ color: '#000000', fontSize: 13, fontWeight: '400', lineHeight: '22px', marginBottom: 0, textAlign: 'center' }}>{labeling.label}</p>
       ) : (<></>)}

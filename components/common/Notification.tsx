@@ -4,6 +4,21 @@ import { message, notification } from 'antd';
 import { NotificationPlacement } from 'antd/lib/notification';
 
 /**
+ * [Function] Create a notification for warning
+ * @param title 알림 제목
+ * @param description 알림 설명
+ * @param placement 알림 위치
+ */
+export const warningNotification = (title: string, description?: string, placement: NotificationPlacement = 'topRight'): void => {
+  notification.warning({
+    description: description,
+    duration: 2.2,
+    message: title,
+    placement: placement
+  });
+}
+
+/**
  * [Function] Create a simple warning notification
  * @param title notification title
  * @param duration duration (milliseconds)
