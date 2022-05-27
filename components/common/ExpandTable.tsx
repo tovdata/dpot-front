@@ -69,7 +69,7 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
   // Set a default focus and default record for columns in row
   const defaultFocusState: any = {};
   const defaultRecord: any = {};
-  const totalheaders = {...innerHeaders, ...headers};
+  const totalheaders = { ...innerHeaders, ...headers };
   // Extract a focus state by inner header key
   Object.keys(totalheaders).forEach((key: string): void => {
     defaultFocusState[key] = false;
@@ -82,7 +82,7 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
   const [row, setRow] = useState<any>({});
   const [focus, setFocus] = useState<any>(defaultFocusState);
   const [selectOptions, setSelectOptions] = useState<SelectOptionsByColumn>(resetSelectOptions(dataSource, headers, tableName, refData, defaultSelectOptions));
-
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   /**
    * [Event Handler] Create a row
    */
@@ -310,17 +310,17 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
   if (dataSource?.length === 0)
     return (
       <>
-      <EmptyTable columns={createColumns(headers, true)} dataSource={dataSource} loading={isLoading} pagination={pagination ? undefined : false} />  
-      <EmptyTableFooter onClick={onCreate} />
-    </>
+        <EmptyTable columns={createColumns(headers, true)} dataSource={dataSource} loading={isLoading} pagination={pagination ? undefined : false} />
+        <EmptyTableFooter onClick={onCreate} />
+      </>
     );
   // Return an element
   return (
     <OuterTable columns={createColumns(headers, true)} dataSource={dataSource} expandable={{
       expandedRowRender: (record: any, index: number) => innerHeaders ? (<Table key={index} columns={createColumns(innerHeaders, false)} dataSource={row.id === record.id ? [row] : [record]} pagination={false} />) : (<></>),
-      rowExpandable: (record: any) => {
-        return (row.id === record.id) ? row[expandKey] : record[expandKey]
-      }
+      rowExpandable: (record: any) => (row.id === record.id) ? row[expandKey] : record[expandKey],
+      expandedRowKeys: row[expandKey] ? [...expandedKeys, row.key] : expandedKeys,
+      onExpandedRowsChange: (expandedRows: any) => setExpandedKeys(expandedRows)
     }} footer={footer} loading={isLoading} pagination={pagination ? undefined : false} />
   )
 }
