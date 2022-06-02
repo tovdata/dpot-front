@@ -20,7 +20,7 @@ export const API_DT_CFNI: PIMType = 'cfni';
 export const API_DT_LIST: PIMType[] = [API_DT_PI, API_DT_FNI, API_DT_PPI, API_DT_CPI, API_DT_PFNI, API_DT_CFNI];
 
 /** PIPP 진행 상태  */
-type PIPPStatus = 'none'|'progress'|'publish';
+type PIPPStatus = 'none' | 'progress' | 'publish';
 /** API로 반환된 데이터 형태 (Map) */
 interface MapDF {
   M: any;
@@ -232,7 +232,7 @@ export const setQueryData = (queryClient: QueryClient, type: string, mutate: Use
     const uMode = mode.split('/')[1];
     mutate({ mode: uMode, data: record }, {
       onSuccess: async (response) => {
-        queryClient.setQueryData(type, (oldData: any): any => updateData(mode, oldData, uMode === 'add' ? response.id : record.id, record));
+        queryClient.setQueryData(type, (oldData: any): any => updateURLData(oldData, uMode === 'add' ? { id: response?.id, url: record?.url } : record));
       },
       onError: () => {
         queryClient.invalidateQueries(type);
@@ -295,4 +295,14 @@ const updateData = (mode: string, datas: any[], id: string, record: any): any[] 
     // 추출된 인덱스에 위치한 데이터를 제외한 데이터로 새로운 배열 생성 및 반환
     return index === datas.length - 1 ? [...datas.slice(0, index), { ...record, id }] : [...datas.slice(0, index), { ...record, id }, ...datas.slice(index + 1, datas.length)];
   }
+}
+/**
+ * [Internal Function] Query URL Data 업데이트 함수 (Front-end 내에서 처리)
+ * @param datas 기존 데이터들
+ * @param record 수정 또는 추가된 데이터
+ * @returns 
+ */
+const updateURLData = (datas: any[], record: any): any[] => {
+  const data = datas.filter((row: any) => row.url === undefined);
+  return [...data, record];
 }
