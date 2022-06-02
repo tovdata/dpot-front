@@ -3,10 +3,11 @@ import styled from 'styled-components';
 // Component
 import { Col, Divider, Input, Row, Select, Space, Typography } from 'antd';
 // Module
-import { createWarningMessage } from './Notification';
+import { warningNotification } from './Notification';
 // Type
-import { SelectOptionsByColumn } from '../../models/type';
 import { PlusOutlined } from '@ant-design/icons';
+// Util
+import { blankCheck } from '../../utils/utils';
 
 // Styled component (IFTTT form)
 const StyledIFTTTForm = styled.div`
@@ -23,6 +24,7 @@ interface GeneralPurposeSelectProps {
   onClick?: () => void;
   options: string[];
   placeholder?: string;
+  refElement?: any;
   value: string | string[];
 }
 /** [Interface] IFTTT Data format */
@@ -51,16 +53,16 @@ interface IFTTTSelectProps {
 /**
  * [Component] Single select
  */
-export const SingleSelect = ({ error, onChange, placeholder, refresh, options, value }: SingleSelectProps): JSX.Element => {
+export const SingleSelect = ({ error, onChange, placeholder, refresh, options, refElement, value }: SingleSelectProps): JSX.Element => {
   // Set the options for select box
   const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select style={{ 'width': '90%' }} key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} status={error ? 'error' : undefined} value={value === '' ? undefined : value} />);
+  return (<Select style={{ 'width': '90%' }} key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} ref={refElement} status={error ? 'error' : undefined} value={value === '' ? undefined : value} />);
 }
 /** 
  * [Component] Addable select
  */
-export const AddableSelect = ({ error, onChange, options, placeholder, value }: GeneralPurposeSelectProps): JSX.Element => {
+export const AddableSelect = ({ error, onChange, options, placeholder, refElement, value }: GeneralPurposeSelectProps): JSX.Element => {
   // Create the select options
   // const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
 
@@ -98,6 +100,7 @@ export const AddableSelect = ({ error, onChange, options, placeholder, value }: 
   // Return an element
   return (
     <Select
+      ref={refElement}
       style={{ 'width': '100%' }}
       placeholder={placeholder}
       value={value}
@@ -126,20 +129,20 @@ export const AddableSelect = ({ error, onChange, options, placeholder, value }: 
 /**
  * [Component] Addable tag select
  */
-export const AddableTagSelect = ({ error, onChange, onClick, options, placeholder, value }: GeneralPurposeSelectProps): JSX.Element => {
+export const AddableTagSelect = ({ error, onChange, onClick, options, placeholder, refElement, value }: GeneralPurposeSelectProps): JSX.Element => {
   // Create the select options
   const selectOptions: SelectOptionFormat[] = options?.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select style={{ 'width': '100%' }} mode='tags' onChange={onChange} onClick={onClick} options={selectOptions} placeholder={placeholder} status={error ? 'error' : undefined} tokenSeparators={[',']} value={value as string[]} />);
+  return (<Select style={{ 'width': '100%' }} mode='tags' onChange={onChange} onClick={onClick} options={selectOptions} placeholder={placeholder} ref={refElement} status={error ? 'error' : undefined} tokenSeparators={[',']} value={value as string[]} />);
 }
 /**
  * [Component] Tag select
  */
-export const TagSelect = ({ error, onChange, options, placeholder, value }: GeneralPurposeSelectProps): JSX.Element => {
+export const TagSelect = ({ error, onChange, options, placeholder, refElement, value }: GeneralPurposeSelectProps): JSX.Element => {
   // Create the select options
   const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select style={{ 'width': '100%' }} mode='multiple' onChange={onChange} options={selectOptions} placeholder={placeholder} status={error ? 'error' : undefined} value={value as string[]} />);
+  return (<Select style={{ 'width': '100%' }} mode='multiple' onChange={onChange} options={selectOptions} placeholder={placeholder} ref={refElement} status={error ? 'error' : undefined} value={value as string[]} />);
 }
 /**
  * [Component] IFTTT select
@@ -174,8 +177,11 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
       setHidden(false);
       // Create an item
       if (changed.digit <= 0) {
-        createWarningMessage('0보다 큰 정수 값을 입력해주세요.', 1.6);
+        warningNotification('기간은 1 ~ 999 사이의 숫자만 입력할 수 있어요');
         setData({ ...data, digit: 1 });
+      } else if (changed.digit > 999) {
+        warningNotification('기간은 1 ~ 999 사이의 숫자만 입력할 수 있어요');
+        setData({ ...data, digit: 999 });
       } else if (changed.digit > 0 && !blankCheck(changed.unit) && !blankCheck(changed.event)) {
         onAdd(`${changed.event}${changed.adverb} ${changed.digit}${changed.unit}`);
         // Update a state
@@ -212,9 +218,4 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
       </Row>
     </StyledIFTTTForm>
   );
-}
-
-const blankCheck = (value: string): boolean => {
-  const blankPattern: RegExp = /^\s+|\s+$/g;
-  return value.trim().replace(blankPattern, '') === '';
 }

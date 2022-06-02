@@ -166,18 +166,3 @@ export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, onSave, t
     </StyledPageHeader>
   );
 }
-/**
- * [Component] Page header to check a document processing
- */
-export const DocumentProcessingStatusHeader: React.FC<any> = ({ description, onClick, status, style, title }: any): JSX.Element => {
-  // 상태 관련 엘리먼트 생성
-  const statusElement: JSX.Element = (status !== undefined ? status === 'processing' ? <Tag color='geekblue'>Processing</Tag> : <Tag color='green'>Completed</Tag> : <Tag color='default'>Not found</Tag>);
-  // Extra 관련 엘리먼트 생성
-  const extraElement: JSX.Element[] = [(<Button icon={<PlusOutlined />} key={1} onClick={onClick} type='primary'>문서 만들기</Button>)];
-  // 생성된 엘리먼트 반환
-  return (
-    <PageHeader extra={extraElement} style={{ paddingLeft: 0, paddingRight: 0, userSelect: 'none', ...style }} tags={statusElement} title={title}>
-      {description ? <p style={{ color: '#8B8B8B', fontSize: 14 }}>{description}</p> : undefined}
-    </PageHeader>
-  );
-}

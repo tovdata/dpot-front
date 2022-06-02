@@ -81,4 +81,15 @@ export const defaultPIPPData: any = {
       usage: undefined
     }
   }
-}
+};
+export const defaultDPIData: any = {
+  subject: '',
+  date: '',
+  reason: [],
+  items: [],
+  charger: '',
+  quantity: undefined,
+  method: undefined,
+  location: undefined,
+  period: []
+};

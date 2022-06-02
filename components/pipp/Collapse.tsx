@@ -56,20 +56,20 @@ export const CollapseForPIPP = ({ data, items, onChange }: any): JSX.Element => 
   // Return an element
   return (
     <StyledCollapse activeKey={Object.keys(data).filter((key: string): boolean => data[key].usage)} bordered={false}>
-      <CDPCollapsePanel header={{ description: '웹이나 앱에서 사용자의 브라우저에 전송하는 소량의 정보', title: '쿠키(cookie)를 사용하나요?' }} id='cookie' key='cookie' onChange={(category: string, value: any) => onChange('aInfo', value, category, 'usage')} status={data.cookie.usage}>
+      <CDPCollapsePanel header={{ description: '웹이나 앱에서 사용자의 브라우저에 전송하는 소량의 정보', title: '1. 쿠키(cookie)를 사용하나요?' }} id='cookie' key='cookie' onChange={(category: string, value: any) => onChange('aInfo', value, category, 'usage')} status={data.cookie.usage}>
         <CDPCollapsePanelContent items={[
           { subject: '사용목적', children: (<AddableTagSelect onChange={(value: string|string[]) => onChange(THIS_STEP, value, 'cookie', 'purpose')} options={additionalInfoOptions.cookie.purpose} placeholder='선택 및 직접입력' value={data.cookie.purpose} />) },
           { subject: '거부 시 불이익', children: (<AddableTagSelect onChange={(value: string|string[]) => onChange(THIS_STEP, value, 'cookie', 'disadvantage')} options={additionalInfoOptions.cookie.disadvantage} placeholder='선택 및 직접입력' value={data.cookie.disadvantage} />) }
         ]} />
       </CDPCollapsePanel>
-      <CDPCollapsePanel header={{ description: '웹이나 앱에서 발생하는 다양한 데이터를 분석하여 서비스 접속이력 및 경로 등에 대한 통계 정보를 제공해주는 도구', title: '웹 로그 분석도구를 사용하시나요? (ex. 구글 애널리틱스)' }} id='webLog' key='webLog' onChange={(category: string, value: any) => onChange('aInfo', value, category, 'usage')} status={data.webLog.usage}>
+      <CDPCollapsePanel header={{ description: '웹이나 앱에서 발생하는 다양한 데이터를 분석하여 서비스 접속이력 및 경로 등에 대한 통계 정보를 제공해주는 도구', title: '2. 웹 로그 분석도구를 사용하시나요? (ex. 구글 애널리틱스)' }} id='webLog' key='webLog' onChange={(category: string, value: any) => onChange('aInfo', value, category, 'usage')} status={data.webLog.usage}>
         <CDPCollapsePanelContent items={[
           { subject: '사용 목적', children: (<AddableTagSelect onChange={(value: string|string[]) => onChange(THIS_STEP, value, 'webLog', 'purpose')} options={additionalInfoOptions.webLog.purpose} placeholder='선택 및 직접입력' value={data.webLog.purpose} />) },
           { subject: '거부 방법', children: (<AddableTagSelect onChange={(value: string|string[]) => onChange(THIS_STEP, value, 'webLog', 'method')} options={additionalInfoOptions.webLog.method} placeholder='[웹 로그 분석도구] 거부 방법(URL)' value={data.webLog.method} />) },
           { subject: '거부 시 불이익', children: (<Input allowClear onChange={(e: any): void => onChange(THIS_STEP, e.target.value, 'webLog', 'disadvantage')} value={data.webLog.disadvantage} />) }
         ]} />
       </CDPCollapsePanel>
-      <CDPCollapsePanel header={{ description: '서비스 방문이력, 사용이력 등 온라인 상의 이용자 활동정보\n- 온라인 맞춤형 광고: 행태정보를 처리하여 이용자의 관심, 흥미, 기호 및 성향 등을 분석·추정한 후 이용자에 따라 다르게 제공되는 온라인 광고\n※ 이용자 편의 제공을 위해 사용 환경(UX,UI 등)을 이용자별로 상이하게 구성하는 등의 맞춤형 서비스는 해당하지 않음', title: '타겟 광고를 위하여 사용자의 행태정보를 사용하나요?' }} id='advertising' key='advertising' onChange={(category: string, value: any) => onChange('aInfo', value, category, 'usage')} status={data.advertising.usage}>
+      <CDPCollapsePanel header={{ description: '서비스 방문이력, 사용이력 등 온라인 상의 이용자 활동정보\n- 온라인 맞춤형 광고: 행태정보를 처리하여 이용자의 관심, 흥미, 기호 및 성향 등을 분석·추정한 후 이용자에 따라 다르게 제공되는 온라인 광고\n※ 이용자 편의 제공을 위해 사용 환경(UX,UI 등)을 이용자별로 상이하게 구성하는 등의 맞춤형 서비스는 해당하지 않음', title: '3. 타겟 광고를 위하여 사용자의 행태정보를 사용하나요?' }} id='advertising' key='advertising' onChange={(category: string, value: any) => onChange('aInfo', value, category, 'usage')} status={data.advertising.usage}>
         <CDPCollapsePanelContent items={[
           { subject: '수집하는 행태정보 항목', children: (<AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, value, 'advertising', 'items')} options={additionalInfoOptions.advertising.items} placeholder='선택 및 직접입력' value={data.advertising.items} />) },
           { subject: '행태정보 수집 방법', children: (<Input allowClear onChange={(e: any): void => onChange(THIS_STEP, e.target.value, 'advertising', 'method')} value={data.advertising.method} />) },
@@ -77,7 +77,7 @@ export const CollapseForPIPP = ({ data, items, onChange }: any): JSX.Element => 
           { subject: '보유 및 이용기간 및 이후 정보처리 방법', children: (<Input allowClear onChange={(e: any): void => onChange(THIS_STEP, e.target.value, 'advertising', 'period')} placeholder='예) 수집일로부터 00일 후 파기' value={data.advertising.period} />) }
         ]} />
       </CDPCollapsePanel>
-      <CDPCollapsePanel header={{ description: 'Google Ads나 Facebook Ads 등 온라인 맞춤형 광고 등을 위해 제3자(온라인 광고사업자 등)가 이용자의 행태정보를 수집·처리하고 있다면, 아래의 내용을 모두 입력해야 해요.', title: '사용자의 행태정보를 제3자(온라인 광고사업자 등)가 수집・처리할 수 있도록 허용한 경우가 있나요?' }} id='thirdParty' key='thirdParty' onChange={(category: string, value: any) => onChange('aInfo', value, category, 'usage')} status={data.thirdParty.usage}>
+      <CDPCollapsePanel header={{ description: 'Google Ads나 Facebook Ads 등 온라인 맞춤형 광고 등을 위해 제3자(온라인 광고사업자 등)가 이용자의 행태정보를 수집·처리하고 있다면, 아래의 내용을 모두 입력해야 해요.', title: '4. 사용자의 행태정보를 제3자(온라인 광고사업자 등)가 수집・처리할 수 있도록 허용한 경우가 있나요?' }} id='thirdParty' key='thirdParty' onChange={(category: string, value: any) => onChange('aInfo', value, category, 'usage')} status={data.thirdParty.usage}>
         <CDPCollapsePanelContent items={[
           { subject: '광고 사업자명', children: (<AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, value, 'thirdParty', 'company')} options={additionalInfoOptions.thirdParty.company.sort()} placeholder='선택 및 직접입력' value={data.thirdParty.company} />) },
           { subject: '형태정보 항목', children: (<AddableTagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, value, 'thirdParty', 'items')} options={additionalInfoOptions.thirdParty.items} placeholder='선택 및 직접입력' value={data.thirdParty.items} />) },
@@ -85,7 +85,7 @@ export const CollapseForPIPP = ({ data, items, onChange }: any): JSX.Element => 
           { subject: '보유 및 이용기간', children: (<Input allowClear onChange={(e: any): void => onChange(THIS_STEP, e.target.value, 'thirdParty', 'period')} placeholder='예) 3개월 또는 사용자 쿠키 삭제 시까지' value={data.thirdParty.period} />) }
         ]} />
       </CDPCollapsePanel>
-      <CDPCollapsePanel header={{ description: '정보주체의 동의 없이 개인정보를 추가적으로 이용하거나 제공하고 있다면, 아래에 내용을 모두 입력해야 해요.', title: '별도의 사용자 동의 없이, 개인정보를 추가 이용 및 제공하는 경우가 있나요?' }} id='additional' key='additional' onChange={(category: string, value: any) => onChange('aInfo', value, category, 'usage')} status={data.additional.usage}>
+      <CDPCollapsePanel header={{ description: '정보주체의 동의 없이 개인정보를 추가적으로 이용하거나 제공하고 있다면, 아래에 내용을 모두 입력해야 해요.', title: '5. 별도의 사용자 동의 없이, 개인정보를 추가 이용 및 제공하는 경우가 있나요?' }} id='additional' key='additional' onChange={(category: string, value: any) => onChange('aInfo', value, category, 'usage')} status={data.additional.usage}>
         <CDPCollapsePanelContent items={[
           { subject: '개인정보 항목', children: (<TagSelect onChange={(value: string|string[]): void => onChange(THIS_STEP, value, 'additional', 'items')} options={items} placeholder='예시에서 선택' value={data.additional.items} />) },
           { subject: '이용 및 제공 목적', children: (<Input allowClear onChange={(e: any): void => onChange(THIS_STEP, e.target.value, 'additional', 'purpose')} placeholder='직접 입력' value={data.additional.purpose} />) },

@@ -232,7 +232,6 @@ export const setQueryData = (queryClient: QueryClient, type: string, mutate: Use
     const uMode = mode.split('/')[1];
     mutate({ mode: uMode, data: record }, {
       onSuccess: async (response) => {
-        console.log('tth', response, record);
         queryClient.setQueryData(type, (oldData: any): any => updateData(mode, oldData, uMode === 'add' ? response.id : record.id, record));
       },
       onError: () => {
