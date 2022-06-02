@@ -46,7 +46,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
   // 예시 데이터 가공 (관계 법령에 따른 개인정보 보유 및 이용기간)
   const exampleForPeriodPI: string[] = Object.keys(periodOfRetentionAndUseOfPersonalInformation).reduce((arr: any, law: string) => { arr.push(...periodOfRetentionAndUseOfPersonalInformation[law].map((item: string): string => `${law} : ${item}`)); return arr }, []);;
   // 예시 데이터 가공 (법정대리인의 동의 확인 방법)
-  const exampleForMethodConsent: any[] = methodOfConfirmConsentOfLegalRepresentative.map((item: string): any => ({ title: item, value: item })); 
+  const exampleForMethodConsent: any[] = Object.keys(methodOfConfirmConsentOfLegalRepresentative).map((key: string): any => ({ title: key, value: methodOfConfirmConsentOfLegalRepresentative[key] })); 
   // 컴포넌트 반환
   return (
     <>

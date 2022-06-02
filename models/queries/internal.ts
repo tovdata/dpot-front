@@ -68,7 +68,7 @@ export const createRequest = (serviceId: string, mode: string, data: any): Reque
  * @param response 응답 데이터
  * @returns 추출된 데이터 결과
  */
-const extractData = async (response: Response, mode?: string): Promise<ResponseDF> => {
+export const extractData = async (response: Response, mode?: string): Promise<ResponseDF> => {
   // 응답 데이터를 JSON 형태로 변환
   const json: any = await response.json();
   // 에러 확인
