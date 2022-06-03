@@ -10,6 +10,9 @@ import IconProvision from '../../public/images/provision.svg';
 import IconConsignment from '../../public/images/consignment.svg';
 import IconComplaint from '../../public/images/complaint.svg';
 
+export const StyledDIRowPadding = styled.div`
+  padding: 30px 0;
+`
 /**
  * 컴포넌트들의 Props 형식
  */
@@ -20,19 +23,19 @@ interface ViewProps {
 }
 /** [Interface] Properties for DDRow or DIRow */
 interface RowProps {
-  children?: JSX.Element|JSX.Element[];
+  children?: JSX.Element | JSX.Element[];
   self?: any;
   style?: React.CSSProperties;
 }
 /** [Interface] Properties for DIInputGroup */
 interface DIInputGroupProps {
-  children?: JSX.Element|JSX.Element[];
+  children?: JSX.Element | JSX.Element[];
   label?: string;
   style?: React.CSSProperties;
 }
 /** [Interface] Properties for DIRowContent */
 interface DIRowContentProps {
-  children?: JSX.Element|JSX.Element[];
+  children?: JSX.Element | JSX.Element[];
 }
 /** [Interface] Properties for DIRowDivider */
 interface DIRowDividerProps {
@@ -44,7 +47,7 @@ interface DIRowHeaderProps {
   required?: boolean;
   style?: React.CSSProperties,
   title: string,
-  tools?: JSX.Element|JSX.Element[];
+  tools?: JSX.Element | JSX.Element[];
 }
 /** [Interface] Properties for DDRowContent */
 interface DDRowContentProps extends ViewProps {
@@ -73,7 +76,7 @@ interface DRLabelingItemProps extends ViewProps {
 }
 /** [Interface] Properties for DTCForm */
 interface DTCFormProps extends ViewProps {
-  children?: JSX.Element|JSX.Element[];
+  children?: JSX.Element | JSX.Element[];
 }
 /** [Interface] Properties for DTCItem */
 interface DTCItemProps extends ViewProps {
@@ -192,7 +195,7 @@ export const DDRow: React.FC<RowProps> = ({ children, self }: RowProps): JSX.Ele
 export const DDRowContent: React.FC<DDRowContentProps> = ({ items, links, preview, style }: DDRowContentProps): JSX.Element => {
   return items ? (
     <div style={{ marginBottom: 8, ...style }}>
-      {items.map((item: string|JSX.Element, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>
+      {items.map((item: string | JSX.Element, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>
         {item}
         {links && links[index] && links[index] !== '' ? (
           <a target='_blank' href={links[index]} style={{ marginLeft: 6, textDecoration: 'underline' }} rel='noreferrer'>보기</a>
@@ -213,7 +216,7 @@ export const DDRowHeader: React.FC<DDRowHeaderProps> = ({ preview, self, title }
 export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, links, preview, style }: DDRowItemListProps): JSX.Element => {
   // 목록 레벨에 따른 스타일 정의
   let styleByType: React.CSSProperties;
-  switch(level) {
+  switch (level) {
     case 1:
       styleByType = { marginBottom: 0, paddingLeft: 19 };
       break;

@@ -366,3 +366,70 @@ export const ecfniTableHeader: TableHeadersData = {
     width: '17%'
   }
 }
+// 동의서 Header
+export const consentEditHeader: TableHeadersData = {
+  subject: {
+    display: 'string',
+    name: '구분(업무명)',
+    required: true,
+    editable: false,
+    width: '14%'
+  },
+  purpose: {
+    display: 'item',
+    name: '처리 목적',
+    required: true,
+    editable: true,
+    width: '23%'
+  },
+  essentialItems: {
+    display: 'item',
+    name: '필수항목',
+    required: true,
+    editable: true,
+    width: '18%'
+  },
+  selectionItems: {
+    display: 'item',
+    name: '선택항목',
+    required: false,
+    editable: true,
+    width: '18%'
+  },
+  period: {
+    display: 'list',
+    name: '보유 및 이용 기간',
+    required: true,
+    editable: false,
+    width: '23%'
+  }
+}
+
+// 동의서 개인정보 수집 이용내역 Header
+export const consentPIHeader: TableHeadersData = {
+  subject: {
+    display: 'string',
+    name: '구분(업무명)',
+    required: true,
+    width: '14%'
+  },
+  purpose: {
+    display: 'list',
+    name: '처리 목적',
+    required: true,
+    width: '23%'
+  },
+  items: {
+    display: 'collection',
+    name: '수집 항목',
+    required: false,
+    width: '18%'
+  },
+  period: {
+    display: 'list',
+    name: '보유 및 이용 기간',
+    required: true,
+    editable: false,
+    width: '23%'
+  }
+}

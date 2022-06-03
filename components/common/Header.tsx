@@ -97,6 +97,7 @@ interface PageHeaderProps {
 /** [Interface] Properties for page header contain step */
 interface PageHeaderContainStepProps extends PageHeaderProps {
   current: number;
+  canTemporarySave?: boolean;
   goTo?: string;
   onBack?: () => void;
   onMove: (type: string) => void;
@@ -117,9 +118,9 @@ export const Header = (): JSX.Element => {
   )
 }
 /** [Component] Page header contain step */
-export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, onSave, title, steps }: PageHeaderContainStepProps): JSX.Element => {
+export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, onSave, title, steps, canTemporarySave = true }: PageHeaderContainStepProps): JSX.Element => {
   // Get a router
-  const router: NextRouter = useRouter(); 
+  const router: NextRouter = useRouter();
   // Create a step item
   const items: JSX.Element[] = steps.map((item: string, index: number): JSX.Element => current === index ? (<Steps.Step key={index} status='process' title={item} />) : current < index ? (<Steps.Step key={index} status='wait' title={item} />) : (<Steps.Step key={index} status='finish' title={item} />));
   // Create an event handler (onBackRoute)
@@ -159,7 +160,7 @@ export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, onSave, t
       <StyledPageHeaderExtra>
         {current > 0 ? <Button type='default' onClick={() => onMove('prev')}>이전</Button> : <span></span>}
         <div>
-          <Button onClick={() => onSave(true)} type='default'>임시저장</Button>
+          {canTemporarySave && <Button onClick={() => onSave(true)} type='default'>임시저장</Button>}
           {current < steps.length - 1 ? <Button type='primary' onClick={() => onMove('next')} style={{ marginLeft: 16 }}>다음</Button> : <Button onClick={() => onMove('complete')} style={{ marginLeft: 16 }} type='primary'>완료</Button>}
         </div>
       </StyledPageHeaderExtra>
