@@ -9,7 +9,7 @@ import { FS_HXXS, LH_HXXS } from '../../static/font';
 import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
 import { IoAddCircle } from 'react-icons/io5';
 // Module
-import { createWarningMessage, warningNotification } from './Notification';
+import { warningNotification } from './Notification';
 // Type
 import { SelectOptionsByColumn, TableHeaderData, TableHeadersData } from '../../models/type';
 import { changeSelectOptions, extractProcessingItems, resetSelectOptions } from '../../utils/table';
@@ -241,8 +241,15 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
           return value;
         }
       });
+      // 중복 제거
+      const filtering = newItem.reduce((arr: string[], value: string) => { 
+        if (!arr.includes(value)) {
+          arr.push(value);
+        }
+        return arr;
+      }, []);
       // Set a row
-      setRow({ ...row, [key]: newItem });
+      setRow({ ...row, [key]: filtering });
     } else {
       // Set a row
       setRow({ ...row, [key]: item });
@@ -338,7 +345,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
             }
           case 'item':
             if (row.id === record.id) {
-              return (<TagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
+              return (<TagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return item && item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
@@ -347,13 +354,13 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
               // Extract a options
               const options: string[] = (key === 'essentialItems' || key === 'selectionItems') ? selectOptions['items']?.filter((item: string): boolean => key === 'essentialItems' ? !row['selectionItems'].includes(item) : !row['essentialItems'].includes(item)) : selectOptions[key] ? selectOptions[key] : [];
               // Return an element
-              return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={options} value={row[key]} />);
+              return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={options} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return item && item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
           case 'list':
             if (row.id === record.id) {
-              return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required)} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
+              return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required)} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return (<TableContentForList items={item} key={index} />);
             }
@@ -364,7 +371,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
                   <Space size={[6, 6]} style={{ marginBottom: '10px' }} wrap>
                     {row[key]?.map((elem: string, index: number): JSX.Element => (<Tag closable key={index} onClose={(e: any): void => { e.preventDefault(); onChange(key, row[key].length - 1 === index ? [...row[key].slice(0, index)] : [...row[key].slice(0, index), ...row[key].slice(index + 1)], header.required) }}>{elem}</Tag>))}
                   </Space>
-                  <IFTTTSelect onAdd={(value: string): void => { row[key].some((item: string): boolean => item === value) ? createWarningMessage('동일한 기간이 존재합니다!', 1.6) : onChange(key, [...row[key], value], header.required) }} options={selectOptions[key] ? selectOptions[key] : []} />
+                  <IFTTTSelect onAdd={(value: string): void => { row[key].some((item: string): boolean => item === value) ? warningNotification('동일한 기간이 존재합니다') : onChange(key, [...row[key], value], header.required) }} options={selectOptions[key] ? selectOptions[key] : []} />
                 </>
               );
             } else {
@@ -372,19 +379,19 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
             }
           case 'select':
             if (row.id === record.id) {
-              return (<SingleSelect error={focus[key]} onChange={(item: string | string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
+              return (<SingleSelect error={focus[key]} onChange={(item: string | string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return (<>{item}</>);
             }
           case 'selectA':
             if (row.id === record.id) {
-              return (<AddableSelect error={focus[key]} onChange={(item: string | string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
+              return (<AddableSelect error={focus[key]} onChange={(item: string | string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return (<>{item}</>);
             }
           default:
             if (row.id === record.id) {
-              return (<Input key={index} onChange={(e: any): void => onChange(key, e.target.value, header.required)} value={row[key]} status={focus[key] ? 'error' : undefined} />);
+              return (<Input key={index} onChange={(e: any): void => onChange(key, e.target.value, header.required)} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} status={focus[key] ? 'error' : undefined} />);
             } else {
               return (<>{item}</>);
             }
@@ -586,12 +593,12 @@ export const createTableColumnProps = (key: string, name: string, description?: 
  * @param required required
  * @returns check result
  */
-  export const checkRequired = (columnName: string, item: string[] | string, required: boolean): boolean => {
+export const checkRequired = (columnName: string, item: string[] | string, required: boolean): boolean => {
   // Check a warning
   const warning: boolean = required && ((typeof item === 'string' && item === '') || (Array.isArray(item) && item.length === 0)) || item === undefined && required;
   // Alert a message
   if (warning) {
-    createWarningMessage(`해당 필드(${columnName})는 필수로 입력해야 합니다.`, 1.6, columnName);
+    warningNotification(`${columnName}은/는 필수로 입력해야 합니다.`);
   }
   // Return
   return warning;

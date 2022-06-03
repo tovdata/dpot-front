@@ -1,11 +1,12 @@
 // Component
-import { Col, Button, Collapse, Input, Radio, Row, Space, TreeSelect, Table } from 'antd';
+import { Col, Button, Collapse, Input, Radio, Row, Space, TreeSelect, Table, Menu, Dropdown } from 'antd';
 import { DIInputGroup, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject } from './Documentation';
 import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DRLabelingHeader, DRLabelingItem, DTCForm, DTCItem } from './Documentation';
 import { AddableTagSelect } from '../common/Select';
 // Data
 import { certificationForPIPP, methodOfConfirmConsentOfLegalRepresentative, periodOfRetentionAndUseOfPersonalInformation } from '../../models/static/selectOption';
 import { YesOrNoRadioButton } from '../common/Radio';
+import { DownOutlined } from '@ant-design/icons';
 /**
  * [Internal Function] 공백 확인 함수 
  * @param value 공백 확인을 위한 문자열
@@ -247,16 +248,29 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, r
     });
     return edited;
   }) : [];
-  // 라벨링을 위한 데이터 가공 (개인정보 처리목적)
+  // 이전 개인정보 처리방침 목록
+  let prevPIPPList: any[] = [];
+  // 라벨링을 위한 데이터들
+  let provision: string[] = [];
+  let consignment: string[] = [];
   const purposeForPI: string[] = [];
-  refTables.pi ? refTables.pi.forEach((row: any): void => row.purpose.forEach((item: string): number => !purposeForPI.includes(item) ? purposeForPI.push(item) : 0)) : undefined;
-  // 라벨링을 위한 데이터 가공 (개인정보 보유기간)
   const periodForPI: string[] = [];
-  refTables.pi ? refTables.pi.forEach((row: any): void => row.period.forEach((item: string): number => !periodForPI.includes(item) ? periodForPI.push(item) : 0)) : undefined;
-  // 라벨링을 위한 데이터 가공 (개인정보의 제공)
-  const provision: string[] = refTables.ppi ? refTables.ppi.map((row: any): string => row.recipient) : [];
-  // 라벨링을 위한 데이터 가공 (처리 위탁)
-  const consignment: string[] = refTables.cpi ? refTables.cpi.map((row: any): string => row.subject) : [];
+  if (!preview) {
+    // 라벨링을 위한 데이터 가공 (개인정보 처리목적)
+    refTables.pi ? refTables.pi.forEach((row: any): void => row.purpose.forEach((item: string): number => !purposeForPI.includes(item) ? purposeForPI.push(item) : 0)) : undefined;
+    // 라벨링을 위한 데이터 가공 (개인정보 보유기간)
+    refTables.pi ? refTables.pi.forEach((row: any): void => row.period.forEach((item: string): number => !periodForPI.includes(item) ? periodForPI.push(item) : 0)) : undefined;
+    // 라벨링을 위한 데이터 가공 (개인정보의 제공)
+    provision = refTables.ppi ? refTables.ppi.map((row: any): string => row.recipient) : [];
+    // 라벨링을 위한 데이터 가공 (처리 위탁)
+    consignment = refTables.cpi ? refTables.cpi.map((row: any): string => row.subject) : [];
+    // 이전 개인정보 처리방침 목록 생성
+    if (data.cInfo.previous.usage) {
+      prevPIPPList.push({ label: `${data.cInfo.applyAt} 이전`, value: data.cInfo.previous.url });
+    }
+  }
+  // 이전 처리방침 목록 menu
+  const menu: JSX.Element = (<Menu items={prevPIPPList.map((item: any, index: number): any => ({ key: index, label: (<a href={item.value} key={index} rel="noopener noreferror" target="_blank">{item.label}</a>) }))} />);
   
   // 컴포넌트 반환
   return (
@@ -643,8 +657,14 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, r
       </DDRow>
       {preview ? (<></>) : (
         <DDRow>
-          <DDRowHeader title='이전 개인정보 처리 방침' />
-          <DDRowItemList items={[]} />
+          {prevPIPPList.length > 0 ? (
+            <Dropdown overlay={menu} trigger={['click']}>
+              <Button>
+                <Space>이전 개인정보 처리방침</Space>
+                <DownOutlined style={{ marginLeft: 12 }} />
+              </Button>
+            </Dropdown>
+          ) : (<></>)}
         </DDRow>
       )}
     </div>

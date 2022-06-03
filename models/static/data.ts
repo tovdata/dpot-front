@@ -85,7 +85,7 @@ export const defaultPIPPData: any = {
 export const defaultDPIData: any = {
   subject: '',
   date: '',
-  reason: [],
+  reason: '',
   items: [],
   charger: '',
   quantity: undefined,

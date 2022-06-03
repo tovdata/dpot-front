@@ -116,19 +116,19 @@ export const InformationForm: React.FC<InformationFormProps> = ({ data, onBack }
   /** [Event handler] 저장 이벤트 */
   const onSave = async (): Promise<void> => {
     if (blankCheck(temp.subject)) {
-      warningNotification('파기 대상 개인정보는 필수로 입력되어야 합니다.');
+      warningNotification('파기 대상 개인정보를 입력해주세요.');
       refs.current[0].focus();
     } else if (blankCheck(temp.date)) {
-      warningNotification('파기 일시는 필수로 입력되어야 합니다.');
+      warningNotification('파기 일시를 선택해주세요.');
       refs.current[1].focus();
     } else if (temp.reason.length === 0) {
-      warningNotification('파기 사유는 필수로 입력되어야 합니다.');
+      warningNotification('파기 사유를 입력해주세요.');
       refs.current[2].focus();
     } else if (temp.items.length === 0) {
-      warningNotification('파기 항목은 필수로 입력되어야 합니다.');
+      warningNotification('파기 항목을 선택해주세요.');
       refs.current[3].focus();
     } else if (blankCheck(temp.charger)) {
-      warningNotification('담당자에 대한 정보는 필수로 입력되어야 합니다.');
+      warningNotification('담당자를 입력해주세요.');
       refs.current[4].focus();
     } else {
       const response: any = await setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_DPI, checkNew() ? 'add' : 'save', temp);
@@ -203,7 +203,7 @@ const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, i
       </Descriptions.Item>
       <Descriptions.Item label={<DescriptionLabel content='파기 사유' required />}>
         {edit ? (
-          <AddableTagSelect onChange={(value: string|string[]): void => onChange('reason', value)} options={[]} placeholder='선택 및 직접 입력' refElement={refElements ? (el: any) => (refElements.current[2] = el) : undefined} value={data.reason} />
+          <AddableTagSelect onChange={(value: string|string[]): void => onChange('reason', value)} options={["계약서에 명시된 보유기간 만료", "법령 의무 보유기간 만료", "이용자의 파기 요청", "1년 이상 서비스 미이용"]} placeholder='선택 및 직접 입력' refElement={refElements ? (el: any) => (refElements.current[2] = el) : undefined} value={data.reason} />
         ) : (
           <ul style={{ margin: 0, paddingLeft: 20 }}>
             {data.reason.map((item: string, index: number): JSX.Element => (<li key={index}>{item}</li>))}
@@ -217,12 +217,12 @@ const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, i
       </Descriptions.Item>
       <Descriptions.Item label={<DescriptionLabel content='담당자' required />}>
         {edit ? (
-          <Input onChange={(e: any): void => onChange('charger', e.target.value)} placeholder='직접 입력' ref={refElements ? (el: any) => (refElements.current[4] = el) : undefined}  value={data.charger} />
+          <Input onChange={(e: any): void => onChange('charger', e.target.value)} placeholder='김OO' ref={refElements ? (el: any) => (refElements.current[4] = el) : undefined} value={data.charger} />
         ) : (<>{data.charger}</>)}
       </Descriptions.Item>
       <Descriptions.Item label={<DescriptionLabel content='파기 건수(정보주체 수)' />}>
         {edit ? (
-          <Input onChange={(e: any): void => onChange('quantity', e.target.value)} placeholder='직접 입력' value={data.quantity}  />
+          <Input onChange={(e: any): void => onChange('quantity', e.target.value)} placeholder='000건' value={data.quantity}  />
         ) : (<>{data.quantity}</>)}
       </Descriptions.Item>
       <Descriptions.Item label={<DescriptionLabel content='파기 방법' />}>

@@ -1,7 +1,7 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { Col, Divider, Input, Row, Select, Space, Typography } from 'antd';
+import { Col, Divider, Input, InputNumber, Row, Select, Space, Typography } from 'antd';
 // Module
 import { warningNotification } from './Notification';
 // Type
@@ -208,7 +208,7 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
         ) : (
           <>
             <Col span={12}>
-              <Input onChange={(e: any) => onChange('digit', e.target.value.toString())} type='number' value={data.digit} />
+              <InputNumber min={1} max={999} onChange={(e: any) => onChange('digit', e.target.value.toString())} value={data.digit} />
             </Col>
             <Col span={12}>
               <SingleSelect onChange={(value: string | string[]) => onChange('unit', value as string)} options={['일', '개월', '년']} placeholder='기간' value={data.unit} />
