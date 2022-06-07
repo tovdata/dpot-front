@@ -10,9 +10,9 @@ const { TabPane } = Tabs;
 const CustomTabPane = styled(TabPane)`
   margin-top: 2rem;
 `;
-const Page = () => {
+const Page = ({ expand, onExpand }: any) => {
   return (
-    <TOVPageLayout selected='/pim/pc'>
+    <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/pc'>
       <div style={{ paddingBottom: 74, paddingTop: 36 }}>
         <Tabs defaultActiveKey="1">
           <CustomTabPane tab="제공" key="1">

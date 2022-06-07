@@ -5,9 +5,9 @@ import { TOVPageLayout } from '../components/common/Layout'
 // Component
 import { TestSession } from '../components/TestSession'
 
-const Home: NextPage = () => {
+const Home: NextPage = ({ expand, onExpand }: any) => {
   return (
-    <TOVPageLayout selected='/'>
+    <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/'>
       <div style={{ marginBottom: 74, marginTop: 74 }}>
         <TestSession />
         <TOVInputGroup label='테스트' required tooltip='asdfas'>

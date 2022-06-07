@@ -1,3 +1,4 @@
+import type { NextPage } from 'next';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 // Component
@@ -12,7 +13,7 @@ import { getStatusForPIPP } from '../../models/queryState';
 
 const queryKeyForStatus: string = 'pippStatus';
 
-const Page = () => {
+const Page: NextPage = ({ expand, onExpand }: any) => {
   const { isLoading, data: status } = useQuery(queryKeyForStatus, async () => await getStatusForPIPP('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   const [progress, setProgress] = useState<string>('none');
   // 처리방침 생성 상태에 대한 쿼리 관리 객체
@@ -33,7 +34,7 @@ const Page = () => {
   }
 
   return (
-    <TOVPageLayout selected='/doc/pipp'>
+    <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/doc/pipp'>
       {isLoading ? (
         <BasicPageLoading />
       ) : (

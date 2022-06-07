@@ -116,6 +116,7 @@
 
 
 import { useEffect, useState } from 'react';
+import Router from 'next/router';
 // Component
 import { Layout } from 'antd';
 import { TOVSideMenu } from './SideMenu';
@@ -127,19 +128,20 @@ import styled from 'styled-components';
 /** [Interface] Properties for Sider */
 interface SiderProps {
   scroll: number;
-  toggle: boolean;
 }
 /** [Interface] Properties for TOVPageLayout */
 interface TOVPageLayoutProps {
   children?: JSX.Element | JSX.Element[];
-  selected?: string;
+  expand: boolean;
+  onExpand: () => void;
+  selectedKey: string;
 }
 /** [Interface] Properties for TOVPageSide */
 interface TOVPageSideProps {
-  onCollapse: () => void;
+  expand: boolean;
+  onExpand: () => void;
   scroll: number;
-  selected?: string;
-  toggle: boolean;
+  selectedKey: string;
 }
 
 /** [Styled Component] 페이지 사이드 */
@@ -178,16 +180,12 @@ const HeaderMenuItem = styled.span`
 `;
 
 /** [Component] 페이지 레이아웃 */
-export const TOVPageLayout: React.FC<TOVPageLayoutProps> = ({ children, selected }): JSX.Element => {
-  // 사이드 메뉴 열기/닫기를 위한 Toggle 상태
-  const [toggle, setToggle] = useState<boolean>(true);
+export const TOVPageLayout: React.FC<TOVPageLayoutProps> = ({ children, expand, onExpand, selectedKey }): JSX.Element => {
   // 스크롤 상태
   const [scroll, setScroll] = useState<number>(0);
 
   // 스크롤 값 저장을 위한 Hook
   const onScroll = () => setScroll(window.scrollY);
-  // 메뉴 토글 Hook
-  const onCollapse = () => setToggle(!toggle);
   // 스크롤 이벤트 등록 (최초 1회)
   useEffect(() => {
     window.addEventListener('scroll', onScroll);
@@ -199,24 +197,16 @@ export const TOVPageLayout: React.FC<TOVPageLayoutProps> = ({ children, selected
     <Layout>
       <TOVPageHeader />
       <Layout hasSider style={{ backgroundColor: '#FFFFFF' }}>
-        <TOVPageSide onCollapse={onCollapse} scroll={scroll} selected={selected} toggle={toggle} />
-        <Layout.Content style={{ backgroundColor: '#FFFFFF', height: '200vh', marginLeft: scroll >= 64 ? toggle ? 246 : 80 : undefined, minHeight: 'calc(100vh - 64px)', paddingLeft: 74, paddingRight: 74 }}>
+        <TOVPageSide expand={expand} selectedKey={selectedKey} onExpand={onExpand} scroll={scroll} />
+        <Layout.Content style={{ backgroundColor: '#FFFFFF', height: '200vh', marginLeft: scroll >= 64 ? expand ? 246 : 80 : undefined, minHeight: 'calc(100vh - 64px)', paddingLeft: 74, paddingRight: 74 }}>
           {children}
         </Layout.Content>
       </Layout>
     </Layout>
   );
 }
-/** [Interneal Component] 페이지 레이아웃 (사이드) */
-const TOVPageSide: React.FC<TOVPageSideProps> = ({ onCollapse, scroll, selected, toggle }): JSX.Element => {
-  return (
-    <Sider collapsed={!toggle} scroll={scroll} toggle={toggle} width={246}>
-      <TOVSideMenu collapsed={!toggle} onCollapse={onCollapse} selected={selected} />
-    </Sider>
-  );
-}
-/** [Internal Component] 페이지 레이아웃 (헤더) */
-const TOVPageHeader: React.FC<any> = (): JSX.Element => {
+/** [Component] 페이지 레이아웃 (헤더) */
+export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
   return (
     <Header>
       <div>
@@ -224,11 +214,19 @@ const TOVPageHeader: React.FC<any> = (): JSX.Element => {
       </div>
       <HeaderNav>
         <HeaderMenuItem>사용가이드</HeaderMenuItem>
-        <HeaderMenuItem>회사 관리</HeaderMenuItem>
-        <span style={{ marginLeft: 12 }}>
+        <HeaderMenuItem onClick={() => Router.push('/company/info')}>회사 관리</HeaderMenuItem>
+        <span onClick={() => Router.push('/login')} style={{ cursor: 'pointer', marginLeft: 12 }}>
           <UserOutlined />
         </span>
       </HeaderNav>
     </Header>
+  );
+}
+/** [Interneal Component] 페이지 레이아웃 (사이드) */
+const TOVPageSide: React.FC<TOVPageSideProps> = ({ expand, onExpand, scroll, selectedKey }): JSX.Element => {
+  return (
+    <Sider collapsed={!expand} scroll={scroll} width={246}>
+      <TOVSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
+    </Sider>
   );
 }

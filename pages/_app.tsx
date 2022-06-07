@@ -1,5 +1,5 @@
 import type { AppProps } from 'next/app'
-import React from 'react';
+import React, { useState } from 'react';
 // Component
 import { RecoilRoot } from 'recoil';
 import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
@@ -8,7 +8,6 @@ import '../public/fonts/pretendard.css';
 // Style
 import { createGlobalStyle } from 'styled-components';
 import 'antd/dist/antd.css';
-import '../styles/globals.css'
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -65,17 +64,24 @@ const queryClient = new QueryClient({
     },
   },
 });
+/** 공통으로 사용될 페이지 컴포넌트 */
 function MyApp({ Component, pageProps }: AppProps) {
+  // 사이드 메뉴 확장 상태 (Default: 확장)
+  const [expand, setExpand] = useState<boolean>(true);
+  /** [Event handler] 메뉴 확장/축소 이벤트 */
+  const onExpand = (): void => setExpand(!expand);
+
+  // 컴포넌트 반환
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
         <RecoilRoot>
           <GlobalStyle />
-          <Component {...pageProps} />
+          <Component {...pageProps} expand={expand} onExpand={onExpand} />
         </RecoilRoot>
       </Hydrate>
     </QueryClientProvider>
-  )
+  );
 }
 
 export default MyApp

@@ -5,7 +5,7 @@ import { DPITableForm, InformationForm } from '../../components/DPI';
 // Data
 import { defaultDPIData } from '../../models/static/data';
 
-const Page = () => {
+const Page = ({ expand, onExpand }: any) => {
   const [data, setData] = useState<any>({});
 
   /** [Event handler] 뒤로가기 이벤트 */
@@ -17,7 +17,7 @@ const Page = () => {
 
   // 컴포넌트 반환
   return (
-    <TOVPageLayout selected='/pim/dest'>
+    <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/dest'>
       <div style={{ marginBottom: 74, marginTop: 74 }}>
         {Object.keys(data).length !== 0 ? (
           <InformationForm data={data} onBack={onBack} />

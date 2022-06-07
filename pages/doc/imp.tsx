@@ -1,9 +1,10 @@
+import type { NextPage } from 'next';
 // Component
 import { TOVPageLayout } from '../../components/common/Layout';
 
-const Page = () => {
+const Page: NextPage = ({ expand, onExpand }: any) => {
   return (
-    <TOVPageLayout selected='/doc/imp'>
+    <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/doc/imp'>
       <h2>IMP page</h2>
     </TOVPageLayout>
   )

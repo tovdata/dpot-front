@@ -30,7 +30,7 @@ const Login: NextPage = () => {
             <StyledDescription>
               <>아직 계정이 없으신가요?</>
               <Link href='/signup'>
-                <label style={{ cursor: 'pointer', fontSize: 12, fontWeight: '400', lineHeight: '20px', marginBottom: 0, marginLeft: 6, textDecoration: 'underline' }}>로그인</label>
+                <label style={{ cursor: 'pointer', fontSize: 12, fontWeight: '400', lineHeight: '20px', marginBottom: 0, marginLeft: 6, textDecoration: 'underline' }}>회원가입</label>
               </Link>
             </StyledDescription>
           </Form.Item>

@@ -228,7 +228,12 @@ const SideMenu = ({ isFixed, open, onOpen }: SideMenuProps): JSX.Element => {
 
 /** [Interface] Properties for SideMenuLayout */
 interface SideMenuLayoutProps {
-  collapsed: boolean;
+  expand: boolean;
+}
+/** [Interface] Properties for TOVSideMenu */
+interface TOVSideMenuProps extends SideMenuLayoutProps {
+  onExpand: () => void;
+  selectedKey: string;
 }
 
 const SideMenuLayout = styled.div<SideMenuLayoutProps>`
@@ -236,11 +241,10 @@ const SideMenuLayout = styled.div<SideMenuLayoutProps>`
   overflow-y: auto;
   position: relative;
   .ant-menu .ant-menu-item {
-    padding-left: ${(props: any) => props.collapsed ? '40px !important' : '31.5px !important'};
+    padding-left: ${(props: any) => props.expand ? '40px !important' : '31.5px !important'};
   }
   .ant-menu .ant-menu-item-divider {
-    margin-bottom: 8px;
-    margin-top: 16px;
+    margin: ${(props: any) => props.expand ? '16px 20px 8px 20px' : '16px 16px 8px 16px'};
   }
   .ant-menu .ant-menu-item-group {
     margin-bottom: 32px;
@@ -250,10 +254,10 @@ const SideMenuLayout = styled.div<SideMenuLayoutProps>`
     font-size: 12px;
     font-weight: 400;
     line-height: 22px;
-    padding-left: ${(props: any) => props.collapsed ? '40px !important' : '19px'};
+    padding-left: ${(props: any) => props.expand ? '40px !important' : '19px'};
     text-overflow: ellipsis;
     white-space: nowrap;
-    ${(props: any) => !props.collapsed && css`
+    ${(props: any) => props.expand && css`
       padding-right: 0 !important;
     `}
   }  
@@ -262,12 +266,12 @@ const SideMenuLayout = styled.div<SideMenuLayoutProps>`
   }
 `;
 
-export const TOVSideMenu: React.FC<any> = ({ collapsed, onCollapse, selected }): JSX.Element => {
+export const TOVSideMenu: React.FC<TOVSideMenuProps> = ({ expand, onExpand, selectedKey }): JSX.Element => {
   // 메뉴 아이템 정의
   const items: any[] = [
     { label: '대시보드', key: '/', icon: (<DashboardOutlined />) },
     { type: 'divider' },
-    { label: collapsed ? '정보관리' : '개인정보 관리', key: 'group1', type: 'group', children: [
+    { label: expand ? '개인정보 관리' : '정보관리', key: 'group1', type: 'group', children: [
       { label: '수집・이용', key: '/pim/cu', icon: (<DatabaseOutlined />) },
       { label: '제공・위탁', key: '/pim/pc', icon: (<PartitionOutlined />) },
       { label: '파기', key: '/pim/dest', icon: (<FireOutlined />) }
@@ -286,17 +290,17 @@ export const TOVSideMenu: React.FC<any> = ({ collapsed, onCollapse, selected }):
 
   // 컴포넌트 반환
   return (
-    <SideMenuLayout collapsed={!collapsed}>
+    <SideMenuLayout expand={expand}>
       <StyledSideMenuProfile>
-        <StyledSideMenuProfileIcon open={!collapsed}>
+        <StyledSideMenuProfileIcon open={expand}>
           <IoBusinessOutline />
         </StyledSideMenuProfileIcon>
-        <StyledSideMenuProfileContent open={!collapsed}>{'주식회사 토브데이터'}</StyledSideMenuProfileContent>
-        <StyledSideMenuToggle onClick={onCollapse} open={!collapsed}>
+        <StyledSideMenuProfileContent open={expand}>{'주식회사 토브데이터'}</StyledSideMenuProfileContent>
+        <StyledSideMenuToggle onClick={onExpand} open={expand}>
           <AiOutlineArrowLeft />
         </StyledSideMenuToggle>
       </StyledSideMenuProfile>
-      <Menu mode='inline' items={items} onClick={(value: any): Promise<boolean> => Router.push(value.key)} selectedKeys={[selected]} style={{ borderRight: 'none', paddingTop: 0 }} />
+      <Menu mode='inline' items={items} onClick={(value: any): Promise<boolean> => Router.push(value.key)} selectedKeys={[selectedKey]} style={{ borderRight: 'none', paddingTop: 0 }} />
     </SideMenuLayout>
   );
 }
