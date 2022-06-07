@@ -1,6 +1,9 @@
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Col, Divider, Form, Input, Row, Steps } from 'antd';
+// Component
 import Link from 'next/link';
+import { Button, Checkbox, Col, Divider, Form, Input, Row, Steps } from 'antd';
+import { TOVInputGroup } from './common/Input';
+// Icon
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 // Styled
 import styled from 'styled-components';
 
@@ -11,26 +14,6 @@ export const PageLayout = styled.div`
   height: 100vh;
   justify-content: center;
   width: 100vw;
-`;
-// 폼 레이아웃 스타일
-export const FormLayout = styled.div`
-  .ant-form-item-with-help .ant-form-item-explain {
-    color: #8C8C8C;
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 20px;
-    margin-bottom: 0;
-    margin-top: 4px;
-    min-height: auto;
-  }
-  .ant-form-item-extra {
-    color: #8C8C8C;
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 20px;
-    margin-bottom: 0;
-    min-height: auto;
-  }
 `;
 export const StyledDescription = styled.p`
   color: #8C8C8C;
@@ -96,21 +79,21 @@ export const Step1: React.FC<InputStepProps> = ({ data, onChange, onMoveStep }):
   // 컴포넌트 반환
   return (
     <Form form={form} onFinish={onMoveStep} style={{ width: 320 }}>
-      <InputGroup label='이메일' required >
+      <TOVInputGroup label='이메일' required >
         <Form.Item name='email' rules={[{ required: true, message: '이메일을 입력해주세요.' }, { type: 'email', message: '이메일 형식을 확인해주세요.' }]}>
           <Input onChange={(e: any): void => onChange(e.target.value, CURRENT_STEP, 'email')} placeholder='nickname@company.com' value={data.email} />
         </Form.Item>
-      </InputGroup>
-      <InputGroup label='비밀번호' required>
+      </TOVInputGroup>
+      <TOVInputGroup label='비밀번호' required>
         <Form.Item extra='영문, 숫자, 특수문자 조합 최소 8자리 이상' hasFeedback name='password' rules={[{ required: true, message: '비밀번호를 입력해주세요.' }, { pattern: new RegExp('^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$'), message: '비밀번호 형식이 올바르지 않습니다.' }]}>
           <Input.Password onChange={(e: any): void => onChange(e.target.value, CURRENT_STEP, 'password')} value={data.password}  />
         </Form.Item>
-      </InputGroup>
-      <InputGroup label='비밀번호 확인' required>
+      </TOVInputGroup>
+      <TOVInputGroup label='비밀번호 확인' required>
         <Form.Item dependencies={['password']} hasFeedback name='confirmPassword' rules={[{ required: true, message: '비밀번호를 확인해주세요.' }, confirmPassword, { pattern: new RegExp('^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$'), message: '' }]}>
           <Input.Password onChange={(e: any): void => onChange(e.target.value, CURRENT_STEP, 'confirmPassword')} value={data.confirmPassword} />
         </Form.Item>
-      </InputGroup>
+      </TOVInputGroup>
       <Divider dashed />
       <Form.Item style={{ marginTop: 8 }}>
         <StyleButton htmlType='submit' type='primary'>다음</StyleButton>
@@ -135,16 +118,16 @@ export const Step2: React.FC<InputStepProps> = ({ data, onChange, onMoveStep }):
   // 컴포넌트 반환
   return (
     <Form form={form} onFinish={onMoveStep} style={{ width: 320 }}>
-      <InputGroup label='이름' required>
+      <TOVInputGroup label='이름' required>
         <Form.Item name='name' rules={[{ required: true, message: '이름을 입력해주세요.' }]}>
           <Input onChange={(e: any): void => onChange(e.target.value, CURRENT_STEP, 'name')} placeholder='김OO' value={data.name} />
         </Form.Item>
-      </InputGroup>
-      <InputGroup label='휴대전화번호' required>
+      </TOVInputGroup>
+      <TOVInputGroup label='휴대전화번호' required>
         <Form.Item name='tel' rules={[{ required: true, message: '휴대전화번호를 입력해주세요.' }, { pattern: new RegExp('^01([0|1|6|7|8|9])-?([0-9]{4})-?([0-9]{4})$'), message: '휴대전화번호 형식이 올바르지 않습니다.' }]}>
           <Input onChange={(e: any): void => onChange(e.target.value, CURRENT_STEP, 'tel')} placeholder='010-0000-0000' value={data.tel} />
         </Form.Item>
-      </InputGroup>
+      </TOVInputGroup>
       <Divider />
       <div style={{ marginBottom: 28 }}>
         <div style={{ alignItems: 'center', display: 'flex', marginBottom: 6 }}>
@@ -198,27 +181,27 @@ export const Step4: React.FC<InputStepProps> = ({ data, onChange, onMoveStep, se
     <Form form={form} onFinish={onMoveStep} style={{ width: 320 }}>
       <div>
         {search ? (
-          <InputGroup label='회사명' required>
+          <TOVInputGroup label='회사명' required>
             <Form.Item name='name' rules={[{ required: true, message: '회사명을 입력해주세요.' }]}>
               <Input.Search placeholder='회사명 검색' />
             </Form.Item>
-          </InputGroup>
+          </TOVInputGroup>
         ) : (
           <>
-            <InputGroup label='회사명' required>
+            <TOVInputGroup label='회사명' required>
               <Form.Item name='name' rules={[{ required: true, message: '회사명을 입력해주세요.' }]}>
                 <Input onChange={(e: any): void => onChange(e.target.value, CURRENT_STEP, 'name')} placeholder='주식회사 토브데이터' value={data.name} />
               </Form.Item>
-            </InputGroup>
-            <InputGroup label='회사명(영문)' required>
+            </TOVInputGroup>
+            <TOVInputGroup label='회사명(영문)' required>
               <Form.Item name='en' rules={[{ required: true, message: '회사명(영문)을 입력해주세요.' }, { pattern: new RegExp('^[a-zA-Z]*$'), message: '영문만 입력해주세요.' }]}>
                 <Input onChange={(e: any): void => onChange(e.target.value, CURRENT_STEP, 'en')} placeholder='TOVDATA' value={data.en} />
               </Form.Item>
-            </InputGroup>
+            </TOVInputGroup>
           </>
         )}
       </div>
-      <InputGroup label='개인정보 보호책임자' required>
+      <TOVInputGroup label='개인정보 보호책임자' required tooltip='개인정보 보호책임자 설명'>
         <Row gutter={[8, 8]}>
           <Col span={5} style={{ alignItems: 'start', display: 'flex', marginTop: 5 }}>직책/직위</Col>
           <Col span={19}>
@@ -234,12 +217,12 @@ export const Step4: React.FC<InputStepProps> = ({ data, onChange, onMoveStep, se
           </Col>
           <Col span={5} style={{ alignItems: 'start', display: 'flex', marginTop: 5 }}>이메일</Col>
           <Col span={19}>
-            <Form.Item name='email' rules={[{ required: true, message: '이메일을 입력해주세요.' }, { type: 'email', message: '이메일 형식을 확인해주세요.' }]} style={{ marginBottom: 0 }}>
+            <Form.Item name='email' rules={[{ required: true, message: '이메일을 입력해주세요.' }, { type: 'email', message: '' }]} style={{ marginBottom: 0 }}>
               <Input disabled={search ? true : false} onChange={(e: any): void => onChange(e.target.value, CURRENT_STEP, 'charger', 'email')} placeholder='nickname@company.com' value={data.charger.email} />
             </Form.Item>
           </Col>
         </Row>
-      </InputGroup>
+      </TOVInputGroup>
       <Divider dashed />
       <Form.Item>
         {search ? (

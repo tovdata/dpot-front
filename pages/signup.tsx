@@ -3,7 +3,7 @@ import type { NextPage } from 'next'
 import { useState } from 'react';
 // Component
 import { Modal } from 'antd';
-import { FormLayout, Header, PageLayout, Step1, Step2, Step3, Step4 } from '../components/Signin-up';
+import { Header, PageLayout, Step1, Step2, Step3, Step4 } from '../components/Signin-up';
 import { warningNotification } from '../components/common/Notification';
 
 /** [Component] 회원가입 페이지 */
@@ -67,7 +67,7 @@ const Signup: NextPage = () => {
 
   return (
     <PageLayout>
-      <FormLayout>
+      <div>
         <Header step={step} style={{ width: 320 }} />
         {step === 0 ? (
           <Step1 data={data.identity} onChange={onChange} onMoveStep={onMoveStep} />
@@ -78,7 +78,7 @@ const Signup: NextPage = () => {
         ) : step === 3 ? (
           <Step4 data={data.company} onChange={onChange} onMoveStep={onMoveStep} search={search} />
         ) : (<></>)}
-      </FormLayout>
+      </div>
     </PageLayout>
   );
 }

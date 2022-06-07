@@ -1,11 +1,16 @@
-import Layout from "../../components/common/Layout";
+import type { NextPage } from 'next';
+// Component
+import { Header } from '../../components/common/Header';
+import { Management } from '../../components/Company';
 
-const Page = () => {
+/** 회사 관리 페이지 */
+const Company: NextPage = () => {
   return (
-    <Layout>
-      <h2>Info page</h2>
-    </Layout>
-  )
+    <div>
+      <Header />
+      <Management />
+    </div>
+  );
 }
 
-export default Page;
+export default Company;

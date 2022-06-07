@@ -1,6 +1,6 @@
 import { useState } from 'react';
 // Component
-import Layout from '../../components/common/Layout';
+import { TOVPageLayout } from '../../components/common/Layout';
 import { DPITableForm, InformationForm } from '../../components/DPI';
 // Data
 import { defaultDPIData } from '../../models/static/data';
@@ -17,7 +17,7 @@ const Page = () => {
 
   // 컴포넌트 반환
   return (
-    <Layout>
+    <TOVPageLayout selected='/pim/dest'>
       <div style={{ marginBottom: 74, marginTop: 74 }}>
         {Object.keys(data).length !== 0 ? (
           <InformationForm data={data} onBack={onBack} />
@@ -25,7 +25,7 @@ const Page = () => {
           <DPITableForm onCreate={onCreate} onEdit={onEdit} />
         )}
       </div>
-    </Layout>
+    </TOVPageLayout>
   )
 }
 

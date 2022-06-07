@@ -1,14 +1,22 @@
+import Router from 'next/router';
 import { useRouter } from 'next/router';
 import styled, { css } from 'styled-components'
 // Component
-import { Menu } from 'antd';
+import { Button, Menu } from 'antd';
 // Icon
 import { AiOutlineArrowLeft } from 'react-icons/ai';
 import { IoBusinessOutline } from 'react-icons/io5';
 import { AiOutlineAudit, AiOutlineCheckCircle, AiOutlineDatabase, AiOutlineDashboard, AiOutlineFire, AiOutlineHistory, AiOutlinePaperClip, AiOutlinePartition, AiOutlineSolution, AiOutlineTool } from 'react-icons/ai';
 import { AiOutlineApartment, AiOutlineTeam } from 'react-icons/ai';
+
+import { ArrowLeftOutlined, DashboardOutlined, DatabaseOutlined, FireOutlined, PartitionOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, PaperClipOutlined, SolutionOutlined, ToolOutlined } from '@ant-design/icons';
+import { AuditOutlined, HistoryOutlined } from '@ant-design/icons';
+
 // Link
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import MenuItem from 'antd/lib/menu/MenuItem';
 
 // Set a side width
 const CLOSE_SIDE_WIDTH: number = 88;
@@ -89,7 +97,7 @@ const StyledSideMenuToggle = styled.div<MenuOpenStatus>`
   ${(props: any) => !props.open && css`
     background-color: #0050B3;
     color: #ffffff;
-    right: 26px;
+    right: 30px;
     svg {
       transform: rotate(180deg);
     }
@@ -101,9 +109,10 @@ const StyledSideMenuProfile = styled.li`
   cursor: default;
   display: flex;
   height: 2.5rem;
-  margin: 4px 0 8px 0;
+  margin-bottom: 4px;
+  margin-top: 32px;
   overflow: hidden;
-  padding-left: 1.875rem;
+  padding-left: 33px;
   padding-right: 0;
   position: relative;
   width: 100%;
@@ -131,9 +140,9 @@ const StyledSideMenuProfileContent = styled.div<MenuOpenStatus>`
   flex: 1;
   font-size: 13px;
   line-height: 1.5715;
-  margin-left: 1.125rem;
+  margin-left: 12px;
   overflow: hidden;
-  padding-right: 2.875rem;
+  padding-right: 46px;
   text-overflow: ellipsis;
   transition: opacity 0.19s;
   white-space:nowrap;
@@ -211,18 +220,85 @@ const SideMenu = ({ isFixed, open, onOpen }: SideMenuProps): JSX.Element => {
               <Link href='/log/history'>활동 내역</Link>
             </Menu.Item>
           </Menu.ItemGroup>
-          <Menu.ItemGroup title='회사관리'>
-            <Menu.Item key='/company/info' icon={<AiOutlineApartment />}>
-              <Link href='/company/info'>회사 정보</Link>
-            </Menu.Item>
-            <Menu.Item key='/company/org' icon={<AiOutlineTeam />}>
-              <Link href='/company/org'>개인정보 보호 조직</Link>
-            </Menu.Item>
-          </Menu.ItemGroup>
         </Menu>
       </StyledSideMenu>
     </>
   )
+}
+
+/** [Interface] Properties for SideMenuLayout */
+interface SideMenuLayoutProps {
+  collapsed: boolean;
+}
+
+const SideMenuLayout = styled.div<SideMenuLayoutProps>`
+  background-color: #FFFFFF;
+  overflow-y: auto;
+  position: relative;
+  .ant-menu .ant-menu-item {
+    padding-left: ${(props: any) => props.collapsed ? '40px !important' : '31.5px !important'};
+  }
+  .ant-menu .ant-menu-item-divider {
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+  .ant-menu .ant-menu-item-group {
+    margin-bottom: 32px;
+  }
+  .ant-menu .ant-menu-item-group-title {
+    color: #595959;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 22px;
+    padding-left: ${(props: any) => props.collapsed ? '40px !important' : '19px'};
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    ${(props: any) => !props.collapsed && css`
+      padding-right: 0 !important;
+    `}
+  }  
+  .ant-menu-title-content {
+    margin-left: 16px !important;
+  }
+`;
+
+export const TOVSideMenu: React.FC<any> = ({ collapsed, onCollapse, selected }): JSX.Element => {
+  // 메뉴 아이템 정의
+  const items: any[] = [
+    { label: '대시보드', key: '/', icon: (<DashboardOutlined />) },
+    { type: 'divider' },
+    { label: collapsed ? '정보관리' : '개인정보 관리', key: 'group1', type: 'group', children: [
+      { label: '수집・이용', key: '/pim/cu', icon: (<DatabaseOutlined />) },
+      { label: '제공・위탁', key: '/pim/pc', icon: (<PartitionOutlined />) },
+      { label: '파기', key: '/pim/dest', icon: (<FireOutlined />) }
+    ] },
+    { label: '문서관리', key: 'group2', type: 'group', children: [
+      { label: '동의서', key: '/doc/consent', icon: (<CheckCircleOutlined />) },
+      { label: '개인정보처리방침', key: '/doc/pipp', icon: (<SolutionOutlined />) },
+      { label: '내부관리계획', key: '/doc/imp', icon: (<ToolOutlined />) },
+      { label: '템플릿', key: '/doc/template', icon: (<PaperClipOutlined />) }
+    ] },
+    { label: '활동이력', key: 'group3', type: 'group', children: [
+      { label: '결재・승인', key: '/log/sa', icon: (<AuditOutlined />) },
+      { label: '활동 내역', key: '/log/history', icon: (<HistoryOutlined />) }
+    ] }
+  ]
+
+  // 컴포넌트 반환
+  return (
+    <SideMenuLayout collapsed={!collapsed}>
+      <StyledSideMenuProfile>
+        <StyledSideMenuProfileIcon open={!collapsed}>
+          <IoBusinessOutline />
+        </StyledSideMenuProfileIcon>
+        <StyledSideMenuProfileContent open={!collapsed}>{'주식회사 토브데이터'}</StyledSideMenuProfileContent>
+        <StyledSideMenuToggle onClick={onCollapse} open={!collapsed}>
+          <AiOutlineArrowLeft />
+        </StyledSideMenuToggle>
+      </StyledSideMenuProfile>
+      <Menu mode='inline' items={items} onClick={(value: any): Promise<boolean> => Router.push(value.key)} selectedKeys={[selected]} style={{ borderRight: 'none', paddingTop: 0 }} />
+    </SideMenuLayout>
+  );
 }
 
 export default SideMenu;

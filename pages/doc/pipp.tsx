@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 // Component
-import Layout from '../../components/common/Layout';
+import { TOVPageLayout } from '../../components/common/Layout';
 import { BasicPageLoading } from '../../components/common/Loading';
 import { CreatePIPPForm, PIPPMain } from '../../components/PIPP';
 // Type
@@ -33,7 +33,7 @@ const Page = () => {
   }
 
   return (
-    <Layout>
+    <TOVPageLayout selected='/doc/pipp'>
       {isLoading ? (
         <BasicPageLoading />
       ) : (
@@ -45,7 +45,7 @@ const Page = () => {
           )}
         </div>
       )}
-    </Layout>
+    </TOVPageLayout>
   );
 }
 

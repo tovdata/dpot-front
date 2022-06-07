@@ -1,10 +1,11 @@
-import Layout from "../../components/common/Layout";
+// Component
+import { TOVPageLayout } from '../../components/common/Layout';
 
 const Page = () => {
   return (
-    <Layout>
+    <TOVPageLayout selected='/doc/imp'>
       <h2>IMP page</h2>
-    </Layout>
+    </TOVPageLayout>
   )
 }
 

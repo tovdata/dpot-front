@@ -1,10 +1,10 @@
 import styled from 'styled-components';
 import { useRouter, NextRouter } from 'next/router';
 // Component
-import { Button, Col, Modal, PageHeader, Row, Steps, Tag } from 'antd';
+import { Button, Col, Modal, Row, Steps } from 'antd';
+import Link from 'next/link';
 // Icon
-import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons'
-import { AiOutlineBell, AiOutlineLogout } from 'react-icons/ai';
+import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { VscChevronLeft } from 'react-icons/vsc';
 
 // Styled element (HeaderNav)
@@ -38,20 +38,17 @@ const StyledHeaderTool = styled.div`
 // Styled element (HeaderToolItem)
 const StyledHeaderToolItem = styled.span`
   align-items: center;
-  border-radius: 50%;
+  border-right: 1px solid #F0F0F0;
   cursor: pointer;
   display: flex;
+  font-size: 12px;
+  font-weight: 600;
   justify-content: center;
-  margin-right: 0.875rem;
-  height: 1.5rem;
-  width: 1.5rem;
+  line-height: 20px;
+  padding: 0 24px;
   transition: background-color 0.25s;
   &:last-child {
-    margin-right: 0;
-  }
-  &:active,
-  &:hover {
-    background-color: #1890FF16;
+    border-right: none;
   }
 `;
 // Styled component (pageHeader)
@@ -110,8 +107,10 @@ export const Header = (): JSX.Element => {
     <StyledHeaderNav>
       <StyledHeaderLogo />
       <StyledHeaderTool>
-        <StyledHeaderToolItem><AiOutlineBell /></StyledHeaderToolItem>
-        <StyledHeaderToolItem><AiOutlineLogout /></StyledHeaderToolItem>
+        <StyledHeaderToolItem>사용 가이드</StyledHeaderToolItem>
+        <StyledHeaderToolItem>
+          <Link href='/company/info'>회사 관리</Link>
+        </StyledHeaderToolItem>
       </StyledHeaderTool>
     </StyledHeaderNav>
   )

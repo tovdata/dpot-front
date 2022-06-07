@@ -1,14 +1,14 @@
 import type { AppProps } from 'next/app'
+import React from 'react';
 // Component
-import Layout from '../components/common/Layout';
+import { RecoilRoot } from 'recoil';
+import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
 // Font
 import '../public/fonts/pretendard.css';
 // Style
 import { createGlobalStyle } from 'styled-components';
 import 'antd/dist/antd.css';
 import '../styles/globals.css'
-import React from 'react';
-import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -38,6 +38,23 @@ const GlobalStyle = createGlobalStyle`
     padding-bottom: 8px;
     padding-top: 8px;
   }
+  .ant-form-item-with-help .ant-form-item-explain {
+    color: #8C8C8C;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-bottom: 0;
+    margin-top: 4px;
+    min-height: auto;
+  }
+  .ant-form-item-extra {
+    color: #8C8C8C;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-bottom: 0;
+    min-height: auto;
+  }
 `;
 
 // const queryClient = new QueryClient();
@@ -52,8 +69,10 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
-        <GlobalStyle />
-        <Component {...pageProps} />
+        <RecoilRoot>
+          <GlobalStyle />
+          <Component {...pageProps} />
+        </RecoilRoot>
       </Hydrate>
     </QueryClientProvider>
   )

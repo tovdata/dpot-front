@@ -1,6 +1,6 @@
 // Component
 import { Tabs } from "antd";
-import Layout from "../../components/common/Layout";
+import { TOVPageLayout } from '../../components/common/Layout';
 import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from "../../components/PCTable";
 // Style
 import styled from "styled-components";
@@ -12,7 +12,7 @@ const CustomTabPane = styled(TabPane)`
 `;
 const Page = () => {
   return (
-    <Layout>
+    <TOVPageLayout selected='/pim/pc'>
       <div style={{ paddingBottom: 74, paddingTop: 36 }}>
         <Tabs defaultActiveKey="1">
           <CustomTabPane tab="제공" key="1">
@@ -25,7 +25,7 @@ const Page = () => {
           </CustomTabPane>
         </Tabs>
       </div>
-    </Layout>
+    </TOVPageLayout>
   )
 }
 
