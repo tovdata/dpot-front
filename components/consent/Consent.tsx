@@ -1,10 +1,9 @@
 import { getPIDatas } from "@/models/queries/api";
-import { SERVICE_FNI, SERVICE_PI } from "@/models/queries/type";
+import { SERVICE_PI } from "@/models/queries/type";
 import { consentList, defaultConsentData, staticConsentData } from "@/models/static/data";
-import { consentEditHeader } from "@/models/static/header";
-import { TableHeaderData } from "@/models/type";
+import { consentEditHeader, consentEPIHeader } from "@/models/static/header";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-import { Alert, Button, Checkbox, Collapse, Input, Modal, Select, Table, TableColumnProps, Tooltip } from "antd";
+import { Alert, Button, Checkbox, Input, Modal, Table, TableColumnProps, Tooltip, Typography } from "antd";
 import Grid from "antd/lib/card/Grid";
 import TextArea from "antd/lib/input/TextArea";
 import React, { useEffect, useState } from "react";
@@ -12,11 +11,13 @@ import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { VscChevronRight } from "react-icons/vsc";
 import { useQuery } from "react-query";
 import styled from "styled-components";
+import { filteredNotUnique, filteredPISubjects } from "utils/consent";
 import { PageHeaderContainStep } from "../common/Header";
-import { AddableTagSelect, TagSelect } from "../common/Select";
-import { createTableColumnProps, EditableTableForm, TableContentForList } from "../common/Table";
+import { warningNotification } from "../common/Notification";
+import { EditableTableForm } from "../common/Table";
 import { DIRow, DIRowContent, DIRowHeader, StyledDIRowPadding } from "../pipp/Documentation";
 import { ConfirmPage } from "./Documentation";
+import { ConsentEditPITable, ConsentEPITable } from "./Table";
 
 // Styled component(Card Container)
 const StyleCardContainer = styled.div`
@@ -91,7 +92,7 @@ const StyledJobSelection = styled.div`
   span, p, div{
     white-space: pre-line;
   }
-`
+`;
 export const ConsentMain = () => {
   // [수정] 동의서 Type
   // 0 : 개인정보 수집 및 이용 동의서
@@ -104,17 +105,42 @@ export const ConsentMain = () => {
   const [stepIndex, setStepIndex] = useState(-1);
   const [consentData, setConsentData] = useState(defaultConsentData);
   // 서버로부터 개인정보 수집 이용 데이블 데이터 가져오기
-  const { isLoading: PIIsLoading, data: PIData } = useQuery(SERVICE_PI, async () => await getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { data: PIData } = useQuery(SERVICE_PI, async () => await getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   const saveData = (newData: any) => setConsentData({ ...consentData, ...newData });
-
   const stepHandler = (newStepIndex: number) => {
+    if (nullCheckHandler(newStepIndex)) return;
     // 제일 첫 페이지로 돌아올 경우 작성하던 데이터 리셋
     if (newStepIndex === -1) setConsentData(defaultConsentData);
     setStepIndex(newStepIndex);
   }
-  useEffect(() => {
-    console.log('consentData', consentData)
-  }, [consentData]);
+  const nullCheckHandler = (newStepIndex: number) => {
+    let result = false;
+    if (newStepIndex === 1) {
+      if (!consentData.title) {
+        warningNotification('동의서 제목을 입력해주세요.');
+        result = true;
+      }
+      if (!consentData.subject || consentData.subject.length === 0) {
+        warningNotification('동의를 받고자 하는 업무를 선택해주세요.');
+        result = true;
+      }
+    } else if (newStepIndex === 2) {
+      consentData.pData?.forEach((item: any) => {
+        if ((item.essentialItems.length === 0 && item.selectionItems.length === 0) || item.purpose.length === 0) {
+          result = true;
+          warningNotification('동의를 받고자 하는 목적과 항목을 선택해주세요.');
+        }
+      })
+      if (!consentData.checkList) {
+        warningNotification('확인사항을 체크해주세요.');
+        result = true;
+      }
+    }
+    return result;
+  }
+  // useEffect(() => {
+  //   console.log('consentData', consentData)
+  // }, [consentData]);
 
   const step0Component = () => {
     // 제 3자 제공 동의서의 경우 화면이 다름
@@ -130,11 +156,13 @@ export const ConsentMain = () => {
       <ConsentList />
     </>;
   } else {
-    const component = stepIndex === 0 ? step0Component() : stepIndex === 1 ? <EnterInformationPage type={type} ids={consentData.subject} dataSource={PIData} saveData={saveData} /> : <ConfirmPage type={type} consentData={consentData} />
-    return <>
-      <StepInfoHeader type={type} stepIndex={stepIndex} stepHandler={stepHandler} />
-      {component}
-    </>
+    const component = stepIndex === 0 ? step0Component() : stepIndex === 1 ? <EnterInformationPage type={type} ids={consentData.subject} PIData={PIData} consentData={consentData} saveData={saveData} /> : <ConfirmPage type={type} consentData={consentData} />
+    return (
+      <>
+        <StepInfoHeader type={type} stepIndex={stepIndex} stepHandler={stepHandler} />
+        {component}
+      </>
+    );
   };
 }
 /**
@@ -253,24 +281,6 @@ const JobSelectionPage = ({ type, data, saveData, PIData }: any): JSX.Element =>
   const [disadvantage, setDisadvantage] = useState(data.disadvantage || staticConsentData[type].disadvantage.example);
   useEffect(() => saveData({ title, disadvantage, subject }), [title, disadvantage, subject]);
 
-  const filteredPiSubjects = () => {
-    switch (type) {
-      case 0:
-      case 1:
-        const subjects: any = {};
-        PIData.forEach((data: any) => {
-          const newData: any = {};
-          newData.subject = data.subject;
-          newData.value = subject?.includes(data.id);
-          subjects[data.id] = newData;
-        });
-        return subjects;
-      case 2:
-        return [];
-      default:
-        return [];
-    }
-  }
   const staticData = staticConsentData[type];
   return (
     <StyledJobSelection>
@@ -285,7 +295,7 @@ const JobSelectionPage = ({ type, data, saveData, PIData }: any): JSX.Element =>
       <DIRow>
         <DIRowHeader title='동의를 받고자 하는 업무를 선택해주세요.' description='개인정보 처리방침을 업데이트 하면, 이전 개인정보 처리방침도 반드시 확인할 수 있어야 합니다.\n본 개인정보 처리방침 이전에 게재한 개인정보 처리방침의 URL을 입력해주세요.' />
         <DIRowContent>
-          <SelectContainer items={filteredPiSubjects()} setSubject={setSubject} />
+          <SelectContainer items={filteredPISubjects(type, subject, PIData)} setSubject={setSubject} />
         </DIRowContent>
       </DIRow>
       <StyledDIRowPadding />
@@ -299,23 +309,32 @@ const JobSelectionPage = ({ type, data, saveData, PIData }: any): JSX.Element =>
     </StyledJobSelection>
   )
 }
-const EnterInformationPage = ({ ids, type, dataSource, saveData }: any) => {
-  const [data, setData] = useState(dataSource);
-  const piData = data.filter((item: any) => ids.includes(item.id));
-  useEffect(() => saveData({ piData }), [piData]);
+
+const EnterInformationPage = ({ ids, type, PIData, consentData, saveData }: any) => {
+  const filteredData = (_data: any) => {
+    const result = _data?.filter((item: any) => ids.includes(item.id));
+    return filteredNotUnique(type, result);
+  }
+  const dataSource = filteredData(PIData);
+  const [data, setData] = useState(consentData.pData || dataSource);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => saveData({ pData: filteredData(data) }), [data]);
+  const onOpenModal = () => setVisible(!visible);
+  const onClose = (): void => setVisible(false);
+
   return (
     <>
       <DIRow>
         <DIRowHeader title='동의를 받고자 하는 목적과 항목을 선택해주세요.' description="동의를 거부할 권리가 있다는 사실 및 동의 거부에 따른 불이익의 내용이 반드시 포함되어야 합니다.\n단, '정보통신서비스 제공자'는 개인정보 보호법 제39조의3에 따라, 동의 거부 시 불이익에 대한 내용은 기재하지 않아도 됩니다." />
         <DIRowContent>
-          <ConsentEditTable orignData={dataSource} data={piData} setData={setData} headers={consentEditHeader} />
+          <ConsentEditPITable orignData={dataSource} data={filteredData(data)} setData={setData} headers={consentEditHeader} />
         </DIRowContent>
       </DIRow>
       <StyledDIRowPadding />
       {staticConsentData[type].isEvidence &&
         <>
           <DIRow>
-            <DIRowHeader title={`(해당시 기재) 법령에 근거하여 정보주체의 동의없이 ${staticConsentData[type].word}를 수집 및 이용하는 경우가 있나요?`} tools={<Button onClick={(): void => console.log('ㅇㅇㅇ')} type='default' size='small' style={{ fontSize: 12, padding: '0 12px' }}>입력하기</Button>} />
+            <DIRowHeader title={`(해당시 기재) 법령에 근거하여 정보주체의 동의없이 ${staticConsentData[type].word}를 수집 및 이용하는 경우가 있나요?`} tools={<Button onClick={onOpenModal} type='default' size='small' style={{ fontSize: 12, padding: '0 12px' }}>입력하기</Button>} />
             <DIRowContent>
             </DIRowContent>
           </DIRow>
@@ -325,53 +344,43 @@ const EnterInformationPage = ({ ids, type, dataSource, saveData }: any) => {
       <DIRow>
         <DIRowHeader title='아래의 사항을 확인해주세요' required={true} />
         <DIRowContent>
-          <CheckListComponent type={type} />
+          <CheckListComponent checkList={staticConsentData[type].checkList} saveData={saveData} />
         </DIRowContent>
       </DIRow>
-
+      <EditableModal onClose={onClose} epiData={consentData.epiData} saveData={saveData} visible={visible} />
     </>
   )
 }
-const CheckListComponent = ({ type }: any): JSX.Element =>
-  <div>{staticConsentData[type].checkList?.map((item: any) => <CheckListItem title={item.title} description={item.description} />)}</div>
-
-const CheckListItem = ({ title, description }: any): JSX.Element => {
+const EditableModal: React.FC<any> = ({ onClose, epiData, saveData, visible }: any): JSX.Element => {
+  const content = <ConsentEPITable data={epiData} saveData={saveData} header={consentEPIHeader}></ConsentEPITable>;
+  // 컴포넌트 반환
   return (
-    <StyledCheckListContainer>
-      <div className="text">
-        <span className="title">{title}</span>
-        <span className="description">{description}</span>
-      </div>
-      <Checkbox></Checkbox>
-    </StyledCheckListContainer>
+    <Modal centered footer={false} onCancel={onClose} style={{ fontFamily: 'Pretendard' }} title={''} visible={visible} width='80%'>{content}</Modal>
   );
 }
-const ConsentEditTable = ({ headers, orignData, data, setData }: any): JSX.Element => {
-  const onChangeHandler = (index: number, key: React.Key | undefined, items: string | string[]): void => {
-    const newData = JSON.parse(JSON.stringify(data));
-    newData[index][key as string] = items;
-    setData(newData);
+// [Component] 확인해야할 사항 체크리스트
+const CheckListComponent = ({ checkList, saveData }: any): JSX.Element => {
+  const [checkState, setCheckState] = useState(checkList?.map(() => false));
+  // check state 업데이트
+  const onChange = (index: number) => {
+    const newState = [...checkState];
+    newState[index] = !newState[index];
+    const preCheck = checkOK(checkState);
+    const newCheck = checkOK(newState);
+    if (preCheck !== newCheck) saveData({ checkList: newCheck });
+    setCheckState(newState);
   }
-  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
-    // Extract a header data
-    const header: TableHeaderData = headers[key];
-    // Create a column
-    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description, header.width);
-    column.render = (item: any, record: any, index: number): JSX.Element => {
-      if (header.editable) {
-        return <TagSelect onChange={(items: string | string[]): void => onChangeHandler(index, column.key, items)} value={item} options={orignData[index][column.key as string]} />
-      }
-      switch (header.display) {
-        case 'string':
-          return <>{item}</>
-        case 'list':
-          return <TableContentForList items={item} key={index} />
-        default:
-          return <>{item}</>
-      }
-    };
-    return column;
-  });
-  return <Table columns={columns} dataSource={data} pagination={false} />
-}
-
+  // 모든 사항에 동의했는지 체크
+  const checkOK = (list: boolean[]) => list.reduce((pre: boolean, cur: boolean) => pre && cur);
+  return (
+    checkList?.map((item: any, index: number) =>
+      <StyledCheckListContainer key={index}>
+        <div className="text">
+          <span className="title">{item.title}</span>
+          <span className="description">{item.description}</span>
+        </div>
+        <Checkbox checked={checkState[index]} onChange={() => onChange(index)}></Checkbox>
+      </StyledCheckListContainer>
+    )
+  )
+};

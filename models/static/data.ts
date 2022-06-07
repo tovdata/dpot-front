@@ -122,8 +122,8 @@ export const defaultConsentData: any = {
   title: undefined,
   subject: undefined,
   disadvantage: undefined,
-  piData: undefined,
-  evidence: undefined,
+  pData: undefined,
+  epiData: undefined,
   checkList: false
 }
 
@@ -221,6 +221,7 @@ export const staticConsentData = [
     name: '마케팅 및 광고성 정보 수신',
     information: undefined,
     isEvidence: false,
+    word: '마케팅 및 광고성 정보',
     titlePlaceHolder: '예 : OOO 서비스를 위한 마케팅 및 광고성 정보 수신 동의서',
     disadvantage: {
       description: '동의를 거부할 권리가 있다는 사실과 동의 거부에 따른 불이익에 대한 구체적인 내용이 반드시 포함되어야 합니다.',

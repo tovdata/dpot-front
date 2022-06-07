@@ -433,3 +433,24 @@ export const consentPIHeader: TableHeadersData = {
     width: '23%'
   }
 }
+// 동의서 법령에 근거해 동의없이 수집 및 이용되는 데이터 Header
+export const consentEPIHeader: TableHeadersData = {
+  purpose: {
+    display: 'list',
+    name: '개인정보 수집·이용 목적',
+    required: true,
+    width: '23%'
+  },
+  items: {
+    display: 'item',
+    name: '개인정보 항목',
+    required: true,
+    width: '20%'
+  },
+  statute: {
+    display: 'list',
+    name: '수집 근거 법령',
+    required: false,
+    width: '20%'
+  }
+}
