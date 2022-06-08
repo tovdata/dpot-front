@@ -1,7 +1,7 @@
 // Type
 import { RESPONSE_STATUS_ERROR, RESPONSE_STATUS_NOT_FOUND, RESPONSE_STATUS_REQUEST_ERROR, RESPONSE_STATUS_UNKNOWN_ERROR, SERVER_URL } from "./type";
 import { RequestDF, ResponseDF } from "./type";
-import { BooleanDF, MapDF, ListDF, StringDF } from './type';
+import { BooleanDF, MapDF, ListDF, NumberDF, StringDF } from './type';
 
 /**
  * 응답 데이터 처리 및 반환 (Object)
@@ -24,6 +24,11 @@ export const processResponse = async (response: Response, mode?: string): Promis
  */
 export const processArrayResponse = async (response: Response): Promise<any[]> => {
   const result: ResponseDF = await transformData(response);
+  // 데이터 정렬
+  if (result.data.length > 0 && 'unix' in result.data[0]) {
+    result.data.sort((a: any, b: any): number => a.unix > b.unix ? 1 : a.unix < b.unix ? -1 : 0);
+  }
+  // 데이터 반환
   return result.result ? result.data.map((elem: any): any => ({ ...elem, key: elem.id })) : [];
 }
 /**
@@ -52,7 +57,7 @@ export const createRequest = (serviceId: string, mode: string, data: any): Reque
       request.method = 'POST';
       break;
     case 'delete':
-      request.body = JSON.stringify({ serviceId, data: copy });
+      request.body = JSON.stringify({ serviceId });
       request.method = 'DELETE';
       break;
     case 'save':
@@ -97,24 +102,25 @@ const transformData = async (response: Response): Promise<ResponseDF> => {
     if (!('id' in item)) continue;
     // ID 값 추출
     const id: string = (item.id as StringDF).S;
+    // 생성일 추출
+    const unix: number|undefined = ('id' in item) ? (item.createAt as NumberDF).N : undefined;
     // Data 속성이 없는 경우, 데이터를 추출하지 않음
-    if (!('data' in item)) continue;
+    const data: any = ('data' in item) ? {} : undefined;
     // 행(Row)에 대한 데이터 추출
-    const extracted: any = {};
     for (const key of Object.keys((item.data as MapDF).M)) {
       // 키 값에 대한 데이터 추출 (JSON)
       const temp: any = item.data.M[key];
       // 형식에 따라 알맞은 데이터 추출
       if ('L' in temp) {
-        extracted[key] = ((temp as ListDF).L).map((elem: StringDF): string => elem.S);
+        data[key] = ((temp as ListDF).L).map((elem: StringDF): string => elem.S);
       } else if ('S' in temp) {
-        extracted[key] = (temp as StringDF).S;
+        data[key] = (temp as StringDF).S;
       } else if ('BOOL' in temp) {
-        extracted[key] = (temp as BooleanDF).BOOL;
+        data[key] = (temp as BooleanDF).BOOL;
       }
     }
     // 추출된 데이터 저장
-    transformed.push({ id, ...extracted });
+    transformed.push({ id, unix, ...data });
   }
   // 결과 반환
   return { result: result.result, data: transformed };

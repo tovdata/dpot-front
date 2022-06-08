@@ -108,9 +108,8 @@ const StyledSideMenuProfile = styled.li`
   align-items: center;
   cursor: default;
   display: flex;
-  height: 2.5rem;
+  height: 40px;
   margin-bottom: 4px;
-  margin-top: 32px;
   overflow: hidden;
   padding-left: 33px;
   padding-right: 0;

@@ -147,26 +147,30 @@ interface TOVPageSideProps {
 /** [Styled Component] 페이지 사이드 */
 const Sider = styled(Layout.Sider)<SiderProps>`
   background-color: #FFFFFF;
-  border-right: 1px solid #f0f0f0;
   height: ${(props: any) => props.scroll < 64 ? `calc(100vh - 64px + ${props.scroll}px)` : '100vh'};
   left: 0;
-  overflow-y: hidden;
+  overflow-y: auto;
   position: ${(props: any) => props.scroll >= 64 ? 'fixed' : 'relative'};
   top: 0;
   // 스크롤 숨기기
   &:hover {
-    overflow-y: auto;
+    &::-webkit-scrollbar-thumb { background-color: #CCCCCC; }
   }
   // 스크롤 스타일
-  // &::-webkit-scrollbar { width: 6px; }
-  // &::-webkit-scrollbar-thumb { background-color: #CCCCCC; border-radius: 6px; }
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb { background-color: #FFFFFF; border-radius: 6px; }
 `;
 /** [Styled Component] 페이지 헤더 */
 const Header = styled(Layout.Header)`
   background-color: #FFFFFF;
   box-shadow: inset 0px -1px 0px #F0F0F0;
   display: flex;
+  font-size: 18px;
+  font-weight: 600;
   justify-content: space-between;
+  padding-left: 40px;
+  padding-right: 40px;
+  text-decoration: none;
 `;
 /** [Styled Component] 페이지 헤더 메뉴 */
 const HeaderNav = styled.div`
@@ -217,7 +221,7 @@ export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
   return (
     <Header>
       <div>
-        <span style={{  }}></span>
+        <a href='/' style={{ color: '#000000', cursor: 'pointer' }}>MOPH</a>
       </div>
       <HeaderNav>
         <HeaderMenuItem>사용가이드</HeaderMenuItem>
@@ -233,7 +237,9 @@ export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
 const TOVPageSide: React.FC<TOVPageSideProps> = ({ expand, onExpand, scroll, selectedKey }): JSX.Element => {
   return (
     <Sider collapsed={!expand} scroll={scroll} width={246}>
-      <TOVSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
+      <div style={{ borderRight: '1px solid #F0F0F0', height: '100%', paddingTop: 32 }}>
+        <TOVSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
+      </div>
     </Sider>
   );
 }

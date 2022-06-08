@@ -261,7 +261,7 @@ export const cpiTableHeader: TableHeadersData = {
   isForeign: {
     description: '위탁한 개인정보가 국외에서 처리된다면 체크해주세요.',
     display: 'checkbox',
-    name: '국외 여부',
+    name: '국외여부',
     required: false,
     width: '9%'
   }
@@ -346,7 +346,7 @@ export const cfniTableHeader: TableHeadersData = {
   isForeign: {
     description: '위탁한 가명정보가 국외에서 처리된다면 체크해주세요.',
     display: 'checkbox',
-    name: '국외 여부',
+    name: '국외여부',
     required: false,
     width: '9%'
   }

@@ -174,8 +174,6 @@ export const Step4: React.FC<InputStepProps> = ({ data, onChange, onMoveStep, se
   // Form 객체 생성
   const [form] = Form.useForm();
 
-  console.log('st4', data);
-
   // 컴포넌트 반환
   return (
     <Form form={form} onFinish={onMoveStep} style={{ width: 320 }}>
@@ -226,9 +224,10 @@ export const Step4: React.FC<InputStepProps> = ({ data, onChange, onMoveStep, se
       <Divider dashed />
       <Form.Item>
         {search ? (
-          <p style={{ color: '#0050B3', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 24, marginTop: 24, textAlign: 'center' }}>위의 정보가 맞다면, 기존 가입자에게 승인을 요청하세요!</p>
+          <p style={{ color: '#0050B3', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 24, textAlign: 'center' }}>위의 정보가 맞다면, 기존 가입자에게 승인을 요청하세요!</p>
         ) : (<></>)}
         <Button htmlType='submit' style={{ width: '100%' }} type='primary'>회원 가입 및 회사 생성</Button>
+        <Button onClick={() => onMoveStep(false)} style={{ marginTop: 12, width: '100%' }} type='default'>이전</Button>
       </Form.Item>
     </Form>
   );

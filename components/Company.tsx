@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 // Component
-import { Button, Col, Divider, Drawer, Form, Input, Row, Table, Tabs } from 'antd';
+import { Button, Col, Divider, Drawer, Form, Input, Row, Space, Table, Tabs } from 'antd';
 import { TOVInputGroup } from './common/Input';
 // Icon
 import { EditOutlined } from '@ant-design/icons';
 // Styled
 import styled from 'styled-components';
+// Module
+import moment from 'moment';
+import { successNotification } from './common/Notification';
 
 // 페이지 Layout
 const Layout = styled.div`
@@ -96,7 +99,49 @@ const CompanyInfoSection: React.FC<any> = ({ change }): JSX.Element => {
   );
 }
 /** [Internal Component] 조직 정보 관리 Section */
-export const OrganizationSection: React.FC<any> = (): JSX.Element => {
+const OrganizationSection: React.FC<any> = (): JSX.Element => {
+  const [dataSource, setDataSource] = useState<any[]>([{ name: '김토브', department: '정보보안팀', position: '대리', email: 'tov@tovdata.com', contact: '01022223333', createAt: 1654642176, task: '' }]);
+
+  // Drawer 열기/닫기 상태
+  const [visible, setVisible] = useState<boolean>(false);
+  // 선택된 Row
+  const [data, setData] = useState<any>({
+    index: 0,
+    row: {
+      name: '',
+      department: '',
+      posotion: '',
+      email: '',
+      contact: '',
+      joinAt: '',
+      task: ''
+    }
+  });
+
+  /** [Event handler] Drawer 열기 */
+  const onOpen = (index: number, record: any) => {
+    setData({ index, row: record });
+    setVisible(true);
+  }
+  /** [Event handler] 데이터 변경 */
+  const onChange = (property: string, value: string): void => setData({ index: data.index, row: { ...data.row, [property]: value } });
+  /** [Event handler] Drawer 닫기 */
+  const onClose = () => setVisible(false);
+  /** [Event handler] 저장 */
+  const onSave = () => {
+    data.index === dataSource.length - 1 ? setDataSource([...dataSource.slice(0, data.index), data.row]) : setDataSource([...dataSource.slice(0, data.index), data.row, ...dataSource.slice(data.index + 1)]);
+    successNotification('저장되었습니다.');
+    onClose();
+  }
+
+  // Drawer tools
+  const extraElement: JSX.Element = (
+    <Space>
+      <Button onClick={onSave} type='primary'>저장</Button>
+    </Space>
+  );
+
+  // 컴포넌트 반환
   return (
     <div style={{ paddingLeft: 168, paddingRight: 168, width: '100%' }}>
       <Table columns={[
@@ -105,21 +150,81 @@ export const OrganizationSection: React.FC<any> = (): JSX.Element => {
         { title: '직책', dataIndex: 'position', key: 'position' },
         { title: '이메일', dataIndex: 'email', key: 'email' },
         { title: '연락처', dataIndex: 'contact', key: 'contact' },
-        { title: '가입일', dataIndex: 'joinAt', key: 'joinAt' },
+        { title: '가입일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => moment.unix(value).format('YYYY-MM-DD') },
         { title: '담당업무', dataIndex: 'task', key: 'task' },
-        { title: '', dataIndex: 'edit', key: 'edit', render: (): JSX.Element => (<span style={{ cursor: 'pointer', userSelect: 'none' }}><EditOutlined /></span>) },
-      ]} dataSource={[
-        { name: '김토브', department: '정보보안팀', position: '대리', email: 'tov@tovdata.com', contact: '01022223333', joinAt: '2022-06-03', task: '' }
-      ]} style={{ marginBottom: 48 }} />
+        { title: '', dataIndex: 'edit', key: 'edit', render: (_: any, record: any, index: number): JSX.Element => (<span onClick={() => onOpen(index, record)} style={{ cursor: 'pointer', userSelect: 'none' }}><EditOutlined /></span>) },
+      ]} dataSource={dataSource} style={{ marginBottom: 48 }} />
       <div style={{ alignItems: 'center', border: '1px dashed #E5E5E5', display: 'flex', justifyContent: 'space-between', padding: '32px 40px', width: '100%' }}>
         <p style={{ fontSize: 14, fontWeight: '600', lineHeight: '22px', margin: 0 }}>아직 가입되어 있지 않은 담당자가 있다면?</p>
         <Button type='default'>초대하기</Button>
       </div>
-      <Drawer title=''>
-        <Form>
-          <Form.Item></Form.Item>
-        </Form>
-      </Drawer>
+      <EditableDrawer extra={extraElement} onChange={onChange} onClose={onClose} row={data.row} visible={visible} />
     </div>
+  );
+}
+
+const EditableDrawer: React.FC<any> = ({ extra, onChange, onClose, row, visible }): JSX.Element => { 
+  return (
+    <Drawer extra={extra} onClose={onClose} size='large' title='조직 정보 관리' visible={visible}>
+      <Form>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item>
+              <TOVInputGroup label='이름' required>
+                <Input disabled value={row.name} />
+              </TOVInputGroup>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item>
+              <TOVInputGroup label='부서'>
+                <Input onChange={(e: any): void => onChange('department', e.target.value)} value={row.department} />
+              </TOVInputGroup>
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item>
+              <TOVInputGroup label='직책'>
+                <Input onChange={(e: any): void => onChange('position', e.target.value)} value={row.position} />
+              </TOVInputGroup>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item>
+              <TOVInputGroup label='이메일'>
+                <Input disabled value={row.email} />
+              </TOVInputGroup>
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item>
+              <TOVInputGroup label='연락처'>
+                <Input disabled value={row.contact} />
+              </TOVInputGroup>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item>
+              <TOVInputGroup label='가입일'>
+                <Input disabled value={moment.unix(row.createAt).format('YYYY-MM-DD')} />
+              </TOVInputGroup>
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={8}>
+          <Col span={24}>
+            <Form.Item>
+              <TOVInputGroup label='담당업무'>
+                <Input onChange={(e: any): void => onChange('task', e.target.value)} value={row.task} />
+              </TOVInputGroup>
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
+    </Drawer>
   );
 }

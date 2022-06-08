@@ -34,9 +34,11 @@ export interface ResponseDF {
 export interface MapDF { M: any };
 /** API 반환 데이터 형태 (List) */
 export interface ListDF { L: any[] };
-/** API 반환 데이터 형태 (List) */
+/** API 반환 데이터 형태 (String) */
 export interface StringDF { S: string };
 /** API 반환 데이터 형태 (List) */
+export interface NumberDF { N: number };
+/** API 반환 데이터 형태 (Boolean) */
 export interface BooleanDF { BOOL: boolean };
 /** API 요청 데이터 형태 */
 export interface RequestDF {

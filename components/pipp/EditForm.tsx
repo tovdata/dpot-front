@@ -1,5 +1,5 @@
 // Component
-import { Col, Button, Collapse, Input, Radio, Row, Space, TreeSelect, Table, Menu, Dropdown } from 'antd';
+import { Col, Button, Collapse, Input, Radio, Row, Space, Select, TreeSelect, Table, Menu, Dropdown } from 'antd';
 import { DIInputGroup, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject } from './Documentation';
 import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DRLabelingHeader, DRLabelingItem, DTCForm, DTCItem } from './Documentation';
 import { AddableTagSelect } from '../common/Select';
@@ -269,8 +269,6 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, r
       prevPIPPList.push({ label: `${data.cInfo.applyAt} 이전`, value: data.cInfo.previous.url });
     }
   }
-  // 이전 처리방침 목록 menu
-  const menu: JSX.Element = (<Menu items={prevPIPPList.map((item: any, index: number): any => ({ key: index, label: (<a href={item.value} key={index} rel="noopener noreferror" target="_blank">{item.label}</a>) }))} />);
   
   // 컴포넌트 반환
   return (
@@ -658,12 +656,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, r
       {preview ? (<></>) : (
         <DDRow>
           {prevPIPPList.length > 0 ? (
-            <Dropdown overlay={menu} trigger={['click']}>
-              <Button>
-                <Space>이전 개인정보 처리방침</Space>
-                <DownOutlined style={{ marginLeft: 12 }} />
-              </Button>
-            </Dropdown>
+            <Select defaultValue='이전 개인정보 처리방침' onChange={(value: string) => window.open(value, '_blank')} options={prevPIPPList} />
           ) : (<></>)}
         </DDRow>
       )}

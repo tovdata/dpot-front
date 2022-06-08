@@ -86,6 +86,10 @@ export const changeSelectOptions = (key: string, onUpdate: (value: any) => void,
       }
     }
   }
+  // 정렬
+  if ('items' in options) {
+    options['items'].sort();
+  }
   // 반환
   return options['items'];
 }
@@ -134,6 +138,10 @@ export const changeSelectOptions = (key: string, onUpdate: (value: any) => void,
         break;
       default:
         break;
+    }
+    // 정렬
+    if (options['items'] !== undefined) {
+      options['items'].sort();
     }
     // 반환
     return options;

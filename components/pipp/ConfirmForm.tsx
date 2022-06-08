@@ -23,7 +23,7 @@ export const ConfirmSection: React.FC<ConfirmSectionProps> = ({ data, onChange, 
         <DIRowContent>
           <Row gutter={16}>
             <Col span={8}>
-              <DatePicker allowClear format='YYYY-MM-DD' mode='date' onChange={(value: any): void => onChange(sectionType, value.format('YYYY-MM-DD'), 'applyAt')} placeholder='날짜 선택' style={{ width: 280 }} value={data.applyAt !== '' ? moment(data.applyAt, 'YYYY-MM-DD') : undefined} />
+              <DatePicker allowClear format='YYYY-MM-DD' mode='date' onChange={(value: any): void => onChange(sectionType, value ? value.format('YYYY-MM-DD') : '', 'applyAt')} placeholder='날짜 선택' style={{ width: 280 }} value={data.applyAt !== '' ? moment(data.applyAt, 'YYYY-MM-DD') : undefined} />
             </Col>
           </Row>
         </DIRowContent>

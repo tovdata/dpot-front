@@ -44,6 +44,7 @@ interface InformationFormBodyProps {
   edit: boolean;
   items: string[];
   onChange: (property: string, value: any) => void;
+  onDelete: (id: string) => void;
   refElements?: MutableRefObject<any[]>;
 }
 /** [Interface] Properties for PrintElement */
@@ -84,14 +85,14 @@ export const DPITableForm: React.FC<DPITableFormProps> = ({ onCreate, onEdit }):
 }
 /** [Component] 개인정보 파기에 대한 자세한 정보 확인 Form (보기/편집/추가) */
 export const InformationForm: React.FC<InformationFormProps> = ({ data, onBack }): JSX.Element => {
-  // 현재 상태가 추가인지 편집인지 확인하는 메서드
-  const checkNew = (): boolean => !('id' in data);
   // 개인정보 수집 및 이용으로부터 항목 조회 (서버 API)
   const { isLoading, data: items } = useQuery('piItems', async () => getPIItems('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
-  // 편집 상태 관리
-  const [edit, setEdit] = useState<boolean>(checkNew() ? true : false);
   // 데이터 상태 관리
   const [temp, setTemp] = useState<any>(data);
+  // 현재 상태가 추가인지 편집인지 확인하는 메서드
+  const checkNew = (): boolean => !('id' in temp);
+  // 편집 상태 관리
+  const [edit, setEdit] = useState<boolean>(checkNew() ? true : false);
   // HTML 요소 관리 (for focus)
   const refs: any = useRef<any[]>([]);
   const printRef: any = useRef<any>();
@@ -100,6 +101,14 @@ export const InformationForm: React.FC<InformationFormProps> = ({ data, onBack }
 
   /** [Event handler] 데이터 변경 이벤트 */
   const onChange = (property: string, value: any) => setTemp({ ...temp, [property]: value });
+  /** [Event handler] 삭제 이벤트 */
+  const onDelete = async (id: string) => {
+    await setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_DPI, 'delete', { id: id });
+    // 데이터 갱신
+    queryClient.invalidateQueries(SERVICE_DPI);
+    // 목록으로 이동
+    onBack();
+  }
   /** [Event handler] 편집 이벤트 */
   const onEdit = (status: boolean): void => {
     if (checkNew() && !status) {    // 추가이면서 취소일 경우, 테이블로 복귀
@@ -109,9 +118,6 @@ export const InformationForm: React.FC<InformationFormProps> = ({ data, onBack }
     }
     // 상태 갱신
     setEdit(status);
-  }
-  /** [Event handler] 인쇄 이벤트 */
-  const onPrint = (): void => {
   }
   /** [Event handler] 저장 이벤트 */
   const onSave = async (): Promise<void> => {
@@ -151,7 +157,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ data, onBack }
       ) : (
         <>
           <InformationFormHeader edit={edit} onBack={onBack} onEdit={onEdit} onSave={onSave} printRef={printRef} />
-          <InformationFormBody data={temp} edit={edit} items={items ? items : []} onChange={onChange} refElements={refs} />
+          <InformationFormBody data={temp} edit={edit} items={items ? items : []} onChange={onChange} onDelete={onDelete} refElements={refs} />
           <div style={{ display: 'none' }}>
             <PrintElement data={temp} printRef={printRef} />
           </div>
@@ -179,7 +185,6 @@ const InformationFormHeader: React.FC<InformationFormHeaderProps> = ({ edit, onB
         ) : (
           <>
             <ReactToPrint trigger={() => (<Button style={{ marginRight: 16 }} type='default'>인쇄</Button>)} content={() => printRef.current} />
-            
             <Button onClick={() => onEdit(true)} type='primary'>편집</Button>
           </>
         )}
@@ -188,65 +193,70 @@ const InformationFormHeader: React.FC<InformationFormHeaderProps> = ({ edit, onB
   );
 }
 /** [Internal Component] 개인정보 파기에 대한 자세한 정보 확인 Form body (보기/편집/추가) */
-const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, items, onChange, refElements }): JSX.Element => {
+const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, items, onChange, onDelete, refElements }): JSX.Element => {
   return (
-    <Descriptions bordered column={1} labelStyle={{ width: 220 }}>
-      <Descriptions.Item label={<DescriptionLabel content='파기 대상 개인정보' required />}>
-        {edit ? (
-          <Input onChange={(e: any): void => onChange('subject', e.target.value)} placeholder='직접 입력' ref={refElements ? (el: any) => (refElements.current[0] = el) : undefined} value={data.subject} />
-        ) : (<>{data.subject}</>)}
-      </Descriptions.Item>
-      <Descriptions.Item label={<DescriptionLabel content='파기 일시' required />}>
-        {edit ? (
-          <DatePicker format='YYYY-MM-DD' onChange={(value: any): void => onChange('date', value.format('YYYY-MM-DD'))} placeholder='날짜 선택' ref={refElements ? (el: any) => (refElements.current[1] = el) : undefined} style={{ width: '100%' }} value={data.date !== '' ? moment(data.date) : undefined} />
-        ) : (<>{data.date}</>)}
-      </Descriptions.Item>
-      <Descriptions.Item label={<DescriptionLabel content='파기 사유' required />}>
-        {edit ? (
-          <AddableTagSelect onChange={(value: string|string[]): void => onChange('reason', value)} options={["계약서에 명시된 보유기간 만료", "법령 의무 보유기간 만료", "이용자의 파기 요청", "1년 이상 서비스 미이용"]} placeholder='선택 및 직접 입력' refElement={refElements ? (el: any) => (refElements.current[2] = el) : undefined} value={data.reason} />
-        ) : (
-          <ul style={{ margin: 0, paddingLeft: 20 }}>
-            {data.reason.map((item: string, index: number): JSX.Element => (<li key={index}>{item}</li>))}
-          </ul>
-        )}
-      </Descriptions.Item>
-      <Descriptions.Item label={<DescriptionLabel content='파기 항목' required />}>
-        {edit ? (
-          <TagSelect onChange={(value: string|string[]): void => onChange('items', value)} options={items} placeholder='예시에서 선택' refElement={refElements ? (el: any) => (refElements.current[3] = el) : undefined} value={data.items} />
-        ) : (<>{data.items.join(', ')}</>)}
-      </Descriptions.Item>
-      <Descriptions.Item label={<DescriptionLabel content='담당자' required />}>
-        {edit ? (
-          <Input onChange={(e: any): void => onChange('charger', e.target.value)} placeholder='김OO' ref={refElements ? (el: any) => (refElements.current[4] = el) : undefined} value={data.charger} />
-        ) : (<>{data.charger}</>)}
-      </Descriptions.Item>
-      <Descriptions.Item label={<DescriptionLabel content='파기 건수(정보주체 수)' />}>
-        {edit ? (
-          <Input onChange={(e: any): void => onChange('quantity', e.target.value)} placeholder='000건' value={data.quantity}  />
-        ) : (<>{data.quantity}</>)}
-      </Descriptions.Item>
-      <Descriptions.Item label={<DescriptionLabel content='파기 방법' />}>
-        {edit ? (
-            <Input onChange={(e: any): void => onChange('method', e.target.value)} placeholder='직접 입력' value={data.method}  />
-          ) : (<>{data.method}</>)}
+    <>
+      <Descriptions bordered column={1} labelStyle={{ width: 220 }}>
+        <Descriptions.Item label={<DescriptionLabel content='파기 대상 개인정보' required />}>
+          {edit ? (
+            <Input onChange={(e: any): void => onChange('subject', e.target.value)} placeholder='직접 입력' ref={refElements ? (el: any) => (refElements.current[0] = el) : undefined} value={data.subject} />
+          ) : (<>{data.subject}</>)}
         </Descriptions.Item>
-      <Descriptions.Item label={<DescriptionLabel content='파기 장소' />}>
-        {edit ? (
-            <Input onChange={(e: any): void => onChange('location', e.target.value)} placeholder='직접 입력' value={data.location} />
-          ) : (<>{data.location}</>)}
+        <Descriptions.Item label={<DescriptionLabel content='파기 일시' required />}>
+          {edit ? (
+            <DatePicker format='YYYY-MM-DD' onChange={(value: any): void => onChange('date', value.format('YYYY-MM-DD'))} placeholder='날짜 선택' ref={refElements ? (el: any) => (refElements.current[1] = el) : undefined} style={{ width: '100%' }} value={data.date !== '' ? moment(data.date) : undefined} />
+          ) : (<>{data.date}</>)}
         </Descriptions.Item>
-      <Descriptions.Item label={<DescriptionLabel content='생성일' />}>
-        {edit ? (
-          <DatePicker.RangePicker onChange={(value: any): void => onChange('period', [value[0].format('YYYY-MM-DD'), value[1].format('YYYY-MM-DD')])} placeholder={['날짜 선택', '날짜 선택']} style={{ width: '100%' }} value={data.period.length !== 0 ? [moment(data.period[0]), moment(data.period[1])] : undefined} />
-        ) : data.period.length !== 0 ? (
-          <div style={{ alignItems: 'center', display: 'flex' }}>
-            <span>{data.period[0]}</span>
-            <span style={{ marginLeft: 16, marginRight: 16 }}>~</span>
-            <span>{data.period[1]}</span>
-          </div>
-        ) : (<></>)}
-      </Descriptions.Item>
-    </Descriptions>
+        <Descriptions.Item label={<DescriptionLabel content='파기 사유' required />}>
+          {edit ? (
+            <AddableTagSelect onChange={(value: string|string[]): void => onChange('reason', value)} options={["계약서에 명시된 보유기간 만료", "법령 의무 보유기간 만료", "이용자의 파기 요청", "1년 이상 서비스 미이용"]} placeholder='선택 및 직접 입력' refElement={refElements ? (el: any) => (refElements.current[2] = el) : undefined} value={data.reason} />
+          ) : (
+            <ul style={{ margin: 0, paddingLeft: 20 }}>
+              {data.reason.map((item: string, index: number): JSX.Element => (<li key={index}>{item}</li>))}
+            </ul>
+          )}
+        </Descriptions.Item>
+        <Descriptions.Item label={<DescriptionLabel content='파기 항목' required />}>
+          {edit ? (
+            <TagSelect onChange={(value: string|string[]): void => onChange('items', value)} options={items} placeholder='예시에서 선택' refElement={refElements ? (el: any) => (refElements.current[3] = el) : undefined} value={data.items} />
+          ) : (<>{data.items.join(', ')}</>)}
+        </Descriptions.Item>
+        <Descriptions.Item label={<DescriptionLabel content='담당자' required />}>
+          {edit ? (
+            <Input onChange={(e: any): void => onChange('charger', e.target.value)} placeholder='김OO' ref={refElements ? (el: any) => (refElements.current[4] = el) : undefined} value={data.charger} />
+          ) : (<>{data.charger}</>)}
+        </Descriptions.Item>
+        <Descriptions.Item label={<DescriptionLabel content='파기 건수(정보주체 수)' />}>
+          {edit ? (
+            <Input onChange={(e: any): void => onChange('quantity', e.target.value)} placeholder='000건' value={data.quantity}  />
+          ) : (<>{data.quantity}</>)}
+        </Descriptions.Item>
+        <Descriptions.Item label={<DescriptionLabel content='파기 방법' />}>
+          {edit ? (
+              <Input onChange={(e: any): void => onChange('method', e.target.value)} placeholder='직접 입력' value={data.method}  />
+            ) : (<>{data.method}</>)}
+          </Descriptions.Item>
+        <Descriptions.Item label={<DescriptionLabel content='파기 장소' />}>
+          {edit ? (
+              <Input onChange={(e: any): void => onChange('location', e.target.value)} placeholder='직접 입력' value={data.location} />
+            ) : (<>{data.location}</>)}
+          </Descriptions.Item>
+        <Descriptions.Item label={<DescriptionLabel content='생성일' />}>
+          {edit ? (
+            <DatePicker.RangePicker onChange={(value: any): void => onChange('period', [value[0].format('YYYY-MM-DD'), value[1].format('YYYY-MM-DD')])} placeholder={['날짜 선택', '날짜 선택']} style={{ width: '100%' }} value={data.period.length !== 0 ? [moment(data.period[0]), moment(data.period[1])] : undefined} />
+          ) : data.period.length !== 0 ? (
+            <div style={{ alignItems: 'center', display: 'flex' }}>
+              <span>{data.period[0]}</span>
+              <span style={{ marginLeft: 16, marginRight: 16 }}>~</span>
+              <span>{data.period[1]}</span>
+            </div>
+          ) : (<></>)}
+        </Descriptions.Item>
+      </Descriptions>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+        <Button danger onClick={() => onDelete(data.id)}>삭제</Button>
+      </div>
+    </>
   );
 }
 /** [Internal Component] 파기 문서 인쇄를 위한 컴포넌트 */
