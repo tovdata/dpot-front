@@ -238,8 +238,8 @@ interface TOVSideMenuProps extends SideMenuLayoutProps {
 
 const SideMenuLayout = styled.div<SideMenuLayoutProps>`
   background-color: #FFFFFF;
-  overflow-y: auto;
   position: relative;
+  width: 100%;
   .ant-menu .ant-menu-item {
     padding-left: ${(props: any) => props.expand ? '40px !important' : '31.5px !important'};
   }
@@ -302,6 +302,14 @@ export const TOVSideMenu: React.FC<TOVSideMenuProps> = ({ expand, onExpand, sele
       </StyledSideMenuProfile>
       <Menu mode='inline' items={items} onClick={(value: any): Promise<boolean> => Router.push(value.key)} selectedKeys={[selectedKey]} style={{ borderRight: 'none', paddingTop: 0 }} />
     </SideMenuLayout>
+  );
+}
+
+const ProfileIcon: React.FC<any> = (): JSX.Element => {
+  return (
+    <span style={{ alignItems: 'center', backgroundColor: '#F0F5FF', borderRadius: 4, display: 'flex', height: 28, justifyContent: 'center', padding: 7, userSelect: 'none' }}>
+      <IoBusinessOutline />
+    </span>
   );
 }
 

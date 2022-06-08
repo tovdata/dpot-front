@@ -150,9 +150,16 @@ const Sider = styled(Layout.Sider)<SiderProps>`
   border-right: 1px solid #f0f0f0;
   height: ${(props: any) => props.scroll < 64 ? `calc(100vh - 64px + ${props.scroll}px)` : '100vh'};
   left: 0;
-  overflow: auto;
+  overflow-y: hidden;
   position: ${(props: any) => props.scroll >= 64 ? 'fixed' : 'relative'};
   top: 0;
+  // 스크롤 숨기기
+  &:hover {
+    overflow-y: auto;
+  }
+  // 스크롤 스타일
+  // &::-webkit-scrollbar { width: 6px; }
+  // &::-webkit-scrollbar-thumb { background-color: #CCCCCC; border-radius: 6px; }
 `;
 /** [Styled Component] 페이지 헤더 */
 const Header = styled(Layout.Header)`
@@ -198,7 +205,7 @@ export const TOVPageLayout: React.FC<TOVPageLayoutProps> = ({ children, expand, 
       <TOVPageHeader />
       <Layout hasSider style={{ backgroundColor: '#FFFFFF' }}>
         <TOVPageSide expand={expand} selectedKey={selectedKey} onExpand={onExpand} scroll={scroll} />
-        <Layout.Content style={{ backgroundColor: '#FFFFFF', height: '200vh', marginLeft: scroll >= 64 ? expand ? 246 : 80 : undefined, minHeight: 'calc(100vh - 64px)', paddingLeft: 74, paddingRight: 74 }}>
+        <Layout.Content style={{ backgroundColor: '#FFFFFF', marginLeft: scroll >= 64 ? expand ? 246 : 80 : undefined, minHeight: 'calc(100vh - 64px)', paddingLeft: 74, paddingRight: 74 }}>
           {children}
         </Layout.Content>
       </Layout>

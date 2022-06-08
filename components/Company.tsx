@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 // Component
-import { Button, Col, Divider, Form, Input, Row, Table, Tabs } from 'antd';
+import { Button, Col, Divider, Drawer, Form, Input, Row, Table, Tabs } from 'antd';
 import { TOVInputGroup } from './common/Input';
+// Icon
+import { EditOutlined } from '@ant-design/icons';
 // Styled
 import styled from 'styled-components';
 
@@ -105,12 +107,19 @@ export const OrganizationSection: React.FC<any> = (): JSX.Element => {
         { title: '연락처', dataIndex: 'contact', key: 'contact' },
         { title: '가입일', dataIndex: 'joinAt', key: 'joinAt' },
         { title: '담당업무', dataIndex: 'task', key: 'task' },
-        { title: '', dataIndex: 'edit', key: 'edit' },
-      ]} dataSource={[]} style={{ marginBottom: 48 }} />
+        { title: '', dataIndex: 'edit', key: 'edit', render: (): JSX.Element => (<span style={{ cursor: 'pointer', userSelect: 'none' }}><EditOutlined /></span>) },
+      ]} dataSource={[
+        { name: '김토브', department: '정보보안팀', position: '대리', email: 'tov@tovdata.com', contact: '01022223333', joinAt: '2022-06-03', task: '' }
+      ]} style={{ marginBottom: 48 }} />
       <div style={{ alignItems: 'center', border: '1px dashed #E5E5E5', display: 'flex', justifyContent: 'space-between', padding: '32px 40px', width: '100%' }}>
         <p style={{ fontSize: 14, fontWeight: '600', lineHeight: '22px', margin: 0 }}>아직 가입되어 있지 않은 담당자가 있다면?</p>
         <Button type='default'>초대하기</Button>
       </div>
+      <Drawer title=''>
+        <Form>
+          <Form.Item></Form.Item>
+        </Form>
+      </Drawer>
     </div>
   );
 }
