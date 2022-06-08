@@ -9,10 +9,6 @@ import IconPIPeriod from '../../public/images/period.svg';
 import IconProvision from '../../public/images/provision.svg';
 import IconConsignment from '../../public/images/consignment.svg';
 import IconComplaint from '../../public/images/complaint.svg';
-
-export const StyledDIRowPadding = styled.div`
-  padding: 30px 0;
-`
 /**
  * 컴포넌트들의 Props 형식
  */

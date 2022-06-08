@@ -1,7 +1,7 @@
 import { getPIDatas } from "@/models/queries/api";
 import { SERVICE_PI } from "@/models/queries/type";
 import { TableHeaderData } from "@/models/type";
-import { Table, TableColumnProps, Typography } from "antd";
+import { Checkbox, Table, TableColumnProps, Typography } from "antd";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import styled from "styled-components";
@@ -12,6 +12,10 @@ import { createTableColumnProps, EditableTable, TableContentForList, TableConten
 const StyleConfirmCollection = styled.div`
   display: flex;
   flex-direction: column;
+`;
+const StyledHighLight = styled.div`
+  font-weight: bold;
+  text-decoration: underline;
 `;
 /**
  * [Component] '정보 입력'에서 수정되는 개인정보 테이블
@@ -94,11 +98,57 @@ export const ConsentTable = ({ headers, data, mode }: any) => {
     delete newItem.selectionItems;
     return newItem;
   })
-  const ItemComponent = ({ name, items }: any) => {
+  const ItemComponent = ({ name, items, isBold }: any) => {
     if (items.length === 0) return <></>;
+    const itemsText = isBold ? <span style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{items.join(', ')}</span> : <span>{items.join(', ')}</span>
     return (
-      <span>{`${name} : ${items.join(', ')}`}</span>
+      <span>{`${name} : `}{itemsText}</span>
     )
+  }
+  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
+    // Extract a header data
+    const header: TableHeaderData = headers[key];
+    // Create a column
+    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description, header.width);
+    column.render = (item: any, record: any, index: number): JSX.Element => {
+      switch (header.display) {
+        case 'string':
+          return <>{item}</>
+        case 'stringB':
+          return <StyledHighLight>{item}</StyledHighLight>
+        case 'list':
+          return <TableContentForList items={item} key={index} />
+        case 'listB':
+          return <StyledHighLight><TableContentForList items={item} key={index} /></StyledHighLight>
+        case 'item':
+          return item && item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
+        case 'collection':
+        case 'collectionA':
+          return (
+            <StyleConfirmCollection>
+              <ItemComponent name="필수" items={item.essentialItems} isBold={header.display === 'collectionA'} />
+              <ItemComponent name="선택" items={item.selectionItems} isBold={header.display === 'collectionA'} />
+            </StyleConfirmCollection>
+          );
+        default:
+          return <>{item}</>
+      }
+    };
+    return column;
+  });
+  return <Table columns={columns} dataSource={mode === 'pi' ? convertData : data} pagination={false} />
+}
+
+export const ConsentEditPPITable = ({ data, headers, ids, setIds }: any) => {
+  const onChangeHandler = (id: string, isChecked: boolean) => {
+    isChecked ? setIds([...ids, id]) : setIds(ids.filter((item: any) => item !== id));
+    // if (isChecked) {
+    //   const newIDs = [...ids];
+    //   if (!newIDs.includes(id))
+    //     setIds([...ids, id]);
+    // } else {
+    //   setIds(ids.filter((item: any) => item !== id));
+    // }
   }
   const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
     // Extract a header data
@@ -111,20 +161,15 @@ export const ConsentTable = ({ headers, data, mode }: any) => {
           return <>{item}</>
         case 'list':
           return <TableContentForList items={item} key={index} />
+        case 'checkbox':
+          return (<Checkbox checked={ids?.includes(record.id)} onChange={(e: any) => onChangeHandler(record.id, e.target.checked)} />);
         case 'item':
           return item && item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
-        case 'collection':
-          return (
-            <StyleConfirmCollection>
-              <ItemComponent name="필수" items={item.essentialItems} />
-              <ItemComponent name="선택" items={item.selectionItems} />
-            </StyleConfirmCollection>
-          );
         default:
           return <>{item}</>
       }
-    };
+    }
     return column;
   });
-  return <Table columns={columns} dataSource={mode === 'pi' ? convertData : data} pagination={false} />
+  return <Table dataSource={data} columns={columns} pagination={false} />;
 }

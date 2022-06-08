@@ -308,7 +308,7 @@ export const cfniTableHeader: TableHeadersData = {
   },
   content: {
     description: '가명정보 처리를 위탁하는 업무의 내용을 상세히 입력해주세요.',
-    display: 'itemA',
+    display: 'list',
     name: '위탁 업무',
     required: true,
     width: '31%'
@@ -364,93 +364,5 @@ export const ecfniTableHeader: TableHeadersData = {
     name: '담당자(연락처)',
     required: true,
     width: '17%'
-  }
-}
-// 동의서 Header
-export const consentEditHeader: TableHeadersData = {
-  subject: {
-    display: 'string',
-    name: '구분(업무명)',
-    required: true,
-    editable: false,
-    width: '14%'
-  },
-  purpose: {
-    display: 'item',
-    name: '처리 목적',
-    required: true,
-    editable: true,
-    width: '23%'
-  },
-  essentialItems: {
-    display: 'item',
-    name: '필수항목',
-    required: true,
-    editable: true,
-    width: '18%'
-  },
-  selectionItems: {
-    display: 'item',
-    name: '선택항목',
-    required: false,
-    editable: true,
-    width: '18%'
-  },
-  period: {
-    display: 'list',
-    name: '보유 및 이용 기간',
-    required: true,
-    editable: false,
-    width: '23%'
-  }
-}
-
-// 동의서 개인정보 수집 이용내역 Header
-export const consentPIHeader: TableHeadersData = {
-  subject: {
-    display: 'string',
-    name: '구분(업무명)',
-    required: true,
-    width: '14%'
-  },
-  purpose: {
-    display: 'list',
-    name: '처리 목적',
-    required: true,
-    width: '23%'
-  },
-  items: {
-    display: 'collection',
-    name: '수집 항목',
-    required: false,
-    width: '18%'
-  },
-  period: {
-    display: 'list',
-    name: '보유 및 이용 기간',
-    required: true,
-    editable: false,
-    width: '23%'
-  }
-}
-// 동의서 법령에 근거해 동의없이 수집 및 이용되는 데이터 Header
-export const consentEPIHeader: TableHeadersData = {
-  purpose: {
-    display: 'list',
-    name: '개인정보 수집·이용 목적',
-    required: true,
-    width: '23%'
-  },
-  items: {
-    display: 'item',
-    name: '개인정보 항목',
-    required: true,
-    width: '20%'
-  },
-  statute: {
-    display: 'list',
-    name: '수집 근거 법령',
-    required: false,
-    width: '20%'
   }
 }

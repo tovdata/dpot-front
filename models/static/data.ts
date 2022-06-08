@@ -120,7 +120,7 @@ export const consentList = [
 export const defaultConsentData: any = {
   type: undefined,
   title: undefined,
-  subject: undefined,
+  subjects: undefined,
   disadvantage: undefined,
   pData: undefined,
   epiData: undefined,
@@ -258,7 +258,7 @@ export const staticConsentData = [
     titlePlaceHolder: '예 : OOO 서비스를 위한 제3자 제공 동의서',
     disadvantage: {
       description: '동의를 거부할 권리가 있다는 사실과 동의 거부에 따른 불이익에 대한 구체적인 내용이 반드시 포함되어야 합니다.',
-      example: '정보주체는 위와 같이 개인정보를 제3자에게 제공하는 것에 대한 동의를 거부할 권리가 있습니다. 그러나 동의를 거부할 경우 원활한 "심사를 할 수 없어 평가 확인에 제한"을 받을 수 있습니다.'
+      example: '정보주체는 위와 같이 개인정보를 제3자에게 제공하는 것에 대한 동의를 거부할 권리가 있습니다.\n그러나 동의를 거부할 경우 원활한 "심사를 할 수 없어 평가 확인에 제한"을 받을 수 있습니다.'
     },
     checkList: [
       {
