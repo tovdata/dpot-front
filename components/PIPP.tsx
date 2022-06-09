@@ -1,18 +1,18 @@
 import React, { useRef } from 'react';
 import { useEffect, useState } from 'react';
 // Component
-import { Button, Col, Input, Modal, Popover, Result, Row, Table } from 'antd';
+import { Button, Col, Input, Modal, Popover, Result, Row, Table, Tag } from 'antd';
 import { PageHeaderContainStep } from './common/Header';
 import { StyledTableForm, TableFormHeader } from './common/Table';
 import { CollapseForPIPP } from './pipp/Collapse';
-import { createNotification, successNotification, warningNotification } from './common/Notification';
+import { successNotification, warningNotification } from './common/Notification';
 // Data
 import { statementForPIPP as stmt } from '../models/static/statement';
 import { defaultPIPPData } from '../models/static/data';
 // Icon
 import { CheckCircleOutlined, EditOutlined, LinkOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons';
 import { FiEdit } from 'react-icons/fi';
-// Module
+// Modulex
 import moment from 'moment';
 import { FNITable, PITable } from './PITable';
 import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from './PCTable';
@@ -51,10 +51,10 @@ export const PIPPMain: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProce
       <StyledTableForm>
         <TableFormHeader title='개인정보 처리방침 이력' />
         <Table columns={[
-          { title: '목록', dataIndex: 'version', key: 'version' },
-          { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (value: number): string => moment.unix(value / 1000).format('YYYY-MM-DD HH:mm') },
-          { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => moment.unix(value / 1000).format('YYYY-MM-DD') },
-          { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt' },
+          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number): string => value === 0 ? '개인정보 처리방침 (이전)' : `개인정보 처리방침 (ver. ${value})` },
+          { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (_: string, record: any): JSX.Element => record.version === 0 ? (<Tag color='default'>외부링크</Tag>) : data ? record.version === data.length - 1 ? (<Tag color='geekblue'>현재</Tag>) : (<Tag color='green'>이전</Tag>) : (<></>) },
+          { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number, record: any): string => record.version === 0 ? '' : moment.unix(value / 1000).format('YYYY-MM-DD HH:mm'), defaultSortOrder: 'ascend', sorter: (a: any, b: any) => a.createAt < b.createAt ? 1 : a.createAt > b.createAt ? -1 : 0 },
+          { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt', render: (value: number, record: any): string => record.version === 0 ? '' : moment.unix(value / 1000).format('YYYY-MM-DD') },
           { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => <a href={value} style={{ color: '#7B7B7B', cursor: 'pointer' }} target='_blank'><LinkOutlined /></a> }
         ]} dataSource={ isLoading ? [] : data} loading={isLoading} />
       </StyledTableForm>

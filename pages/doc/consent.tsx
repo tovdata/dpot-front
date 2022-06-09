@@ -1,11 +1,15 @@
-import Layout from "@/components/common/Layout";
+import { NextPage } from "next";
+// Component
+import { TOVPageLayout } from "@/components/common/Layout";
 import { ConsentMain } from "@/components/consent/Consent";
 
-const Page = () => {
+const Page: NextPage = ({ expand, onExpand }: any) => {
   return (
-    <div style={{ paddingBottom: 74, paddingTop: 36 }}>
-      <ConsentMain />
-    </div>
+    <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/doc/consent'>
+      <div style={{ paddingBottom: 74, paddingTop: 36 }}>
+        <ConsentMain />
+      </div>
+    </TOVPageLayout>
   );
 }
 

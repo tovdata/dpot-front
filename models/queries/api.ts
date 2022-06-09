@@ -171,8 +171,10 @@ export const getPIPPList = async (serviceId: string): Promise<any[]> => {
   const response: Response = await fetch(`${SERVER_URL}pipp/${serviceId}/publishedlist`);
   // 응답 데이터 추출
   const result: ResponseDF = await extractData(response);
+  // 데이터 정렬
+  const sorted: any[] = result.result ? result.data.list.sort((a: any, b: any): number => a.createAt > b.createAt ? 1 : a.createAt < b.createAt ? -1 : 0) : [];
   // 데이터 가공 및 반환
-  return result.result ? result.data.list.map((item: any, index: number): any => ({ ...item, key: index })) : [];
+  return sorted.map((item: any, index: number) => ({ ...item, key: index, version: index }));
 }
 /**
  * [API Caller] 개인정보 처리방침에 대한 데이터 저장하기

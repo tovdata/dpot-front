@@ -1,7 +1,7 @@
 import { MutableRefObject, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 // Component
-import { Button, DatePicker, Descriptions, Input, Table } from 'antd';
+import { Button, DatePicker, Descriptions, Input, Popconfirm, Table } from 'antd';
 import ReactToPrint from 'react-to-print';
 import { BasicPageLoading } from './common/Loading';
 import { warningNotification } from './common/Notification';
@@ -253,9 +253,13 @@ const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, i
           ) : (<></>)}
         </Descriptions.Item>
       </Descriptions>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-        <Button danger onClick={() => onDelete(data.id)}>삭제</Button>
-      </div>
+      {data.id !== undefined ? (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+          <Popconfirm cancelText='아니오' okText='예' onConfirm={() => onDelete(data.id)} placement='topRight' title='해당 파기 내용을 삭제하시겠습니까?'>
+            <Button danger>삭제</Button>
+          </Popconfirm>
+        </div>
+      ) : (<></>)}
     </>
   );
 }
