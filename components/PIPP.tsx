@@ -1,18 +1,19 @@
 import React, { useRef } from 'react';
 import { useEffect, useState } from 'react';
 // Component
-import { Button, Col, Modal, Row, Table } from 'antd';
+import { Button, Col, Input, Modal, Popover, Result, Row, Table } from 'antd';
 import { PageHeaderContainStep } from './common/Header';
 import { StyledTableForm, TableFormHeader } from './common/Table';
 import { CollapseForPIPP } from './pipp/Collapse';
-import { createNotification, warningNotification } from './common/Notification';
+import { createNotification, successNotification, warningNotification } from './common/Notification';
 // Data
 import { statementForPIPP as stmt } from '../models/static/statement';
 import { defaultPIPPData } from '../models/static/data';
 // Icon
-import { EditOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, EditOutlined, LinkOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons';
 import { FiEdit } from 'react-icons/fi';
 // Module
+import moment from 'moment';
 import { FNITable, PITable } from './PITable';
 import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from './PCTable';
 import { useQueries, useQuery, useQueryClient } from 'react-query';
@@ -24,7 +25,9 @@ import { DRModal } from './pipp/Documentation';
 import { ConfirmSection } from './pipp/ConfirmForm';
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from '../models/queries/type';
 import { BasicPageLoading } from './common/Loading';
-import { getPIPPData, setPIPPData } from '../models/queries/api';
+import { getPIPPData, getPIPPList, setPIPPData } from '../models/queries/api';
+
+const PIPP_LIST: string = 'pipp-list';
 
 /** [Interface] PIPP process */
 interface PIPPProcess {
@@ -38,6 +41,10 @@ type ScrollPosition = 'start'|'end';
  * [Component] 개인정보 처리방침 메인 페이지
  */
 export const PIPPMain: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProcess): JSX.Element => {
+  const { isLoading, data } = useQuery(PIPP_LIST, async () => await getPIPPList('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+
+  useEffect(() => data ? console.log(moment.unix(data[0].createAt / 1000), data[0].createAt) : undefined, [data])
+
   return (
     <>
       <MainPageHeader onProcess={onProcess} status={status} />
@@ -45,10 +52,11 @@ export const PIPPMain: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProce
         <TableFormHeader title='개인정보 처리방침 이력' />
         <Table columns={[
           { title: '목록', dataIndex: 'version', key: 'version' },
-          { title: '구분', dataIndex: 'sortation', key: 'sortation' },
-          { title: '최종 편집일', dataIndex: 'editedAt', key: 'editedAt' },
-          { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt' }
-        ]} dataSource={[]} />
+          { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (value: number): string => moment.unix(value / 1000).format('YYYY-MM-DD HH:mm') },
+          { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => moment.unix(value / 1000).format('YYYY-MM-DD') },
+          { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt' },
+          { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => <a href={value} style={{ color: '#7B7B7B', cursor: 'pointer' }} target='_blank'><LinkOutlined /></a> }
+        ]} dataSource={ isLoading ? [] : data} loading={isLoading} />
       </StyledTableForm>
     </>
   );
@@ -88,8 +96,11 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack, onUpdateStatus, progress
   };
   // 최종 문서 확인 모달을 위한 visible 상태
   const [visible, setVisible] = useState<boolean>(false);
+  const [visible2, setVisible2] = useState<boolean>(false);
   // 처리방침 생성 과정에서 사용될 데이터 구조
   const [data, setData] = useState<any>(defaultPIPPData);
+  // 생성된 URL
+  const [url, setUrl] = useState<string>('');
 
   useEffect(() => {
     if (progress === 'update' && loadData) {
@@ -202,6 +213,8 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack, onUpdateStatus, progress
   }
   /** [Event handler] 저장 이벤트 */
   const onSave = async (temp: boolean = true): Promise<void> => {
+    // 미리보기 모달 닫기
+    onClose();
     // 처리 상태 정의
     const apiStatus: string = status === 'none' ? 'create' : temp ? 'update' : 'publish';
     // API 호출
@@ -210,11 +223,11 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack, onUpdateStatus, progress
       const result = await response.json();
       if (result.status === "OK") {
         if (temp) {
-          createNotification('임시 저장 완료');
+          successNotification('임시 저장 완료');
         } else {
-          createNotification('개인정보 처리방침 최종 저장 완료');
+          setUrl(result.data.url);
+          setVisible2(true);
           onUpdateStatus();
-          onBack();
         }
       } else {
         temp ? warningNotification('임시 저장 실패') : warningNotification('최종 저장 실패');
@@ -295,6 +308,18 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack, onUpdateStatus, progress
           <DRModal centered onCancel={onClose} onOk={() => onSave(false)} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
             <PreviewSection data={data} preview={false} refTables={ref} stmt={stmt(data.dInfo.name)} />
           </DRModal>
+          <Modal centered footer={false} onCancel={() => {setVisible2(false); onBack()}} visible={visible2} width={420}>
+            <div style={{ textAlign: 'center' }}>
+              <span style={{ color: '#52C41A', display: 'block', fontSize: 46, marginBottom: 16, marginTop: 8 }}>
+                <CheckCircleOutlined />
+              </span>
+              <h3 style={{ fontSize: 16, fontWeight: '600', lineHeight: '24px', marginBottom: 16 }}>개인정보 처리방침 작성 완료</h3>
+              <Input.Group compact style={{ display: 'flex' }}>
+                <Input value={url} style={{ flex: 1 }} />
+                <Button onClick={() => {navigator.clipboard.writeText(url)}} type='primary'>복사</Button>
+              </Input.Group>
+            </div>            
+          </Modal>
         </>
       )}
     </>
@@ -379,7 +404,7 @@ export const EditableModal: React.FC<any> = ({ onClose, type, visible }: any): J
   }, [type]);
   // 컴포넌트 반환
   return (
-    <Modal centered footer={false} onCancel={onClose} style={{ fontFamily: 'Pretendard' }} title={title} visible={visible} width='80%'>{content}</Modal>
+    <Modal centered footer={false} maskClosable={false} onCancel={onClose} style={{ fontFamily: 'Pretendard' }} title={title} visible={visible} width='80%'>{content}</Modal>
   );
 }
 

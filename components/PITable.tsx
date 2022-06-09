@@ -10,7 +10,7 @@ import { GetPersonalInfoSelectOptionsSelector } from '../models/state';
 // Type
 import { SelectOptionsByColumn } from '../models/type';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { getListForPIM, processPIMData, setQueryData } from '../models/queryState';
+import { setQueryData } from '../models/queryState';
 import { SERVICE_PI,SERVICE_FNI } from '../models/queries/type';
 import { Button } from 'antd';
 // API

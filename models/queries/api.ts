@@ -1,5 +1,5 @@
 // Data
-import { SERVER_URL, RequestDF, SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_DPI } from './type';
+import { SERVER_URL, RequestDF, SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_DPI, ResponseDF } from './type';
 // Module
 import { createRequest, extractData, processArrayResponse, processResponse } from './internal';
 
@@ -113,22 +113,11 @@ export const getDatasByTableType = async (serviceId: string, type: string): Prom
       return await getCPIDatas(serviceId);
     case SERVICE_CFNI:
       return await getCFNIDatas(serviceId);
+    case SERVICE_DPI:
+      return await getDPIDatas(serviceId);
     default:
       return [];
   }
-}
-/**
- * [API Caller] 개인정보 처리방침을 생성하기 위한 데이터 불러오기
- * @param serviceId 현재 서비스 ID
- * @returns 결과 데이터
- */
-export const getPIPPData = async (serviceId: string): Promise<any> => {
-  // API 호출
-  const response: Response = await fetch(`${SERVER_URL}pipp/${serviceId}`);
-  // 응답 데이터 처리
-  const result: any = await processResponse(response);
-  // 데이터 반환
-  return result ? result.data : undefined;
 }
 /**
  * [API Caller] 테이블 유형에 따라 데이터 처리
@@ -148,6 +137,19 @@ export const setDataByTableType = async (serviceId: string, type: string, mode: 
   return await processResponse(response, mode);
 }
 /**
+ * [API Caller] 개인정보 처리방침을 생성하기 위한 데이터 불러오기
+ * @param serviceId 현재 서비스 ID
+ * @returns 결과 데이터
+ */
+export const getPIPPData = async (serviceId: string): Promise<any> => {
+  // API 호출
+  const response: Response = await fetch(`${SERVER_URL}pipp/${serviceId}`);
+  // 응답 데이터 처리
+  const result: any = await processResponse(response);
+  // 데이터 반환
+  return result ? result.data : undefined;
+}
+/**
  * [API Caller] 개인정보 처리방침에 대한 진행 상태 불러오기
  * @param serviceId 현재 서비스 ID
  * @returns 결과 데이터
@@ -163,6 +165,14 @@ export const getPIPPStatus = async (serviceId: string): Promise<string> => {
   } else {
     return 'none';
   }
+}
+export const getPIPPList = async (serviceId: string): Promise<any[]> => {
+  // API 호출
+  const response: Response = await fetch(`${SERVER_URL}pipp/${serviceId}/publishedlist`);
+  // 응답 데이터 추출
+  const result: ResponseDF = await extractData(response);
+  // 데이터 가공 및 반환
+  return result.result ? result.data.list.map((item: any, index: number): any => ({ ...item, key: index })) : [];
 }
 /**
  * [API Caller] 개인정보 처리방침에 대한 데이터 저장하기

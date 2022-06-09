@@ -86,6 +86,10 @@ export const extractProcessingItems = (dataSource: any[]): string[] => {
       }
     }
   }
+  // 정렬
+  if ('items' in options) {
+    options['items'].sort();
+  }
   // 반환
   return options['items'];
 }
@@ -136,6 +140,10 @@ export const resetSelectOptions = (dataSource: any, headers: TableHeadersData, t
     default:
       break;
   }
+  // 정렬
+    if (options['items'] !== undefined) {
+      options['items'].sort();
+    }
   // 반환
   return options;
 }

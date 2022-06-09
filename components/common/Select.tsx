@@ -1,7 +1,7 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { Col, Divider, Input, Row, Select, Space, Typography } from 'antd';
+import { Col, Divider, Input, InputNumber, Row, Select, Space, Typography } from 'antd';
 // Module
 import { warningNotification } from './Notification';
 // Type
@@ -31,7 +31,7 @@ interface GeneralPurposeSelectProps {
 interface IFTTTData {
   event: string;
   adverb: string;
-  digit: number;
+  digit?: number;
   unit: string;
 }
 /** [Interface] Select option format */
@@ -176,13 +176,7 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
     } else if (changed.adverb === '일로부터') {
       setHidden(false);
       // Create an item
-      if (changed.digit <= 0) {
-        warningNotification('기간은 1 ~ 999 사이의 숫자만 입력할 수 있어요');
-        setData({ ...data, digit: 1 });
-      } else if (changed.digit > 999) {
-        warningNotification('기간은 1 ~ 999 사이의 숫자만 입력할 수 있어요');
-        setData({ ...data, digit: 999 });
-      } else if (changed.digit > 0 && !blankCheck(changed.unit) && !blankCheck(changed.event)) {
+      if (!blankCheck(changed.unit) && !blankCheck(changed.event)) {
         onAdd(`${changed.event}${changed.adverb} ${changed.digit}${changed.unit}`);
         // Update a state
         setHidden(true);
@@ -208,7 +202,7 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
         ) : (
           <>
             <Col span={12}>
-              <Input onChange={(e: any) => onChange('digit', e.target.value.toString())} type='number' value={data.digit} />
+              <InputNumber max={999} min={1} onChange={(value: any) => onChange('digit', value === null ? 1 : value.toString())} value={data.digit} />
             </Col>
             <Col span={12}>
               <SingleSelect onChange={(value: string | string[]) => onChange('unit', value as string)} options={['일', '개월', '년']} placeholder='기간' value={data.unit} />
