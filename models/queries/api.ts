@@ -157,8 +157,8 @@ export const getPIPPData = async (serviceId: string): Promise<any> => {
 export const getPIPPStatus = async (serviceId: string): Promise<string> => {
   // API 호출
   const response: Response = await fetch(`${SERVER_URL}pipp/${serviceId}`);
-  // 응답 데이터 처리
-  const result: any = await processResponse(response);
+  // 응답 데이터 추출
+  const result: ResponseDF = await extractData(response);
   // 결과 데이터 처리 및 반환
   if (result && ('publish' in result.data)) {
     return result.data.publish ? 'publish' : 'progress';
@@ -171,10 +171,18 @@ export const getPIPPList = async (serviceId: string): Promise<any[]> => {
   const response: Response = await fetch(`${SERVER_URL}pipp/${serviceId}/publishedlist`);
   // 응답 데이터 추출
   const result: ResponseDF = await extractData(response);
-  // 데이터 정렬
-  const sorted: any[] = result.result ? result.data.list.sort((a: any, b: any): number => a.createAt > b.createAt ? 1 : a.createAt < b.createAt ? -1 : 0) : [];
+  // 데이터 가공
+  let sorted: any[] = [];
+  if (result.result) {
+    // 데이터 정렬
+    sorted.push(...result.data.list.sort((a: any, b: any): number => a.createAt > b.createAt ? 1 : a.createAt < b.createAt ? -1 : 0));
+    // 데이터 가공
+    sorted = sorted.map((item: any, index: number) => ({ ...item, key: index + 1, prev: false, version: index + 1 }));
+    // Prev가 있을 경우 추가
+    result.data.prevUrl !== '' ? sorted.unshift({ createAt: 100, key: 0, prev: true, url: result.data.prevUrl }) : undefined;
+  }
   // 데이터 가공 및 반환
-  return sorted.map((item: any, index: number) => ({ ...item, key: index, version: index }));
+  return sorted;
 }
 /**
  * [API Caller] 개인정보 처리방침에 대한 데이터 저장하기

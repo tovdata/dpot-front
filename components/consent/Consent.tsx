@@ -282,7 +282,7 @@ const EditableModal: React.FC<any> = ({ onClose, epiData, saveData, visible }: a
   const content = <ConsentEPITable data={epiData} saveData={saveData} header={consentEPIHeader}></ConsentEPITable>;
   // 컴포넌트 반환
   return (
-    <Modal centered footer={false} onCancel={onClose} style={{ fontFamily: 'Pretendard' }} title={''} visible={visible} width='80%'>{content}</Modal>
+    <Modal centered footer={false} onCancel={onClose} maskClosable={false} style={{ fontFamily: 'Pretendard' }} title={''} visible={visible} width='80%'>{content}</Modal>
   );
 }
 

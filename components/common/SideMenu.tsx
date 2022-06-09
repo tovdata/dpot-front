@@ -30,7 +30,7 @@ const StyledSideMenuToggle = styled.div<MenuOpenStatus>`
   ${(props: any) => !props.open && css`
     background-color: #0050B3;
     color: #ffffff;
-    right: 30px;
+    right: 32px;
     svg {
       transform: rotate(180deg);
     }
@@ -116,7 +116,7 @@ const SideMenuLayout = styled.div<SideMenuLayoutProps>`
     font-size: 12px;
     font-weight: 400;
     line-height: 22px;
-    padding-left: ${(props: any) => props.expand ? '40px !important' : '19px'};
+    padding-left: ${(props: any) => props.expand ? '40px !important' : '20px'};
     text-overflow: ellipsis;
     white-space: nowrap;
     ${(props: any) => props.expand && css`

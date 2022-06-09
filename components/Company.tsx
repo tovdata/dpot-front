@@ -49,7 +49,7 @@ const CompanyInfoSection: React.FC<any> = ({ change }): JSX.Element => {
   // Form 객체 생성
   const [form] = Form.useForm();
   // 탭 변경에 따라 Form 내에 필드 초기화
-  useEffect(() => form.resetFields(), [change]);
+  useEffect(() => form.resetFields(), [change, form]);
 
   // 컴포넌트 반환
   return (
@@ -60,7 +60,7 @@ const CompanyInfoSection: React.FC<any> = ({ change }): JSX.Element => {
         </Form.Item>
       </TOVInputGroup>
       <TOVInputGroup label='회사명(영문)' required>
-        <Form.Item name='name' rules={[{ required: true, message: '회사명(영문)을 입력해주세요.' }, { pattern: new RegExp('^[a-zA-Z]*$'), message: '영문만 입력해주세요.' }]}>
+        <Form.Item name='en' rules={[{ required: true, message: '회사명(영문)을 입력해주세요.' }, { pattern: new RegExp('^[a-zA-Z]*$'), message: '영문만 입력해주세요.' }]}>
           <Input />
         </Form.Item>
       </TOVInputGroup>
@@ -85,7 +85,7 @@ const CompanyInfoSection: React.FC<any> = ({ change }): JSX.Element => {
           </Col>
           <Col span={5} style={{ alignItems: 'start', display: 'flex', marginTop: 5 }}>이메일</Col>
           <Col span={19}>
-            <Form.Item name='email' rules={[{ required: true, message: '이메일을 입력해주세요.' }, { type: 'email', message: '' }]} style={{ marginBottom: 0 }}>
+            <Form.Item name='email' rules={[{ required: true, message: '이메일을 입력해주세요.' }, { type: 'email', message: '이메일 형식이 올바르지 않습니다.' }]} style={{ marginBottom: 0 }}>
               <Input placeholder='nickname@company.com' />
             </Form.Item>
           </Col>

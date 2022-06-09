@@ -25,12 +25,11 @@ import { DRModal } from './pipp/Documentation';
 import { ConfirmSection } from './pipp/ConfirmForm';
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from '../models/queries/type';
 import { BasicPageLoading } from './common/Loading';
-import { getPIPPData, getPIPPList, setPIPPData } from '../models/queries/api';
-
-const PIPP_LIST: string = 'pipp-list';
+import { getPIPPData, setPIPPData } from '../models/queries/api';
 
 /** [Interface] PIPP process */
 interface PIPPProcess {
+  list?: any[];
   onProcess: (process: DocProgressStatus) => void;
   status?: string;
 }
@@ -40,23 +39,19 @@ type ScrollPosition = 'start'|'end';
 /**
  * [Component] 개인정보 처리방침 메인 페이지
  */
-export const PIPPMain: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProcess): JSX.Element => {
-  const { isLoading, data } = useQuery(PIPP_LIST, async () => await getPIPPList('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
-
-  useEffect(() => data ? console.log(moment.unix(data[0].createAt / 1000), data[0].createAt) : undefined, [data])
-
+export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIPPProcess): JSX.Element => {
   return (
     <>
       <MainPageHeader onProcess={onProcess} status={status} />
       <StyledTableForm>
         <TableFormHeader title='개인정보 처리방침 이력' />
         <Table columns={[
-          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number): string => value === 0 ? '개인정보 처리방침 (이전)' : `개인정보 처리방침 (ver. ${value})` },
-          { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (_: string, record: any): JSX.Element => record.version === 0 ? (<Tag color='default'>외부링크</Tag>) : data ? record.version === data.length - 1 ? (<Tag color='geekblue'>현재</Tag>) : (<Tag color='green'>이전</Tag>) : (<></>) },
-          { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number, record: any): string => record.version === 0 ? '' : moment.unix(value / 1000).format('YYYY-MM-DD HH:mm'), defaultSortOrder: 'ascend', sorter: (a: any, b: any) => a.createAt < b.createAt ? 1 : a.createAt > b.createAt ? -1 : 0 },
-          { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt', render: (value: number, record: any): string => record.version === 0 ? '' : moment.unix(value / 1000).format('YYYY-MM-DD') },
-          { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => <a href={value} style={{ color: '#7B7B7B', cursor: 'pointer' }} target='_blank'><LinkOutlined /></a> }
-        ]} dataSource={ isLoading ? [] : data} loading={isLoading} />
+          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number, record: any): string => record.prev ? '개인정보 처리방침 (외부)' : `개인정보 처리방침 (ver. ${value})` },
+          { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (_: string, record: any): JSX.Element => list ? record.prev ? (<Tag color='default'>외부링크</Tag>) : record.version === list.length - 1 ? (<Tag color='geekblue'>현재</Tag>) : (<Tag color='green'>이전</Tag>) : (<></>) },
+          { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number, record: any): string => record.prev ? '' : moment.unix(value / 1000).format('YYYY-MM-DD HH:mm'), defaultSortOrder: 'ascend', sorter: (a: any, b: any) => a.createAt < b.createAt ? 1 : a.createAt > b.createAt ? -1 : 0 },
+          { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt', render: (value: string, record: any): string => record.prev ? '' : value },
+          { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => <a href={value} style={{ color: '#000000D9', cursor: 'pointer' }} target='_blank' rel='noreferrer'><LinkOutlined /></a> }
+        ]} dataSource={list} />
       </StyledTableForm>
     </>
   );
@@ -64,7 +59,7 @@ export const PIPPMain: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProce
 /**
  * [Component] 개인정보 처리방침 생성 페이지
  */
-export const CreatePIPPForm: React.FC<any> = ({ onBack, onUpdateStatus, progress, status }: any): JSX.Element => {
+export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, progress, status }: any): JSX.Element => {
   const { isLoading, data: loadData } = useQuery(SERVICE_PIPP, async () => await getPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   // 단계에 대한 Title
   const steps: string[] = ['입력사항 확인', '처리방침 편집', '최종 확인'];
@@ -119,7 +114,7 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack, onUpdateStatus, progress
     }
   }
   /** [Event handler] 포커스에 따라 스코롤 이동 이벤트 (Prview part) */
-  const onFocus = (type: string, index: number, pos?: ScrollPosition) => { console.log(type, index, pos); refs[type].current[index] ? refs[type].current[index].scrollIntoView((type === 'preview' && (index === 1 || index === 3 || index === 4 || index === 7)) ? { block: pos ? pos : 'start' } : { behavior: 'smooth' , block: pos ? pos : 'start' }) : undefined };
+  const onFocus = (type: string, index: number, pos?: ScrollPosition) => { refs[type].current[index] ? refs[type].current[index].scrollIntoView((type === 'preview' && (index === 1 || index === 3 || index === 4 || index === 7)) ? { block: pos ? pos : 'start' } : { behavior: 'smooth' , block: pos ? pos : 'start' }) : undefined };
   /** [Event handler] 단계 이동 이벤트 */
   const onMoveStep = (type: string): void => {
     if (type === 'prev') {
@@ -303,10 +298,10 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack, onUpdateStatus, progress
             <CreatePIPP data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTable={ref} />
           </div>
           <div style={{ display: stepIndex === 2 ? 'block' : 'none' }}>
-            <ConfirmSection data={data.cInfo} onChange={onChange} refTables={ref} sectionType='cInfo' />
+            <ConfirmSection data={data.cInfo} onChange={onChange} prevList={list.filter((item: any): boolean => !item.prev)} sectionType='cInfo' />
           </div>
           <DRModal centered onCancel={onClose} onOk={() => onSave(false)} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
-            <PreviewSection data={data} preview={false} refTables={ref} stmt={stmt(data.dInfo.name)} />
+            <PreviewSection data={data} preview={false} prevList={list.filter((item: any): boolean => !item.prev)} refTables={ref} stmt={stmt(data.dInfo.name)} />
           </DRModal>
           <Modal centered footer={false} onCancel={() => {setVisible2(false); onBack()}} visible={visible2} width={420}>
             <div style={{ textAlign: 'center' }}>

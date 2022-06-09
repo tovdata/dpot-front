@@ -2,6 +2,7 @@ import Router from 'next/router';
 import { useEffect, useState } from 'react';
 // Component
 import { Layout } from 'antd';
+import Link from 'next/link';
 import { TOVSideMenu } from './SideMenu';
 // Icon
 import { UserOutlined } from '@ant-design/icons';
@@ -104,7 +105,9 @@ export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
   return (
     <Header>
       <div>
-        <a href='/' style={{ color: '#000000', cursor: 'pointer' }}>MOPH</a>
+        <Link href='/'>
+          <label style={{ color: '#000000', cursor: 'pointer', margin: 0 }}>MOPH</label>
+        </Link>
       </div>
       <HeaderNav>
         <HeaderMenuItem>사용가이드</HeaderMenuItem>
@@ -119,7 +122,7 @@ export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
 /** [Interneal Component] 페이지 레이아웃 (사이드) */
 const TOVPageSide: React.FC<TOVPageSideProps> = ({ expand, onExpand, scroll, selectedKey }): JSX.Element => {
   return (
-    <Sider collapsed={!expand} scroll={scroll} width={246}>
+    <Sider collapsed={!expand} collapsedWidth={88} scroll={scroll} width={246}>
       <div style={{ borderRight: '1px solid #F0F0F0', height: '100%', paddingTop: 32 }}>
         <TOVSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
       </div>

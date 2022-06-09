@@ -54,8 +54,13 @@ export const ConfirmPage = ({ type, consentData }: any): JSX.Element => {
     <StyleConfirmContainer>
       <h1 className="title">{consentData.title}</h1>
       <span className="fixed-text-div">{staticConsentData[type].document?.fixedText.map((item: any, index: number) => fixedText(item.text, item.important, index))}</span>
-      <ConfirmItemComponent title={title} children={<ConsentTable data={consentData.pData} headers={getHistoryHeader()} mode={mode} />} footerText={consentData.disadvantage} />
-      {consentData.epiData && <ConfirmItemComponent title='기타 고지 사항' children={<ConsentTable data={consentData.epiData} headers={consentEPIHeader} />} headerText={'개인정보 보호법 제15조 제1항 제2호에 따라 정보주체의 동의 없이 개인정보를 수집·이용합니다.'} />}
+      <ConfirmItemComponent title={title} footerText={consentData.disadvantage} />
+        <ConsentTable data={consentData.pData} headers={getHistoryHeader()} mode={mode} />
+        {consentData.epiData && (
+          <ConfirmItemComponent title='기타 고지 사항' headerText={'개인정보 보호법 제15조 제1항 제2호에 따라 정보주체의 동의 없이 개인정보를 수집·이용합니다.'}>
+            <ConsentTable data={consentData.epiData} headers={consentEPIHeader} />
+          </ConfirmItemComponent>
+        )}
       <ConfirmItemComponent footerText={`위와 같이 ${staticConsentData[type].word}를 제공하는데 동의합니다.`} />
     </StyleConfirmContainer>)
 }

@@ -31,6 +31,7 @@ interface InputSectionProps {
 interface PreviewSectionProps {
   data: any;
   preview?: boolean;
+  prevList?: any[];
   refElements?: any;
   refTables: any;
   stmt: any;
@@ -214,7 +215,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
   );
 }
 /** [Component] 개인정보 처리방침 편집을 위한 Preview section */
-export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, refElements, refTables, stmt }: PreviewSectionProps): JSX.Element => {
+export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, prevList, refElements, refTables, stmt }: PreviewSectionProps): JSX.Element => {
   const managerTableData: any[] = [];
   if (!blankCheck(data.dInfo.manager.charger.name) || !blankCheck(data.dInfo.manager.charger.position) || !blankCheck(data.dInfo.manager.charger.contact)) {
     managerTableData.push({ identity: '개인정보보호책임자', charger: !blankCheck(data.dInfo.manager.charger.name) && !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`, `성명 : ${data.dInfo.manager.charger.name}`] : !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`] : !blankCheck(data.dInfo.manager.charger.name) ? [`성명 : ${data.dInfo.manager.charger.name}`] : [], contact: !blankCheck(data.dInfo.manager.charger.contact) ? data.dInfo.manager.charger.contact : '' });
@@ -269,7 +270,9 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, r
       prevPIPPList.push({ label: `${data.cInfo.applyAt} 이전`, value: data.cInfo.previous.url });
     }
   }
-  
+  // 이전 개인정보 처리방침 리스트 추가
+  prevList ? prevPIPPList.push(...prevList.map((item: any): any => ({ label: item.applyAt, value: item.url }))) : undefined;
+
   // 컴포넌트 반환
   return (
     <div id={preview ? 'preview' : 'report'}>
@@ -656,7 +659,17 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, r
       {preview ? (<></>) : (
         <DDRow>
           {prevPIPPList.length > 0 ? (
-            <Select defaultValue='이전 개인정보 처리방침' onChange={(value: string) => window.open(value, '_blank')} options={prevPIPPList} />
+            <>
+              <DDRowHeader title='이전 개인정보 처리방침' />
+              <select id='prev-list' onChange={(e: any) => e.target.value !== 'none' ? window.open(e.target.value, '_blank') : undefined} style={{ border: '1px solid #C0C0C0', padding: '6px 9px' }}>
+                <option key={-1} value='none'>이전 개인정보 처리방침</option>
+                {prevPIPPList.map((item: any, index: number): JSX.Element => (
+                  <option key={index} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </>
           ) : (<></>)}
         </DDRow>
       )}
