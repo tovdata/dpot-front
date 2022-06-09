@@ -274,4 +274,16 @@ export const staticConsentData = [
       ]
     }
   },
-]
+];
+// 파기
+export const defaultDPIData: any = {
+  subject: '',
+  date: '',
+  reason: [],
+  items: [],
+  charger: '',
+  quantity: undefined,
+  method: undefined,
+  location: undefined,
+  period: []
+};

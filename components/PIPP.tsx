@@ -202,7 +202,10 @@ export const CreatePIPPForm: React.FC<any> = ({ onBack, onUpdateStatus, progress
   }
   /** [Event handler] 저장 이벤트 */
   const onSave = async (temp: boolean = true): Promise<void> => {
-    const response = await setPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', data, status === 'none' ? 'create' : temp ? 'update' : 'publish');
+    // 처리 상태 정의
+    const apiStatus: string = status === 'none' ? 'create' : temp ? 'update' : 'publish';
+    // API 호출
+    const response = await setPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', data, apiStatus, apiStatus ? document.getElementById('report')?.outerHTML : undefined);
     if (response) {
       const result = await response.json();
       if (result.status === "OK") {

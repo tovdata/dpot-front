@@ -1,7 +1,7 @@
 // Data
 import { SERVER_URL, RequestDF, SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_DPI } from './type';
 // Module
-import { createRequest, processArrayResponse, processResponse } from './internal';
+import { createRequest, extractData, processArrayResponse, processResponse } from './internal';
 
 /**
  * [API Caller] 개인정보 수집 및 이용에 대한 데이터 불러오기
@@ -68,6 +68,30 @@ export const getCFNIDatas = async (serviceId: string): Promise<any[]> => {
   const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/cfnis`);
   // 응답 데이터 처리 및 반환
   return await processArrayResponse(response);
+}
+/**
+ * [API Caller] 개인정보 파기에 대한 데이터 불러오기
+ * @param serviceId 현재 서비스 ID
+ * @returns 결과 데이터
+ */
+export const getDPIDatas = async (serviceId: string): Promise<any[]> => {
+  // API 호출
+  const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/dpis`);
+  // 응답 데이터 처리 및 반환
+  return await processArrayResponse(response);
+}
+/**
+ * [API Caller] 개인정보 수집 및 이용 내 필수/선택 항목 데이터 불러오기
+ * @param serviceId 현재 서비스 ID
+ * @returns 결과 데이터
+ */
+export const getPIItems = async (serviceId: string): Promise<any[]> => {
+  // API 호출
+  const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pi/allitems`);
+  // 응답 데이터 추출
+  const result = await extractData(response);
+  // 결과 반환
+  return result.result ? result.data : [];
 }
 /**
  * [API Caller] 테이블 유형에 따른 데이터 불러오기
@@ -145,9 +169,10 @@ export const getPIPPStatus = async (serviceId: string): Promise<string> => {
  * @param serviceId 현재 서비스 ID
  * @param data 임시 저장을 위한 데이터
  * @param status 데이터 저장 상태 (생성 완료일 경우, status = 'publish')
+ * @param html 최종 문서 HTML 코드
  * @returns API로부터 응답받은 데이터
  */
-export const setPIPPData = async (serviceId: string, data: any, status: string): Promise<any> => {
+export const setPIPPData = async (serviceId: string, data: any, status: string, html?: string): Promise<any> => {
   // 초기 저장인지 아닌지를 확인하여 API 호출을 위한 URL 정의
   const url: string = status === 'create' ? `${SERVER_URL}pipp/new` : `${SERVER_URL}pipp/${serviceId}`;
   // 초기 저장 여부에 따라 요청 데이터 생성
@@ -157,7 +182,8 @@ export const setPIPPData = async (serviceId: string, data: any, status: string):
     publish: false
   } : {
     data: data,
-    publish: status === 'publish' ? true : false
+    publish: status === 'publish' ? true : false,
+    html: status === 'publish' ? html : undefined
   };
   // API 호출에 필요한 Request 생성
   const request: RequestDF = {
