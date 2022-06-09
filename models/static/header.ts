@@ -308,7 +308,7 @@ export const cfniTableHeader: TableHeadersData = {
   },
   content: {
     description: '가명정보 처리를 위탁하는 업무의 내용을 상세히 입력해주세요.',
-    display: 'itemA',
+    display: 'list',
     name: '위탁 업무',
     required: true,
     width: '31%'
