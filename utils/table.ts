@@ -1,12 +1,12 @@
 import { TableHeadersData, SelectOptionsByColumn } from '../models/type';
-import {SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI} from '../models/queries/type';
+import { SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_EPI } from '../models/queries/type';
 
 /**
  * [Function] Set a data source 
  * @param dataSource raw data source
  * @returns data source
  */
- export const setDataSource = (dataSource: any): any[] => {
+export const setDataSource = (dataSource: any): any[] => {
   return dataSource.map((item: any): any => { return { ...item, key: item.id } });
 }
 /**
@@ -19,7 +19,7 @@ import {SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE
  * @param row 현재 테이블 row 값
  * @param isInit 처음 onEdit 시 초기화를 위한 호출인지
  */
-export const changeSelectOptions = (key: string, onUpdate: (value: any) => void, ref: any, tableName: string, value?: string | string[], row?: any, isInit :boolean = false): void => {
+export const changeSelectOptions = (key: string, onUpdate: (value: any) => void, ref: any, tableName: string, value?: string | string[], row?: any, isInit: boolean = false): void => {
   // 테이블 이름에 따른 처리
   switch (tableName) {
     case SERVICE_PI:
@@ -41,15 +41,15 @@ export const changeSelectOptions = (key: string, onUpdate: (value: any) => void,
       const cpiRef = ref['cpi'];
       // "업무명"이 변경된 경우, 
       // "업무명"에 따라 "수탁자" Select Options를 변경
-      let _contents:string[] = [];
+      let _contents: string[] = [];
       if (key === 'subject') {
         // 초기화 호출 시
-        if(isInit && Object.keys(row).length>0){
+        if (isInit && Object.keys(row).length > 0) {
           const _companys = cpiRef[row?.subject];
-          _contents= _companys ? _companys[row?.company].content :[];
+          _contents = _companys ? _companys[row?.company].content : [];
         }
         if (value && typeof value === "string") {
-          cpiRef[value] ? onUpdate({ ['company']: Object.keys(cpiRef[value]), ['content']: _contents }) : onUpdate({ ['company']: [] , ['content']: _contents});
+          cpiRef[value] ? onUpdate({ ['company']: Object.keys(cpiRef[value]), ['content']: _contents }) : onUpdate({ ['company']: [], ['content']: _contents });
         }
       }
       // "수탁자"가 변경될 경우,
@@ -70,7 +70,7 @@ export const changeSelectOptions = (key: string, onUpdate: (value: any) => void,
  * @param dataSource 테이블 데이터 소스
  * @returns 추출된 항목 데이터
  */
- export const extractProcessingItems = (dataSource: any[]): string[] => {
+export const extractProcessingItems = (dataSource: any[]): string[] => {
   const options: SelectOptionsByColumn = {};
   for (const row of dataSource) {
     // 테이블 데이터 소스로부터 필수항목(essentialItems)과 선택항목(selectionItems) 데이터 추출 (중복 제거)
@@ -103,46 +103,47 @@ export const changeSelectOptions = (key: string, onUpdate: (value: any) => void,
  * @param defaultSelectOptions 기본으로 제공될 각 칼럼(Column)별 Select 옵션 데이터
  * @returns 각 칼럼(Column)별 Select 옵션 데이터
  */
- export const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableName: string, ref: any, defaultSelectOptions?: SelectOptionsByColumn): SelectOptionsByColumn => {
-    const options: SelectOptionsByColumn = {};
-    // 각 컬럼(Column)에 따라 부모 컴포넌트로부터 받은 기본 옵션을 포함한 Select 옵션 설정
-    Object.keys(headers).forEach((key: string): string[] => defaultSelectOptions && defaultSelectOptions[key] ? options[key] = [...defaultSelectOptions[key]] : []);
-    let items: any = [];
-    // 테이블에 따라 초기 각각의 컬럼(Column)의 Select 옵션 설정
-    switch (tableName) {
-      case SERVICE_PI:
-        options['items'] = defaultSelectOptions && defaultSelectOptions['items'] ? defaultSelectOptions['items'] : [];
-        options['items'] = extractProcessingItems(dataSource)?.filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
-        break;
-      case SERVICE_FNI:
-        const subjectOptions: string[] = ref.map((elem: any): string => elem.subject).filter((item: string): boolean => options['subject'] ? !options['subject'].includes(item) : true)
-        options['subject'] ? options['subject'].push(...subjectOptions) : options['subject'] = [...subjectOptions];
-        // options['items'] = [];
-        // options['items'] = extractProcessingItems(ref)?.filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
-        break;
-      case SERVICE_PPI:
-        options['items'] = extractProcessingItems(ref);
-        break;
-      case SERVICE_PFNI:
-        const pfniItems = ref?.filter((fni:any)=> fni.url===undefined)?.map((fni: any) => fni.items);
-        pfniItems.forEach((pfniArr: any) => pfniArr.forEach((pfniItem: any) => !items.includes(pfniItem) && items.push(pfniItem)));
-        options['items'] = items;
-        break;
-      case SERVICE_CPI:
-        options['items'] = extractProcessingItems(ref[SERVICE_PI]);
-        break;
-      case SERVICE_CFNI:
-        const fniItems = ref?.filter((ppi:any)=> ppi.url===undefined)?.map((ppi: any) => ppi.items);
-        fniItems.forEach((fniArr: any) => fniArr.forEach((fniItem: any) => !items.includes(fniItem) && items.push(fniItem)));
-        options['items'] = items;
-        break;
-      default:
-        break;
-    }
-    // 정렬
+export const resetSelectOptions = (dataSource: any, headers: TableHeadersData, tableName: string, ref: any, defaultSelectOptions?: SelectOptionsByColumn): SelectOptionsByColumn => {
+  const options: SelectOptionsByColumn = {};
+  // 각 컬럼(Column)에 따라 부모 컴포넌트로부터 받은 기본 옵션을 포함한 Select 옵션 설정
+  Object.keys(headers).forEach((key: string): string[] => defaultSelectOptions && defaultSelectOptions[key] ? options[key] = [...defaultSelectOptions[key]] : []);
+  let items: any = [];
+  // 테이블에 따라 초기 각각의 컬럼(Column)의 Select 옵션 설정
+  switch (tableName) {
+    case SERVICE_PI:
+      options['items'] = defaultSelectOptions && defaultSelectOptions['items'] ? defaultSelectOptions['items'] : [];
+      options['items'] = extractProcessingItems(dataSource)?.filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
+      break;
+    case SERVICE_FNI:
+      const subjectOptions: string[] = ref.map((elem: any): string => elem.subject).filter((item: string): boolean => options['subject'] ? !options['subject'].includes(item) : true)
+      options['subject'] ? options['subject'].push(...subjectOptions) : options['subject'] = [...subjectOptions];
+      // options['items'] = [];
+      // options['items'] = extractProcessingItems(ref)?.filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
+      break;
+    case SERVICE_PPI:
+    case SERVICE_EPI:
+      options['items'] = extractProcessingItems(ref);
+      break;
+    case SERVICE_PFNI:
+      const pfniItems = ref?.filter((fni: any) => fni.url === undefined)?.map((fni: any) => fni.items);
+      pfniItems.forEach((pfniArr: any) => pfniArr.forEach((pfniItem: any) => !items.includes(pfniItem) && items.push(pfniItem)));
+      options['items'] = items;
+      break;
+    case SERVICE_CPI:
+      options['items'] = extractProcessingItems(ref[SERVICE_PI]);
+      break;
+    case SERVICE_CFNI:
+      const fniItems = ref?.filter((ppi: any) => ppi.url === undefined)?.map((ppi: any) => ppi.items);
+      fniItems.forEach((fniArr: any) => fniArr.forEach((fniItem: any) => !items.includes(fniItem) && items.push(fniItem)));
+      options['items'] = items;
+      break;
+    default:
+      break;
+  }
+  // 정렬
     if (options['items'] !== undefined) {
       options['items'].sort();
     }
-    // 반환
-    return options;
-  }
+  // 반환
+  return options;
+}

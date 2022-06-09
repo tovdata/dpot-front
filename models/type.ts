@@ -10,6 +10,7 @@ export interface TableHeaderData {
   placeholder?: string;
   required: boolean;
   width?: string;
+  editable?: boolean;
 }
 /** [Interface] Table headers */
 export interface TableHeadersData {
@@ -19,7 +20,6 @@ export interface TableHeadersData {
 export interface SelectOptionsByColumn {
   [key: string]: string[];
 }
-
 /**
  * Data format
  */
@@ -90,4 +90,4 @@ export interface PersonalInformationProcessingPolicyDF {
 }
 
 /** [Type] Documentation process status */
-export type DocProgressStatus = 'none'|'create'|'update';
+export type DocProgressStatus = 'none' | 'create' | 'update';
