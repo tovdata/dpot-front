@@ -1,5 +1,6 @@
 import { TableHeadersData, SelectOptionsByColumn } from '../models/type';
 import { SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_EPI } from '../models/queries/type';
+import { returnUniqueInfo } from './consent';
 
 /**
  * [Function] Set a data source 
@@ -121,8 +122,9 @@ export const resetSelectOptions = (dataSource: any, headers: TableHeadersData, t
       // options['items'] = extractProcessingItems(ref)?.filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
       break;
     case SERVICE_PPI:
-    case SERVICE_EPI:
       options['items'] = extractProcessingItems(ref);
+    case SERVICE_EPI:
+      options['items'] = returnUniqueInfo(extractProcessingItems(ref));
       break;
     case SERVICE_PFNI:
       const pfniItems = ref?.filter((fni: any) => fni.url === undefined)?.map((fni: any) => fni.items);
@@ -141,9 +143,9 @@ export const resetSelectOptions = (dataSource: any, headers: TableHeadersData, t
       break;
   }
   // 정렬
-    if (options['items'] !== undefined) {
-      options['items'].sort();
-    }
+  if (options['items'] !== undefined) {
+    options['items'].sort();
+  }
   // 반환
   return options;
 }

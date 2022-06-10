@@ -60,7 +60,7 @@ export const historyHeader: TableHeadersData = {
     width: '18%'
   },
   period: {
-    display: 'listA',
+    display: 'listB',
     name: '보유 및 이용 기간',
     required: true,
     editable: false,

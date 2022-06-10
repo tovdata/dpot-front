@@ -1,12 +1,12 @@
 import { getPIDatas } from "@/models/queries/api";
-import { SERVICE_PI } from "@/models/queries/type";
+import { SERVICE_EPI, SERVICE_PI } from "@/models/queries/type";
 import { TableHeaderData } from "@/models/type";
 import { Checkbox, Table, TableColumnProps, Typography } from "antd";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import styled from "styled-components";
 import { TagSelect } from "../common/Select";
-import { createTableColumnProps, EditableTable, TableContentForList, TableContentForTags } from "../common/Table";
+import { createTableColumnProps, EditableTable, EditableTableForm, TableContentForList, TableContentForTags } from "../common/Table";
 
 // Styled component(Confirm collection)
 const StyleConfirmCollection = styled.div`
@@ -56,12 +56,13 @@ export const ConsentEditPITable = ({ headers, orignData, data, setData }: any): 
 }
 /**
  * [Component] 법령에 근거하여 정보주체의 동의없이 수집하는 정보를 작성하는 테이블
+ * @param {string} description 설명
  * @param {object} headers 헤더정보
  * @param {object} data 변경되는 정보
  * @param {void} setData 정보를 변경시키는 함수
  * @returns 
  */
-export const ConsentEPITable = ({ header, data, saveData }: any): JSX.Element => {
+export const ConsentEPITable = ({ description, header, data, saveData }: any): JSX.Element => {
   // [State] Exception Personal Information
   const [epiData, setEpiData] = useState(data || []);
   // Get a state (for select options) 개인정보 수집 및 이용 정보
@@ -79,7 +80,10 @@ export const ConsentEPITable = ({ header, data, saveData }: any): JSX.Element =>
     return true;
   }
   // Return an element
-  return (<EditableTable refData={piLoading ? [] : piData} dataSource={epiData} headers={header} isLoading={false} onAdd={onAdd} onDelete={onDelete} onSave={onSave} tableName='epi' />);
+  return (
+    <EditableTableForm title='' description={description}>
+      <EditableTable refData={piLoading ? [] : piData} dataSource={epiData} headers={header} isLoading={false} onAdd={onAdd} onDelete={onDelete} onSave={onSave} tableName={SERVICE_EPI} />
+    </EditableTableForm>);
 }
 /** [Component] 최종 확인 단계에서 입력한 정보를 보여주는 테이블
  * @param {object} headers 헤더정보
@@ -123,11 +127,11 @@ export const ConsentTable = ({ headers, data, mode }: any) => {
         case 'item':
           return item && item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
         case 'collection':
-        case 'collectionA':
+        case 'collectionB':
           return (
             <StyleConfirmCollection>
-              <ItemComponent name="필수" items={item.essentialItems} isBold={header.display === 'collectionA'} />
-              <ItemComponent name="선택" items={item.selectionItems} isBold={header.display === 'collectionA'} />
+              <ItemComponent name="필수" items={item.essentialItems} isBold={header.display === 'collectionB'} />
+              <ItemComponent name="선택" items={item.selectionItems} isBold={header.display === 'collectionB'} />
             </StyleConfirmCollection>
           );
         default:

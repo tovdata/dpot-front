@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 // Component
 import { TOVPageLayout } from "@/components/common/Layout";
-import { ConsentMain } from "@/components/consent/Consent";
+import { ConsentMain } from "@/components/Consent";
 
 const Page: NextPage = ({ expand, onExpand }: any) => {
   return (

@@ -1,5 +1,5 @@
-import { getPIDatas, getPPIDatas } from "@/models/queries/api";
-import { SERVICE_PI, SERVICE_PPI } from "@/models/queries/type";
+import { getConsentList, getPIDatas, getPPIDatas, setDataByTableType } from "@/models/queries/api";
+import { SERVICE_CONSENT, SERVICE_PI, SERVICE_PPI } from "@/models/queries/type";
 import { consentList, defaultConsentData, staticConsentData } from "@/models/static/data";
 import { consentEPIHeader } from '@/components/consent/Header';
 import { ExclamationCircleOutlined } from "@ant-design/icons";
@@ -8,14 +8,14 @@ import Grid from "antd/lib/card/Grid";
 import React, { useEffect, useState } from "react";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { VscChevronRight } from "react-icons/vsc";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import styled from "styled-components";
-import { filteredData, nullCheckForNextStep } from "utils/consent";
-import { PageHeaderContainStep } from "../common/Header";
-import { EditableTableForm } from "../common/Table";
-import { AddEpiDataComponent, ConfirmCheckListComponent, DisadvantageComponent, SelectCompanyComponent, SelectPIComponent, SubjectComponent, TitleComponent } from "./Atom";
-import { ConfirmPage } from "./Documentation";
-import { ConsentEPITable } from "./Table";
+import { filteredData, filteredNotUnique, filteredNotUniqueData, nullCheckForNextStep, returnUniqueInfo } from "utils/consent";
+import { PageHeaderContainStep } from "./common/Header";
+import { EditableTableForm } from "./common/Table";
+import { AddEpiDataComponent, ConfirmCheckListComponent, DisadvantageComponent, SelectCompanyComponent, SelectPIComponent, SubjectComponent, TitleComponent } from "./consent/Atom";
+import { ConfirmPage } from "./consent/Documentation";
+import { ConsentEPITable } from "./consent/Table";
 
 // Styled component(Card Container)
 const StyleCardContainer = styled.div`
@@ -72,28 +72,53 @@ export const ConsentMain = () => {
   // 3 : 마케팅 및 광고성 정보 수신 동의서
   // 4 : 제 3자 제공 동의서
   const [type, setType] = useState(0);
-  // -1 <= step <= 3
+  const steps: string[] = type === 4 ? ['정보 입력', '최종 확인'] : ['업무 선택', '정보 입력', '최종 확인'];
   const [stepIndex, setStepIndex] = useState(-1);
-  const [consentData, setConsentData] = useState(defaultConsentData);
+  const [data, setData] = useState(defaultConsentData);
+  // 생성된 개인정보 처리방침 목록 조회 API
+  const { isLoading: isLoadingForList, data: consentList } = useQuery(SERVICE_CONSENT, async () => await getConsentList('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   // 서버로부터 개인정보 수집 이용 데이블 데이터 가져오기
   const { data: PIData } = useQuery(SERVICE_PI, async () => await getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   const { data: PPIData } = useQuery(SERVICE_PPI, async () => await getPPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
-
-  const saveData = (newData: any) => setConsentData({ ...consentData, ...newData });
+  // 데이터 동기를 위한 객체 생성
+  const queryClient = useQueryClient();
+  const saveData = (newData: any) => setData({ ...data, ...newData });
   const stepHandler = (newStepIndex: number) => {
-    if (nullCheckForNextStep(type, consentData, newStepIndex)) return;
+    if (nullCheckForNextStep(type, data, newStepIndex)) return;
     // 제일 첫 페이지로 돌아올 경우 작성하던 데이터 리셋
-    if (newStepIndex === -1) setConsentData(defaultConsentData);
+    if (newStepIndex === -1) setData(defaultConsentData);
     setStepIndex(newStepIndex);
   }
-
+  // [Handler] 완료 단계에서 동의서를 저장
+  const completeHander = async () => {
+    await setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_CONSENT, 'add', data);
+    queryClient.invalidateQueries(SERVICE_CONSENT);
+  }
+  useEffect(() => {
+    console.log('consentList', consentList)
+  }, [isLoadingForList])
   const FirstStepComponent = () => {
     // 제 3자 제공 동의서의 경우
     if (type === 4)
-      return <InputInformationPage type={type} data={consentData} saveData={saveData} PPIData={PPIData} />
+      return <InputInformationPage type={type} data={data} saveData={saveData} PPIData={PPIData} />
     else
-      return <JobSelectionPage type={type} data={consentData} saveData={saveData} PIData={PIData} />
+      return <JobSelectionPage type={type} data={data} saveData={saveData} PIData={PIData} />
   };
+  // 사전에 있어야할 정보가 있는지 체크
+  const emptyCheckHandler = (type: number): boolean => {
+    // 개인정보 수집 및 이용 동의서, 
+    // 민감정보 수집 및 이용 동의서, 
+    // 마케팅 및 광고성 정보 수신 동의서 
+    // > 개인정보 수집 이용 표 정보의 유무 확인
+    if ([0, 1, 3].includes(type) && PIData?.length === 0) return true;
+    // 고유식별정보 수집 및 이용 동의서 > 개인정보 수집 이용 표 내 고유식별정보의 유무
+    const filtered = filteredNotUniqueData(PIData);
+    if (type === 2 && filtered?.length === 0) return true;
+    // 제3자 제공 동의서 > 개인정보 제공 표 정보의 유무
+    if (type === 4 && PPIData?.length === 0) return true;
+
+    return false;
+  }
 
   let component;
   switch (stepIndex) {
@@ -103,28 +128,28 @@ export const ConsentMain = () => {
     case 1:
       // 제 3자 제공 동의서의 경우
       if (type === 4) {
-        component = <ConfirmPage type={type} consentData={consentData} />;
+        component = <ConfirmPage type={type} consentData={data} />;
       } else {
-        component = <EnterInformationPage type={type} ids={consentData.subjects} PIData={PIData} consentData={consentData} saveData={saveData} />;
+        component = <EnterInformationPage type={type} ids={data.subjects} PIData={PIData} consentData={data} saveData={saveData} />;
       }
       break;
     case 2:
-      component = <ConfirmPage type={type} consentData={consentData} />;
+      component = <ConfirmPage type={type} consentData={data} />;
       break;
   }
-  if (stepIndex === -1) return <ConsentHomePage setType={setType} stepHandler={stepHandler} />
+  if (stepIndex === -1) return <ConsentHomePage setType={setType} stepHandler={stepHandler} emptyCheck={emptyCheckHandler} />
   return (
     <>
-      <StepInfoHeader type={type} stepIndex={stepIndex} stepHandler={stepHandler} />
+      <StepInfoHeader steps={steps} type={type} stepIndex={stepIndex} stepHandler={stepHandler} completeHander={completeHander} />
       {component}
     </>
   );
 };
 
-const ConsentHomePage = ({ setType, stepHandler }: any): JSX.Element => {
+const ConsentHomePage = ({ setType, stepHandler, emptyCheck }: any): JSX.Element => {
   return (
     <>
-      <CreateConsent setType={setType} stepHandler={stepHandler} />
+      <CreateConsent setType={setType} stepHandler={stepHandler} emptyCheck={emptyCheck} />
       <ConsentList />
     </>
   );
@@ -152,7 +177,7 @@ const ConsentCard = ({ title, description }: any): JSX.Element => {
   )
 }
 
-const CreateConsent = ({ setType, stepHandler }: any) => {
+const CreateConsent = ({ setType, stepHandler, emptyCheck }: any) => {
   const header: JSX.Element = (
     <div>
       <Button style={{ marginRight: 8 }} type='default'>동의서 생성 가이드</Button>
@@ -165,18 +190,21 @@ const CreateConsent = ({ setType, stepHandler }: any) => {
    * @param content Modal message
    */
   const onClickCardHandler = (type: number, title: string, content: string) => {
-    if (false)
+    if (emptyCheck(type)) {
       Modal.warning({
         title: title,
         icon: <ExclamationCircleOutlined />,
         content: content,
         okText: '입력하러가기'
       })
-    setType(type);
-    stepHandler(0);
+    }
+    else {
+      setType(type);
+      stepHandler(0);
+    }
   }
   return (
-    <EditableTableForm title='동의서 생성' tools={header}>
+    <EditableTableForm title='동의서 생성' tools={header} description={'이용자의 개인정보를 수집 및 이용하기 위해서는 각각의 처리 목적과 이용되는 항목 및 보유 기간을 안내하고 동의를 받아야 해요.\\n만약, 수집 및 이용하려는 개인정보 항목에 민감정보나 고유식별정보가 포함되어 있거나 홍보 또는 제3자 제공을 위한 경우에는 별도로 동의를 받아야 합니다.\\n필요한 동의서를 선택하면 개인정보 관리 메뉴에서 입력한 내용을 기반으로 간편하게 동의서를 만들 수 있습니다.'}>
       <StyleCardContainer>
         {consentList.map((info: any) => <div key={info.key} onClick={() => onClickCardHandler(info.key, info.emptyTitle, info.emptyMessage)}><ConsentCard title={info.name} description={info.description} /></div>)}
       </StyleCardContainer>
@@ -200,14 +228,14 @@ const ConsentList = () => {
     </EditableTableForm>
   )
 }
-const StepInfoHeader = ({ type, stepIndex, stepHandler }: any): JSX.Element => {
-  const steps: string[] = type === 4 ? ['정보 입력', '최종 확인'] : ['업무 선택', '정보 입력', '최종 확인'];
+const StepInfoHeader = ({ type, steps, stepIndex, stepHandler, completeHander }: any): JSX.Element => {
   const onMoveStep = (mode: string): void => {
     if (mode === 'prev') {
       stepIndex - 1 >= 0 ? stepHandler(stepIndex - 1) : undefined;
     } else if (mode === 'next') {
       stepIndex + 1 <= steps.length ? stepHandler(stepIndex + 1) : undefined;
     } else {
+      completeHander();
     }
   }
   return (
@@ -224,15 +252,15 @@ const InputInformationPage = ({ data, type, saveData, PPIData }: any): JSX.Eleme
   const [disadvantage, setDisadvantage] = useState(data.disadvantage || staticConsentData[type].disadvantage.example);
   const [visible, setVisible] = useState(false);
   const onClose = (): void => setVisible(false);
-  useEffect(() => saveData({ title, disadvantage }), [title, disadvantage]);
+  useEffect(() => saveData({ type, title, disadvantage }), [type, title, disadvantage]);
   return (
     <StyledJobSelection>
       <TitleComponent type={type} title={title} setTitle={setTitle} />
-      <SelectCompanyComponent subjects={data.subjects} PPIData={PPIData} saveData={saveData} />
+      <SelectCompanyComponent type={type} subjects={data.subjects} PPIData={PPIData} saveData={saveData} />
       <DisadvantageComponent type={type} disadvantage={disadvantage} setDisadvantage={setDisadvantage} />
       <AddEpiDataComponent type={type} onOpenModal={() => setVisible(!visible)} />
       <ConfirmCheckListComponent checked={data.checkList} type={type} saveData={saveData} />
-      <EditableModal onClose={onClose} epiData={data.epiData} saveData={saveData} visible={visible} />
+      <EditableModal type={type} onClose={onClose} epiData={data.epiData} saveData={saveData} visible={visible} />
     </StyledJobSelection>
   );
 }
@@ -250,7 +278,7 @@ const JobSelectionPage = ({ type, data, saveData, PIData }: any): JSX.Element =>
   const [subjects, setSubjects] = useState(data.subjects);
   // 불이익
   const [disadvantage, setDisadvantage] = useState(data.disadvantage || staticConsentData[type].disadvantage.example);
-  useEffect(() => saveData({ title, disadvantage, subjects }), [title, disadvantage, subjects]);
+  useEffect(() => saveData({ type, title, disadvantage, subjects }), [type, title, disadvantage, subjects]);
   const staticData = staticConsentData[type];
   return (
     <StyledJobSelection>
@@ -271,18 +299,22 @@ const EnterInformationPage = ({ ids, type, PIData, consentData, saveData }: any)
 
   return (
     <>
-      <SelectPIComponent originData={dataSource} data={filteredData(data, ids, type)} setData={setData} />
+      <SelectPIComponent type={type} originData={dataSource} data={filteredData(data, ids, type)} setData={setData} />
       <AddEpiDataComponent type={type} onOpenModal={() => setVisible(!visible)} />
       <ConfirmCheckListComponent checked={consentData.checkList} type={type} saveData={saveData} />
-      <EditableModal onClose={onClose} epiData={consentData.epiData} saveData={saveData} visible={visible} />
+      <EditableModal type={type} onClose={onClose} epiData={consentData.epiData} saveData={saveData} visible={visible} />
     </>
   )
 }
-const EditableModal: React.FC<any> = ({ onClose, epiData, saveData, visible }: any): JSX.Element => {
-  const content = <ConsentEPITable data={epiData} saveData={saveData} header={consentEPIHeader}></ConsentEPITable>;
+const EditableModal: React.FC<any> = ({ type, onClose, epiData, saveData, visible }: any): JSX.Element => {
+  const word = type === 4 ? '개인정보' : staticConsentData[type].word;
+  const header = consentEPIHeader;
+  header.purpose.name = `${word} 수집·이용 목적`;
+  header.items.name = `${word} 항목`;
+  const content = <ConsentEPITable description={`이용자의 동의 없이, 법령에 의거하여 수집 및 이용하고 있는 ${word}가 있다면 동의서에 함께 안내될 수 있도록 아래에 입력해 주세요.\\n‘${word} 항목’은 개인정보 수집·이용 현황표에 입력된 항목에서 선택 가능합니다.`} data={epiData} saveData={saveData} header={header}></ConsentEPITable>;
   // 컴포넌트 반환
   return (
-    <Modal centered footer={false} onCancel={onClose} maskClosable={false} style={{ fontFamily: 'Pretendard' }} title={''} visible={visible} width='80%'>{content}</Modal>
+    <Modal title={`법령에 근거한 ${word} 수집·이용`} centered footer={false} onCancel={onClose} maskClosable={false} style={{ fontFamily: 'Pretendard' }} visible={visible} width='80%'>{content}</Modal>
   );
 }
 
