@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 // Component
-import { Button, Col, Divider, Drawer, Form, Input, Row, Space, Table, Tabs } from 'antd';
+import { Button, Col, Divider, Drawer, Form, Input, Row, Table, Tabs } from 'antd';
 import { TOVInputGroup } from './common/Input';
 // Icon
 import { EditOutlined } from '@ant-design/icons';
@@ -29,7 +29,7 @@ export const Management: React.FC<any> = (): JSX.Element => {
   // 컴포넌트 반환
   return (
     <Layout>
-      <Tabs centered defaultActiveKey='company' onChange={(key: string): void => setChange(!change)} style={{ marginTop: 64 }} tabBarStyle={{ borderWidth: 0 }}>
+      <Tabs centered defaultActiveKey='company' onChange={(): void => setChange(!change)} style={{ marginTop: 64 }} tabBarStyle={{ borderWidth: 0 }}>
         <Tabs.TabPane key='company' tab='회사 정보'>
           <CommonSection>
             <CompanyInfoSection change={change} />
@@ -136,9 +136,9 @@ const OrganizationSection: React.FC<any> = (): JSX.Element => {
 
   // Drawer tools
   const extraElement: JSX.Element = (
-    <Space>
+    <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'flex-end' }}>
       <Button onClick={onSave} type='primary'>저장</Button>
-    </Space>
+    </div>
   );
 
   // 컴포넌트 반환
@@ -162,68 +162,46 @@ const OrganizationSection: React.FC<any> = (): JSX.Element => {
     </div>
   );
 }
-
+/** [Internal Component] 조직 구성원 정보 수정을 위한 Drawer */
 const EditableDrawer: React.FC<any> = ({ extra, onChange, onClose, row, visible }): JSX.Element => { 
   return (
-    <Drawer extra={extra} onClose={onClose} size='large' title='조직 정보 관리' visible={visible}>
+    <Drawer footer={extra} onClose={onClose} title='조직 구성원 정보 수정하기' visible={visible}>
       <Form>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item>
-              <TOVInputGroup label='이름' required>
-                <Input disabled value={row.name} />
-              </TOVInputGroup>
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item>
-              <TOVInputGroup label='부서'>
-                <Input onChange={(e: any): void => onChange('department', e.target.value)} value={row.department} />
-              </TOVInputGroup>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item>
-              <TOVInputGroup label='직책'>
-                <Input onChange={(e: any): void => onChange('position', e.target.value)} value={row.position} />
-              </TOVInputGroup>
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item>
-              <TOVInputGroup label='이메일'>
-                <Input disabled value={row.email} />
-              </TOVInputGroup>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item>
-              <TOVInputGroup label='연락처'>
-                <Input disabled value={row.contact} />
-              </TOVInputGroup>
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item>
-              <TOVInputGroup label='가입일'>
-                <Input disabled value={moment.unix(row.createAt).format('YYYY-MM-DD')} />
-              </TOVInputGroup>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={8}>
-          <Col span={24}>
-            <Form.Item>
-              <TOVInputGroup label='담당업무'>
-                <Input onChange={(e: any): void => onChange('task', e.target.value)} value={row.task} />
-              </TOVInputGroup>
-            </Form.Item>
-          </Col>
-        </Row>
+        <Form.Item style={{ marginBottom :0 }}>
+          <TOVInputGroup label='이름' required>
+            <Input disabled value={row.name} />
+          </TOVInputGroup>
+        </Form.Item>
+        <Form.Item style={{ marginBottom :0 }}>
+          <TOVInputGroup label='부서'>
+            <Input onChange={(e: any): void => onChange('department', e.target.value)} value={row.department} />
+          </TOVInputGroup>
+        </Form.Item>
+        <Form.Item style={{ marginBottom :0 }}>
+          <TOVInputGroup label='직책'>
+            <Input onChange={(e: any): void => onChange('position', e.target.value)} value={row.position} />
+          </TOVInputGroup>
+        </Form.Item>
+        <Form.Item style={{ marginBottom :0 }}>
+          <TOVInputGroup label='이메일'>
+            <Input disabled value={row.email} />
+          </TOVInputGroup>
+        </Form.Item>
+        <Form.Item style={{ marginBottom :0 }}>
+          <TOVInputGroup label='연락처'>
+            <Input disabled value={row.contact} />
+          </TOVInputGroup>
+        </Form.Item>
+        <Form.Item style={{ marginBottom :0 }}>
+          <TOVInputGroup label='가입일'>
+            <Input disabled value={moment.unix(row.createAt).format('YYYY-MM-DD')} />
+          </TOVInputGroup>
+        </Form.Item>
+        <Form.Item style={{ marginBottom :0 }}>
+          <TOVInputGroup label='담당업무'>
+            <Input onChange={(e: any): void => onChange('task', e.target.value)} value={row.task} />
+          </TOVInputGroup>
+        </Form.Item>
       </Form>
     </Drawer>
   );

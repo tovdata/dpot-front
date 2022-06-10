@@ -23,7 +23,7 @@ export const ConfirmSection: React.FC<ConfirmSectionProps> = ({ data, onChange, 
         <DIRowContent>
           <Row gutter={16}>
             <Col span={8}>
-              <DatePicker allowClear format='YYYY-MM-DD' mode='date' onChange={(value: any): void => onChange(sectionType, value ? value.format('YYYY-MM-DD') : '', 'applyAt')} placeholder='날짜 선택' style={{ width: 280 }} value={data.applyAt !== '' ? moment(data.applyAt, 'YYYY-MM-DD') : undefined} />
+              <DatePicker format='YYYY-MM-DD' mode='date' onChange={(value: any): void => onChange(sectionType, value !== null ? value.unix() : undefined, 'applyAt')} placeholder='날짜 선택' style={{ width: 280 }} value={data.applyAt ? moment.unix(data.applyAt) : undefined} />
             </Col>
           </Row>
         </DIRowContent>
@@ -51,7 +51,7 @@ export const ConfirmSection: React.FC<ConfirmSectionProps> = ({ data, onChange, 
                   <Col span={16} style={{ color: '#000000D9', fontSize: 14, fontWeight: '500', lineHeight: '22px' }}>개인정보 처리방침 URL</Col>
                 </Row>
                 <Row gutter={[16, 8]}>
-                  {prevList.map((item: any, index: number): JSX.Element => (<URLList date={item.applyAt} key={index} url={item.url} />))}
+                  {prevList.sort((a: any, b: any): number => a.applyAt > b.applyAt ? 1 : a.applyAt < b.applyAt ? -1 : 0).map((item: any, index: number): JSX.Element => (<URLList date={item.applyAt} key={index} url={item.url} />))}
                 </Row>
               </DIRowContent>
             ) : (<></>)}
@@ -66,7 +66,7 @@ const URLList: React.FC<any> = ({ date, url }): JSX.Element => {
   return (
     <>
       <Col span={8}>
-        <DatePicker disabled value={moment(date, 'YYYY-MM-DD')} style={{ width: '100%' }} />
+        <DatePicker disabled format='YYYY-MM-DD' value={moment.unix(date)} style={{ width: '100%' }} />
       </Col>
       <Col span={16}>
         <Input disabled value={url} />

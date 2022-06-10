@@ -33,7 +33,7 @@ const Sider = styled(Layout.Sider)<SiderProps>`
   background-color: #FFFFFF;
   height: ${(props: any) => props.scroll < 64 ? `calc(100vh - 64px + ${props.scroll}px)` : '100vh'};
   left: 0;
-  overflow-y: auto;
+  overflow-y: scroll;
   position: ${(props: any) => props.scroll >= 64 ? 'fixed' : 'relative'};
   top: 0;
   // 스크롤 보이기

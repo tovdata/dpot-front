@@ -46,9 +46,9 @@ const Page: NextPage = ({ expand, onExpand }: any) => {
       ) : (
         <div style={{ height: '100%', paddingBottom: 74, paddingTop: 74 }}>
           {progress === 'none' ? (
-            <PIPPMain list={isLoadingForList ? [] : list} onProcess={onProcess} status={status} />
+            <PIPPMain list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.version - a.version) : []} onProcess={onProcess} status={status} />
           ) : (
-            <CreatePIPPForm list={isLoadingForList ? [] : list} onBack={onBack} onUpdateStatus={onUpdateStatus} progress={progress} status={status} />
+            <CreatePIPPForm list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.applyAt - a.applyAt) : []} onBack={onBack} onUpdateStatus={onUpdateStatus} progress={progress} status={status} />
           )}
         </div>
       )}

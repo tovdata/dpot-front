@@ -307,7 +307,7 @@ const PrintElement: React.FC<PrintElementProps> = ({ data, printRef }): JSX.Elem
       </Descriptions>
       <div style={{ fontSize: 16, fontWeight: '500', lineHeight: '32px', marginTop: 84, textAlign: 'center' }}>
         <h4 style={{ marginBottom: 16 }}>{moment(data.date).year()}년 {moment(data.date).month() + 1}월 {moment(data.date).date()}일</h4>
-        <p style={{ margin: 0 }}>개인정보 보호책임자 {data.charger} (인)</p>
+        <p style={{ marginBottom: 0 }}>개인정보 보호책임자 <label style={{ marginLeft: 6 }}>{data.charger}</label> (인)</p>
       </div>
     </div>
   );
