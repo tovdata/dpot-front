@@ -16,6 +16,7 @@ export const SERVICE_PFNI = 'pfni';
 export const SERVICE_CFNI = 'cfni';
 export const SERVICE_PIPP = 'pipp';
 export const SERVICE_EPI = 'epi';
+export const SERVICE_ESI = 'esi';
 export const SERVICE_CONSENT = 'consent';
 /** API 서비스 목록 */
 export const SERVICE_LIST = [

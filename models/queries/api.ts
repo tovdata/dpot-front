@@ -218,6 +218,26 @@ export const setPIPPData = async (serviceId: string, data: any, status: string, 
   return await fetch(url, request);
 }
 
+export const setConsentData = async (serviceId: string, data: any, html?: string): Promise<any> => {
+  // 초기 저장인지 아닌지를 확인하여 API 호출을 위한 URL 정의
+  const url: string = `${SERVER_URL}consent/publish`;
+  // 초기 저장 여부에 따라 요청 데이터 생성
+  const body: any = {
+    serviceId: serviceId,
+    data: data,
+    htmlBody: html
+  };
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST'
+  };
+  // 응답 데이터 반환
+  return await fetch(url, request);
+}
 export const getConsentList = async (serviceId: string): Promise<any[]> => {
   // API 호출
   const response: Response = await fetch(`${SERVER_URL}consent/${serviceId}`);

@@ -242,7 +242,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
         }
       });
       // 중복 제거
-      const filtering = newItem.reduce((arr: string[], value: string) => { 
+      const filtering = newItem.reduce((arr: string[], value: string) => {
         if (!arr.includes(value)) {
           arr.push(value);
         }
@@ -420,10 +420,10 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
   if (dataSource?.length === 0)
     return (
       <>
-        <EmptyTable columns={createColumns(headers, true)} dataSource={dataSource} loading={isLoading} pagination={pagination ? undefined : false}/>  
+        <EmptyTable columns={createColumns(headers, true)} dataSource={dataSource} loading={isLoading} pagination={pagination ? undefined : false} />
         <EmptyTableFooter onClick={onCreate} />
       </>
-  );
+    );
   // Return an element
   return (
     <Table columns={createColumns(headers, true)} dataSource={dataSource} footer={footer} loading={isLoading} pagination={pagination ? undefined : false} />

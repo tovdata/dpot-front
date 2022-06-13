@@ -41,29 +41,6 @@ const StyledCheckListContainer = styled.div`
   }
 `;
 
-const StyleConfirmItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 2rem;
-  span{
-    white-space: pre-line;
-  }
-  .title{
-    display: flex;
-    flex-direction: row;
-    font-weight: 600;
-    font-size: 16px;
-    text-align: left;
-    .label{
-      margin-top: 0.1rem;
-      margin-right: 0.5rem;
-    }
-  }
-  .footer{
-    margin-top: 16px;
-  }
-`;
 
 /**
  * [Component] 동의서 제목
@@ -252,13 +229,15 @@ interface ConfirmItemProps {
   headerText?: string,
   footerText?: string
 }
+
 export const ConfirmItemComponent = ({ title, children, headerText, footerText }: ConfirmItemProps): JSX.Element => {
   return (
-    <StyleConfirmItem>
-      {title && <h2 className="title"><span className="label">◾️</span><span>{title}</span></h2>}
-      {headerText && <span className="header">{headerText}</span>}
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', marginTop: '2rem' }}>
+      {title && <h2 style={{ whiteSpace: 'pre-line', display: 'flex', flexDirection: 'row', fontWeight: 600, fontSize: '16px', textAlign: 'left' }} >
+        <span style={{ marginTop: '0.1rem', marginRight: '0.5rem' }}>◾️</span><span>{title}</span></h2>}
+      {headerText && <span>{headerText}</span>}
       {children}
-      {footerText && <span className="footer">{footerText}</span>}
-    </StyleConfirmItem>
+      {footerText && <span style={{ whiteSpace: 'pre-line', marginTop: '16px' }}>{footerText}</span>}
+    </div>
   )
 }

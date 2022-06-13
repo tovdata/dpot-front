@@ -83,38 +83,43 @@ export const defaultPIPPData: any = {
   }
 }
 // 동의서 리스트
-export const consentList = [
+export const staticConsentTexts = [
   {
     key: 0,
     name: '개인정보 수집 및 이용 동의서',
     emptyTitle: '입력된 정보가 없습니다.',
     emptyMessage: '‘개인정보 관리 메뉴’에서 개인정보 처리에 관한 내용을 입력하셔야 동의서를 만들 수 있어요!',
-    description: '서비스 제공에 필요한 필수 항목과 선택 동의 항목으로 구분하여 동의를 받아야만 해요!'
+    description: '서비스 제공에 필요한 필수 항목과 선택 동의 항목으로 구분하여 동의를 받아야만 해요!',
+    goto: '/pim/cu'
   },
   {
     key: 1,
     name: '민감정보 수집 및 이용 동의서',
     emptyTitle: '입력된 정보가 없습니다.',
     emptyMessage: '‘개인정보 관리 메뉴’에서 개인정보 처리에 관한 내용을 입력하셔야 동의서를 만들 수 있어요!',
-    description: '민감정보를 수집하고 이용하기 위해서는 별도의 동의를 받아야만 해요!'
+    description: '민감정보를 수집하고 이용하기 위해서는 별도의 동의를 받아야만 해요!',
+    goto: '/pim/cu'
   }, {
     key: 2,
     name: '고유식별정보 수집 및 이용 동의서',
     emptyTitle: '입력된 고유식별정보가 없습니다.',
     emptyMessage: '‘개인정보 관리 메뉴’에서 고유식별정보 처리에 관한 내용을 입력하셔야 동의서를 만들 수 있어요!',
-    description: '고유식별정보를 수집하고 이용하기 위해서는 별도의 동의를 받아야만 해요!'
+    description: '고유식별정보를 수집하고 이용하기 위해서는 별도의 동의를 받아야만 해요!',
+    goto: '/pim/cu'
   }, {
     key: 3,
     name: '마케팅 및 광고성 정보 수신 동의서',
     emptyTitle: '입력된 정보가 없습니다.',
     emptyMessage: '‘개인정보 관리 메뉴’에서 개인정보 처리에 관한 내용을 입력하셔야 동의서를 만들 수 있어요!',
-    description: '상품 혹은 서비스 홍보 및 판매를 위한 동의를 받는 경우, 이를 명확하게 인지할 수 있도록 알리고 동의를 받아야 해요.'
+    description: '상품 혹은 서비스 홍보 및 판매를 위한 동의를 받는 경우, 이를 명확하게 인지할 수 있도록 알리고 동의를 받아야 해요.',
+    goto: '/pim/cu'
   }, {
     key: 4,
     name: '제3자 제공 동의서',
     emptyTitle: '입력된 정보가 없습니다.',
     emptyMessage: '‘개인정보 관리 메뉴’에서 개인정보 제3자 제공에 관한 내용을 입력하셔야 동의서를 만들 수 있어요!',
-    description: '제3자 제공에 대한 동의를 받는 경우, 서비스 제공에 필요한 동의와 구분하여 이를 명확하게 인지할 수 있도록 알리고 각각 동의를 받아야 해요.'
+    description: '제3자 제공에 대한 동의를 받는 경우, 서비스 제공에 필요한 동의와 구분하여 이를 명확하게 인지할 수 있도록 알리고 각각 동의를 받아야 해요.',
+    goto: '/pim/pc'
   }
 ];
 export const defaultConsentData: any = {

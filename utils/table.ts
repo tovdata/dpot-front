@@ -1,5 +1,5 @@
 import { TableHeadersData, SelectOptionsByColumn } from '../models/type';
-import { SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_EPI } from '../models/queries/type';
+import { SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_EPI, SERVICE_ESI } from '../models/queries/type';
 import { returnUniqueInfo } from './consent';
 
 /**
@@ -122,8 +122,10 @@ export const resetSelectOptions = (dataSource: any, headers: TableHeadersData, t
       // options['items'] = extractProcessingItems(ref)?.filter((item: string): boolean => !options['items'].includes(item)).concat(options['items']);
       break;
     case SERVICE_PPI:
-      options['items'] = extractProcessingItems(ref);
     case SERVICE_EPI:
+      options['items'] = extractProcessingItems(ref);
+      break;
+    case SERVICE_ESI:
       options['items'] = returnUniqueInfo(extractProcessingItems(ref));
       break;
     case SERVICE_PFNI:
