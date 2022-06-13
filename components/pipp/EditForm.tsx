@@ -269,7 +269,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
     consignment = refTables.cpi ? refTables.cpi.map((row: any): string => row.subject) : [];
     // 이전 개인정보 처리방침 목록 생성
     if (data.cInfo.previous.usage) {
-      prevPIPPList.push({ label: '이전 개인정보 처리방침', value: data.cInfo.previous.url });
+      prevPIPPList.push({ label: '이전 개인정보 처리방침', value: `https://${data.cInfo.previous.url}` });
     }
   }
   // 이전 개인정보 처리방침 리스트 추가

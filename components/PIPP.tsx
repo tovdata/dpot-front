@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useEffect, useState } from 'react';
 // Component
 import { Button, Col, Input, Modal, Popover, Result, Row, Table, Tag } from 'antd';
@@ -51,7 +51,7 @@ export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
           { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value / 1000).format('YYYY-MM-DD HH:mm'), sorter: (a: any, b: any): number => a.createAt - b.createAt },
           { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value).format('YYYY-MM-DD'), sorter: (a: any, b: any): number => a.applyAt - b.applyAt },
           { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => <a href={value} style={{ color: '#000000D9', cursor: 'pointer' }} target='_blank' rel='noreferrer'><LinkOutlined /></a> }
-        ]} dataSource={list} />
+        ]} dataSource={list} showSorterTooltip={false} />
       </StyledTableForm>
     </>
   );
@@ -60,9 +60,17 @@ export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
  * [Component] 개인정보 처리방침 생성 페이지
  */
 export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, progress, status }: any): JSX.Element => {
-  const { isLoading, data: loadData } = useQuery(SERVICE_PIPP, async () => await getPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  // 데이터 불러오기에 대한 상태
+  const [loading, setLoading] = useState<boolean>(true);
+  // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
+  const { isLoading: isLoadingForData, data: loadData } = useQuery(SERVICE_PIPP, async () => await getPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   // 테이블 데이터 쿼리 (API 호출)
   const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', type as PIMType) })));
+  // 로딩 데이터 Hook
+  useEffect(() => setLoading(isLoadingForData || results.some((result: any): boolean => result.isLoading)), [isLoadingForData, results]);
+  // 임시 저장 데이터가 있을 경우, 데이터 갱신
+  useEffect(() => (progress === 'update' && !isLoadingForData && loadData !== undefined) ? setData({ ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi } }) : undefined, [isLoadingForData]);
+
   // 단계에 대한 Title
   const steps: string[] = ['입력사항 확인', '처리방침 편집', '최종 확인'];
   // 현재 Step, 쿼리 상태, 참조 데이터에 대한 상태 생성
@@ -98,12 +106,6 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
   const [data, setData] = useState<any>(defaultPIPPData);
   // 생성된 URL
   const [url, setUrl] = useState<string>('');
-
-  useEffect(() => {
-    if (progress === 'update' && loadData) {
-      setData({ ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi } });
-    }
-  }, [isLoading]);
 
   // 요청으로 응답된 데이터 가공 및 처리
   if (results.every((result: any): boolean => !result.isLoading)) {
@@ -288,25 +290,26 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
       row['selectionItems'].forEach((item: string): number => !itemForPI.includes(item) ? itemForPI.push(item) : 0);
     }
   });
+  
   // 컴포넌트 반환
   return (
     <>
-      {isLoading ? (
+      {loading ? (
         <BasicPageLoading />
       ) : (
         <>
           <PageHeaderContainStep current={stepIndex} goTo='/doc/pipp' onBack={onBack} onMove={onMoveStep} onSave={onSave} title='개인정보 처리방침 만들기' steps={steps} />
-          <div style={{ display: stepIndex === 0 ? 'block' : 'none', marginBottom: '3rem' }}>
-            <CollapseForPIPP data={data.aInfo} items={itemForPI} onChange={onChange} />
-          </div>
-          <div style={{ display: stepIndex === 1 ? 'block' : 'none' }}>
+          {stepIndex === 0 ? (
+            <div style={{ marginBottom: '3rem' }}>
+              <CollapseForPIPP data={data.aInfo} items={itemForPI} onChange={onChange} />
+            </div>
+          ) : stepIndex === 1 ? (
             <CreatePIPP data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTable={ref} />
-          </div>
-          <div style={{ display: stepIndex === 2 ? 'block' : 'none' }}>
-            <ConfirmSection data={data.cInfo} onChange={onChange} prevList={list.filter((item: any): boolean => !item.prev)} sectionType='cInfo' />
-          </div>
+          ) : stepIndex === 2 ? (
+            <ConfirmSection data={data.cInfo} onChange={onChange} prevList={list.filter((item: any): boolean => item.version !== 0)} sectionType='cInfo' />
+          ) : (<></>)}
           <DRModal centered onCancel={onClose} onOk={() => onSave(false)} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
-            <PreviewSection data={data} preview={false} prevList={list.filter((item: any): boolean => !item.prev)} refTables={ref} stmt={stmt(data.dInfo.name)} />
+            <PreviewSection data={data} preview={false} prevList={list.filter((item: any): boolean => item.version !== 0)} refTables={ref} stmt={stmt(data.dInfo.name)} />
           </DRModal>
           <Modal centered footer={false} onCancel={() => {setVisible2(false); onBack()}} visible={visible2} width={420}>
             <div style={{ textAlign: 'center' }}>

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import React from 'react';
+import React, { useMemo } from 'react';
 // Component
 import { Collapse, Descriptions, Input, Popover, Radio, Space } from 'antd';
 // Data

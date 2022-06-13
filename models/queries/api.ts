@@ -91,7 +91,7 @@ export const getPIItems = async (serviceId: string): Promise<any[]> => {
   // 응답 데이터 추출
   const result = await extractData(response);
   // 결과 반환
-  return result.result ? result.data : [];
+  return result.result ? result.data.sort() : [];
 }
 /**
  * [API Caller] 테이블 유형에 따른 데이터 불러오기
