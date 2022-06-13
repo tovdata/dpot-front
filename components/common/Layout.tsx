@@ -1,7 +1,7 @@
 import Router from 'next/router';
 import { useEffect, useState } from 'react';
 // Component
-import { Layout } from 'antd';
+import { Dropdown, Layout, Menu } from 'antd';
 import Link from 'next/link';
 import { TOVSideMenu } from './SideMenu';
 // Icon
@@ -33,7 +33,7 @@ const Sider = styled(Layout.Sider)<SiderProps>`
   background-color: #FFFFFF;
   height: ${(props: any) => props.scroll < 64 ? `calc(100vh - 64px + ${props.scroll}px)` : '100vh'};
   left: 0;
-  overflow-y: auto;
+  overflow-y: scroll;
   position: ${(props: any) => props.scroll >= 64 ? 'fixed' : 'relative'};
   top: 0;
   // 스크롤 보이기
@@ -102,6 +102,15 @@ export const TOVPageLayout: React.FC<TOVPageLayoutProps> = ({ children, expand, 
 }
 /** [Component] 페이지 레이아웃 (헤더) */
 export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
+  //
+  const items = [
+    { label: (<a href='/my'>내 정보</a>), key: 'info' },
+    { label: (<a>나의 활동내역</a>), key: 'active' },
+    { type: 'divider' },
+    { label: (<a href='/login'>로그아웃</a>), key: 'sign'}
+  ]
+
+  // 컴포넌트 반환
   return (
     <Header>
       <div>
@@ -112,9 +121,12 @@ export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
       <HeaderNav>
         <HeaderMenuItem>사용가이드</HeaderMenuItem>
         <HeaderMenuItem onClick={() => Router.push('/company/info')}>회사 관리</HeaderMenuItem>
-        <span onClick={() => Router.push('/login')} style={{ cursor: 'pointer', marginLeft: 12 }}>
+        <Dropdown overlay={<Menu items={items} />} trigger={['click']}>
           <UserOutlined />
-        </span>
+        </Dropdown>
+        {/* <span onClick={() => Router.push('/login')} style={{ cursor: 'pointer', marginLeft: 12 }}>
+          <UserOutlined />
+        </span> */}
       </HeaderNav>
     </Header>
   );
@@ -123,8 +135,17 @@ export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
 const TOVPageSide: React.FC<TOVPageSideProps> = ({ expand, onExpand, scroll, selectedKey }): JSX.Element => {
   return (
     <Sider collapsed={!expand} collapsedWidth={88} scroll={scroll} width={246}>
-      <div style={{ borderRight: '1px solid #F0F0F0', height: '100%', paddingTop: 32 }}>
-        <TOVSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
+      <div style={{ borderRight: '1px solid #F0F0F0', minHeight: '100%', paddingTop: 32 }}>
+        <div style={{ flex: 1 }}>
+          <TOVSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
+        </div>
+        <div style={{ alignItems: 'center', display: expand ? 'flex' : 'none', flexDirection: 'column', justifyContent: 'space-between', padding: 24 }}>
+          <div style={{ cursor: 'pointer', fontSize: 11, lineHeight: '20px', marginBottom: 8 }}>
+            <a style={{ borderRight: '1px solid #8C8C8C', color: '#8C8C8C', fontWeight: '700', paddingLeft: 10, paddingRight: 10 }}>개인정보처리방침</a>
+            <a style={{ color: '#8C8C8C', fontWeight: '400', paddingLeft: 10, paddingRight: 10 }}>이용약관</a>
+          </div>
+          <p style={{ color: '#8C8C8C', fontSize: 11, fontWeight: '400', lineHeight: '16px', marginBottom: 0, textAlign: 'center' }}>©2022. TOVDATA Inc.</p>
+        </div>
       </div>
     </Sider>
   );

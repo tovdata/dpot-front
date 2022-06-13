@@ -234,8 +234,15 @@ export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, link
     </ul>
   ) : (<></>);
 }
-export const DDRowTableForm = styled.div<{ preview?: boolean }>`
-  margin-bottom: 8px;
+/** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 테이블 폼 */
+export const DDRowTableForm: React.FC<any> = ({ children, preview }): JSX.Element => {
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <StyledDDRowTableForm preview={preview}>{children}</StyledDDRowTableForm>
+    </div>
+  );
+}
+const StyledDDRowTableForm = styled.div<{ preview?: boolean }>`
   table .ant-table-thead > tr > th {
     font-size: 13px;
     font-weight: 400;

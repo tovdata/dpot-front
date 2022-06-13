@@ -25,8 +25,8 @@ export const processResponse = async (response: Response, mode?: string): Promis
 export const processArrayResponse = async (response: Response): Promise<any[]> => {
   const result: ResponseDF = await transformData(response);
   // 데이터 정렬
-  if (result.data.length > 0 && 'unix' in result.data[0]) {
-    result.data.sort((a: any, b: any): number => a.unix > b.unix ? 1 : a.unix < b.unix ? -1 : 0);
+  if (result.data.length > 0 && 'createAt' in result.data[0]) {
+    result.data.sort((a: any, b: any): number => a.createAt - b.createAt);
   }
   // 데이터 반환
   return result.result ? result.data.map((elem: any): any => ({ ...elem, key: elem.id })) : [];
@@ -41,9 +41,12 @@ export const processArrayResponse = async (response: Response): Promise<any[]> =
 export const createRequest = (serviceId: string, mode: string, data: any): RequestDF => {
   // 데이터 복사 (깊은 복사)
   const copy: any = JSON.parse(JSON.stringify(data));
-  // id, key 속성 삭제
+  // Timestamp 추출
+  const createAt: number|undefined = data.createAt;
+  // id, key, unix 속성 삭제
   delete copy.id;
   delete copy.key;
+  delete copy.createAt;
   // Request 정의
   const request: RequestDF = {
     body: '',
@@ -61,7 +64,7 @@ export const createRequest = (serviceId: string, mode: string, data: any): Reque
       request.method = 'DELETE';
       break;
     case 'save':
-      request.body = JSON.stringify({ data: copy });
+      request.body = JSON.stringify({ createAt: Number(createAt), data: copy });
       request.method = 'PUT';
       break;
   }
@@ -103,7 +106,7 @@ const transformData = async (response: Response): Promise<ResponseDF> => {
     // ID 값 추출
     const id: string = (item.id as StringDF).S;
     // 생성일 추출
-    const unix: number|undefined = ('id' in item) ? (item.createAt as NumberDF).N : undefined;
+    const createAt: number|undefined = ('createAt' in item) ? (item.createAt as NumberDF).N : undefined;
     // Data 속성이 없는 경우, 데이터를 추출하지 않음
     const data: any = ('data' in item) ? {} : undefined;
     // 행(Row)에 대한 데이터 추출
@@ -120,7 +123,7 @@ const transformData = async (response: Response): Promise<ResponseDF> => {
       }
     }
     // 추출된 데이터 저장
-    transformed.push({ id, unix, ...data });
+    transformed.push({ id, createAt, ...data });
   }
   // 결과 반환
   return { result: result.result, data: transformed };

@@ -6,7 +6,9 @@ import { AddableTagSelect } from '../common/Select';
 // Data
 import { certificationForPIPP, methodOfConfirmConsentOfLegalRepresentative, periodOfRetentionAndUseOfPersonalInformation } from '../../models/static/selectOption';
 import { YesOrNoRadioButton } from '../common/Radio';
-import { DownOutlined } from '@ant-design/icons';
+// Module
+import moment from 'moment';
+
 /**
  * [Internal Function] 공백 확인 함수 
  * @param value 공백 확인을 위한 문자열
@@ -267,18 +269,18 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
     consignment = refTables.cpi ? refTables.cpi.map((row: any): string => row.subject) : [];
     // 이전 개인정보 처리방침 목록 생성
     if (data.cInfo.previous.usage) {
-      prevPIPPList.push({ label: `${data.cInfo.applyAt} 이전`, value: data.cInfo.previous.url });
+      prevPIPPList.push({ label: '이전 개인정보 처리방침', value: `https://${data.cInfo.previous.url}` });
     }
   }
   // 이전 개인정보 처리방침 리스트 추가
-  prevList ? prevPIPPList.push(...prevList.map((item: any): any => ({ label: item.applyAt, value: item.url }))) : undefined;
+  prevList ? prevPIPPList.unshift(...prevList.map((item: any): any => ({ label: moment.unix(item.applyAt).format('YYYY-MM-DD'), value: item.url }))) : undefined;
 
   // 컴포넌트 반환
   return (
     <div id={preview ? 'preview' : 'report'}>
       <h2 ref={refElements ? (el: any) => (refElements.current[0] = el) : undefined} style={{ fontSize: preview ? 18 : 24, fontWeight: '700', lineHeight: '22px', marginBottom: 30, textAlign: 'center' }}>{stmt.title}</h2>
       {!preview ? (
-        <p style={{ color: '#262626', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 32, textAlign: 'right' }}>{data.cInfo.applyAt}</p>
+        <p style={{ color: '#262626', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 32, textAlign: 'right' }}>{moment.unix(data.cInfo.applyAt).format('YYYY-MM-DD')}</p>
       ) : (<></>)}
       <DDRow>
         <DDRowContent items={[`${stmt.introduction}`]} />
@@ -361,6 +363,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
         {data.dInfo.ppi.usage ? (
           <>
             <DDRowHeader title={stmt.ppi.title} />
+            { console.log('url', data.dInfo.ppi) }
             <DDRowContent items={stmt.ppi.content.common[1]} links={data.dInfo.ppi.url ? ['', data.dInfo.ppi.url] : undefined} />
             <ReadableTable columns={[
               { title: '제공받는 자', dataIndex: 'recipient', key: 'recipient', width: '16%' },
@@ -662,7 +665,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
             <>
               <DDRowHeader title='이전 개인정보 처리방침' />
               <select id='prev-list' onChange={(e: any) => e.target.value !== 'none' ? window.open(e.target.value, '_blank') : undefined} style={{ border: '1px solid #C0C0C0', padding: '6px 9px' }}>
-                <option key={-1} value='none'>이전 개인정보 처리방침</option>
+                <option key={-1} value='none'>선택하세요.</option>
                 {prevPIPPList.map((item: any, index: number): JSX.Element => (
                   <option key={index} value={item.value}>
                     {item.label}

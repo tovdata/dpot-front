@@ -75,7 +75,7 @@ export const defaultPIPPData: any = {
     }
   },
   cInfo: {
-    applyAt: '',
+    applyAt: undefined,
     previous: {
       url: '',
       usage: undefined

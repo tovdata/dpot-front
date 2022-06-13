@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useEffect, useState } from 'react';
 // Component
 import { Button, Col, Input, Modal, Popover, Result, Row, Table, Tag } from 'antd';
@@ -46,12 +46,12 @@ export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
       <StyledTableForm>
         <TableFormHeader title='개인정보 처리방침 이력' />
         <Table columns={[
-          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number, record: any): string => record.prev ? '개인정보 처리방침 (외부)' : `개인정보 처리방침 (ver. ${value})` },
-          { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (_: string, record: any): JSX.Element => list ? record.prev ? (<Tag color='default'>외부링크</Tag>) : record.version === list.length - 1 ? (<Tag color='geekblue'>현재</Tag>) : (<Tag color='green'>이전</Tag>) : (<></>) },
-          { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number, record: any): string => record.prev ? '' : moment.unix(value / 1000).format('YYYY-MM-DD HH:mm'), defaultSortOrder: 'ascend', sorter: (a: any, b: any) => a.createAt < b.createAt ? 1 : a.createAt > b.createAt ? -1 : 0 },
-          { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt', render: (value: string, record: any): string => record.prev ? '' : value },
+          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number, record: any): string => record.version === 0 ? '이전 개인정보 처리방침' : `개인정보 처리방침 (ver. ${value === 9999 ? 'latest' : value})`, sorter: (a: any, b: any): number => a.version - b.version },
+          { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (_: string, record: any): JSX.Element => list ? record.version === 0 ? (<Tag color='default'>외부링크</Tag>) : record.version === 9999 ? (<Tag color='geekblue'>현재</Tag>) : (<Tag color='green'>이전</Tag>) : (<></>) },
+          { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value / 1000).format('YYYY-MM-DD HH:mm'), sorter: (a: any, b: any): number => a.createAt - b.createAt },
+          { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value).format('YYYY-MM-DD'), sorter: (a: any, b: any): number => a.applyAt - b.applyAt },
           { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => <a href={value} style={{ color: '#000000D9', cursor: 'pointer' }} target='_blank' rel='noreferrer'><LinkOutlined /></a> }
-        ]} dataSource={list} />
+        ]} dataSource={list} showSorterTooltip={false} />
       </StyledTableForm>
     </>
   );
@@ -60,7 +60,17 @@ export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
  * [Component] 개인정보 처리방침 생성 페이지
  */
 export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, progress, status }: any): JSX.Element => {
-  const { isLoading, data: loadData } = useQuery(SERVICE_PIPP, async () => await getPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  // 데이터 불러오기에 대한 상태
+  const [loading, setLoading] = useState<boolean>(true);
+  // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
+  const { isLoading: isLoadingForData, data: loadData } = useQuery(SERVICE_PIPP, async () => await getPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  // 테이블 데이터 쿼리 (API 호출)
+  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', type as PIMType) })));
+  // 로딩 데이터 Hook
+  useEffect(() => setLoading(isLoadingForData || results.some((result: any): boolean => result.isLoading)), [isLoadingForData, results]);
+  // 임시 저장 데이터가 있을 경우, 데이터 갱신
+  useEffect(() => (progress === 'update' && !isLoadingForData && loadData !== undefined) ? setData({ ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi } }) : undefined, [isLoadingForData]);
+
   // 단계에 대한 Title
   const steps: string[] = ['입력사항 확인', '처리방침 편집', '최종 확인'];
   // 현재 Step, 쿼리 상태, 참조 데이터에 대한 상태 생성
@@ -97,11 +107,45 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
   // 생성된 URL
   const [url, setUrl] = useState<string>('');
 
-  useEffect(() => {
-    if (progress === 'update' && loadData) {
-      setData(loadData);
+  // 요청으로 응답된 데이터 가공 및 처리
+  if (results.every((result: any): boolean => !result.isLoading)) {
+    if (!initQuery) {
+      setInitQuery(true);
+      // 가공을 위한 임시 데이터 셋 정의
+      const tempRef: any = {};
+      const tempData: any = JSON.parse(JSON.stringify(data.dInfo));
+      // 데이터 가공 및 처리
+      SERVICE_LIST.forEach((type: string, index: number): any => {
+        tempRef[type] = results[index].isSuccess ? results[index].data ? results[index].data : [] : [];
+        // URL filter
+        if ((type === SERVICE_PI || type === SERVICE_PPI || type === SERVICE_CPI || type === SERVICE_FNI || type === SERVICE_CFNI || type === SERVICE_PFNI) && tempRef[type].length > 0) {
+          if (type in tempData) {
+            tempData[type].usage = true;
+          }
+          // Extract a url
+          if (type === SERVICE_PPI || type === SERVICE_PFNI || type === SERVICE_CPI || type === SERVICE_CFNI) {
+            let isUrl: boolean = false;
+            tempRef[type] = tempRef[type].filter((row: any): boolean => {
+              if (row['url'] === undefined) {
+                return true;
+              } else {
+                isUrl = true;
+                tempData[type] !== undefined ? tempData[type].url = row['url'] : undefined;
+                return false;
+              }
+            });
+            if (!isUrl) {
+              tempData[type].url = undefined;
+            }
+          }
+        }
+      });
+      // 참조 데이터 갱신
+      setRef(tempRef);
+      // 상태 데이터 갱신
+      setData({ ...data, dInfo: { ...tempData } });
     }
-  }, [isLoading]);
+  }
 
   /** [Event handler] 데이터 변경 이벤트 */
   const onChange = (step: string, value: any, category: string, property?: string, subProperty?: string): void => {
@@ -195,7 +239,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
       }
     } else if (type === 'complete') {
       const cInfo: any = data.cInfo;
-      if (blankCheck(cInfo.applyAt)) {
+      if (cInfo.applyAt === undefined) {
         warningNotification('개인정보 처리방침 최종 게재일을 선택해주세요.');
       } else if (cInfo.previous.usage === undefined) {
         warningNotification('이전 처리방침 여부를 선택 해주세요.');
@@ -236,43 +280,6 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
   /** [Query handler] API를 요청하여 데이터를 갱신하기 위해 호출되는 함수 */
   const onRefresh = (): void => setInitQuery(false);
 
-  // 데이터 쿼리 (API 호출)
-  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', type as PIMType) })));
-  // 요청으로 응답된 데이터 가공 및 처리
-  if (results.every((result: any): boolean => !result.isLoading)) {
-    if (!initQuery) {
-      setInitQuery(true);
-      // 가공을 위한 임시 데이터 셋 정의
-      const tempRef: any = {};
-      const tempData: any = JSON.parse(JSON.stringify(data.dInfo));
-      // 데이터 가공 및 처리
-      SERVICE_LIST.forEach((type: string, index: number): any => {
-        tempRef[type] = results[index].isSuccess ? results[index].data ? results[index].data : [] : [];
-        // URL filter
-        if ((type === SERVICE_PI || type === SERVICE_PPI || type === SERVICE_CPI || type === SERVICE_FNI || type === SERVICE_CFNI || type === SERVICE_PFNI) && tempRef[type].length > 0) {
-          if (type in tempData) {
-            tempData[type].usage = true;
-          }
-          // Extract a url
-          if (type === SERVICE_PPI || type === SERVICE_PFNI || type === SERVICE_CPI || type === SERVICE_CFNI) {
-            tempRef[type] = tempRef[type].filter((row: any): boolean => {
-              if (row['url'] === undefined) {
-                return true;
-              } else {
-                tempData[type] !== undefined ? tempData[type].url = row['url'] : undefined;
-                return false;
-              }
-            });
-          }
-        }
-      });
-      // 참조 데이터 갱신
-      setRef(tempRef);
-      // 상태 데이터 갱신
-      setData({ ...data, dInfo: { ...tempData } });
-    }
-  }
-
   // 개인정보 수집 및 이용 데이터 및 라벨링을 위한 데이터 가공 (개인정보 수집 항목)
   const itemForPI: string[] = [];
   ref.pi.forEach((row: any): void => {
@@ -283,25 +290,26 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
       row['selectionItems'].forEach((item: string): number => !itemForPI.includes(item) ? itemForPI.push(item) : 0);
     }
   });
+  
   // 컴포넌트 반환
   return (
     <>
-      {isLoading ? (
+      {loading ? (
         <BasicPageLoading />
       ) : (
         <>
           <PageHeaderContainStep current={stepIndex} goTo='/doc/pipp' onBack={onBack} onMove={onMoveStep} onSave={onSave} title='개인정보 처리방침 만들기' steps={steps} />
-          <div style={{ display: stepIndex === 0 ? 'block' : 'none', marginBottom: '3rem' }}>
-            <CollapseForPIPP data={data.aInfo} items={itemForPI} onChange={onChange} />
-          </div>
-          <div style={{ display: stepIndex === 1 ? 'block' : 'none' }}>
+          {stepIndex === 0 ? (
+            <div style={{ marginBottom: '3rem' }}>
+              <CollapseForPIPP data={data.aInfo} items={itemForPI} onChange={onChange} />
+            </div>
+          ) : stepIndex === 1 ? (
             <CreatePIPP data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTable={ref} />
-          </div>
-          <div style={{ display: stepIndex === 2 ? 'block' : 'none' }}>
-            <ConfirmSection data={data.cInfo} onChange={onChange} prevList={list.filter((item: any): boolean => !item.prev)} sectionType='cInfo' />
-          </div>
+          ) : stepIndex === 2 ? (
+            <ConfirmSection data={data.cInfo} onChange={onChange} prevList={list.filter((item: any): boolean => item.version !== 0)} sectionType='cInfo' />
+          ) : (<></>)}
           <DRModal centered onCancel={onClose} onOk={() => onSave(false)} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
-            <PreviewSection data={data} preview={false} prevList={list.filter((item: any): boolean => !item.prev)} refTables={ref} stmt={stmt(data.dInfo.name)} />
+            <PreviewSection data={data} preview={false} prevList={list.filter((item: any): boolean => item.version !== 0)} refTables={ref} stmt={stmt(data.dInfo.name)} />
           </DRModal>
           <Modal centered footer={false} onCancel={() => {setVisible2(false); onBack()}} visible={visible2} width={420}>
             <div style={{ textAlign: 'center' }}>
@@ -324,6 +332,17 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
  * [Internal Component] 개인정보 처리방침 메인 페이지 Header (현재 문서 작성에 대한 상태에 따라 내용 변경)
  */
 const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProcess): JSX.Element => {
+  // 확인 모달 생성
+  const confirm = () => Modal.confirm({
+    cancelText: '아니오',
+    centered: true,
+    content: '이전에 입력되어있던 내용은 삭제됩니다.',
+    okText: '예',
+    onOk: () => onProcess('create'),
+    title: '처음부터 다시 만드시겠습니까?',
+  });
+
+  // 컴포넌트 반환
   return (
     <div style={{ marginBottom: 84, userSelect: 'none' }}>
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 36 }}>
@@ -348,7 +367,7 @@ const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProces
         ) : status === 'progress' ? (
           <span>
             <Button icon={<EditOutlined />} onClick={() => onProcess('update')} type='primary' style={{ marginRight: 16 }}>이어 만들기</Button>
-            <Button icon={<PlusOutlined />} onClick={() => onProcess('create')} type='default'>문서 생성하기</Button>
+            <Button icon={<PlusOutlined />} onClick={confirm} type='default'>문서 생성하기</Button>
           </span>
         ) : (
           <Button icon={<RedoOutlined />} onClick={() => onProcess('update')} type='primary'>문서 업데이트</Button>

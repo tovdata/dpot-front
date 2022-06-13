@@ -91,7 +91,7 @@ export const getPIItems = async (serviceId: string): Promise<any[]> => {
   // 응답 데이터 추출
   const result = await extractData(response);
   // 결과 반환
-  return result.result ? result.data : [];
+  return result.result ? result.data.sort() : [];
 }
 /**
  * [API Caller] 테이블 유형에 따른 데이터 불러오기
@@ -173,14 +173,12 @@ export const getPIPPList = async (serviceId: string): Promise<any[]> => {
   // 응답 데이터 추출
   const result: ResponseDF = await extractData(response);
   // 데이터 가공
-  let sorted: any[] = [];
+  const sorted: any[] = [];
   if (result.result) {
     // 데이터 정렬
-    sorted.push(...result.data.list.sort((a: any, b: any): number => a.createAt > b.createAt ? 1 : a.createAt < b.createAt ? -1 : 0));
-    // 데이터 가공
-    sorted = sorted.map((item: any, index: number) => ({ ...item, key: index + 1, prev: false, version: index + 1 }));
+    sorted.push(...result.data.list.sort((a: any, b: any): number => a.applyAt - b.applyAt).map((item: any, index: number): any => ({ ...item, key: index + 1, version: index === result.data.list.length - 1 ? 9999 : index + 1 })));
     // Prev가 있을 경우 추가
-    result.data.prevUrl !== '' ? sorted.unshift({ createAt: 100, key: 0, prev: true, url: result.data.prevUrl }) : undefined;
+    result.data.prevUrl !== '' ? sorted.unshift({ createAt: 100, key: 0, version: 0, url: result.data.prevUrl }) : undefined;
   }
   // 데이터 가공 및 반환
   return sorted;

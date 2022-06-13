@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 // Component
-import { Button, Col, Divider, Drawer, Form, Input, Row, Table, Tabs } from 'antd';
+import { Button, Col, Divider, Drawer, Form, Input, Modal, Row, Table, Tabs } from 'antd';
 import { TOVInputGroup } from './common/Input';
 // Icon
 import { EditOutlined } from '@ant-design/icons';
@@ -32,7 +32,7 @@ export const Management: React.FC<any> = (): JSX.Element => {
       <Tabs centered defaultActiveKey='company' onChange={(): void => setChange(!change)} style={{ marginTop: 64 }} tabBarStyle={{ borderWidth: 0 }}>
         <Tabs.TabPane key='company' tab='회사 정보'>
           <CommonSection>
-            <CompanyInfoSection change={change} />
+            <UserInfoSection change={change} />
           </CommonSection>
         </Tabs.TabPane>
         <Tabs.TabPane key='organization' tab='개인정보 보호조직'>
@@ -44,57 +44,75 @@ export const Management: React.FC<any> = (): JSX.Element => {
     </Layout>
   );
 }
-/** [Internal Component] 회사 정보 관리 Section */
-const CompanyInfoSection: React.FC<any> = ({ change }): JSX.Element => {
+/** [Component] 내 정보 관리 Section */
+export const UserInfoSection: React.FC<any> = ({ change, style }): JSX.Element => {
   // Form 객체 생성
   const [form] = Form.useForm();
   // 탭 변경에 따라 Form 내에 필드 초기화
   useEffect(() => form.resetFields(), [change, form]);
 
+  // 모달 Open 상태
+  const [visible, setVisible] = useState<boolean>(false);
+  /** [Event handler] 모달 열기 */
+  const onOpen = () => setVisible(true);
+  /** [Event handler] 모달 닫기 */
+  const onCancel = () => setVisible(false);
+  // 비밀번호 확인 함수
+  const confirmPassword = ({ getFieldValue }: any) => ({ validator(_: any, value: string) {
+    return !value || getFieldValue('password') === value ? Promise.resolve() : Promise.reject(new Error('비밀번호가 일치하지 않습니다.'));
+  } });
+
   // 컴포넌트 반환
   return (
-    <Form form={form} style={{ marginLeft: 'auto', marginRight: 'auto', width: 360 }}>
-      <TOVInputGroup label='회사명' required>
-        <Form.Item name='name' rules={[{ required: true, message: '회사명을 입력해주세요.' }]}>
+    <Form form={form} style={{ marginLeft: 'auto', marginRight: 'auto', width: 360, ...style }}>
+      <h2 style={{ fontSize: 24, fontWeight: '500', lineHeight: '32px', marginBottom: 64 }}>내 정보</h2>
+      <TOVInputGroup label='회사명'>
+        <Form.Item name='company'>
+          <Input disabled />
+        </Form.Item>
+      </TOVInputGroup>
+      <TOVInputGroup label='회사명(영문)'>
+        <Form.Item name='en'>
+          <Input disabled />
+        </Form.Item>
+      </TOVInputGroup>
+      <TOVInputGroup label='이름' required>
+        <Form.Item name='name'>
           <Input />
         </Form.Item>
       </TOVInputGroup>
-      <TOVInputGroup label='회사명(영문)' required>
-        <Form.Item name='en' rules={[{ required: true, message: '회사명(영문)을 입력해주세요.' }, { pattern: new RegExp('^[a-zA-Z]*$'), message: '영문만 입력해주세요.' }]}>
+      <TOVInputGroup label='휴대전화번호' required>
+        <Form.Item name='phone'>
           <Input />
         </Form.Item>
       </TOVInputGroup>
-      <TOVInputGroup label='회사 홈페이지 URL'>
-        <Form.Item name='url'>
-          <Input />
-        </Form.Item>
-      </TOVInputGroup>
-      <TOVInputGroup label='개인정보 보호책임자' required tooltip='개인정보 보호책임자 설명'>
-        <Row gutter={[8, 8]}>
-          <Col span={5} style={{ alignItems: 'start', display: 'flex', marginTop: 5 }}>직책/직위</Col>
-          <Col span={19}>
-            <Form.Item name='position' rules={[{ required: true, message: '직책 또는 직위를 입력해주세요.' }]} style={{ marginBottom: 0 }}>
-              <Input placeholder='예) CPO, 대표이사 등' />
-            </Form.Item>
-          </Col>
-          <Col span={5} style={{ alignItems: 'start', display: 'flex', marginTop: 5 }}>이름</Col>
-          <Col span={19}>
-            <Form.Item name='charger' rules={[{ required: true, message: '이름을 입력해주세요.' }]} style={{ marginBottom: 0 }}>
-              <Input placeholder='김OO' />
-            </Form.Item>
-          </Col>
-          <Col span={5} style={{ alignItems: 'start', display: 'flex', marginTop: 5 }}>이메일</Col>
-          <Col span={19}>
-            <Form.Item name='email' rules={[{ required: true, message: '이메일을 입력해주세요.' }, { type: 'email', message: '이메일 형식이 올바르지 않습니다.' }]} style={{ marginBottom: 0 }}>
-              <Input placeholder='nickname@company.com' />
-            </Form.Item>
-          </Col>
-        </Row>
+      <TOVInputGroup label='비밀번호 변경'>
+        <Button onClick={onOpen}>변경하기</Button>
       </TOVInputGroup>
       <Divider dashed />
-      <Form.Item>
+      <Form.Item style={{ marginBottom: 16 }}>
         <Button htmlType='submit' type='primary' style={{ width: '100%' }}>저장</Button>
       </Form.Item>
+      <div style={{ display: 'flex', justifyContent:'flex-end' }}>
+        <a style={{ color: '#595959', fontSize: 12, fontWeight: '400', lineHeight: '20px' }}>회원 탈퇴하기</a>
+      </div>
+      <Modal footer={[(<Button key='ok' onClick={onCancel} type='primary'>변경하기</Button>)]} onCancel={onCancel} title='비밀번호 변경' visible={visible}>
+        <TOVInputGroup label='기존 비밀번호' required>
+          <Form.Item name='prev'>
+            <Input />
+          </Form.Item>
+        </TOVInputGroup>
+        <TOVInputGroup label='비밀번호' required>
+          <Form.Item extra='영문, 숫자, 특수문자 조합 최소 8자리 이상' hasFeedback name='password' rules={[{ required: true, message: '비밀번호를 입력해주세요.' }, { pattern: new RegExp('^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$'), message: '비밀번호 형식이 올바르지 않습니다.' }]}>
+            <Input.Password />
+          </Form.Item>
+        </TOVInputGroup>
+        <TOVInputGroup label='비밀번호 확인' required>
+          <Form.Item dependencies={['password']} hasFeedback name='confirmPassword' rules={[{ required: true, message: '비밀번호를 확인해주세요.' }, confirmPassword, { pattern: new RegExp('^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$'), message: '' }]}>
+            <Input.Password />
+          </Form.Item>
+        </TOVInputGroup>
+      </Modal>
     </Form>
   );
 }

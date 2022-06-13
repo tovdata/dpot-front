@@ -1,4 +1,4 @@
-import { MutableRefObject, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 // Component
 import { Button, DatePicker, Descriptions, Input, Popconfirm, Table } from 'antd';
@@ -66,10 +66,10 @@ export const DPITable: React.FC<DPITableProps> = ({ onEdit }): JSX.Element => {
   return (
     <Table columns={[
       { title: '파기 일시', dataIndex: 'date', key: 'date', sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix() },
-      { title: '파기 대상 개인정보', dataIndex: 'subject', key: 'subject', render: (value: any, record: any): JSX.Element => (<p onClick={(e: any) => onEdit(record)} style={{ cursor: 'pointer', margin: 0 }}>{value}</p>) },
+      { title: '파기 대상 개인정보', dataIndex: 'subject', key: 'subject' },
       { title: '파기 사유', dataIndex: 'reason', key: 'reason', render: (value: string[]): JSX.Element => (<TableContentForList items={value} />) },
       { title: '파기 항목', dataIndex: 'items', key: 'items', render: (value: string[]): JSX.Element => (<TableContentForTags items={value} tooltip='고유식별정보' />) }
-    ]} dataSource={data ? data : []} loading={isLoading} />
+    ]} dataSource={data ? data : []} loading={isLoading} onRow={(record: any) => ({ onClick: () => onEdit(record) })} />
   );
 }
 /** [Component] 개인정보 파기 테이블 Form */
@@ -90,7 +90,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ data, onBack }
   // 데이터 상태 관리
   const [temp, setTemp] = useState<any>(data);
   // 현재 상태가 추가인지 편집인지 확인하는 메서드
-  const checkNew = (): boolean => !('id' in temp);
+  const checkNew = () => !('id' in temp);
   // 편집 상태 관리
   const [edit, setEdit] = useState<boolean>(checkNew() ? true : false);
   // HTML 요소 관리 (for focus)
@@ -140,7 +140,9 @@ export const InformationForm: React.FC<InformationFormProps> = ({ data, onBack }
       const response: any = await setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_DPI, checkNew() ? 'add' : 'save', temp);
       // 응답에 따른 처리
       if (response && 'id' in response) {
+        console.log(response);
         temp.id = response.id;
+        temp.unix = response.createAt;
       }
       // 데이터 갱신
       queryClient.invalidateQueries(SERVICE_DPI);
@@ -307,7 +309,7 @@ const PrintElement: React.FC<PrintElementProps> = ({ data, printRef }): JSX.Elem
       </Descriptions>
       <div style={{ fontSize: 16, fontWeight: '500', lineHeight: '32px', marginTop: 84, textAlign: 'center' }}>
         <h4 style={{ marginBottom: 16 }}>{moment(data.date).year()}년 {moment(data.date).month() + 1}월 {moment(data.date).date()}일</h4>
-        <p style={{ margin: 0 }}>개인정보 보호책임자 {data.charger} (인)</p>
+        <p style={{ marginBottom: 0 }}>개인정보 보호책임자 <label style={{ marginLeft: 6 }}>{data.charger}</label> (인)</p>
       </div>
     </div>
   );
