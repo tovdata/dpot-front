@@ -130,6 +130,7 @@ export const getDatasByTableType = async (serviceId: string, type: string): Prom
 export const setDataByTableType = async (serviceId: string, type: string, mode: string, data: any): Promise<any> => {
   // URL 및 Request 정의
   const url: string = mode === 'add' ? `${SERVER_URL}${type}/new` : `${SERVER_URL}${type}/${data.id}`;
+  console.log('url', url)
   const request: RequestDF = createRequest(serviceId, mode, data);
   // API 요청
   const response: Response = await fetch(url, request);
@@ -215,4 +216,44 @@ export const setPIPPData = async (serviceId: string, data: any, status: string, 
   };
   // 응답 데이터 반환
   return await fetch(url, request);
+}
+
+export const setConsentData = async (serviceId: string, data: any, html?: string): Promise<any> => {
+  // 초기 저장인지 아닌지를 확인하여 API 호출을 위한 URL 정의
+  const url: string = `${SERVER_URL}consent/publish`;
+  // 초기 저장 여부에 따라 요청 데이터 생성
+  const body: any = {
+    serviceId: serviceId,
+    data: data,
+    htmlBody: html
+  };
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST'
+  };
+  // 응답 데이터 반환
+  return await fetch(url, request);
+}
+export const getConsentList = async (serviceId: string): Promise<any[]> => {
+  // API 호출
+  const response: Response = await fetch(`${SERVER_URL}consent/${serviceId}`);
+  // 응답 데이터 추출
+  const result: ResponseDF = await extractData(response);
+  return result.data.consentList;
+  // // 데이터 가공
+  // let sorted: any[] = [];
+  // if (result.result) {
+  //   // 데이터 정렬
+  //   sorted.push(...result.data.list.sort((a: any, b: any): number => a.createAt > b.createAt ? 1 : a.createAt < b.createAt ? -1 : 0));
+  //   // 데이터 가공
+  //   sorted = sorted.map((item: any, index: number) => ({ ...item, key: index + 1, prev: false, version: index + 1 }));
+  //   // Prev가 있을 경우 추가
+  //   result.data.prevUrl !== '' ? sorted.unshift({ createAt: 100, key: 0, prev: true, url: result.data.prevUrl }) : undefined;
+  // }
+  // // 데이터 가공 및 반환
+  // return sorted;
 }

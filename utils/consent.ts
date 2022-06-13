@@ -7,7 +7,7 @@ export const returnUniqueInfo = (info: string[]) => {
 }
 
 // 고유식별정보의 경우 고유식별 정보만 보여주는 piData를 리턴한다.
-const filteredNotUnique = (type: number, _data: any) => {
+export const filteredNotUnique = (type: number, _data: any) => {
   if (type === 2) {
     return _data?.map((item: any) => {
       const newItem = JSON.parse(JSON.stringify(item));
@@ -18,6 +18,20 @@ const filteredNotUnique = (type: number, _data: any) => {
   } else {
     return _data;
   }
+}
+// 고유식별정보를 가지고 있는지 체크
+export const hasUniqueItems = (type: number, data: any) => {
+  // 고유식별정보 ,제 3자 제공는 제외
+  if (type === 2 || type === 4) {
+    return false;
+  }
+  for (let i = 0; i < data.length; i++) {
+    const item = data[i];
+    const ei = returnUniqueInfo(item.essentialItems);
+    const si = returnUniqueInfo(item.selectionItems);
+    if (ei.length > 0 || si.length > 0) return true;
+  }
+  return false;
 }
 
 // type에 따른 PI Subject 필터링
@@ -39,13 +53,17 @@ export const filteredPISubjects = (type: number, subject: string[], PIData: any)
       data = PIData;
       break;
     case 2:
-      data = PIData.filter((data: any) => returnUniqueInfo([...data.essentialItems, ...data.selectionItems]).length > 0);
+      data = filteredNotUniqueData(PIData);
       break;
     default:
       break;
   }
   dataProcess(data);
   return subjects;
+}
+// 고유식별정보를 가진 데이터만 추출
+export const filteredNotUniqueData = (data: any) => {
+  return data?.filter((data: any) => returnUniqueInfo([...data.essentialItems, ...data.selectionItems]).length > 0)
 }
 
 export const filteredData = (oData: any, ids: string[], type: number) => {
@@ -89,6 +107,10 @@ export const nullCheckForNextStep = (type: number, consentData: any, newStepInde
       })
       if (!consentData.checkList) {
         warningNotification('확인사항을 체크해주세요.');
+        result = true;
+      }
+      if (hasUniqueItems(type, consentData.pData)) {
+        warningNotification('선택한 항목 중 고유식별정보가 있습니다. 고유식별정보를 제거해주세요.');
         result = true;
       }
     }

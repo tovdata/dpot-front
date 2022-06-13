@@ -1,22 +1,16 @@
 import { getPIDatas } from "@/models/queries/api";
-import { SERVICE_PI } from "@/models/queries/type";
+import { SERVICE_EPI, SERVICE_ESI, SERVICE_PI } from "@/models/queries/type";
 import { TableHeaderData } from "@/models/type";
-import { Checkbox, Table, TableColumnProps, Typography } from "antd";
+import { LinkOutlined } from "@ant-design/icons";
+import { Checkbox, Table, TableColumnProps, Tag, Typography } from "antd";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import styled from "styled-components";
+import { copyTextToClipboard } from "utils/utils";
 import { TagSelect } from "../common/Select";
-import { createTableColumnProps, EditableTable, TableContentForList, TableContentForTags } from "../common/Table";
+import { createTableColumnProps, EditableTable, EditableTableForm, TableContentForList, TableContentForTags } from "../common/Table";
+import { consentListHeader } from "./Header";
 
-// Styled component(Confirm collection)
-const StyleConfirmCollection = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-const StyledHighLight = styled.div`
-  font-weight: bold;
-  text-decoration: underline;
-`;
 /**
  * [Component] '정보 입력'에서 수정되는 개인정보 테이블
  * @param {object} headers 헤더정보
@@ -56,12 +50,13 @@ export const ConsentEditPITable = ({ headers, orignData, data, setData }: any): 
 }
 /**
  * [Component] 법령에 근거하여 정보주체의 동의없이 수집하는 정보를 작성하는 테이블
+ * @param {string} description 설명
  * @param {object} headers 헤더정보
  * @param {object} data 변경되는 정보
  * @param {void} setData 정보를 변경시키는 함수
  * @returns 
  */
-export const ConsentEPITable = ({ header, data, saveData }: any): JSX.Element => {
+export const ConsentEPITable = ({ description, header, data, saveData, type }: any): JSX.Element => {
   // [State] Exception Personal Information
   const [epiData, setEpiData] = useState(data || []);
   // Get a state (for select options) 개인정보 수집 및 이용 정보
@@ -79,7 +74,10 @@ export const ConsentEPITable = ({ header, data, saveData }: any): JSX.Element =>
     return true;
   }
   // Return an element
-  return (<EditableTable refData={piLoading ? [] : piData} dataSource={epiData} headers={header} isLoading={false} onAdd={onAdd} onDelete={onDelete} onSave={onSave} tableName='epi' />);
+  return (
+    <EditableTableForm title='' description={description}>
+      <EditableTable refData={piLoading ? [] : piData} dataSource={epiData} headers={header} isLoading={false} onAdd={onAdd} onDelete={onDelete} onSave={onSave} tableName={type === 2 ? SERVICE_ESI : SERVICE_EPI} />
+    </EditableTableForm>);
 }
 /** [Component] 최종 확인 단계에서 입력한 정보를 보여주는 테이블
  * @param {object} headers 헤더정보
@@ -101,9 +99,14 @@ export const ConsentTable = ({ headers, data, mode }: any) => {
   const ItemComponent = ({ name, items, isBold }: any) => {
     if (items.length === 0) return <></>;
     const itemsText = isBold ? <span style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{items.join(', ')}</span> : <span>{items.join(', ')}</span>
-    return (
-      <span>{`${name} : `}{itemsText}</span>
-    )
+    if (name)
+      return (
+        <span>{`${name} : `}{itemsText}</span>
+      )
+    else
+      return (
+        <span>{itemsText}</span>
+      );
   }
   const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
     // Extract a header data
@@ -115,20 +118,20 @@ export const ConsentTable = ({ headers, data, mode }: any) => {
         case 'string':
           return <>{item}</>
         case 'stringB':
-          return <StyledHighLight>{item}</StyledHighLight>
+          return <span style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{item}</span>
         case 'list':
           return <TableContentForList items={item} key={index} />
         case 'listB':
-          return <StyledHighLight><TableContentForList items={item} key={index} /></StyledHighLight>
+          return <span style={{ fontWeight: 'bold', textDecoration: 'underline' }}><TableContentForList items={item} key={index} /></span>
         case 'item':
-          return item && item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
+          return item && item.length > 0 ? (<ItemComponent items={item} />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
         case 'collection':
-        case 'collectionA':
+        case 'collectionB':
           return (
-            <StyleConfirmCollection>
-              <ItemComponent name="필수" items={item.essentialItems} isBold={header.display === 'collectionA'} />
-              <ItemComponent name="선택" items={item.selectionItems} isBold={header.display === 'collectionA'} />
-            </StyleConfirmCollection>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <ItemComponent name="필수" items={item.essentialItems} isBold={header.display === 'collectionB'} />
+              <ItemComponent name="선택" items={item.selectionItems} isBold={header.display === 'collectionB'} />
+            </div>
           );
         default:
           return <>{item}</>
@@ -142,13 +145,6 @@ export const ConsentTable = ({ headers, data, mode }: any) => {
 export const ConsentEditPPITable = ({ data, headers, ids, setIds }: any) => {
   const onChangeHandler = (id: string, isChecked: boolean) => {
     isChecked ? setIds([...ids, id]) : setIds(ids.filter((item: any) => item !== id));
-    // if (isChecked) {
-    //   const newIDs = [...ids];
-    //   if (!newIDs.includes(id))
-    //     setIds([...ids, id]);
-    // } else {
-    //   setIds(ids.filter((item: any) => item !== id));
-    // }
   }
   const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
     // Extract a header data
@@ -172,4 +168,53 @@ export const ConsentEditPPITable = ({ data, headers, ids, setIds }: any) => {
     return column;
   });
   return <Table dataSource={data} columns={columns} pagination={false} />;
+}
+
+const StyledLinkText = styled.a`
+  cursor: pointer;
+  color:black;
+  &:hover{
+    text-decoration: underline;
+  }
+`;
+const StyledCopyButton = styled.button`
+  border: none;
+  background-color: transparent;
+`;
+export const ConsentListTable = ({ data }: any): JSX.Element => {
+  const headers = consentListHeader;
+  const docType: any = {
+    'pi': { name: '개인정보', color: 'geekblue' },
+    'si': { name: '민감정보', color: 'magenta' },
+    'uii': { name: '고유식별정보', color: 'purple' },
+    'mai': { name: '마케팅', color: 'cyan' },
+    'tpp': { name: '제3자제공', color: 'green' }
+  };
+  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
+    // Extract a header data
+    const header: TableHeaderData = headers[key];
+    // Create a column
+    const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description, header.width);
+    column.render = (item: any, record: any, index: number): JSX.Element => {
+      switch (header.display) {
+        case 'tag':
+          return <Tag color={docType[item].color}>{docType[item].name}</Tag>
+        case 'list':
+          return <TableContentForList items={item} key={index} />
+        case 'title':
+          return <StyledLinkText href={record.url} target='_blank'>{item}</StyledLinkText>
+        case 'url':
+          return <StyledCopyButton onClick={() => copyTextToClipboard(item)} style={{ color: '#000000D9', cursor: 'pointer' }}><LinkOutlined /></StyledCopyButton>
+        default:
+          return <>{item}</>
+      }
+    };
+    return column;
+  });
+  return <Table
+    columns={columns}
+    dataSource={data}
+    pagination={{
+      position: ['bottomRight'],
+    }} />
 }

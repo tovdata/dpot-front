@@ -60,7 +60,7 @@ export const historyHeader: TableHeadersData = {
     width: '18%'
   },
   period: {
-    display: 'listA',
+    display: 'listB',
     name: '보유 및 이용 기간',
     required: true,
     editable: false,
@@ -70,18 +70,21 @@ export const historyHeader: TableHeadersData = {
 // 동의서 법령에 근거해 동의없이 수집 및 이용되는 데이터 Header
 export const consentEPIHeader: TableHeadersData = {
   purpose: {
+    placeholder: '직접 입력',
     display: 'list',
     name: '개인정보 수집·이용 목적',
     required: true,
     width: '23%'
   },
   items: {
+    placeholder: '예시에서 선택',
     display: 'item',
     name: '개인정보 항목',
     required: true,
     width: '20%'
   },
   statute: {
+    placeholder: '법령명 : 조항',
     display: 'list',
     name: '수집 근거 법령',
     required: false,
@@ -146,5 +149,38 @@ export const consentPPIEditHeader: TableHeadersData = {
     name: '보유 및 이용기간',
     required: true,
     width: '25%'
+  }
+}
+
+export const consentListHeader: TableHeadersData = {
+  type: {
+    display: 'tag',
+    name: '구분',
+    required: true,
+    width: '20%'
+  },
+  title: {
+    display: 'title',
+    name: '목록',
+    required: true,
+    width: '30%'
+  },
+  editedAt: {
+    display: 'string',
+    name: '최종 편집일',
+    required: true,
+    width: '20%'
+  },
+  creater: {
+    display: 'string',
+    name: '작성자',
+    required: true,
+    width: '20%'
+  },
+  url: {
+    display: 'url',
+    name: '링크',
+    required: true,
+    width: '10%'
   }
 }

@@ -41,29 +41,6 @@ const StyledCheckListContainer = styled.div`
   }
 `;
 
-const StyleConfirmItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 2rem;
-  span{
-    white-space: pre-line;
-  }
-  .title{
-    display: flex;
-    flex-direction: row;
-    font-weight: 600;
-    font-size: 16px;
-    text-align: left;
-    .label{
-      margin-top: 0.1rem;
-      margin-right: 0.5rem;
-    }
-  }
-  .footer{
-    margin-top: 16px;
-  }
-`;
 
 /**
  * [Component] 동의서 제목
@@ -147,28 +124,34 @@ export const DisadvantageComponent = ({ type, disadvantage, setDisadvantage }: D
  * [Component] 동의 받고자 하는 목적과 항목 선택
  */
 interface SelectPIProps {
+  type: number,
   originData: any,
   data: any,
   setData: (data: any) => void
 }
-export const SelectPIComponent = ({ originData, data, setData }: SelectPIProps): JSX.Element => {
+export const SelectPIComponent = ({ type, originData, data, setData }: SelectPIProps): JSX.Element => {
   return (
     <CSRow>
-      <DIRowHeader title='동의를 받고자 하는 목적과 항목을 선택해주세요.' description="동의를 거부할 권리가 있다는 사실 및 동의 거부에 따른 불이익의 내용이 반드시 포함되어야 합니다.\n단, '정보통신서비스 제공자'는 개인정보 보호법 제39조의3에 따라, 동의 거부 시 불이익에 대한 내용은 기재하지 않아도 됩니다." />
+      <DIRowHeader title='동의를 받고자 하는 목적과 항목을 선택해주세요.' description={staticConsentData[type].pData?.description} />
       <DIRowContent>
         <ConsentEditPITable orignData={originData} data={data} setData={setData} headers={consentEditHeader} />
       </DIRowContent>
     </CSRow>
   )
 }
-
-export const SelectCompanyComponent = ({ subjects, PPIData, saveData }: any): JSX.Element => {
+interface SelectCompanyProps {
+  type: number,
+  subjects: string[],
+  PPIData: any,
+  saveData: (data: any) => void
+}
+export const SelectCompanyComponent = ({ type, subjects, PPIData, saveData }: SelectCompanyProps): JSX.Element => {
   const [ids, setIds] = useState(subjects || []);
   const data = addSelectedOption(PPIData, ids);
   useEffect(() => { saveData({ subjects: ids, pData: getSelectedPPIData(data, ids) }) }, [ids])
   return (
     <CSRow>
-      <DIRowHeader title='동의를 받고자 하는 업체(제공받는 자)를 선택해주세요.' description="개인정보 처리방침을 업데이트 하면, 이전 개인정보 처리방침도 반드시 확인할 수 있어야 합니다.\n본 개인정보 처리방침 이전에 게재한 개인정보 처리방침의 URL을 입력해주세요." />
+      <DIRowHeader title='동의를 받고자 하는 업체(제공받는 자)를 선택해주세요.' description={staticConsentData[type].pData?.description} />
       <DIRowContent>
         <ConsentEditPPITable headers={consentPPIEditHeader} data={data} ids={ids} setIds={setIds} />
       </DIRowContent>
@@ -246,13 +229,15 @@ interface ConfirmItemProps {
   headerText?: string,
   footerText?: string
 }
+
 export const ConfirmItemComponent = ({ title, children, headerText, footerText }: ConfirmItemProps): JSX.Element => {
   return (
-    <StyleConfirmItem>
-      {title && <h2 className="title"><span className="label">◾️</span><span>{title}</span></h2>}
-      {headerText && <span className="header">{headerText}</span>}
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', marginTop: '2rem' }}>
+      {title && <h2 style={{ whiteSpace: 'pre-line', display: 'flex', flexDirection: 'row', fontWeight: 600, fontSize: '16px', textAlign: 'left' }} >
+        <span style={{ marginTop: '0.1rem', marginRight: '0.5rem' }}>◾️</span><span>{title}</span></h2>}
+      {headerText && <span>{headerText}</span>}
       {children}
-      {footerText && <span className="footer">{footerText}</span>}
-    </StyleConfirmItem>
+      {footerText && <span style={{ whiteSpace: 'pre-line', marginTop: '16px' }}>{footerText}</span>}
+    </div>
   )
 }
