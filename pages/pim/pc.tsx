@@ -1,6 +1,6 @@
 // Component
 import { Tabs } from "antd";
-import { TOVPageLayout } from '../../components/common/Layout';
+import { TOVLayoutPadding, TOVPageLayout } from '../../components/common/Layout';
 import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from "../../components/PCTable";
 // Style
 import styled from "styled-components";
@@ -13,7 +13,7 @@ const CustomTabPane = styled(TabPane)`
 const Page = ({ expand, onExpand }: any) => {
   return (
     <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/pc'>
-      <div style={{ paddingBottom: 74, paddingTop: 36 }}>
+      <TOVLayoutPadding style={{ paddingTop: 36 }}>
         <Tabs defaultActiveKey="1">
           <CustomTabPane tab="제공" key="1">
             <PPITableForm />
@@ -24,7 +24,7 @@ const Page = ({ expand, onExpand }: any) => {
             <CFNITableForm />
           </CustomTabPane>
         </Tabs>
-      </div>
+      </TOVLayoutPadding>
     </TOVPageLayout>
   )
 }

@@ -18,7 +18,7 @@ export const copyTextToClipboard = (url: string) => {
     document.execCommand('copy');
     textField.remove();
 
-    successNotification('클립보드에 복사 완료');
+    successNotification('복사 완료');
   } catch (e) {
     console.log(e)
   }

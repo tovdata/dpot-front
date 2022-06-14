@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Button, Col, Divider, Drawer, Form, Input, Row, Table, Tabs } from 'antd';
 import { TOVInputGroup } from './common/Input';
 // Icon
-import { EditOutlined } from '@ant-design/icons';
+import { CloseOutlined, EditOutlined } from '@ant-design/icons';
 // Styled
 import styled from 'styled-components';
 // Module
@@ -134,8 +134,8 @@ const OrganizationSection: React.FC<any> = (): JSX.Element => {
     onClose();
   }
 
-  // Drawer tools
-  const extraElement: JSX.Element = (
+  // Drawer footer
+  const footer: JSX.Element = (
     <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'flex-end' }}>
       <Button onClick={onSave} type='primary'>저장</Button>
     </div>
@@ -158,14 +158,14 @@ const OrganizationSection: React.FC<any> = (): JSX.Element => {
         <p style={{ fontSize: 14, fontWeight: '600', lineHeight: '22px', margin: 0 }}>아직 가입되어 있지 않은 담당자가 있다면?</p>
         <Button type='default'>초대하기</Button>
       </div>
-      <EditableDrawer extra={extraElement} onChange={onChange} onClose={onClose} row={data.row} visible={visible} />
+      <EditableDrawer footer={footer} onChange={onChange} onClose={onClose} row={data.row} visible={visible} />
     </div>
   );
 }
 /** [Internal Component] 조직 구성원 정보 수정을 위한 Drawer */
-const EditableDrawer: React.FC<any> = ({ extra, onChange, onClose, row, visible }): JSX.Element => { 
+const EditableDrawer: React.FC<any> = ({ footer, onChange, onClose, row, visible }): JSX.Element => { 
   return (
-    <Drawer footer={extra} onClose={onClose} title='조직 구성원 정보 수정하기' visible={visible}>
+    <Drawer closable={false} extra={<DrawerExtra onClick={onClose} />} footer={footer} onClose={onClose} title='조직 구성원 정보 수정하기' visible={visible}>
       <Form>
         <Form.Item style={{ marginBottom :0 }}>
           <TOVInputGroup label='이름' required>
@@ -204,5 +204,13 @@ const EditableDrawer: React.FC<any> = ({ extra, onChange, onClose, row, visible 
         </Form.Item>
       </Form>
     </Drawer>
+  );
+}
+/** [Internal Component] Drawer extra */
+const DrawerExtra: React.FC<any> = ({ onClick }): JSX.Element => {
+  return (
+    <span onClick={onClick} style={{ alignItems: 'center', color: '#7C7B7C', cursor: 'pointer', display: 'flex', justifyContent: 'center' }}>
+      <CloseOutlined />
+    </span>
   );
 }

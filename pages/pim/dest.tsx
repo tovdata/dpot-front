@@ -1,6 +1,6 @@
 import { useState } from 'react';
 // Component
-import { TOVPageLayout } from '../../components/common/Layout';
+import { TOVLayoutPadding, TOVPageLayout } from '../../components/common/Layout';
 import { DPITableForm, InformationForm } from '../../components/DPI';
 // Data
 import { defaultDPIData } from '../../models/static/data';
@@ -18,13 +18,13 @@ const Page = ({ expand, onExpand }: any) => {
   // 컴포넌트 반환
   return (
     <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/dest'>
-      <div style={{ marginBottom: 74, marginTop: 74 }}>
+      <TOVLayoutPadding>
         {Object.keys(data).length !== 0 ? (
           <InformationForm data={data} onBack={onBack} />
         ) : (
           <DPITableForm onCreate={onCreate} onEdit={onEdit} />
         )}
-      </div>
+      </TOVLayoutPadding>
     </TOVPageLayout>
   )
 }

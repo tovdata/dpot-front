@@ -26,6 +26,7 @@ import { ConfirmSection } from './pipp/ConfirmForm';
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from '../models/queries/type';
 import { BasicPageLoading } from './common/Loading';
 import { getPIPPData, setPIPPData } from '../models/queries/api';
+import { blankCheck, copyTextToClipboard } from 'utils/utils';
 
 /** [Interface] PIPP process */
 interface PIPPProcess {
@@ -36,9 +37,7 @@ interface PIPPProcess {
 /** [Type] Scroll position */
 type ScrollPosition = 'start'|'end';
 
-/**
- * [Component] 개인정보 처리방침 메인 페이지
- */
+/** [Component] 개인정보 처리방침 메인 페이지 */
 export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIPPProcess): JSX.Element => {
   return (
     <>
@@ -46,11 +45,11 @@ export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
       <StyledTableForm>
         <TableFormHeader title='개인정보 처리방침 이력' />
         <Table columns={[
-          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number, record: any): string => record.version === 0 ? '이전 개인정보 처리방침' : `개인정보 처리방침 (ver. ${value === 9999 ? 'latest' : value})`, sorter: (a: any, b: any): number => a.version - b.version },
+          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number, record: any): JSX.Element => record.version === 0 ? (<Subject subject='이전 개인정보 처리방침' url={record.url} />) : (<Subject subject={`개인정보 처리방침 (ver. ${value === 9999 ? 'latest' : value})`} url={record.url} />), sorter: (a: any, b: any): number => a.version - b.version },
           { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (_: string, record: any): JSX.Element => list ? record.version === 0 ? (<Tag color='default'>외부링크</Tag>) : record.version === 9999 ? (<Tag color='geekblue'>현재</Tag>) : (<Tag color='green'>이전</Tag>) : (<></>) },
           { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value / 1000).format('YYYY-MM-DD HH:mm'), sorter: (a: any, b: any): number => a.createAt - b.createAt },
           { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value).format('YYYY-MM-DD'), sorter: (a: any, b: any): number => a.applyAt - b.applyAt },
-          { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => <a href={value} style={{ color: '#000000D9', cursor: 'pointer' }} target='_blank' rel='noreferrer'><LinkOutlined /></a> }
+          { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => (<LinkButton url={value} />) }
         ]} dataSource={list} showSorterTooltip={false} />
       </StyledTableForm>
     </>
@@ -319,7 +318,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
               <h3 style={{ fontSize: 16, fontWeight: '600', lineHeight: '24px', marginBottom: 16 }}>개인정보 처리방침 작성 완료</h3>
               <Input.Group compact style={{ display: 'flex' }}>
                 <Input value={url} style={{ flex: 1 }} />
-                <Button onClick={() => {navigator.clipboard.writeText(url)}} type='primary'>복사</Button>
+                <Button onClick={() => copyTextToClipboard(url)} type='primary'>복사</Button>
               </Input.Group>
             </div>            
           </Modal>
@@ -454,7 +453,15 @@ const CreatePIPP: React.FC<any> = ({ onChange, data, onFocus, onRefresh, refElem
   );
 }
 
-const blankCheck = (value: string): boolean => {
-  const blankPattern: RegExp = /^\s+|\s+$/g;
-  return value.trim().replace(blankPattern, '') === '';
+/** [Internal Compoent] 테이블 내 Row 제목 */
+const Subject: React.FC<any> = ({ subject, url }): JSX.Element => {
+  return (
+    <a href={url} rel='referrer' style={{ color: '#000000D9', fontSize: 14 }} target='_blank'>{subject}</a>
+  );
+}
+/** [Internal Component] 테이블 내 Link */
+const LinkButton: React.FC<any> = ({ url }): JSX.Element => {
+  return (
+    <Button icon={<LinkOutlined style={{ color: '#000000D9', fontSize: 14 }} />} onClick={() => copyTextToClipboard(url)} style={{ backgroundColor: 'transparent', border: 'none' }}></Button>
+  );
 }

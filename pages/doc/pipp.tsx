@@ -2,7 +2,7 @@ import type { NextPage } from 'next';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 // Component
-import { TOVPageLayout } from '@/components/common/Layout';
+import { TOVLayoutPadding, TOVPageLayout } from '@/components/common/Layout';
 import { BasicPageLoading } from '@/components/common/Loading';
 import { CreatePIPPForm, PIPPMain } from '@/components/PIPP';
 // Type
@@ -45,13 +45,13 @@ const Page: NextPage = ({ expand, onExpand }: any) => {
       {isLoadingForStatus && isLoadingForList ? (
         <BasicPageLoading />
       ) : (
-        <div style={{ height: '100%', paddingBottom: 74, paddingTop: 74 }}>
+        <TOVLayoutPadding>
           {progress === 'none' ? (
             <PIPPMain list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.version - a.version) : []} onProcess={onProcess} status={status} />
           ) : (
             <CreatePIPPForm list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.applyAt - a.applyAt) : []} onBack={onBack} onUpdateStatus={onUpdateStatus} progress={progress} status={status} />
           )}
-        </div>
+        </TOVLayoutPadding>
       )}
     </TOVPageLayout>
   );

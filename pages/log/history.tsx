@@ -1,25 +1,26 @@
 import type { NextPage } from 'next';
 // Component
-import { TOVPageLayout } from '../../components/common/Layout';
+import { TOVLayoutPadding, TOVPageLayout } from '../../components/common/Layout';
 import { TOVPageTitle } from '../../components/common/Header';
-import { Col, Row, Timeline } from 'antd';
+import { Col, Row, Tabs, Timeline } from 'antd';
 // Module
 import moment from 'moment';
+import { useState } from 'react';
 
 const data: any[] = [
-  { date: 1654565301, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654568901, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654572501, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654648101, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654655301, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654658901, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654738101, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654748901, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654824501, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654900101, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654907301, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654914501, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
-  { date: 1654921701, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654565301, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654568901, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654572501, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654648101, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654655301, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654658901, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654738101, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654748901, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654824501, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654900101, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654907301, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654914501, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
+  { date: 1654921701, user: '김토브', content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
   
   { date: 1654565301, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
   { date: 1654568901, content: '김토브 님이 ‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표를 수정하였습니다.' },
@@ -54,14 +55,26 @@ const data: any[] = [
 const Page: NextPage = ({ expand, onExpand }: any) => {
   // 데이터 구분 및 정렬
   const sorted: any = sortByDatetime(data);
+  // 탭 키 상태
+  const [key, setKey] = useState<string>('total');
 
   // 컴포넌트 반환
   return (
     <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/log/history'>
-      <div style={{ paddingBottom: 74, paddingTop: 74 }}>
-        <TOVPageTitle title='활동 내역' style={{ marginBottom: 42 }} />
-        <TOVHistoryList data={sorted} />
-      </div>
+      <TOVLayoutPadding style={{ paddingTop: 42 }}>
+        <Tabs activeKey={key} onChange={(value: string) => setKey(value)}>
+          <Tabs.TabPane tab='전체 활동내역' key='total'>
+            <div style={{ marginTop: 64 }}>
+              <TOVHistoryList data={sorted} />
+            </div>
+          </Tabs.TabPane>
+          <Tabs.TabPane tab='나의 활동내역' key='my'>
+            <div style={{ marginTop: 64 }}>
+              <TOVHistoryList data={sorted} />
+            </div>
+          </Tabs.TabPane>
+        </Tabs>       
+      </TOVLayoutPadding>
     </TOVPageLayout>
   )
 }

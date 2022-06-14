@@ -89,9 +89,22 @@ export const getPIItems = async (serviceId: string): Promise<any[]> => {
   // API 호출
   const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pi/allitems`);
   // 응답 데이터 추출
-  const result = await extractData(response);
+  const result = await extractData(response);  
   // 결과 반환
-  return result.result ? result.data.sort() : [];
+  return result.result ? result.data.allItems.sort() : [];
+}
+/**
+ * [API Caller] 개인정보 수집 및 이용 내 필수/선택 항목 데이터 불러오기
+ * @param serviceId 현재 서비스 ID
+ * @returns 결과 데이터
+ */
+export const getPIItemsByType = async (serviceId: string): Promise<any[]> => {
+  // API 호출
+  const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pi/allitems`);
+  // 응답 데이터 추출
+  const result = await extractData(response);  
+  // 결과 반환
+  return result.result ? result.data : { allItems: [], essentialItemsOnly: [], selectionItemsOnly: [] };
 }
 /**
  * [API Caller] 테이블 유형에 따른 데이터 불러오기
