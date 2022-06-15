@@ -129,3 +129,11 @@ export const addSelectedOption = (data: any, ids: string[]) => {
 export const getSelectedPPIData = (data: any, subjects: string[]) => {
   return data.filter((item: any) => subjects.includes(item.id));
 }
+// data가 URL을 가지고 있는지 확인
+export const hasURL = (data:any)=>{
+  let result = false;
+  for(let i=0;i<data.length;i++){
+    if(data[i].url) return true;
+  }
+  return false;
+}

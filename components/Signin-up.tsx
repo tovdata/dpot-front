@@ -42,6 +42,7 @@ interface StepProps {
 /** [Interface] Properties for step to input */
 interface InputStepProps extends StepProps {
   onChange: (value: any, category: string, property: string, subProperty?: string) => void;
+  onFinish?: (isNew: boolean) => void;
   search?: boolean;
 }
 /** [Interface] Properties for step to select */
@@ -74,7 +75,6 @@ export const Step1: React.FC<InputStepProps> = ({ data, onChange, onMoveStep }):
   const confirmPassword = ({ getFieldValue }: any) => ({ validator(_: any, value: string) {
     return !value || getFieldValue('password') === value ? Promise.resolve() : Promise.reject(new Error('비밀번호가 일치하지 않습니다.'));
   } });
-  console.log('st1', data);
 
   // 컴포넌트 반환
   return (
@@ -113,7 +113,6 @@ export const Step2: React.FC<InputStepProps> = ({ data, onChange, onMoveStep }):
   const CURRENT_STEP: string = 'user';
   // Form 객체 생성
   const [form] = Form.useForm();
-  console.log('st2', data);
 
   // 컴포넌트 반환
   return (
@@ -168,7 +167,7 @@ export const Step3: React.FC<SelectStepProps> = ({ onMoveStep, onSelect, search 
   );
 }
 /** [Component] 회원가입 4단계 */
-export const Step4: React.FC<InputStepProps> = ({ data, onChange, onMoveStep, search }): JSX.Element => {
+export const Step4: React.FC<InputStepProps> = ({ data, onChange, onMoveStep, onFinish, search }): JSX.Element => {
   // 현재 스탭 정의
   const CURRENT_STEP: string = 'company';
   // Form 객체 생성
@@ -176,7 +175,7 @@ export const Step4: React.FC<InputStepProps> = ({ data, onChange, onMoveStep, se
 
   // 컴포넌트 반환
   return (
-    <Form form={form} onFinish={onMoveStep} style={{ width: 320 }}>
+    <Form form={form} onFinish={() => onFinish ? onFinish(!search) : undefined} style={{ width: 320 }}>
       <div>
         {search ? (
           <TOVInputGroup label='회사명' required>

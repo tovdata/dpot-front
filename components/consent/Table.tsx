@@ -211,7 +211,7 @@ export const ConsentListTable = ({ data }: any): JSX.Element => {
     };
     return column;
   });
-  return <Table
+  return <Table 
     columns={columns}
     dataSource={data}
     pagination={{

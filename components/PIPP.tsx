@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useRef } from 'react';
 import { useEffect, useState } from 'react';
 // Component
 import { Button, Col, Input, Modal, Popover, Result, Row, Table, Tag } from 'antd';
@@ -17,7 +17,6 @@ import moment from 'moment';
 import { FNITable, PITable } from './PITable';
 import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from './PCTable';
 import { useQueries, useQuery, useQueryClient } from 'react-query';
-import { getListForPIM, PIMType } from '../models/queryState';
 // Type
 import { DocProgressStatus } from '../models/type';
 import { InputSection, PreviewSection } from './pipp/EditForm';
@@ -25,7 +24,7 @@ import { DRModal } from './pipp/Documentation';
 import { ConfirmSection } from './pipp/ConfirmForm';
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from '../models/queries/type';
 import { BasicPageLoading } from './common/Loading';
-import { getPIPPData, setPIPPData } from '../models/queries/api';
+import { getDatasByTableType, getPIPPData, setPIPPData } from '../models/queries/api';
 import { blankCheck, copyTextToClipboard } from 'utils/utils';
 
 /** [Interface] PIPP process */
@@ -64,7 +63,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
   // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
   const { isLoading: isLoadingForData, data: loadData } = useQuery(SERVICE_PIPP, async () => await getPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   // 테이블 데이터 쿼리 (API 호출)
-  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', type as PIMType) })));
+  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getDatasByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', type) })));
   // 로딩 데이터 Hook
   useEffect(() => setLoading(isLoadingForData || results.some((result: any): boolean => result.isLoading)), [isLoadingForData, results]);
   // 임시 저장 데이터가 있을 경우, 데이터 갱신
@@ -198,13 +197,13 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
         } else if (dInfo.ppi.usage === undefined) {
           warningNotification('제3자 제공 여부를 선택해주세요.');
           onFocus('input', 3);
-        } else if (dInfo.ppi.usage && ref.ppi.length === 0) {
+        } else if (dInfo.ppi.usage && (dInfo.ppi.url === undefined && ref.ppi.length === 0)) {
           warningNotification('개인정보 제공에 대한 정보를 입력해주세요.');
           onFocus('input', 3);
         } else if (dInfo.cpi.usage === undefined) {
           warningNotification('위탁 여부를 선택해주세요.');
           onFocus('input', 4);
-        } else if (dInfo.cpi.usage && ref.cpi.length === 0) {
+        } else if (dInfo.cpi.usage && (dInfo.cpi.url === undefined && ref.cpi.length === 0)) {
           warningNotification('개인정보 위탁에 대한 정보를 입력해주세요.');
           onFocus('input', 4);
         } else if (dInfo.destructionUnused.type === undefined) {
@@ -226,7 +225,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
           warningNotification('가명정보 처리에 대한 정보를 입력해주세요.');
           onFocus('input', 7);
         } else if (blankCheck(dInfo.manager.charger.name) || blankCheck(dInfo.manager.charger.position)) {
-          warningNotification('개인정보보호 책임자에 대한 정보를 입력해주세요.');
+          warningNotification('개인정보 보호책임자에 대한 정보를 입력해주세요.');
           onFocus('input', 8);
         } else if (blankCheck(dInfo.manager.request.department) || blankCheck(dInfo.manager.request.charger) || blankCheck(dInfo.manager.request.contact)) {
           warningNotification('개인정보 열람 청구 부서에 대한 정보를 입력해주세요.');
@@ -456,7 +455,7 @@ const CreatePIPP: React.FC<any> = ({ onChange, data, onFocus, onRefresh, refElem
 /** [Internal Compoent] 테이블 내 Row 제목 */
 const Subject: React.FC<any> = ({ subject, url }): JSX.Element => {
   return (
-    <a href={url} rel='referrer' style={{ color: '#000000D9', fontSize: 14 }} target='_blank'>{subject}</a>
+    <a href={url} rel='noreferrer' style={{ color: '#000000D9', fontSize: 14 }} target='_blank'>{subject}</a>
   );
 }
 /** [Internal Component] 테이블 내 Link */

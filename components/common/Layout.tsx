@@ -31,18 +31,19 @@ interface TOVPageSideProps {
 /** [Styled Component] 페이지 사이드 */
 const Sider = styled(Layout.Sider)<SiderProps>`
   background-color: #FFFFFF;
+  border-right: 1px solid #F0F0F0;
   height: ${(props: any) => props.scroll < 64 ? `calc(100vh - 64px + ${props.scroll}px)` : '100vh'};
-  left: 0;
-  // overflow-y: scroll;
+  overflow-x: hidden;
+  overflow-y: overlay;
   position: ${(props: any) => props.scroll >= 64 ? 'fixed' : 'relative'};
   top: 0;
-  // // 스크롤 보이기
-  // &:hover {
-  //   &::-webkit-scrollbar-thumb { background-color: #CCCCCC; }
-  // }
-  // // 스크롤 스타일
-  &::-webkit-scrollbar { width: 6px; }
-  &::-webkit-scrollbar-thumb { background-color: #999999; border-radius: 6px; }
+  // 스크롤 보이기
+  &:hover {
+    &::-webkit-scrollbar-thumb { background-color: rgba(12, 12, 12, 0.24); }
+  }
+  // 스크롤 스타일
+  &::-webkit-scrollbar { background-color: transparent; width: 6px; }
+  &::-webkit-scrollbar-thumb { background-color: transparent; border-radius: 8px; }
 `;
 /** [Styled Component] 페이지 헤더 */
 const Header = styled(Layout.Header)`
@@ -121,8 +122,8 @@ export const TOVPageLayout: React.FC<TOVPageLayoutProps> = ({ children, expand, 
 export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
   //
   const items = [
-    { label: (<a href='/my'>내 정보</a>), key: 'info' },
-    { label: (<a href='/login'>로그아웃</a>), key: 'sign'}
+    { label: (<Link href='/my'>내 정보</Link>), key: 'info' },
+    { label: (<Link href='/login'>로그아웃</Link>), key: 'sign'}
   ]
 
   // 컴포넌트 반환
@@ -143,42 +144,21 @@ export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
     </Header>
   );
 }
-const Test = styled.div`
-  position: relative;
-  width: 100%;
-  // 스크롤 스타일
-  &::-webkit-scrollbar { width: 6px; }
-  &::-webkit-scrollbar-thumb { background-color: #999999; border-radius: 6px; }
-`;
-const Test2 = styled.div`
-  position: absoluate;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  &::-webkit-scrollbar { width: 6px; }
-  &::-webkit-scrollbar-thumb { background-color: #999999; border-radius: 6px; }
-`;
+
 /** [Interneal Component] 페이지 레이아웃 (사이드) */
 const TOVPageSide: React.FC<TOVPageSideProps> = ({ expand, onExpand, scroll, selectedKey }): JSX.Element => {
   return (
     <Sider collapsed={!expand} collapsedWidth={88} scroll={scroll} width={246}>
-      <Test>
-        <Test2 style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%' }}>
-          <div style={{ position: 'relative', width: '100%' }}>
-            <div style={{ borderRight: '1px solid #F0F0F0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '100%', paddingTop: 32 }}>
-              <TOVSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
-              <div style={{ alignItems: 'center', display: expand ? 'flex' : 'none', flexDirection: 'column', justifyContent: 'space-between', padding: 24 }}>
-                <div style={{ cursor: 'pointer', fontSize: 11, lineHeight: '20px', marginBottom: 8 }}>
-                  <a style={{ borderRight: '1px solid #8C8C8C', color: '#8C8C8C', fontWeight: '700', paddingLeft: 10, paddingRight: 10 }}>개인정보처리방침</a>
-                  <a style={{ color: '#8C8C8C', fontWeight: '400', paddingLeft: 10, paddingRight: 10 }}>이용약관</a>
-                </div>
-                <p style={{ color: '#8C8C8C', fontSize: 11, fontWeight: '400', lineHeight: '16px', marginBottom: 0, textAlign: 'center' }}>©2022. TOVDATA Inc.</p>
-              </div>
-            </div>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '100%', paddingTop: 32, width: '100%' }}>
+        <TOVSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
+        <div style={{ alignItems: 'center', display: expand ? 'flex' : 'none', flexDirection: 'column', justifyContent: 'space-between', padding: 24 }}>
+          <div style={{ cursor: 'pointer', fontSize: 11, lineHeight: '20px', marginBottom: 8 }}>
+            <a style={{ borderRight: '1px solid #8C8C8C', color: '#8C8C8C', fontWeight: '700', paddingLeft: 10, paddingRight: 10 }}>개인정보처리방침</a>
+            <a style={{ color: '#8C8C8C', fontWeight: '400', paddingLeft: 10, paddingRight: 10 }}>이용약관</a>
           </div>
-        </Test2>
-      </Test>
+          <p style={{ color: '#8C8C8C', fontSize: 11, fontWeight: '400', lineHeight: '16px', marginBottom: 0, textAlign: 'center' }}>©2022. TOVDATA Inc.</p>
+        </div>
+      </div>
     </Sider>
   );
 }

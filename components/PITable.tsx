@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 // Component
 import { EditableTable, EditableTableForm } from './common/Table';
@@ -7,22 +8,26 @@ import { fniTableHeader, piTableHeader } from '../models/static/header';
 import { warningNotification } from './common/Notification';
 // State
 import { GetPersonalInfoSelectOptionsSelector } from '../models/state';
+// Storage
+import { getService } from '@/models/session';
 // Type
 import { SelectOptionsByColumn } from '../models/type';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { setQueryData } from '../models/queryState';
 import { SERVICE_PI,SERVICE_FNI } from '../models/queries/type';
 import { Button } from 'antd';
-// API
+// Query
 import { getFNIDatas, getPIDatas, setDataByTableType } from '../models/queries/api';
 /**
  * [Component] 가명정보 수집 및 이용 테이블
  */
 export const FNITable: React.FC<any> = (): JSX.Element => {
+  const serviceId = getService()?.id;
+
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(SERVICE_FNI, async () => await getFNIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading, data } = useQuery(SERVICE_FNI, async () => await getFNIDatas(serviceId ? serviceId : ''));
   // Get a state (for select options)
-  const { isLoading: piLoading, data: piData } = useQuery(SERVICE_PI, async () => await getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading: piLoading, data: piData } = useQuery(SERVICE_PI, async () => await getPIDatas(serviceId ? serviceId : ''));
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = {
     basis: ['과학적 연구', '통계 작성', '공익적 기록 및 보존', '기타']

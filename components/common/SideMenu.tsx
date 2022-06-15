@@ -30,7 +30,7 @@ const StyledSideMenuToggle = styled.div<MenuOpenStatus>`
   ${(props: any) => !props.open && css`
     background-color: #0050B3;
     color: #ffffff;
-    right: 32px;
+    right: 34px;
     svg {
       transform: rotate(180deg);
     }
@@ -103,7 +103,9 @@ const SideMenuLayout = styled.div<SideMenuLayoutProps>`
   position: relative;
   width: 100%;
   .ant-menu .ant-menu-item {
-    padding-left: ${(props: any) => props.expand ? '40px !important' : '31.5px !important'};
+    margin-bottom: 2px;
+    margin-top: 2px;
+    padding-left: ${(props: any) => props.expand ? '40px !important' : '35px !important'};
   }
   .ant-menu .ant-menu-item-divider {
     margin: ${(props: any) => props.expand ? '16px 20px 8px 20px' : '16px 16px 8px 16px'};
@@ -116,7 +118,7 @@ const SideMenuLayout = styled.div<SideMenuLayoutProps>`
     font-size: 12px;
     font-weight: 400;
     line-height: 22px;
-    padding-left: ${(props: any) => props.expand ? '40px !important' : '20px'};
+    padding-left: ${(props: any) => props.expand ? '40px !important' : '23px'};
     text-overflow: ellipsis;
     white-space: nowrap;
     ${(props: any) => props.expand && css`

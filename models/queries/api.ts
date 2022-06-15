@@ -1,7 +1,7 @@
 // Data
-import { SERVER_URL, RequestDF, SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_DPI, ResponseDF } from './type';
+import { SERVER_URL, RequestDF, SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_DPI, ResponseDF, RESPONSE_STATUS_OK } from './type';
 // Module
-import { createRequest, extractData, processArrayResponse, processResponse } from './internal';
+import { catchAPIRequestError, createRequest, extractData, processArrayResponse, processResponse } from './internal';
 
 /**
  * [API Caller] 개인정보 수집 및 이용에 대한 데이터 불러오기
@@ -143,7 +143,6 @@ export const getDatasByTableType = async (serviceId: string, type: string): Prom
 export const setDataByTableType = async (serviceId: string, type: string, mode: string, data: any): Promise<any> => {
   // URL 및 Request 정의
   const url: string = mode === 'add' ? `${SERVER_URL}${type}/new` : `${SERVER_URL}${type}/${data.id}`;
-  console.log('url', url)
   const request: RequestDF = createRequest(serviceId, mode, data);
   // API 요청
   const response: Response = await fetch(url, request);
@@ -227,6 +226,93 @@ export const setPIPPData = async (serviceId: string, data: any, status: string, 
   };
   // 응답 데이터 반환
   return await fetch(url, request);
+}
+/**
+ * [API Caller] 활동 내역 저장
+ * @param type 활동 기준 (서비스, 사용자)
+ * @param id 식별 아이디 (service_id or user_id)
+ * @param data 활동 내역
+ * @returns API로부터 응답받은 데이터
+ */
+export const setActivity = async (type: string, id: string, data: any): Promise<void> => {
+  // 활동 내용 기준에 따라 URL 정의 (서비스 or 사용자)
+  const url: string = type === 'service' ? `${SERVER_URL}activity/service/${id}` : `${SERVER_URL}activity/user/${id}`;
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify({ text: data }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'PUT'
+  };
+  // API 호출 및 데이터 반환
+  await fetch(url, request);
+}
+/**
+ * [API Caller] 활동 내역 가져오기
+ * @param type 활동 기준 (서비스, 사용자)
+ * @param id 식별 아이디 (service_id or user_id)
+ * @returns 가공 데이터 반환
+ */
+export const getActivity = async (type: string, id: string): Promise<any> => {
+  // 활동 내역 기준에 따라 API 호출 (서비스 or 사용자)
+  const response: any = await fetch(type === 'service' ? `${SERVER_URL}activity/service/${id}` : `${SERVER_URL}activity/user/${id}`);
+  // 응답 데이터 추출
+  const result: ResponseDF = await extractData(response);
+  // 데이터 반환
+  return result.result ? result.data : [];
+}
+/**
+ * [API Caller] 회원가입 (사용자 데이터 저장)
+ * @param id AWS Cognito로부터 부여받은 id
+ * @param data 사용자 정보
+ */
+export const addUser = async (id: string, companyId: string, data: any): Promise<any> => {
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify({
+      companyId: companyId,
+      email: data.identity.email,
+      name: data.user.name,
+      contact: data.user.tel,
+      agree: {
+        service: data.user.esa1,
+        pi: data.user.esa2,
+        marketing: data.user.ssa1
+      }
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST'
+  };
+  // API 호출
+  const response = await fetch(`${SERVER_URL}user/new/${id}`, request);
+  console.log(await response.json());
+}
+
+export const setCompany = async (data: any, id?: string) => {
+  // API 호출을 위한 URL 정의
+  const url: string = id ? `${SERVER_URL}/${id}` : `${SERVER_URL}company/new`;
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify({
+      companyName: data.name,
+      en: data.en,
+      charger: data.charger,
+      url: data.url
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: id ? 'POST' : 'PUT'
+  };
+  // API 호출
+  const response = await fetch(url, request);
+  // 결과 변환
+  const result = await response.json();
+  // 결과 반환
+  return !catchAPIRequestError(result) ? result.data.id : '';
 }
 
 export const setConsentData = async (serviceId: string, data: any, html?: string): Promise<any> => {

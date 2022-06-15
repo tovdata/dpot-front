@@ -133,7 +133,7 @@ const transformData = async (response: Response): Promise<ResponseDF> => {
  * @param response 응답 데이터
  * @returns 에러 결과
  */
-const catchAPIRequestError = (response: any): boolean => {
+export const catchAPIRequestError = (response: any): boolean => {
   if ('status' in response) {
     // 상태별 구문 정의
     let stmt: string|undefined = undefined;

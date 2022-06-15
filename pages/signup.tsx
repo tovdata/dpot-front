@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Modal } from 'antd';
 import { Header, PageLayout, Step1, Step2, Step3, Step4 } from '../components/Signin-up';
 import { warningNotification } from '../components/common/Notification';
+import { setCompany } from '@/models/queries/api';
 
 /** [Component] 회원가입 페이지 */
 const Signup: NextPage = () => {
@@ -24,6 +25,7 @@ const Signup: NextPage = () => {
       ssa1: false
     },
     company: {
+      id: '',
       name: '',
       en: undefined,
       charger: {
@@ -40,7 +42,6 @@ const Signup: NextPage = () => {
   const onSelect = (value: boolean) => { console.log('sr', value); setSearch(value) };
   const onMoveStep = (next: boolean = true) => {
     if (next) {
-      console.log(step + 1)
       if (step + 1 === 2) {
         if (!data.user.esa1) {
           warningNotification('서비스 이용약관 동의는 필수입니다.');
@@ -52,16 +53,23 @@ const Signup: NextPage = () => {
       } else if (step + 1 < 4) {
         setStep(step + 1);
       } else {
-        Modal.success({
-          title: search ? '가입 승인을 요청하였습니다.' : '회사가 생성되었습니다 !',
-          content: search ? '승인이 완료되면, 알려주신 이메일로 연락드릴게요 :)' : '디팟과 함께 개인정보를 관리해보아요 :)',
-          okText: search ? '확인' : '시작하기',
-          onOk: () => Router.push('/'),
-          centered: true
-        });
+
+        // Modal.success({
+        //   title: search ? '가입 승인을 요청하였습니다.' : '회사가 생성되었습니다 !',
+        //   content: search ? '승인이 완료되면, 알려주신 이메일로 연락드릴게요 :)' : '디팟과 함께 개인정보를 관리해보아요 :)',
+        //   okText: search ? '확인' : '시작하기',
+        //   onOk: () => Router.push('/'),
+        //   centered: true
+        // });
       }
     } else {
       step - 1 < 0 ? undefined : setStep(step - 1);
+    }
+  }
+  //
+  const onFinish = async (isNew: boolean) => {
+    if (isNew) {
+      data.company.id = await setCompany(data.company);
     }
   }
 
@@ -76,7 +84,7 @@ const Signup: NextPage = () => {
         ) : step === 2 ? (
           <Step3 data={data} onMoveStep={onMoveStep} onSelect={onSelect} search={search} />
         ) : step === 3 ? (
-          <Step4 data={data.company} onChange={onChange} onMoveStep={onMoveStep} search={search} />
+          <Step4 data={data.company} onChange={onChange} onMoveStep={onMoveStep} onFinish={onFinish} search={search} />
         ) : (<></>)}
       </div>
     </PageLayout>

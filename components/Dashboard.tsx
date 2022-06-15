@@ -102,13 +102,13 @@ const DashboardItemHeader: React.FC<any> = ({ extra, marginBottom, style, title 
   );
 }
 
-/** [Internal Component] 개인정보보호 책임자 */
+/** [Internal Component] 개인정보 보호책임자 */
 const ChargerForCompany: React.FC<any> = (): JSX.Element => {
   return (
     <DashboardItemCard>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
         <div style={{ marginBottom: 21 }}>
-          <h3 style={{ color: '#2F2E41', fontSize: 16, fontWeight: '700', lineHeight: '24px' }}>우리 회사의 개인정보보호 책임자<label style={{ marginLeft: 6 }}>👑</label></h3>
+          <h3 style={{ color: '#2F2E41', fontSize: 16, fontWeight: '700', lineHeight: '24px' }}>우리 회사의 개인정보 보호책임자<label style={{ marginLeft: 6 }}>👑</label></h3>
         </div>
         <Row gutter={16} style={{ marginBottom: 18 }}>
           <Col span={8}>
@@ -185,7 +185,7 @@ const NumberOfConsignmentCompanies: React.FC<any> = (): JSX.Element => {
   // 위탁 데이터 조회
   const { isLoading, data } = useQuery("dashboard-cpi", async () => await getCPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   // Count 변수 설정
-  const count: number = useMemo(() => data ? data.length : 0, [data]);
+  const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
   // 컴포넌트 반환
   return (
@@ -202,7 +202,7 @@ const NumberOfProvisionCompanies: React.FC<any> = (): JSX.Element => {
   // 제공 데이터 조회
   const { isLoading, data } = useQuery("dashboard-ppi", async () => await getPPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
   // Count 변수 설정
-  const count: number = useMemo(() => data ? data.length : 0, [data]);
+  const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
   // 컴포넌트 반환
   return (

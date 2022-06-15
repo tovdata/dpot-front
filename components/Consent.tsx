@@ -10,7 +10,7 @@ import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { VscChevronRight } from "react-icons/vsc";
 import { useQuery, useQueryClient } from "react-query";
 import styled from "styled-components";
-import { filteredData, filteredNotUniqueData, nullCheckForNextStep, returnUniqueInfo } from "utils/consent";
+import { filteredData, filteredNotUniqueData, nullCheckForNextStep, returnUniqueInfo, hasURL } from "utils/consent";
 import { PageHeaderContainStep } from "./common/Header";
 import { EditableTableForm } from "./common/Table";
 import { AddEpiDataComponent, ConfirmCheckListComponent, DisadvantageComponent, SelectCompanyComponent, SelectPIComponent, SubjectComponent, TitleComponent } from "./consent/Atom";
@@ -18,7 +18,6 @@ import { ConfirmPage } from "./consent/Documentation";
 import { ConsentEPITable, ConsentListTable } from "./consent/Table";
 import { copyTextToClipboard, unixTimeToTimeStamp } from "utils/utils";
 import Router from "next/router";
-
 // Styled component(Card Container)
 const StyleCardContainer = styled.div`
   display: grid;
@@ -34,10 +33,15 @@ const StyleCardGrid = styled(Grid)`
   min-width: -webkit-fill-available;
   min-width: fill-available;
   margin: 0.5rem;
+  padding: 2rem;
   cursor: pointer;
+  border-radius:8px;
   .info{
     display: flex;
-  }
+  };
+  &:hover{
+    transform:scale(1.01);  
+  };
 `;
 // Styled component(Header Question Item)
 const StyledHeaderQuestionItem = styled.span`
@@ -128,8 +132,9 @@ export const ConsentMain = () => {
     const filtered = filteredNotUniqueData(PIData);
     if (type === 2 && filtered?.length === 0) return true;
     // 제3자 제공 동의서 > 개인정보 제공 표 정보의 유무
-    if (type === 4 && PPIData?.length === 0) return true;
-
+    if (type === 4 && (PPIData?.length === 0 || hasURL(PPIData))) {
+        return true;
+    }
     return false;
   }
 
