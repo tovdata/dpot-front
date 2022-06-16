@@ -156,7 +156,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
       <DIRow self={refElements ? (el: any) => (refElements.current[8] = el) : undefined}>
         <DIRowHeader title='개인정보 보호책임자 및 개인정보 열람청구' />
         <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. 연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다.' required title='개인정보 보호책임자' />
-        <Row gutter={8} style={{ marginBottom: 24 }}>
+        {/* <Row gutter={8} style={{ marginBottom: 24 }}>
           <Col span={7}>
             <DIInputGroup label='직책'>
               <Input allowClear onChange={(e: any) => onChange(sectionType, e.target.value, 'manager', 'charger', 'position')} onClick={() => onFocus('preview', 8)} value={data.manager.charger.position} />
@@ -172,7 +172,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
               <Input allowClear onChange={(e: any) => onChange(sectionType, e.target.value, 'manager', 'charger', 'contact')} onClick={() => onFocus('preview', 8)} placeholder='예 : privacy@company.com' value={data.manager.charger.contact} />
             </DIInputGroup>
           </Col>
-        </Row>
+        </Row> */}
         {/* <Button size='small' style={{ fontSize: 12, marginBottom: 24, padding: '0 12px' }} type='default'>수정하기</Button> */}
         <DIRowSubject description='필요에 따라 개인정보보호 담당부서와 연락처 정보도 함께 안내하는 것을 권장합니다.' title='개인정보보호 담당부서' />
         <Row gutter={8} style={{ marginBottom: 24 }}>
@@ -281,7 +281,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
     <div id={preview ? 'preview' : 'report'}>
       <h2 ref={refElements ? (el: any) => (refElements.current[0] = el) : undefined} style={{ fontSize: preview ? 18 : 24, fontWeight: '700', lineHeight: '22px', marginBottom: 30, textAlign: 'center' }}>{stmt.title}</h2>
       {!preview ? (
-        <p style={{ color: '#262626', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 32, textAlign: 'right' }}>{moment.unix(data.cInfo.applyAt).format('YYYY-MM-DD')}</p>
+        <p style={{ color: '#262626', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 32, textAlign: 'right' }}>적용일자 : {moment.unix(data.cInfo.applyAt).format('YYYY-MM-DD')}</p>
       ) : (<></>)}
       <DDRow>
         <DDRowContent items={[`${stmt.introduction}`]} />
@@ -607,10 +607,10 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
         {data.dInfo.fni.usage ? (
           <>
             <DDRowHeader title={stmt.fni.title} />
-            <DDRowContent items={stmt.fni.content.common[1]} />
+            <DDRowContent items={stmt.fni.content.common[1]} style={{ marginBottom: 0 }} />
             {refTables.fni && refTables.fni.length > 0 ? (
               <>
-                <DDRowItemList items={['가명정보의 처리에 관한 사항']} style={{ marginBottom: 4 }} />
+                <DDRowItemList items={['가명정보의 처리에 관한 사항']} style={{ marginBottom: 4, marginTop: 8 }} />
                 <ReadableTable columns={[
                   { title: '구분', dataIndex: 'subject', key: 'subject', width: '20%' },
                   { title: '처리 목적', dataIndex: 'purpose', key: 'purpose', width: '30%' },
@@ -665,9 +665,11 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
       </DDRow>
       {preview ? (<></>) : (
         <DDRow>
+          <DDRowHeader title='개인정보 처리방침의 변경에 관한 사항' />
+          <DDRowContent items={[`① 본 방침은 ${moment.unix(data.cInfo.applyAt).format('YYYY년 M월 D일')}부터 시행됩니다.`]} style={{ marginBottom: 0 }} />
           {prevPIPPList.length > 0 ? (
             <>
-              <DDRowHeader title='이전 개인정보 처리방침' />
+              <DDRowContent items={['② 이전의 개인정보 처리방침은 아래에서 확인할 수 있습니다.']} />
               <select id='prev-list' onChange={(e: any) => e.target.value !== 'none' ? window.open(e.target.value, '_blank') : undefined} style={{ border: '1px solid #C0C0C0', padding: '6px 9px' }}>
                 <option key={-1} value='none'>선택하세요.</option>
                 {prevPIPPList.map((item: any, index: number): JSX.Element => (

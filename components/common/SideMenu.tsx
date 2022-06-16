@@ -148,7 +148,7 @@ export const TOVSideMenu: React.FC<TOVSideMenuProps> = ({ expand, onExpand, sele
     ] },
     { label: '활동이력', key: 'group3', type: 'group', children: [
       { label: '결재・승인', key: '/log/sa', icon: (<AuditOutlined />) },
-      { label: '활동 내역', key: '/log/history', icon: (<HistoryOutlined />) }
+      { label: '활동 내역', key: '/log/activity', icon: (<HistoryOutlined />) }
     ] }
   ]
 

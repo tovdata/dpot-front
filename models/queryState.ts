@@ -1,4 +1,5 @@
 import { QueryClient, UseMutateFunction } from "react-query";
+import { writeActivityLog } from "utils/utils";
 import { setDataSource } from "../utils/table";
 // Query
 import { setActivity } from "./queries/api";
@@ -39,21 +40,21 @@ export const setQueryData = (queryClient: QueryClient, type: string, mutate: Use
   }
 
   // 활동 이력 기록을 위한 위치 추출
-  const location: string = getTableLocation(type);
-  // 활동 이력 기록
-  if (location !== '') {
-    switch (mode) {
-      case 'add':
-        setActivity('service', 'b7dc6570-4be9-4710-85c1-4c3788fcbd12', `OOO가 ${location}를 추가하였습니다.`);
-        break;
-      case 'delete':
-        setActivity('service', 'b7dc6570-4be9-4710-85c1-4c3788fcbd12', `OOO가 ${location}를 삭제하였습니다.`);
-        break;
-      case 'save':
-        setActivity('service', 'b7dc6570-4be9-4710-85c1-4c3788fcbd12', `OOO가 ${location}를 수정하였습니다.`);
-        break;
-    }
-  }
+  // writeActivityLog('service', mode, type)
+  // // 활동 이력 기록
+  // if (location !== '') {
+  //   switch (mode) {
+  //     case 'add':
+  //       setActivity('service', 'b7dc6570-4be9-4710-85c1-4c3788fcbd12', `OOO가 ${location}를 추가하였습니다.`);
+  //       break;
+  //     case 'delete':
+  //       setActivity('service', 'b7dc6570-4be9-4710-85c1-4c3788fcbd12', `OOO가 ${location}를 삭제하였습니다.`);
+  //       break;
+  //     case 'save':
+  //       setActivity('service', 'b7dc6570-4be9-4710-85c1-4c3788fcbd12', `OOO가 ${location}를 수정하였습니다.`);
+  //       break;
+  //   }
+  // }
 }
 /**
  * [Internal Function] Query Data 업데이트 함수 (Front-end 내에서 처리)
@@ -94,27 +95,27 @@ const updateURLData = (datas: any[], record: any): any[] => {
  * @param type 활동 내역 기준 (표, 서비스 등)
  * @returns UI상 위치 데이터
  */
-export const getTableLocation = (type: string): string => {
-  switch (type) {
-    case SERVICE_PI:
-      return '‘수집・이용’ 탭의 ‘개인정보 수집・이용’ 표';
-    case SERVICE_FNI:
-      return '‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표';
-    case SERVICE_PPI:
-      return '‘제공・위탁’ 탭의 ‘개인정보 제3자 제공’ 표';
-    case SERVICE_CPI:
-      return '‘제공・위탁’ 탭의 ‘개인정보 위탁’ 표';
-    case SERVICE_PFNI:
-      return '‘제공・위탁’ 탭의 ‘가명정보 제3자 제공’ 표';
-    case SERVICE_CFNI:
-      return '‘제공・위탁’ 탭의 ‘가명정보 위탁’ 표';
-    case SERVICE_DPI:
-      return '‘파기’ 탭의 ‘개인정보 파기 관리대장’ 표';
-    case 'consent':  
-      return '동의서';
-    case SERVICE_PIPP:
-      return '개인정보 처리방침';
-    default:
-      return '';
-  }
-}
+// export const getTableLocation = (type: string): string => {
+//   switch (type) {
+//     case SERVICE_PI:
+//       return '‘수집・이용’ 탭의 ‘개인정보 수집・이용’ 표';
+//     case SERVICE_FNI:
+//       return '‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표';
+//     case SERVICE_PPI:
+//       return '‘제공・위탁’ 탭의 ‘개인정보 제3자 제공’ 표';
+//     case SERVICE_CPI:
+//       return '‘제공・위탁’ 탭의 ‘개인정보 위탁’ 표';
+//     case SERVICE_PFNI:
+//       return '‘제공・위탁’ 탭의 ‘가명정보 제3자 제공’ 표';
+//     case SERVICE_CFNI:
+//       return '‘제공・위탁’ 탭의 ‘가명정보 위탁’ 표';
+//     case SERVICE_DPI:
+//       return '‘파기’ 탭의 ‘개인정보 파기 관리대장’ 표';
+//     case 'consent':  
+//       return '동의서';
+//     case SERVICE_PIPP:
+//       return '개인정보 처리방침';
+//     default:
+//       return '';
+//   }
+// }

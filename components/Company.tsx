@@ -1,17 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
 // Component
 import { Button, Col, Divider, Drawer, Form, Input, Row, Table, Tabs } from 'antd';
 import { TOVInputGroup } from './common/Input';
+import { successNotification } from './common/Notification';
 // Icon
 import { CloseOutlined, EditOutlined } from '@ant-design/icons';
+// State
+import { companySelector } from '@/models/session';
 // Styled
 import styled from 'styled-components';
 // Module
 import moment from 'moment';
-import { successNotification } from './common/Notification';
 
 // 페이지 Layout
 const Layout = styled.div`
+  .ant-tabs-top > .ant-tabs-nav {
+    border-bottom: none !important;
+  }
   .ant-tabs-top > .ant-tabs-nav::before {
     border-bottom: none;
   }
@@ -46,27 +52,38 @@ export const Management: React.FC<any> = (): JSX.Element => {
 }
 /** [Internal Component] 회사 정보 관리 Section */
 const CompanyInfoSection: React.FC<any> = ({ change }): JSX.Element => {
+  // 회사 정보
+  const [company, setCompany] = useRecoilState(companySelector);
   // Form 객체 생성
   const [form] = Form.useForm();
   // 탭 변경에 따라 Form 내에 필드 초기화
-  useEffect(() => form.resetFields(), [change, form]);
+  useEffect(() => form.setFieldsValue({ name: company.name, en: company.en, position: company.manager.position, manager: company.manager.name, email: company.manager.email }), []);
+
+  /** [Event handler] 회사 정보 변경 */
+  const onChange = (property: string, value: any): void => form.setFieldsValue({ ...form.getFieldsValue(), [property]: value });
+  /** [Event handler] 변경한 회사 정보 저장 */
+  const onSave = () => {
+    console.log({ id: company.id, name: form.getFieldValue('name'), en: form.getFieldValue('en'), manager: { name: form.getFieldValue('manager'), position: form.getFieldValue('position'), email: form.getFieldValue('email') } })
+    setCompany({ id: company.id, name: form.getFieldValue('name'), en: form.getFieldValue('en'), manager: { name: form.getFieldValue('manager'), position: form.getFieldValue('position'), email: form.getFieldValue('email') } });
+    successNotification('변경된 회사 정보가 저장되었습니다.');
+  }
 
   // 컴포넌트 반환
   return (
-    <Form form={form} style={{ marginLeft: 'auto', marginRight: 'auto', width: 360 }}>
+    <Form form={form} onFinish={onSave} style={{ marginLeft: 'auto', marginRight: 'auto', width: 360 }}>
       <TOVInputGroup label='회사명' required>
         <Form.Item name='name' rules={[{ required: true, message: '회사명을 입력해주세요.' }]}>
-          <Input />
+          <Input onChange={(e: any): void => onChange('name', e.target.value)} />
         </Form.Item>
       </TOVInputGroup>
       <TOVInputGroup label='회사명(영문)' required>
         <Form.Item name='en' rules={[{ required: true, message: '회사명(영문)을 입력해주세요.' }, { pattern: new RegExp('^[a-zA-Z]*$'), message: '영문만 입력해주세요.' }]}>
-          <Input />
+          <Input onChange={(e: any): void => onChange('en', e.target.value)} />
         </Form.Item>
       </TOVInputGroup>
       <TOVInputGroup label='회사 홈페이지 URL'>
         <Form.Item name='url'>
-          <Input />
+          <Input onChange={(e: any): void => onChange('url', e.target.value)} />
         </Form.Item>
       </TOVInputGroup>
       <TOVInputGroup label='개인정보 보호책임자' required tooltip='개인정보 보호책임자 설명'>
@@ -74,19 +91,19 @@ const CompanyInfoSection: React.FC<any> = ({ change }): JSX.Element => {
           <Col span={5} style={{ alignItems: 'start', display: 'flex', marginTop: 5 }}>직책/직위</Col>
           <Col span={19}>
             <Form.Item name='position' rules={[{ required: true, message: '직책 또는 직위를 입력해주세요.' }]} style={{ marginBottom: 0 }}>
-              <Input placeholder='예) CPO, 대표이사 등' />
+              <Input onChange={(e: any): void => onChange('position', e.target.value)} placeholder='예) CPO, 대표이사 등' />
             </Form.Item>
           </Col>
           <Col span={5} style={{ alignItems: 'start', display: 'flex', marginTop: 5 }}>이름</Col>
           <Col span={19}>
-            <Form.Item name='charger' rules={[{ required: true, message: '이름을 입력해주세요.' }]} style={{ marginBottom: 0 }}>
-              <Input placeholder='김OO' />
+            <Form.Item name='manager' rules={[{ required: true, message: '이름을 입력해주세요.' }]} style={{ marginBottom: 0 }}>
+              <Input onChange={(e: any): void => onChange('manager', e.target.value)} placeholder='김OO' />
             </Form.Item>
           </Col>
           <Col span={5} style={{ alignItems: 'start', display: 'flex', marginTop: 5 }}>이메일</Col>
           <Col span={19}>
             <Form.Item name='email' rules={[{ required: true, message: '이메일을 입력해주세요.' }, { type: 'email', message: '이메일 형식이 올바르지 않습니다.' }]} style={{ marginBottom: 0 }}>
-              <Input placeholder='nickname@company.com' />
+              <Input onChange={(e: any): void => onChange('email', e.target.value)} placeholder='nickname@company.com' />
             </Form.Item>
           </Col>
         </Row>

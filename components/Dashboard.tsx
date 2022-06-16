@@ -10,6 +10,8 @@ import { useQuery } from 'react-query';
 // Query
 import { getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/api';
 import { useMemo } from 'react';
+import { useRecoilValue } from 'recoil';
+import { companySelector, serviceSelector } from '@/models/session';
 // Set chart
 ChartJS.register(ArcElement, Tooltip);
 
@@ -27,16 +29,20 @@ const StyledDashboardItemCard = styled.div`
 
 /** [Component] 대시보드 */
 export const Dashboard: React.FC<any> = (): JSX.Element => {
+  // 회사 및 서비스 정보 조회
+  const company = useRecoilValue(companySelector);
+  const service = useRecoilValue(serviceSelector);
+  // 컴포넌트 반환
   return (
     <div style={{ backgroundColor: '#F0F5FF', height: '100%' }}>
       <TOVLayoutPadding>
         <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 24, userSelect: 'none' }}>
           <h2 style={{ fontSize: 20, fontWeight: '500', lineHeight: '28px', margin: 0 }}>정재은 님 안녕하세요 😊</h2>
-          <p style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', margin: 0 }}>주식회사 토브데이터</p>
+          <p style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', margin: 0 }}>{company.name}</p>
         </div>
         <Row gutter={[24, 24]}>
           <Col span={14}>
-            <ChargerForCompany />
+            <ChargerForCompany manager={company.manager} />
           </Col>
           <Col span={10}>
             <LastInformation />
@@ -44,13 +50,13 @@ export const Dashboard: React.FC<any> = (): JSX.Element => {
           <Col span={14}>
             <Row gutter={[16, 16]}>
               <Col span={8}>
-                <PIItems />
+                <PIItems serviceId={service.id} />
               </Col>
               <Col span={8}>
-                <NumberOfConsignmentCompanies />
+                <NumberOfConsignmentCompanies serviceId={service.id} />
               </Col>
               <Col span={8}>
-                <NumberOfProvisionCompanies />
+                <NumberOfProvisionCompanies serviceId={service.id} />
               </Col>
               <Col span={8}>
                 <DashboardItemCard>
@@ -103,7 +109,7 @@ const DashboardItemHeader: React.FC<any> = ({ extra, marginBottom, style, title 
 }
 
 /** [Internal Component] 개인정보 보호책임자 */
-const ChargerForCompany: React.FC<any> = (): JSX.Element => {
+const ChargerForCompany: React.FC<any> = ({ manager }): JSX.Element => {
   return (
     <DashboardItemCard>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
@@ -114,13 +120,13 @@ const ChargerForCompany: React.FC<any> = (): JSX.Element => {
           <Col span={8}>
             <div style={{ alignItems: 'center', color: '#3F3D56', display: 'flex' }}>
               <span style={{ fontSize: 12, fontWeight: '400', lineHeight: '20px', width: 60 }}>이름</span>
-              <span style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', flex: 1 }}>김토브</span>
+              <span style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', flex: 1 }}>{manager.name}</span>
             </div>
           </Col>
           <Col span={8}>
             <div style={{ alignItems: 'center', color: '#3F3D56', display: 'flex' }}>
               <span style={{ color: '#3F3D56', fontSize: 12, fontWeight: '400', lineHeight: '20px', marginRight: 8, width: 60 }}>직위/직책</span>
-              <span style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', flex: 1 }}>대표이사</span>
+              <span style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', flex: 1 }}>{manager.position}</span>
             </div>
           </Col>
         </Row>
@@ -128,7 +134,7 @@ const ChargerForCompany: React.FC<any> = (): JSX.Element => {
           <Col span={16}>
             <div style={{ alignItems: 'center', color: '#3F3D56', display: 'flex' }}>
               <span style={{ color: '#3F3D56', fontSize: 12, fontWeight: '400', lineHeight: '20px', width: 60 }}>이메일</span>
-              <span style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', flex: 1 }}>privacy@tovdata.com</span>
+              <span style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', flex: 1 }}>{manager.email}</span>
             </div>
           </Col>
         </Row>
@@ -151,9 +157,9 @@ const LastInformation: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Internal Component] 개인정보 수집 항목 차트 */
-const PIItems: React.FC<any> = (): JSX.Element => {
-  // 위탁 데이터 조회
-  const { isLoading, data } = useQuery("dashboard-items", async () => await getPIItemsByType('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+const PIItems: React.FC<any> = ({ serviceId }): JSX.Element => {
+  // 개인정보 수집 항목 조회
+  const { isLoading, data } = useQuery("dashboard-items", async () => await getPIItemsByType(serviceId));
   // Chart data
   const chartData: any = useMemo(() => ({
     labels: ['필수항목', '선택항목'],
@@ -181,9 +187,9 @@ const PIItems: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Internal Component] 개인정보 위탁 업체 수 표시 */
-const NumberOfConsignmentCompanies: React.FC<any> = (): JSX.Element => {
+const NumberOfConsignmentCompanies: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 위탁 데이터 조회
-  const { isLoading, data } = useQuery("dashboard-cpi", async () => await getCPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading, data } = useQuery("dashboard-cpi", async () => await getCPIDatas(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -198,9 +204,9 @@ const NumberOfConsignmentCompanies: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Internal Component] 개인정보 제공 업체 수 표시 */
-const NumberOfProvisionCompanies: React.FC<any> = (): JSX.Element => {
+const NumberOfProvisionCompanies: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 제공 데이터 조회
-  const { isLoading, data } = useQuery("dashboard-ppi", async () => await getPPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading, data } = useQuery("dashboard-ppi", async () => await getPPIDatas(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -239,7 +245,7 @@ const ConsentInformaiton: React.FC<any> = (): JSX.Element => {
 const MyActivieList: React.FC<any> = (): JSX.Element => {
   return (
     <>
-      <DashboardItemHeader extra={<ViewAll />} title='나의 활동 내역' />
+      <DashboardItemHeader extra={<ViewAll href='/log/activity' />} title='나의 활동 내역' />
       <div></div>
     </>
   );

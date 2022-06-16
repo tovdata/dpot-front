@@ -2,6 +2,7 @@
 import { SERVER_URL, RequestDF, SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_DPI, ResponseDF, RESPONSE_STATUS_OK } from './type';
 // Module
 import { catchAPIRequestError, createRequest, extractData, processArrayResponse, processResponse } from './internal';
+import { writeActivityLog } from 'utils/utils';
 
 /**
  * [API Caller] 개인정보 수집 및 이용에 대한 데이터 불러오기
@@ -147,6 +148,11 @@ export const setDataByTableType = async (serviceId: string, type: string, mode: 
   // API 요청
   const response: Response = await fetch(url, request);
   // 에러 처리
+  if (!catchAPIRequestError(response)) {
+    // 활동 내역 기록
+    writeActivityLog('service', mode, type);
+  }
+  // 결과 반환
   return await processResponse(response, mode);
 }
 /**

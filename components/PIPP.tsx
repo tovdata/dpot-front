@@ -26,6 +26,14 @@ import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SER
 import { BasicPageLoading } from './common/Loading';
 import { getDatasByTableType, getPIPPData, setPIPPData } from '../models/queries/api';
 import { blankCheck, copyTextToClipboard } from 'utils/utils';
+import { useRecoilValue } from 'recoil';
+import { companySelector, serviceSelector } from '@/models/session';
+// Query
+import { getPIPPList, getPIPPStatus } from '@/models/queries/api';
+import { TOVLayoutPadding } from './common/Layout';
+// Query key
+const PIPP_LIST: string = 'pippList';
+const PIPP_STATUS: string = 'pippStatus';
 
 /** [Interface] PIPP process */
 interface PIPPProcess {
@@ -36,8 +44,54 @@ interface PIPPProcess {
 /** [Type] Scroll position */
 type ScrollPosition = 'start'|'end';
 
+export const PIPPMain: React.FC<any> = (): JSX.Element => {
+  // 현재 서비스 조회
+  const service = useRecoilValue(serviceSelector);
+  // 개인정보 처리방침 상태 조회 API
+  const { isLoading: isLoadingForStatus, data: status } = useQuery(PIPP_STATUS, async () => await getPIPPStatus(service.id));
+  // 생성된 개인정보 처리방침 목록 조회 API
+  const { isLoading: isLoadingForList, data: list } = useQuery(PIPP_LIST, async () => await getPIPPList(service.id));
+
+  // 현재 페이지 상태
+  const [progress, setProgress] = useState<string>('none');
+  // 처리방침 생성 상태에 대한 쿼리 관리 객체
+  const queryClient = useQueryClient();
+  /** [Event handler] 처리방침 상태 및 목록 갱신 함수 */
+  const onUpdateStatus = () => {
+    queryClient.invalidateQueries(PIPP_LIST);
+    queryClient.invalidateQueries(PIPP_STATUS);
+    queryClient.invalidateQueries(SERVICE_PIPP);
+  }
+  /** [Event handler] 처리방침 생성 및 편집 */
+  const onProcess = (process: DocProgressStatus) => {
+    process ? setProgress(process) : setProgress('none');
+  }
+  /** [Event handler] 처리방침 생성 취소 */
+  const onBack = () => {
+    onUpdateStatus();
+    setProgress('none');
+  }
+
+  // 컴포넌트 반환
+  return (
+    <>
+      {isLoadingForStatus && isLoadingForList ? (
+        <BasicPageLoading />
+      ) : (
+        <TOVLayoutPadding>
+          {progress === 'none' ? (
+            <PIPPList list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.version - a.version) : []} onProcess={onProcess} status={status} />
+          ) : (
+            <CreatePIPPForm list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.applyAt - a.applyAt) : []} onBack={onBack} onUpdateStatus={onUpdateStatus} progress={progress} status={status} />
+          )}
+        </TOVLayoutPadding>
+      )}
+    </>
+  );
+}
+
 /** [Component] 개인정보 처리방침 메인 페이지 */
-export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIPPProcess): JSX.Element => {
+export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIPPProcess): JSX.Element => {
   return (
     <>
       <MainPageHeader onProcess={onProcess} status={status} />
@@ -58,6 +112,8 @@ export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
  * [Component] 개인정보 처리방침 생성 페이지
  */
 export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, progress, status }: any): JSX.Element => {
+  // 현재 서비스 조회
+  const company = useRecoilValue(companySelector);
   // 데이터 불러오기에 대한 상태
   const [loading, setLoading] = useState<boolean>(true);
   // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
@@ -101,12 +157,12 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
   const [visible, setVisible] = useState<boolean>(false);
   const [visible2, setVisible2] = useState<boolean>(false);
   // 처리방침 생성 과정에서 사용될 데이터 구조
-  const [data, setData] = useState<any>(defaultPIPPData);
+  const [data, setData] = useState<any>({ ...defaultPIPPData, dInfo: { ...defaultPIPPData.dInfo, manager: { ...defaultPIPPData.dInfo.manager, charger: { name: company.manager.name, position: company.manager.position, contact: company.manager.email } } } });
   // 생성된 URL
   const [url, setUrl] = useState<string>('');
 
   // 요청으로 응답된 데이터 가공 및 처리
-  if (results.every((result: any): boolean => !result.isLoading)) {
+  if (!loading) {
     if (!initQuery) {
       setInitQuery(true);
       // 가공을 위한 임시 데이터 셋 정의
@@ -116,8 +172,10 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
       SERVICE_LIST.forEach((type: string, index: number): any => {
         tempRef[type] = results[index].isSuccess ? results[index].data ? results[index].data : [] : [];
         // URL filter
-        if ((type === SERVICE_PI || type === SERVICE_PPI || type === SERVICE_CPI || type === SERVICE_FNI || type === SERVICE_CFNI || type === SERVICE_PFNI) && tempRef[type].length > 0) {
-          if (type in tempData) {
+        if ((type === SERVICE_PPI || type === SERVICE_CPI || type === SERVICE_FNI || type === SERVICE_CFNI || type === SERVICE_PFNI) && tempRef[type].length > 0) {
+          if (type === SERVICE_PFNI || type === SERVICE_CFNI) {
+            tempData.fni.usage = true;
+          } else {
             tempData[type].usage = true;
           }
           // Extract a url

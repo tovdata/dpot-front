@@ -343,6 +343,19 @@ export const statementForPIPP = (company: string): any => {
           ]
         }
       }
+    },
+    prevLink: {
+      title: '개인정보 처리방침의 변경에 관한 사항',
+      content: {
+        common: {
+          1: [
+            '① 본 방침은 2022년 6월 1일부터 시행됩니다.'
+          ],
+          2: [
+            '② 이전의 개인정보 처리방침은 아래에서 확인할 수 있습니다.'
+          ]
+        }
+      }
     }
   }
 };

@@ -56,7 +56,6 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-// const queryClient = new QueryClient();
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

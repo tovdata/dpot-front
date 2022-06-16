@@ -1,17 +1,27 @@
 import Router from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
 // Component
 import { Dropdown, Layout, Menu } from 'antd';
 import Link from 'next/link';
 import { TOVSideMenu } from './SideMenu';
+import { NotFoundCompanyPage, NotFoundServicePage } from './ResponsePage';
 // Icon
 import { UserOutlined } from '@ant-design/icons';
+// State
+import { companySelector, serviceSelector } from '@/models/session';
 // Style
 import styled from 'styled-components';
+import { BasicPageLoading } from './Loading';
 
 /** [Interface] Properties for Sider */
 interface SiderProps {
   scroll: number;
+}
+/** [Interface] Properties for TOVSession */
+interface TOVSessionProps {
+  children?: JSX.Element | JSX.Element[];
+  type?: string;
 }
 /** [Interface] Properties for TOVPageLayout */
 interface TOVPageLayoutProps {
@@ -92,6 +102,27 @@ export const TOVLayoutVerticalPadding = styled.div`
   position: relative;
 `;
 
+/** [Component] 현재 회사 및 서비스 확인 섹션 */
+export const TOVSession: React.FC<any> = ({ children, type }): JSX.Element => {
+  const company = useRecoilValue(companySelector);
+  const service = useRecoilValue(serviceSelector);
+
+  // 컴포넌트 반환
+  return (
+    <>{company.id === '' ? (
+      <div className='1'>
+        <NotFoundCompanyPage />
+      </div>
+    ) : type === 'service' && service.id === '' ? (
+      <div className='2'>
+        <NotFoundServicePage />
+      </div>
+    ) : (
+      <>{children}</>
+    )}
+    </>
+  );
+}
 /** [Component] 페이지 레이아웃 */
 export const TOVPageLayout: React.FC<TOVPageLayoutProps> = ({ children, expand, onExpand, selectedKey }): JSX.Element => {
   // 스크롤 상태
@@ -120,11 +151,11 @@ export const TOVPageLayout: React.FC<TOVPageLayoutProps> = ({ children, expand, 
 }
 /** [Component] 페이지 레이아웃 (헤더) */
 export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
-  //
-  const items = [
+  // 헤더 메뉴 아이템
+  const items = useMemo(() => [
     { label: (<Link href='/my'>내 정보</Link>), key: 'info' },
     { label: (<Link href='/login'>로그아웃</Link>), key: 'sign'}
-  ]
+  ], []);
 
   // 컴포넌트 반환
   return (

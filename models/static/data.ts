@@ -34,7 +34,7 @@ export const defaultPIPPData: any = {
   },
   dInfo: {
     name: '',
-    period: [],
+    period: ['통신비밀보호법 : 웹사이트 방문 기록(3개월)'],
     child: {
       method: [],
       usage: undefined

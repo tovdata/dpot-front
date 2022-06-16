@@ -3,7 +3,7 @@ import type { NextPage } from 'next'
 import { TOVPageLayout } from '@/components/common/Layout'
 import { Dashboard } from '@/components/Dashboard'
 
-const Home: NextPage = ({ expand, onExpand }: any) => {
+const Page: NextPage = ({ expand, onExpand }: any) => {
   return (
     <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/'>
       <Dashboard />
@@ -11,4 +11,4 @@ const Home: NextPage = ({ expand, onExpand }: any) => {
   )
 }
 
-export default Home
+export default Page;
