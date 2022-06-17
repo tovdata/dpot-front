@@ -1,12 +1,13 @@
 // Chart
 import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { useQuery } from 'react-query';
 // Component
 import { Col, Row, Spin, Tag } from 'antd';
 import { TOVLayoutPadding } from './common/Layout';
 // Styled
-import styled from 'styled-components';
-import { useQuery } from 'react-query';
+import { StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemHeader, StyledDashboardItemTitle } from './styled/Dashboard';
+import { StyledDescriptionForm, StyledDescriptionFormSubject, StyledDescriptionFormContent, StyledManagerSection, StyledManagerSectionHeader, StyledManagerSectionIcon, StyledManagerSectionTitle } from './styled/Dashboard';
 // Query
 import { getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/api';
 import { useMemo } from 'react';
@@ -14,18 +15,6 @@ import { useRecoilValue } from 'recoil';
 import { companySelector, serviceSelector } from '@/models/session';
 // Set chart
 ChartJS.register(ArcElement, Tooltip);
-
-const StyledDashboardItemCard = styled.div`
-  background-color: #FFFFFF;
-  border: 1px solid #F0F5FF;
-  border-radius: 16px;
-  height: 100%;
-  position: relative;
-  .ant-spin-container,
-  .ant-spin-nested-loading {
-    height: 100%;
-  }
-`;
 
 /** [Component] 대시보드 */
 export const Dashboard: React.FC<any> = (): JSX.Element => {
@@ -91,9 +80,9 @@ const DashboardItemCard: React.FC<any> = ({ children, loading, style }): JSX.Ele
   return (
     <StyledDashboardItemCard>
       <Spin spinning={loading ? true : false} size='large'>
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', padding: '24px 32px', ...style }}>
+        <StyledDashboardItemContent style={style}>
           {children}
-        </div>
+        </StyledDashboardItemContent>
       </Spin>
     </StyledDashboardItemCard>
   );
@@ -101,10 +90,10 @@ const DashboardItemCard: React.FC<any> = ({ children, loading, style }): JSX.Ele
 /** [Internal Component] 대시보드 아이템 헤더 */
 const DashboardItemHeader: React.FC<any> = ({ extra, marginBottom, style, title }): JSX.Element => {
   return (
-    <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: marginBottom ? marginBottom : 16 }}>
-      <h3 style={{ color: '#061178', fontSize: 14, fontWeight: '700', lineHeight: '22px', margin: 0, ...style }}>{title}</h3>
-      {extra}
-    </div>
+    <StyledDashboardItemHeader style={marginBottom ? { marginBottom: marginBottom } : undefined}>
+      <StyledDashboardItemTitle style={style}>{title}</StyledDashboardItemTitle>
+      <>{extra}</>
+    </StyledDashboardItemHeader>
   );
 }
 
@@ -112,33 +101,34 @@ const DashboardItemHeader: React.FC<any> = ({ extra, marginBottom, style, title 
 const ChargerForCompany: React.FC<any> = ({ manager }): JSX.Element => {
   return (
     <DashboardItemCard>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-        <div style={{ marginBottom: 21 }}>
-          <h3 style={{ color: '#2F2E41', fontSize: 16, fontWeight: '700', lineHeight: '24px' }}>우리 회사의 개인정보 보호책임자<label style={{ marginLeft: 6 }}>👑</label></h3>
-        </div>
+      <StyledManagerSection>
+        <StyledManagerSectionHeader>
+          <StyledManagerSectionTitle>우리 회사의 개인정보 보호책임자</StyledManagerSectionTitle>
+          <StyledManagerSectionIcon>👑</StyledManagerSectionIcon>
+        </StyledManagerSectionHeader>
         <Row gutter={16} style={{ marginBottom: 18 }}>
           <Col span={8}>
-            <div style={{ alignItems: 'center', color: '#3F3D56', display: 'flex' }}>
-              <span style={{ fontSize: 12, fontWeight: '400', lineHeight: '20px', width: 60 }}>이름</span>
-              <span style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', flex: 1 }}>{manager.name}</span>
-            </div>
+            <StyledDescriptionForm>
+              <StyledDescriptionFormSubject>이름</StyledDescriptionFormSubject>
+              <StyledDescriptionFormContent>{manager.name}</StyledDescriptionFormContent>
+            </StyledDescriptionForm>
           </Col>
           <Col span={8}>
-            <div style={{ alignItems: 'center', color: '#3F3D56', display: 'flex' }}>
-              <span style={{ color: '#3F3D56', fontSize: 12, fontWeight: '400', lineHeight: '20px', marginRight: 8, width: 60 }}>직위/직책</span>
-              <span style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', flex: 1 }}>{manager.position}</span>
-            </div>
+            <StyledDescriptionForm>
+              <StyledDescriptionFormSubject>직위/직책</StyledDescriptionFormSubject>
+              <StyledDescriptionFormContent>{manager.position}</StyledDescriptionFormContent>
+            </StyledDescriptionForm>
           </Col>
         </Row>
         <Row>
           <Col span={16}>
-            <div style={{ alignItems: 'center', color: '#3F3D56', display: 'flex' }}>
-              <span style={{ color: '#3F3D56', fontSize: 12, fontWeight: '400', lineHeight: '20px', width: 60 }}>이메일</span>
-              <span style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', flex: 1 }}>{manager.email}</span>
-            </div>
+            <StyledDescriptionForm>
+              <StyledDescriptionFormSubject>이메일</StyledDescriptionFormSubject>
+              <StyledDescriptionFormContent>{manager.email}</StyledDescriptionFormContent>
+            </StyledDescriptionForm>
           </Col>
         </Row>
-      </div>
+      </StyledManagerSection>
     </DashboardItemCard>
   );
 }

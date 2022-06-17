@@ -273,18 +273,18 @@ export const getActivity = async (type: string, id: string): Promise<any> => {
  * @param id AWS Cognito로부터 부여받은 id
  * @param data 사용자 정보
  */
-export const addUser = async (id: string, companyId: string, data: any): Promise<any> => {
+export const addUser = async (id: string, companyId: string, data: any): Promise<ResponseDF> => {
   // API 호출에 필요한 Request 생성
   const request: RequestDF = {
     body: JSON.stringify({
       companyId: companyId,
-      email: data.identity.email,
-      name: data.user.name,
-      contact: data.user.tel,
+      email: data.email,
+      name: data.name,
+      contact: data.tel,
       agree: {
-        service: data.user.esa1,
-        pi: data.user.esa2,
-        marketing: data.user.ssa1
+        service: data.esa1,
+        pi: data.esa2,
+        marketing: data.ssa1
       }
     }),
     headers: {
@@ -294,10 +294,28 @@ export const addUser = async (id: string, companyId: string, data: any): Promise
   };
   // API 호출
   const response = await fetch(`${SERVER_URL}user/new/${id}`, request);
-  console.log(await response.json());
+  // 응답 데이터 추출 및 반환
+  return await extractData(response);
 }
-
-export const setCompany = async (data: any, id?: string) => {
+/**
+ * [API Caller] 회사 검색
+ * @param name 검색할 값
+ * @returns 응답 결과
+ */
+export const findCompany = async (name: string): Promise<any[]> => {
+  const response = await fetch(`${SERVER_URL}company/find?name=${encodeURIComponent(name)}`);
+  // 응답 데이터 추출
+  const result = await extractData(response);
+  // 데이터 반환
+  return result.result ? result.data.list : [];
+}
+/**
+ * [API Caller] 회사 생성/수정
+ * @param data 회사 정보 데이터
+ * @param id 회사 ID
+ * @returns 응답 결과
+ */
+export const setCompany = async (data: any, id?: string): Promise<ResponseDF> => {
   // API 호출을 위한 URL 정의
   const url: string = id ? `${SERVER_URL}/${id}` : `${SERVER_URL}company/new`;
   // API 호출에 필요한 Request 생성
@@ -305,20 +323,18 @@ export const setCompany = async (data: any, id?: string) => {
     body: JSON.stringify({
       companyName: data.name,
       en: data.en,
-      charger: data.charger,
+      manager: data.manager,
       url: data.url
     }),
     headers: {
       'Content-Type': 'application/json'
     },
-    method: id ? 'POST' : 'PUT'
+    method: id ? 'PUT' : 'POST'
   };
   // API 호출
   const response = await fetch(url, request);
-  // 결과 변환
-  const result = await response.json();
-  // 결과 반환
-  return !catchAPIRequestError(result) ? result.data.id : '';
+  // 응답 데이터 추출 및 반환
+  return await extractData(response);
 }
 
 export const setConsentData = async (serviceId: string, data: any, html?: string): Promise<any> => {

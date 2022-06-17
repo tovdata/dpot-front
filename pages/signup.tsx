@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Modal } from 'antd';
 import { Header, PageLayout, Step1, Step2, Step3, Step4 } from '../components/Signin-up';
 import { warningNotification } from '../components/common/Notification';
-import { setCompany } from '@/models/queries/api';
+import { addUser, setCompany } from '@/models/queries/api';
 
 /** [Component] 회원가입 페이지 */
 const Signup: NextPage = () => {
@@ -28,7 +28,7 @@ const Signup: NextPage = () => {
       id: '',
       name: '',
       en: undefined,
-      charger: {
+      manager: {
         position: '',
         name: '',
         email: ''
@@ -37,39 +37,59 @@ const Signup: NextPage = () => {
   });
 
   const onChange = (value: any, category: string, property: string, subProperty?: string) => {
-    subProperty ? setData({ ...data, [category]: { ...data[category], [property]: { ...data[category][property], [subProperty]: value } } }) : setData({ ...data, [category]: { ...data[category], [property]: value } }) ;
+    subProperty ? setData({ ...data, [category]: { ...data[category], [property]: { ...data[category][property], [subProperty]: value } } }) : setData({ ...data, [category]: { ...data[category], [property]: value } });
   }
   const onSelect = (value: boolean) => { console.log('sr', value); setSearch(value) };
-  const onMoveStep = (next: boolean = true) => {
+  const onMoveStep = (next: boolean = true): void => {
     if (next) {
-      if (step + 1 === 2) {
+      if (step + 1 === 1) {
+        // 
+      } else if (step + 1 === 2) {
         if (!data.user.esa1) {
-          warningNotification('서비스 이용약관 동의는 필수입니다.');
+          return warningNotification('서비스 이용약관 동의는 필수입니다.');
         } else if (!data.user.esa2) {
-          warningNotification('개인정보 수집 및 이용 동의는 필수입니다.');
-        } else {
-          setStep(step + 1);
+          return warningNotification('개인정보 수집 및 이용 동의는 필수입니다.');
         }
-      } else if (step + 1 < 4) {
-        setStep(step + 1);
-      } else {
-
-        // Modal.success({
-        //   title: search ? '가입 승인을 요청하였습니다.' : '회사가 생성되었습니다 !',
-        //   content: search ? '승인이 완료되면, 알려주신 이메일로 연락드릴게요 :)' : '디팟과 함께 개인정보를 관리해보아요 :)',
-        //   okText: search ? '확인' : '시작하기',
-        //   onOk: () => Router.push('/'),
-        //   centered: true
-        // });
       }
+      setStep(step + 1);
     } else {
       step - 1 < 0 ? undefined : setStep(step - 1);
     }
   }
   //
-  const onFinish = async (isNew: boolean) => {
+  const onFinish = async (isNew: boolean): Promise<void> => {
     if (isNew) {
-      data.company.id = await setCompany(data.company);
+      const result = await setCompany(data.company);
+      if (result.result) {
+        data.company.id = result.data.id;
+      } else {
+        Modal.error({
+          title: '회원가입 오류',
+          content: '회사 생성 과정에서 오류가 발생하였습니다. 플립(Plip)으로 문의해주세요 :(',
+          okText: '확인',
+          centered: true
+        });
+        return;
+      }
+    }
+    // 회원가입
+    const result = await addUser('4', data.company.id, { ...data.user, email: data.identity.email });
+    // 결과 통보
+    if (result.result) {
+      Modal.success({
+        title: search ? '가입 승인을 요청하였습니다.' : '회사가 생성되었습니다 !',
+        content: search ? '승인이 완료되면, 알려주신 이메일로 연락드릴게요 :)' : '플립(Plip)과 함께 개인정보를 관리해보아요 :)',
+        okText: search ? '확인' : '시작하기',
+        onOk: () => Router.push('/login'),
+        centered: true
+      });
+    } else {
+      Modal.error({
+        title: '회원가입 오류',
+        content: '회원가입 과정에서 오류가 발생하였습니다. 플립(Plip)으로 문의해주세요 :(',
+        okText: '확인',
+        centered: true
+      });
     }
   }
 

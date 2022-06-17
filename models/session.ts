@@ -2,10 +2,14 @@ import { atom, selector } from 'recoil';
 // Keys
 const KEY_COMPANY = 'plip-company';
 const KEY_SERVICE = 'plip-service';
-/** [Interface] 회사 데이터 구조 */
-export interface Company {
+const KEY_USER = 'plip-user';
+/** [Interface] 기본적인 데이터 구조 */
+export interface Session {
   id: string;
   name: string;
+}
+/** [Interface] 회사 데이터 구조 */
+export interface Company extends Session {
   en: string;
   url?: string;
   manager: PIManager;
@@ -17,10 +21,9 @@ export interface PIManager {
   email: string;
 }
 /** [Interface] 서비스 데이터 구조 */
-export interface Service {
-  id: string;
-  name: string;
-}
+export interface Service extends Session {}
+/** [Interface] 사용자 데이터 구조 */
+export interface User extends Session {}
 
 /**
  * [Internal Function] 로컬 스토리지에 대한 데이터 동기 (조회/저장)
@@ -58,6 +61,12 @@ const serviceAtom = atom<Service>({
   default: { id: '', name: '' },
   effects: [localStorageEffects(KEY_SERVICE)],
 });
+/** [Atom] 사용자 정보 */
+const userAtom = atom<User>({
+  key: 'userAtom',
+  default: { id: '', name: '' },
+  effects: [localStorageEffects(KEY_USER)],
+});
 
 /** [Selector] 회사 정보 */
 export const companySelector = selector<Company>({
@@ -70,4 +79,10 @@ export const serviceSelector = selector<Service>({
   key: 'serviceSelector',
   get: ({ get }: any) => get(serviceAtom),
   set: ({ set }: any, newValue: any) => set(serviceAtom, newValue)
+});
+/** [Selector] 사용자 정보 */
+export const userSelector = selector<Service>({
+  key: 'userSelector',
+  get: ({ get }: any) => get(userAtom),
+  set: ({ set }: any, newValue: any) => set(userAtom, newValue)
 });

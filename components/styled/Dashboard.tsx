@@ -1,0 +1,84 @@
+// Styled
+import styled from 'styled-components';
+
+/** [Styled Component] 대시보드 아이템 카드 */
+export const StyledDashboardItemCard = styled.div`
+  background-color: #FFFFFF;
+  border: 1px solid #F0F5FF;
+  border-radius: 16px;
+  height: 100%;
+  position: relative;
+  .ant-spin-container,
+  .ant-spin-nested-loading {
+    height: 100%;
+  }
+`;
+/** [Styled Component] 대시보드 아이템 내용 */
+export const StyledDashboardItemContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 24px 32px;
+`;
+/** [Styled Component] 대시보드 아이템 헤더 */
+export const StyledDashboardItemHeader = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+`;
+/** [Styled Component] 대시보드 아이템 제목 */
+export const StyledDashboardItemTitle = styled.h3`
+  color: #061178;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 22px;
+  margin: 0;
+`;
+/** [Styled Component] 개인정보 보호책임자 설명 폼 */
+export const StyledDescriptionForm = styled.div`
+  align-items: center;
+  display: flex;  
+`;
+/** [Styled Component] 개인정보 보호책임자 설명 폼 내용 */
+export const StyledDescriptionFormContent = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+  line-height: 24px;
+`;
+/** [Styled Component] 개인정보 보호책임자 설명 폼 주제 */
+export const StyledDescriptionFormSubject = styled.div`
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  min-width: 60px;
+`;
+/** [Styled Component] 개인정보 보호책임자 섹션 */
+export const StyledManagerSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+`;
+/** [Styled Component] 개인정보 보호책임자 섹션 헤더 */
+export const StyledManagerSectionHeader = styled.div`
+  align-items: center;
+  display: flex;
+  margin-bottom: 21px;
+  position: relative;
+`;
+/** [Styled Component] 개인정보 보호책임자 섹션 아이콘 */
+export const StyledManagerSectionIcon = styled.div`
+  font-size: 16px;
+  margin-left: 8px;
+`;
+/** [Styled Component] 개인정보 보호책임자 섹션 제목 */
+export const StyledManagerSectionTitle = styled.div`
+  color: #2F2E41;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  margin: 0;
+`;
