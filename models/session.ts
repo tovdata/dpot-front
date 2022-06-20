@@ -81,7 +81,7 @@ export const serviceSelector = selector<Service>({
   set: ({ set }: any, newValue: any) => set(serviceAtom, newValue)
 });
 /** [Selector] 사용자 정보 */
-export const userSelector = selector<Service>({
+export const userSelector = selector<User>({
   key: 'userSelector',
   get: ({ get }: any) => get(userAtom),
   set: ({ set }: any, newValue: any) => set(userAtom, newValue)

@@ -36,10 +36,13 @@ const Signup: NextPage = () => {
     }
   });
 
+  /** [Event handler] 데이터 변경 */
   const onChange = (value: any, category: string, property: string, subProperty?: string) => {
     subProperty ? setData({ ...data, [category]: { ...data[category], [property]: { ...data[category][property], [subProperty]: value } } }) : setData({ ...data, [category]: { ...data[category], [property]: value } });
   }
-  const onSelect = (value: boolean) => { console.log('sr', value); setSearch(value) };
+  /** [Event handler] 회사 생성 또는 이동 */
+  const onSelect = (value: boolean) => setSearch(value);
+  /** [Event handler] 단계 이동 */
   const onMoveStep = (next: boolean = true): void => {
     if (next) {
       if (step + 1 === 1) {
@@ -56,7 +59,7 @@ const Signup: NextPage = () => {
       step - 1 < 0 ? undefined : setStep(step - 1);
     }
   }
-  //
+  /** [Event handler] 회원가입 */
   const onFinish = async (isNew: boolean): Promise<void> => {
     if (isNew) {
       const result = await setCompany(data.company);

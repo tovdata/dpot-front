@@ -6,10 +6,12 @@ import { useQuery } from 'react-query';
 import { Col, Row, Spin, Tag } from 'antd';
 import { TOVLayoutPadding } from './common/Layout';
 // Styled
-import { StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemHeader, StyledDashboardItemTitle } from './styled/Dashboard';
+import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardItemTitle } from './styled/Dashboard';
+import { StyledTag, StyledTagList } from './styled/Dashboard';
+import { StyledLatestInfoRow, StyledLatestInfoRowSubject, StyledLatestInfoRowContent, StyledLatestInfoRowContentContainer } from './styled/Dashboard';
 import { StyledDescriptionForm, StyledDescriptionFormSubject, StyledDescriptionFormContent, StyledManagerSection, StyledManagerSectionHeader, StyledManagerSectionIcon, StyledManagerSectionTitle } from './styled/Dashboard';
 // Query
-import { getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/api';
+import { getConsentList, getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/api';
 import { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 import { companySelector, serviceSelector } from '@/models/session';
@@ -53,9 +55,7 @@ export const Dashboard: React.FC<any> = (): JSX.Element => {
                 </DashboardItemCard>
               </Col>
               <Col span={16}>
-                <DashboardItemCard>
-                  <ConsentInformaiton />
-                </DashboardItemCard>
+                <ConsentInformaiton serviceId={service.id} />
               </Col>
             </Row>
           </Col>
@@ -138,9 +138,9 @@ const LastInformation: React.FC<any> = (): JSX.Element => {
     <DashboardItemCard>
       <DashboardItemHeader title='최근 정보 수정일' />
       <div>
-        <LastInformationRow date='2022-06-08' style={{ marginBottom: 4 }} subject='동의서' user='김토브' />
-        <LastInformationRow date='2022-06-08' style={{ marginBottom: 4 }} subject='개인정보 처리방침' user='김토브' />
-        <LastInformationRow date='2022-06-08' style={{ marginBottom: 4 }} subject='개인정보 수집・이용 현황' user='김토브' />
+        <LastInformationRow date='2022-06-08' subject='동의서' user='김토브' />
+        <LastInformationRow date='2022-06-08' subject='개인정보 처리방침' user='김토브' />
+        <LastInformationRow date='2022-06-08' subject='개인정보 수집・이용 현황' user='김토브' />
         <LastInformationRow date='2022-06-08' subject='개인정보 제공・위탁 현황' user='김토브' />
       </div>
     </DashboardItemCard>
@@ -187,9 +187,9 @@ const NumberOfConsignmentCompanies: React.FC<any> = ({ serviceId }): JSX.Element
   return (
     <DashboardItemCard loading={isLoading}>
       <DashboardItemHeader title={<>개인정보<br/>위탁 업체 수</>} />
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <StyledDashboardItemContentEnd>
         <CountLabel count={count} />
-      </div>
+      </StyledDashboardItemContentEnd>
     </DashboardItemCard>
   );
 }
@@ -204,9 +204,9 @@ const NumberOfProvisionCompanies: React.FC<any> = ({ serviceId }): JSX.Element =
   return (
     <DashboardItemCard loading={isLoading}>
       <DashboardItemHeader title={<>개인정보<br/>제공 업체 수</>} />
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <StyledDashboardItemContentEnd>
         <CountLabel count={count} />
-      </div>
+      </StyledDashboardItemContentEnd>
     </DashboardItemCard>
   );
 }
@@ -223,12 +223,49 @@ const PIPPInfomation: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Internal Component] 동의서 개수 표시 */
-const ConsentInformaiton: React.FC<any> = (): JSX.Element => {
-  return (
-    <>
-      <DashboardItemHeader title='동의서' />
+const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
+  // 동의서 목록 조회
+  const { isLoading, data } = useQuery("dashboard-consent", async () => await getConsentList(serviceId));
+  // Count 변수 설정
+  const count: number = useMemo(() => data ? data.length : 0, [data]);
+  // 동의서 유형
+  const types: string[] = useMemo(() => data ? data.reduce((acc: string[], item: any): string[] => {
+    // type에 따라 태그 변경
+    let tagName: string = '';
+    switch(item.data.type) {
+      case 'pi':
+        tagName = '개인정보';
+        break;
+      case 'si':
+        tagName = '민감정보';
+        break;
+      case 'uii':
+        tagName = '고유식별정보';
+        break;
+      case 'mai':
+        tagName = '마케팅';
+        break;
+      default:
+        tagName = '제3자제공';
+        break;
+    }
+    // 중복 확인
+    if (!acc.includes(tagName)) acc.push(tagName);
+    return acc;
+  }, []) : [], [data]);
 
-    </>
+  return (
+    <DashboardItemCard loading={isLoading}>
+      <DashboardItemHeader title='동의서' />
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <StyledTagList>
+          {types.map((item: string): JSX.Element => (<StyledTag>{item}</StyledTag>))}
+        </StyledTagList>
+        <StyledDashboardItemContentEnd>
+          <CountLabel count={count} />
+        </StyledDashboardItemContentEnd>
+      </div>
+    </DashboardItemCard>
   );
 }
 /** [Internal Component] 나의 활동 내역 */
@@ -251,28 +288,28 @@ const PINews: React.FC<any> = (): JSX.Element => {
 }
 
 /** [Internal Component] 최근 정보 수정일 Row */
-const LastInformationRow: React.FC<any> = ({ date, style, subject, user }): JSX.Element => {
+const LastInformationRow: React.FC<any> = ({ date, subject, user }): JSX.Element => {
   return (
-    <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', ...style }}>
-      <h5 style={{ color: '#11142D', fontSize: 14, fontWeight: '600', lineHeight: '22px', margin: 0 }}>{subject}</h5>
-      <div style={{ color: '#2F2E41', fontSize: 12, fontWeight: '400', lineHeight: '20px' }}>
+    <StyledLatestInfoRow>
+      <StyledLatestInfoRowSubject>{subject}</StyledLatestInfoRowSubject>
+      <StyledLatestInfoRowContent>
         {date ? (
-          <div style={{  alignItems: 'center', display: 'flex', justifyContent: 'space-between', minWidth: 116 }}>
+          <StyledLatestInfoRowContentContainer>
             <label>{date}</label>
             <label>{user}</label>
-          </div>
+          </StyledLatestInfoRowContentContainer>
         ) : (<></>)}
-      </div>
-    </div>
+      </StyledLatestInfoRowContent>
+    </StyledLatestInfoRow>
   );
 }
 /** [Internal Component] 개수 표시 컴포넌트 */
 const CountLabel: React.FC<any> = ({ count }): JSX.Element => {
   return (
-    <p style={{ color: '#11142D', fontSize: 24, fontWeight: '700', lineHeight: '32px', margin: 0 }}>
-      {count}
-      <small style={{ color: '#2F2E41', fontSize: 12, fontWeight: '400', lineHeight: '20px', marginLeft: 6 }}>개</small>
-    </p>
+    <StyledCountLabel>
+      <>{count}</>
+      <small>개</small>
+    </StyledCountLabel>
   );
 }
 /** [Internal Component] 전체 보기 컴포넌트 (extra) */

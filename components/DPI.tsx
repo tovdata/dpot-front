@@ -12,10 +12,10 @@ import { AddableTagSelect, TagSelect } from './common/Select';
 import { PlusOutlined } from '@ant-design/icons';
 import { VscChevronLeft } from 'react-icons/vsc';
 // Module
-import { blankCheck, writeActivityLog } from '../utils/utils';
+import { blankCheck } from '../utils/utils';
 import moment from 'moment';
 // State
-import { serviceSelector } from '@/models/session';
+import { companySelector, serviceSelector, userSelector } from '@/models/session';
 // Query
 import { getDPIDatas, getPIItems, setDataByTableType } from '../models/queries/api';
 import { SERVICE_DPI } from '@/models/queries/type';
@@ -92,6 +92,9 @@ export const DPITableForm: React.FC<DPITableFormProps> = ({ onCreate, onEdit }):
 export const InformationForm: React.FC<InformationFormProps> = ({ data, onBack }): JSX.Element => {
   // 서비스 정보 가져오기
   const service = useRecoilValue(serviceSelector);
+  // 사용자 정보 가져오기
+  const user = useRecoilValue(userSelector);
+
   // 개인정보 수집 및 이용으로부터 항목 조회 (서버 API)
   const { isLoading, data: items } = useQuery('piItems', async () => getPIItems(service.id));
   // 데이터 상태 관리
@@ -110,7 +113,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ data, onBack }
   const onChange = (property: string, value: any) => setTemp({ ...temp, [property]: value });
   /** [Event handler] 삭제 이벤트 */
   const onDelete = async (id: string) => {
-    await setDataByTableType(service.id, SERVICE_DPI, 'delete', { id: id });
+    await setDataByTableType(user, service.id, SERVICE_DPI, 'delete', { id: id });
     // 데이터 갱신
     queryClient.invalidateQueries(SERVICE_DPI);
     // 목록으로 이동
@@ -144,7 +147,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ data, onBack }
       warningNotification('담당자를 입력해주세요.');
       refs.current[4].focus();
     } else {
-      const response: any = await setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_DPI, checkNew() ? 'add' : 'save', temp);
+      const response: any = await setDataByTableType(user, service.id, SERVICE_DPI, checkNew() ? 'add' : 'save', temp);
       // 응답에 따른 처리
       if (response && 'id' in response) {
         temp.id = response.id;
@@ -273,6 +276,8 @@ const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, i
 }
 /** [Internal Component] 파기 문서 인쇄를 위한 컴포넌트 */
 const PrintElement: React.FC<PrintElementProps> = ({ data, printRef }): JSX.Element => {
+  const company = useRecoilValue(companySelector);
+  // 컴포넌트 반환
   return (
     <div ref={printRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'start', padding: '10%', width: '100%' }}>
       <h2 style={{ color: '#000000', fontSize: 24, fontWeight: '700', marginBottom: 82, textAlign: 'center' }}>개인정보 파기 확인서</h2>
@@ -315,7 +320,7 @@ const PrintElement: React.FC<PrintElementProps> = ({ data, printRef }): JSX.Elem
       </Descriptions>
       <div style={{ fontSize: 16, fontWeight: '500', lineHeight: '32px', marginTop: 84, textAlign: 'center' }}>
         <h4 style={{ marginBottom: 16 }}>{moment(data.date).year()}년 {moment(data.date).month() + 1}월 {moment(data.date).date()}일</h4>
-        <p style={{ marginBottom: 0 }}>개인정보 보호책임자 <label style={{ marginLeft: 6 }}>{data.charger}</label> (인)</p>
+        <p style={{ marginBottom: 0 }}>개인정보 보호책임자 <label style={{ marginLeft: 6 }}>{company.manager.name}</label> (인)</p>
       </div>
     </div>
   );

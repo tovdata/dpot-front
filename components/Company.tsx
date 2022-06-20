@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 // Component
 import { Button, Col, Divider, Drawer, Form, Input, Row, Table, Tabs } from 'antd';
@@ -15,6 +15,8 @@ import moment from 'moment';
 
 // 페이지 Layout
 const Layout = styled.div`
+  display: block;
+  position: relative;
   .ant-tabs-top > .ant-tabs-nav {
     border-bottom: none !important;
   }
@@ -63,7 +65,6 @@ const CompanyInfoSection: React.FC<any> = ({ change }): JSX.Element => {
   const onChange = (property: string, value: any): void => form.setFieldsValue({ ...form.getFieldsValue(), [property]: value });
   /** [Event handler] 변경한 회사 정보 저장 */
   const onSave = () => {
-    console.log({ id: company.id, name: form.getFieldValue('name'), en: form.getFieldValue('en'), manager: { name: form.getFieldValue('manager'), position: form.getFieldValue('position'), email: form.getFieldValue('email') } })
     setCompany({ id: company.id, name: form.getFieldValue('name'), en: form.getFieldValue('en'), manager: { name: form.getFieldValue('manager'), position: form.getFieldValue('position'), email: form.getFieldValue('email') } });
     successNotification('변경된 회사 정보가 저장되었습니다.');
   }

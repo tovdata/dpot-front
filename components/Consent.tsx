@@ -1,4 +1,4 @@
-import { getConsentList, getPIDatas, getPPIDatas, setConsentData, setDataByTableType } from "@/models/queries/api";
+import { getConsentList, getPIDatas, getPPIDatas, setConsentData } from "@/models/queries/api";
 import { SERVICE_CONSENT, SERVICE_PI, SERVICE_PPI } from "@/models/queries/type";
 import { staticConsentTexts, defaultConsentData, staticConsentData } from "@/models/static/data";
 import { consentEPIHeader } from '@/components/consent/Header';
@@ -10,7 +10,7 @@ import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { VscChevronRight } from "react-icons/vsc";
 import { useQuery, useQueryClient } from "react-query";
 import styled from "styled-components";
-import { filteredData, filteredNotUniqueData, nullCheckForNextStep, returnUniqueInfo, hasURL } from "utils/consent";
+import { filteredData, filteredNotUniqueData, nullCheckForNextStep, hasURL } from "utils/consent";
 import { PageHeaderContainStep } from "./common/Header";
 import { EditableTableForm } from "./common/Table";
 import { AddEpiDataComponent, ConfirmCheckListComponent, DisadvantageComponent, SelectCompanyComponent, SelectPIComponent, SubjectComponent, TitleComponent } from "./consent/Atom";

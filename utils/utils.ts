@@ -32,32 +32,30 @@ export const copyTextToClipboard = (url: string) => {
 
 /**
  * [Function] 활동 로그 기록
- * @param type 활동 로그 유형 (서비스 or 사용자)
  * @param mode 로그 유형 [add | delete | update]
  * @param path 활동 위치 (path)
+ * @param id 대상 ID
+ * @param user 사용자 이름
  */
-export const writeActivityLog = (type: string, mode: string, path: string) => {
+export const writeActivityLog = (mode: string, path: string, id: string, user?: string) => {
   if (typeof window !== 'undefined') {
-    const result = window.localStorage.getItem(`plip-${type}`);
-    if (result !== null) {
-      // 아이디 추출
-      const id: string = JSON.parse(result).id;
-      // 활동 위치 추출
-      const pathStr: string = getTableLocation(path);
-      // 메시지 생성 및 로그 기록
-      if (pathStr !== '') {
-        switch (mode) {
-          case 'add':
-            setActivity(type, id, `OOO가 ${pathStr}를 추가하였습니다.`);
-            break;
-          case 'delete':
-            setActivity(type, id, `OOO가 ${pathStr}를 삭제하였습니다.`);
-            break;
-          case 'save':
-          case 'update':
-            setActivity(type, id, `OOO가 ${pathStr}를 수정하였습니다.`);
-            break;
-        }
+    // 로그 대상 정의
+    const target: string = user ? 'service' : 'user';
+    // 활동 위치 추출
+    const pathStr: string = getTableLocation(path);
+    // 메시지 생성 및 로그 기록
+    if (pathStr !== '') {
+      switch (mode) {
+        case 'add':
+          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 추가하였습니다.` : `${pathStr}를 추가하였습니다.`);
+          break;
+        case 'delete':
+          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 삭제하였습니다.` : `${pathStr}를 삭제하였습니다.`);
+          break;
+        case 'save':
+        case 'update':
+          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 수정하였습니다.` : `${pathStr}를 수정하였습니다.`);
+          break;
       }
     }
   }
@@ -70,19 +68,19 @@ export const writeActivityLog = (type: string, mode: string, path: string) => {
 const getTableLocation = (path: string): string => {
   switch (path) {
     case SERVICE_PI:
-      return '‘수집・이용’ 탭의 ‘개인정보 수집・이용’ 표';
+      return '"수집・이용" 탭의 "개인정보 수집・이용" 표';
     case SERVICE_FNI:
-      return '‘수집・이용’ 탭의 ‘가명정보 수집・이용’ 표';
+      return '"수집・이용" 탭의 "가명정보 수집・이용" 표';
     case SERVICE_PPI:
-      return '‘제공・위탁’ 탭의 ‘개인정보 제3자 제공’ 표';
+      return '"제공・위탁" 탭의 "개인정보 제3자 제공" 표';
     case SERVICE_CPI:
-      return '‘제공・위탁’ 탭의 ‘개인정보 위탁’ 표';
+      return '"제공・위탁" 탭의 "개인정보 위탁" 표';
     case SERVICE_PFNI:
-      return '‘제공・위탁’ 탭의 ‘가명정보 제3자 제공’ 표';
+      return '"제공・위탁" 탭의 "가명정보 제3자 제공" 표';
     case SERVICE_CFNI:
-      return '‘제공・위탁’ 탭의 ‘가명정보 위탁’ 표';
+      return '"제공・위탁" 탭의 "가명정보 위탁" 표';
     case SERVICE_DPI:
-      return '‘파기’ 탭의 ‘개인정보 파기 관리대장’ 표';
+      return '"파기" 탭의 "개인정보 파기 관리대장" 표';
     case 'consent':  
       return '동의서';
     case SERVICE_PIPP:

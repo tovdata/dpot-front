@@ -8,7 +8,7 @@ import { Col, Row, Tabs, Timeline } from 'antd';
 // Module
 import moment from 'moment';
 // State
-import { serviceSelector } from '@/models/session';
+import { serviceSelector, userSelector } from '@/models/session';
 // Query
 import { getActivity } from '@/models/queries/api';
 import { BasicPageLoading } from '@/components/common/Loading';
@@ -19,17 +19,17 @@ const Page: NextPage = ({ expand, onExpand }: any) => {
 
   // 컴포넌트 반환
   return (
-    <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/log/history'>
+    <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/log/activity'>
       <TOVLayoutPadding style={{ paddingTop: 42 }}>
         <Tabs activeKey={key} onChange={(value: string) => setKey(value)}>
           <Tabs.TabPane tab='나의 활동내역' key='my'>
             <div style={{ marginTop: 48 }}>
-              <TotalActivity />
+              <UserActivity />
             </div>
           </Tabs.TabPane>
           <Tabs.TabPane tab='전체 활동내역' key='total'>
             <div style={{ marginTop: 48 }}>
-              <TotalActivity />
+              <ServiceActivity />
             </div>
           </Tabs.TabPane>
         </Tabs>       
@@ -38,13 +38,15 @@ const Page: NextPage = ({ expand, onExpand }: any) => {
   );
 }
 
-const TotalActivity: React.FC<any> = (): JSX.Element => {
+/** [Internal Component] 서비스 대상 활동 내역 */
+const ServiceActivity: React.FC<any> = (): JSX.Element => {
    // 서비스 정보 조회
    const service = useRecoilValue(serviceSelector);
    // 활동 내역 조회
-   const { isLoading, data } = useQuery('totalActivity', async () => await getActivity('service', service.id));
+   const { isLoading, data } = useQuery('serviceAct', async () => await getActivity('service', service.id));
    // 데이터 구분 및 정렬
    const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data]);
+   console.log('service', sorted)
 
    // 컴포넌트 반환
    return (
@@ -57,7 +59,28 @@ const TotalActivity: React.FC<any> = (): JSX.Element => {
     </>
    );
 }
-/** [Internal Component] 활동 이력 목록 */
+/** [Internal Component] 사용자 대상 활동 내역 */
+const UserActivity: React.FC<any> = (): JSX.Element => {
+  // 서비스 정보 조회
+  const user = useRecoilValue(userSelector);
+  // 활동 내역 조회
+  const { isLoading, data } = useQuery('userAct', async () => await getActivity('user', user.id));
+  // 데이터 구분 및 정렬
+  const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data]);
+  console.log('user', sorted)
+
+  // 컴포넌트 반환
+  return (
+   <>
+     {isLoading ? (
+       <BasicPageLoading />
+     ) : (
+       <PLIPActivityList data={sorted} />
+     )}
+   </>
+  );
+}
+/** [Internal Component] 활동 내역 목록 */
 const PLIPActivityList: React.FC<any> = ({ data }): JSX.Element => {
   // 타임라인 아이템 생성
   const items: JSX.Element[] = Object.keys(data).map((date: string): JSX.Element => (
@@ -73,7 +96,17 @@ const PLIPActivityList: React.FC<any> = ({ data }): JSX.Element => {
   ));
 
   // 컴포넌트 반환
-  return (<Timeline>{items}</Timeline>);
+  return (
+    <>
+      {items.length > 0 ? (
+        <Timeline>{items}</Timeline>
+      ) : (
+        <div style={{ color: '#8C8C8C', display: 'flex', justifyContent: 'center' }}>
+          활동 내역이 없습니다.
+        </div>
+      )}
+    </>
+  );
 }
 
 /** [Internal Function] 데이터를 날짜별로 구분하고, 시간별로 정렬하는 함수 */

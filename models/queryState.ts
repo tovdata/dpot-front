@@ -1,9 +1,5 @@
 import { QueryClient, UseMutateFunction } from "react-query";
-import { writeActivityLog } from "utils/utils";
 import { setDataSource } from "../utils/table";
-// Query
-import { setActivity } from "./queries/api";
-import { SERVICE_CFNI, SERVICE_CPI, SERVICE_DPI, SERVICE_FNI, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from "./queries/type";
 
 /**
  * [Function] API 요청에 따라 데이터를 업데이트하는 함수

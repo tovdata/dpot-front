@@ -197,13 +197,12 @@ export const Step4: React.FC<FinishStepProps> = ({ data, onChange, onMoveStep, o
   const onSelect = useCallback((company: any) => {
     onChange(company.id, CURRENT_STEP, 'id');
     // Form 변경
-    form.setFieldsValue({ ...form.getFieldValue, name: company.companyName, position: company.inCharge.position ? company.inCharge.position : '', manager: company.inCharge.name, email: company.inCharge.email });
+    form.setFieldsValue({ ...form.getFieldValue, name: company.companyName, position: company.manager.position ? company.manager.position : '', manager: company.manager.name, email: company.manager.email });
     // 모달 닫기
     onClose();
   }, [data]);
 
   useEffect(() => console.log(data), [data]);
-
 
   // 컴포넌트 반환
   return (
@@ -270,7 +269,7 @@ export const Step4: React.FC<FinishStepProps> = ({ data, onChange, onMoveStep, o
           {list.map((item: any): JSX.Element => (
             <StyledCompanyListItem key={item.id} onClick={() => onSelect(item)}>
               <StyledCompanyListItemName>{item.companyName}</StyledCompanyListItemName>
-              <StyledCompanyListItemDescription>개인정보보호 책임자: {item.inCharge ? item.inCharge.name : ''} ({item.inCharge ? item.inCharge.email : ''})</StyledCompanyListItemDescription>
+              <StyledCompanyListItemDescription>개인정보보호 책임자: {item.manager ? item.manager.name : ''} ({item.manager ? item.manager.email : ''})</StyledCompanyListItemDescription>
             </StyledCompanyListItem>
           ))}
         </StyledCompanyList>

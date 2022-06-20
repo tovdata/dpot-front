@@ -3,6 +3,7 @@ import { SERVER_URL, RequestDF, SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PF
 // Module
 import { catchAPIRequestError, createRequest, extractData, processArrayResponse, processResponse } from './internal';
 import { writeActivityLog } from 'utils/utils';
+import { User } from '../session';
 
 /**
  * [API Caller] 개인정보 수집 및 이용에 대한 데이터 불러오기
@@ -135,22 +136,25 @@ export const getDatasByTableType = async (serviceId: string, type: string): Prom
 }
 /**
  * [API Caller] 테이블 유형에 따라 데이터 처리
+ * @param user 사용자 정보
  * @param serviceId 현재 서비스 ID
  * @param type 테이블 유형 [ pi | fni | ppi | pfni | cpi | cfni | dpi ]
  * @param mode 처리 유형 [ add | delete | save ]
  * @param data 처리하고자는 데이터
  * @returns 결과 데이터
  */
-export const setDataByTableType = async (serviceId: string, type: string, mode: string, data: any): Promise<any> => {
+export const setDataByTableType = async (user: User, serviceId: string, type: string, mode: string, data: any): Promise<any> => {
   // URL 및 Request 정의
   const url: string = mode === 'add' ? `${SERVER_URL}${type}/new` : `${SERVER_URL}${type}/${data.id}`;
   const request: RequestDF = createRequest(serviceId, mode, data);
   // API 요청
   const response: Response = await fetch(url, request);
-  // 에러 처리
+  // 에러 확인 및 로그 작성
   if (!catchAPIRequestError(response)) {
-    // 활동 내역 기록
-    writeActivityLog('service', mode, type);
+    // 서비스 로그
+    writeActivityLog(mode, type, serviceId, user.name);
+    // 사용자 로그
+    writeActivityLog(mode, type, user.id);
   }
   // 결과 반환
   return await processResponse(response, mode);
@@ -235,14 +239,14 @@ export const setPIPPData = async (serviceId: string, data: any, status: string, 
 }
 /**
  * [API Caller] 활동 내역 저장
- * @param type 활동 기준 (서비스, 사용자)
+ * @param type 활동 기준 [service | user]
  * @param id 식별 아이디 (service_id or user_id)
  * @param data 활동 내역
  * @returns API로부터 응답받은 데이터
  */
 export const setActivity = async (type: string, id: string, data: any): Promise<void> => {
   // 활동 내용 기준에 따라 URL 정의 (서비스 or 사용자)
-  const url: string = type === 'service' ? `${SERVER_URL}activity/service/${id}` : `${SERVER_URL}activity/user/${id}`;
+  const url: string = `${SERVER_URL}activity/${type}/${id}`;
   // API 호출에 필요한 Request 생성
   const request: RequestDF = {
     body: JSON.stringify({ text: data }),
@@ -256,13 +260,13 @@ export const setActivity = async (type: string, id: string, data: any): Promise<
 }
 /**
  * [API Caller] 활동 내역 가져오기
- * @param type 활동 기준 (서비스, 사용자)
+ * @param type 활동 기준 [service | user]
  * @param id 식별 아이디 (service_id or user_id)
  * @returns 가공 데이터 반환
  */
 export const getActivity = async (type: string, id: string): Promise<any> => {
   // 활동 내역 기준에 따라 API 호출 (서비스 or 사용자)
-  const response: any = await fetch(type === 'service' ? `${SERVER_URL}activity/service/${id}` : `${SERVER_URL}activity/user/${id}`);
+  const response: any = await fetch(`${SERVER_URL}activity/${type}/${id}`);
   // 응답 데이터 추출
   const result: ResponseDF = await extractData(response);
   // 데이터 반환
@@ -298,9 +302,38 @@ export const addUser = async (id: string, companyId: string, data: any): Promise
   return await extractData(response);
 }
 /**
+ * [API Caller] 사용자 조회
+ * @param id 사용자 ID
+ * @returns 조회 결과
+ */
+export const getUser = async (id: string): Promise<any> => {
+  const response = await fetch(`${SERVER_URL}user/${id}`);
+  // 응답 데이터 추출 및 반환
+  return await processResponse(response);
+}
+/**
+ * [API Caller] 사용자 정보 갱신
+ * @param data 사용자 정보
+ * @returns 결과 데이터
+ */
+export const updateUser = async (data: any): Promise<boolean> => {
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'PUT'
+  };
+  // API 호출
+  const response = await fetch(`${SERVER_URL}user/${data.id}`, request);
+  // 결과 반환
+  return !catchAPIRequestError(response);
+}
+/**
  * [API Caller] 회사 검색
  * @param name 검색할 값
- * @returns 응답 결과
+ * @returns 검색 결과
  */
 export const findCompany = async (name: string): Promise<any[]> => {
   const response = await fetch(`${SERVER_URL}company/find?name=${encodeURIComponent(name)}`);

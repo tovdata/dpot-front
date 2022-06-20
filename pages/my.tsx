@@ -1,15 +1,15 @@
 import type { NextPage } from 'next';
 // Component
-import { TOVPageHeader } from '@/components/common/Layout';
+import { TOVPageHeader, TOVSession } from '@/components/common/Layout';
 import { UserInfoSection } from '@/components/User';
 
 /** 회사 관리 페이지 */
 const Company: NextPage = () => {
   return (
-    <div>
+    <TOVSession>
       <TOVPageHeader />
       <UserInfoSection style={{ marginBottom: 64, marginTop: 84 }} />
-    </div>
+    </TOVSession>
   );
 }
 
