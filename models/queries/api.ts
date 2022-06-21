@@ -149,15 +149,15 @@ export const setDataByTableType = async (user: User, serviceId: string, type: st
   const request: RequestDF = createRequest(serviceId, mode, data);
   // API 요청
   const response: Response = await fetch(url, request);
+  // 데이터 변환
+  const result = await processResponse(response, mode);
   // 에러 확인 및 로그 작성
-  if (!catchAPIRequestError(response)) {
+  if (result) {
     // 서비스 로그
     writeActivityLog(mode, type, serviceId, user.name);
     // 사용자 로그
     writeActivityLog(mode, type, user.id);
   }
-  // 결과 반환
-  return await processResponse(response, mode);
 }
 /**
  * [API Caller] 개인정보 처리방침을 생성하기 위한 데이터 불러오기
@@ -328,7 +328,7 @@ export const updateUser = async (data: any): Promise<boolean> => {
   // API 호출
   const response = await fetch(`${SERVER_URL}user/${data.id}`, request);
   // 결과 반환
-  return !catchAPIRequestError(response);
+  return !catchAPIRequestError(await response.json());
 }
 /**
  * [API Caller] 회사 검색
@@ -408,4 +408,46 @@ export const getConsentList = async (serviceId: string): Promise<any[]> => {
   // }
   // // 데이터 가공 및 반환
   // return sorted;
+}
+
+/**
+ * [API Calller] 로그인
+ * @param email 이메일
+ * @param password 비밀번호
+ * @returns 로그인 결과
+ */
+export const signInProcess = async (email:string, password:string):Promise<ResponseDF> => {
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify({
+      email: email,
+      password: password
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST'
+  };
+  // API 호출
+  const response = await fetch(`${SERVER_URL}auth/signin`, request);
+  // 에러 확인 및 반환
+  return await extractData(response);
+}
+/**
+ * [API Caller] 로그인 (Refresh)
+ * @param id 사용자 ID
+ * @returns 액세스 토큰
+ */
+export const refreshSignInProcess = async (id: string) : Promise<any> => {
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify({ id }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST'
+  };  
+  // 응답 데이터
+  const response = await fetch(`${SERVER_URL}auth/silentrefresh`, request);
+  return response;
 }

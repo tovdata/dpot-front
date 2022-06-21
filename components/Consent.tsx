@@ -285,6 +285,7 @@ const StepInfoHeader = ({ type, steps, stepIndex, stepHandler, completeHander }:
  * 정보 입력 Step (개인정보 제 3자 제공 동의서에만 해당)
  */
 const InputInformationPage = ({ data, type, saveData, PPIData }: any): JSX.Element => {
+  const filteredPPIData = PPIData?.filter((item:any) => item.url === undefined);
   // 동의서 제목
   const [title, setTitle] = useState(data.title);
   // 불이익
@@ -295,7 +296,7 @@ const InputInformationPage = ({ data, type, saveData, PPIData }: any): JSX.Eleme
   return (
     <StyledJobSelection>
       <TitleComponent type={type} title={title} setTitle={setTitle} />
-      <SelectCompanyComponent type={type} subjects={data.subjects} PPIData={PPIData} saveData={saveData} />
+      <SelectCompanyComponent type={type} subjects={data.subjects} PPIData={filteredPPIData} saveData={saveData} />
       <DisadvantageComponent type={type} disadvantage={disadvantage} setDisadvantage={setDisadvantage} />
       <AddEpiDataComponent type={type} onOpenModal={() => setVisible(!visible)} />
       <ConfirmCheckListComponent checked={data.checkList} type={type} saveData={saveData} />

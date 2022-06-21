@@ -23,6 +23,19 @@ export const StyledDashboardHeader = styled.div`
   justify-content: space-between;
   margin-bottom: 24px;
   user-select: none;
+  h2 {
+    color: #000000;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 28px;
+    margin: 0;
+  }
+  .company {
+    font-size: 14;
+    font-weight: 500;
+    line-height: 22px;
+    margin: 0;
+  }
 `;
 /** [Styled Component] 대시보드 아이템 카드 */
 export const StyledDashboardItemCard = styled.div`
@@ -55,33 +68,30 @@ export const StyledDashboardItemHeader = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 16px;
-`;
-/** [Styled Component] 대시보드 아이템 제목 */
-export const StyledDashboardItemTitle = styled.h3`
-  color: #061178;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 22px;
-  margin: 0;
+  h4 {
+    color: #061178;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 22px;
+    margin: 0;
+  }
 `;
 /** [Styled Component] 개인정보 보호책임자 설명 폼 */
 export const StyledDescriptionForm = styled.div`
   align-items: center;
-  display: flex;  
-`;
-/** [Styled Component] 개인정보 보호책임자 설명 폼 내용 */
-export const StyledDescriptionFormContent = styled.div`
-  font-size: 14px;
-  font-weight: 500;
-  flex: 1;
-  line-height: 24px;
-`;
-/** [Styled Component] 개인정보 보호책임자 설명 폼 주제 */
-export const StyledDescriptionFormSubject = styled.div`
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 20px;
-  min-width: 60px;
+  display: flex;
+  .subject {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    min-width: 60px;
+  }
+  .content {
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+    line-height: 24px;
+  }
 `;
 /** [Styled Component] 최근 정보 수정일 Row */
 export const StyledLatestInfoRow = styled.div`
@@ -92,28 +102,23 @@ export const StyledLatestInfoRow = styled.div`
   &:last-child {
     margin-bottom: 0;
   }
-`;
-/** [Styled Component] 최근 정보 수정일 주제 */
-export const StyledLatestInfoRowSubject = styled.h5`
-  color: #11142D;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 22px;
-  margin: 0;
-`;
-/** [Styled Component] 최근 정보 수정일 내용 */
-export const StyledLatestInfoRowContent = styled.div`
-  color: #11142D;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 20px;
-`;
-/** [Styled Component] 최근 정보 수정일 내용 Container */
-export const StyledLatestInfoRowContentContainer = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  min-width: 116px
+  h5 {
+    color: #11142D;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+    margin: 0;
+  }
+  .content {
+    align-items: center;
+    color: #11142D;
+    display: flex;
+    font-size: 12px;
+    font-weight: 400;
+    justify-content: space-between;
+    line-height: 20px;
+    min-width: 116px
+  }
 `;
 /** [Styled Component] 개인정보 보호책임자 섹션 */
 export const StyledManagerSection = styled.div`
@@ -128,19 +133,17 @@ export const StyledManagerSectionHeader = styled.div`
   display: flex;
   margin-bottom: 21px;
   position: relative;
-`;
-/** [Styled Component] 개인정보 보호책임자 섹션 아이콘 */
-export const StyledManagerSectionIcon = styled.div`
-  font-size: 16px;
-  margin-left: 8px;
-`;
-/** [Styled Component] 개인정보 보호책임자 섹션 제목 */
-export const StyledManagerSectionTitle = styled.div`
-  color: #2F2E41;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 24px;
-  margin: 0;
+  h4 {
+    color: #2F2E41;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+    margin: 0;
+  }
+  i {
+    font-size: 16px;
+    margin-left: 8px;
+  }
 `;
 /** [Styled Component] 동의서 유형 태그 목록 */
 export const StyledTagList = styled.div`

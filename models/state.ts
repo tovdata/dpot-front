@@ -11,7 +11,7 @@ const PersonalInfoSelectOptionsAtom = atom<any>({
 const DefaultCPIAtom = atom<any>({
   key: 'DefaultCPIAtom',
   default: infoFromSubjectInCPI
-})
+});
 
 /** [Selector] Personal information select options selector for reference */
 export const GetPersonalInfoSelectOptionsSelector = selector<any[]>({
@@ -22,4 +22,4 @@ export const GetPersonalInfoSelectOptionsSelector = selector<any[]>({
 export const GetCPIDefaultSelector = selector<any[]>({
   key: 'GetCPIDefaultSelector',
   get: ({ get }) => get(DefaultCPIAtom)
-})
+});

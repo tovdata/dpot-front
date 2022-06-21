@@ -1,7 +1,9 @@
+import dynamic from "next/dynamic";
 // Component
 import { Tabs } from "antd";
-import { TOVLayoutPadding, TOVPageLayout, TOVSession } from '@/components/common/Layout';
+import { TOVLayoutPadding, TOVPageLayout } from '@/components/common/Layout';
 import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from "@/components/PCTable";
+const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
 // Style
 import styled from "styled-components";
 
@@ -12,7 +14,7 @@ const CustomTabPane = styled(Tabs.TabPane)`
 
 const Page = ({ expand, onExpand }: any) => {
   return (
-    <TOVSession type='service'>
+    <PILPSession>
       <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/pc'>
           <TOVLayoutPadding style={{ paddingTop: 36 }}>
             <Tabs defaultActiveKey="1">
@@ -27,7 +29,7 @@ const Page = ({ expand, onExpand }: any) => {
             </Tabs>
           </TOVLayoutPadding>
         </TOVPageLayout>
-    </TOVSession>
+    </PILPSession>
   );
 }
 

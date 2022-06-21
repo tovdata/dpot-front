@@ -1,36 +1,38 @@
+import { useQuery } from 'react-query';
 // Chart
 import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
-import { useQuery } from 'react-query';
 // Component
 import { Col, Row, Spin, Tag } from 'antd';
 import { TOVLayoutPadding } from './common/Layout';
 // Styled
-import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardItemTitle } from './styled/Dashboard';
+import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader } from './styled/Dashboard';
 import { StyledTag, StyledTagList } from './styled/Dashboard';
-import { StyledLatestInfoRow, StyledLatestInfoRowSubject, StyledLatestInfoRowContent, StyledLatestInfoRowContentContainer } from './styled/Dashboard';
-import { StyledDescriptionForm, StyledDescriptionFormSubject, StyledDescriptionFormContent, StyledManagerSection, StyledManagerSectionHeader, StyledManagerSectionIcon, StyledManagerSectionTitle } from './styled/Dashboard';
+import { StyledLatestInfoRow } from './styled/Dashboard';
+import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader } from './styled/Dashboard';
 // Query
 import { getConsentList, getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/api';
 import { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
-import { companySelector, serviceSelector } from '@/models/session';
+import { companySelector, serviceSelector, userSelector } from '@/models/session';
+
 // Set chart
 ChartJS.register(ArcElement, Tooltip);
 
 /** [Component] 대시보드 */
-export const Dashboard: React.FC<any> = (): JSX.Element => {
+const Dashboard: React.FC<any> = (): JSX.Element => {
   // 회사 및 서비스 정보 조회
   const company = useRecoilValue(companySelector);
   const service = useRecoilValue(serviceSelector);
+  const user = useRecoilValue(userSelector);
   // 컴포넌트 반환
   return (
     <div style={{ backgroundColor: '#F0F5FF', height: '100%' }}>
       <TOVLayoutPadding>
-        <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 24, userSelect: 'none' }}>
-          <h2 style={{ fontSize: 20, fontWeight: '500', lineHeight: '28px', margin: 0 }}>정재은 님 안녕하세요 😊</h2>
-          <p style={{ fontSize: 14, fontWeight: '500', lineHeight: '22px', margin: 0 }}>{company.name}</p>
-        </div>
+        <StyledDashboardHeader>
+          <h2 style={{ fontSize: 20, fontWeight: '500', lineHeight: '28px', margin: 0 }}>{user.name} 님 안녕하세요 😊</h2>
+          <span className='company'>{company.name}</span>
+        </StyledDashboardHeader>
         <Row gutter={[24, 24]}>
           <Col span={14}>
             <ChargerForCompany manager={company.manager} />
@@ -88,10 +90,10 @@ const DashboardItemCard: React.FC<any> = ({ children, loading, style }): JSX.Ele
   );
 }
 /** [Internal Component] 대시보드 아이템 헤더 */
-const DashboardItemHeader: React.FC<any> = ({ extra, marginBottom, style, title }): JSX.Element => {
+const DashboardItemHeader: React.FC<any> = ({ extra, title }): JSX.Element => {
   return (
-    <StyledDashboardItemHeader style={marginBottom ? { marginBottom: marginBottom } : undefined}>
-      <StyledDashboardItemTitle style={style}>{title}</StyledDashboardItemTitle>
+    <StyledDashboardItemHeader>
+      <h4>{title}</h4>
       <>{extra}</>
     </StyledDashboardItemHeader>
   );
@@ -103,28 +105,28 @@ const ChargerForCompany: React.FC<any> = ({ manager }): JSX.Element => {
     <DashboardItemCard>
       <StyledManagerSection>
         <StyledManagerSectionHeader>
-          <StyledManagerSectionTitle>우리 회사의 개인정보 보호책임자</StyledManagerSectionTitle>
-          <StyledManagerSectionIcon>👑</StyledManagerSectionIcon>
+          <h4>우리 회사의 개인정보 보호책임자</h4>
+          <i>👑</i>
         </StyledManagerSectionHeader>
         <Row gutter={16} style={{ marginBottom: 18 }}>
           <Col span={8}>
             <StyledDescriptionForm>
-              <StyledDescriptionFormSubject>이름</StyledDescriptionFormSubject>
-              <StyledDescriptionFormContent>{manager.name}</StyledDescriptionFormContent>
+              <label className='subject'>이름</label>
+              <label className='content'>{manager.name}</label>
             </StyledDescriptionForm>
           </Col>
           <Col span={8}>
             <StyledDescriptionForm>
-              <StyledDescriptionFormSubject>직위/직책</StyledDescriptionFormSubject>
-              <StyledDescriptionFormContent>{manager.position}</StyledDescriptionFormContent>
+              <label className='subject'>직위/직책</label>
+              <label className='content'>{manager.position}</label>
             </StyledDescriptionForm>
           </Col>
         </Row>
         <Row>
           <Col span={16}>
             <StyledDescriptionForm>
-              <StyledDescriptionFormSubject>이메일</StyledDescriptionFormSubject>
-              <StyledDescriptionFormContent>{manager.email}</StyledDescriptionFormContent>
+              <label className='subject'>이메일</label>
+              <label className='content'>{manager.email}</label>
             </StyledDescriptionForm>
           </Col>
         </Row>
@@ -259,7 +261,7 @@ const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
       <DashboardItemHeader title='동의서' />
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <StyledTagList>
-          {types.map((item: string): JSX.Element => (<StyledTag>{item}</StyledTag>))}
+          {types.map((item: string): JSX.Element => (<StyledTag key={item}>{item}</StyledTag>))}
         </StyledTagList>
         <StyledDashboardItemContentEnd>
           <CountLabel count={count} />
@@ -291,15 +293,15 @@ const PINews: React.FC<any> = (): JSX.Element => {
 const LastInformationRow: React.FC<any> = ({ date, subject, user }): JSX.Element => {
   return (
     <StyledLatestInfoRow>
-      <StyledLatestInfoRowSubject>{subject}</StyledLatestInfoRowSubject>
-      <StyledLatestInfoRowContent>
+      <h5>{subject}</h5>
+      <div className='content'>
         {date ? (
-          <StyledLatestInfoRowContentContainer>
+          <>
             <label>{date}</label>
             <label>{user}</label>
-          </StyledLatestInfoRowContentContainer>
+          </>
         ) : (<></>)}
-      </StyledLatestInfoRowContent>
+      </div>
     </StyledLatestInfoRow>
   );
 }
@@ -342,3 +344,5 @@ const NewsItem: React.FC<any> = ({ date, sources, style, subject, type }): JSX.E
     </div>
   );
 }
+
+export default Dashboard;

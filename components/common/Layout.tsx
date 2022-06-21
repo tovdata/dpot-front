@@ -13,6 +13,7 @@ import { companySelector, serviceSelector } from '@/models/session';
 // Style
 import styled from 'styled-components';
 import { BasicPageLoading } from './Loading';
+import { PLIP403Page } from '../renewer/Page';
 
 /** [Interface] Properties for Sider */
 interface SiderProps {
@@ -104,22 +105,29 @@ export const TOVLayoutVerticalPadding = styled.div`
 
 /** [Component] 현재 회사 및 서비스 확인 섹션 */
 export const TOVSession: React.FC<any> = ({ children, type }): JSX.Element => {
-  const company = useRecoilValue(companySelector);
-  const service = useRecoilValue(serviceSelector);
+  const company = useRecoilValueLoadable(companySelector);
+  const service = useRecoilValueLoadable(serviceSelector);
+  // 컴포넌트 렌더링 상태
+  // const [mounted, setMounted] = useState(false);
+  // useEffect(() => setMounted(true), []);
+
+  console.log('company', company);
+  console.log('service', service);
 
   // 컴포넌트 반환
   return (
-    <>{company.id === '' ? (
-      <div className='1'>
-        <NotFoundCompanyPage />
-      </div>
-    ) : type === 'service' && service.id === '' ? (
-      <div className='2'>
-        <NotFoundServicePage />
-      </div>
-    ) : (
-      <>{children}</>
-    )}
+    <>
+      {company.state === 'hasValue' && service.state === 'hasValue' ? (
+        <>
+          {company.contents.id === '' ? (
+            <PLIP403Page />
+          ) : type === 'service' && service.contents.id === '' ? (
+            <PLIP403Page />
+          ) : (
+            <>{children}</>
+          )}
+        </>
+      ) : (<></>)}
     </>
   );
 }
@@ -154,7 +162,7 @@ export const TOVPageHeader: React.FC<any> = (): JSX.Element => {
   // 헤더 메뉴 아이템
   const items = useMemo(() => [
     { label: (<Link href='/my'>내 정보</Link>), key: 'info' },
-    { label: (<Link href='/login'>로그아웃</Link>), key: 'sign'}
+    { label: (<Link href='/signin'>로그아웃</Link>), key: 'sign'}
   ], []);
 
   // 컴포넌트 반환
@@ -193,3 +201,5 @@ const TOVPageSide: React.FC<TOVPageSideProps> = ({ expand, onExpand, scroll, sel
     </Sider>
   );
 }
+
+export default TOVSession;

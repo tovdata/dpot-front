@@ -1,4 +1,5 @@
 import { atom, selector } from 'recoil';
+import { refreshSignInProcess } from './queries/api';
 // Keys
 const KEY_COMPANY = 'plip-company';
 const KEY_SERVICE = 'plip-service';
@@ -49,6 +50,11 @@ const localStorageEffects = (key: string) => ({ setSelf, onSet }: any): any => {
   }
 }
 
+/** [Atom] 액세스 토큰 정보  */
+const AccessTokenAtom = atom<any>({
+  key: 'AccessTokenAtom',
+  default: undefined
+});
 /** [Atom] 회사 정보 */
 const companyAtom = atom<Company>({
   key: 'companyAtom',
@@ -85,4 +91,25 @@ export const userSelector = selector<User>({
   key: 'userSelector',
   get: ({ get }: any) => get(userAtom),
   set: ({ set }: any, newValue: any) => set(userAtom, newValue)
+});
+/** [Selector] 액세스 토큰 정보  */
+export const accessTokenSelector = selector<string>({
+  key: 'AccessTokenSelector',
+  get: async ({ get }) => {
+    const token = get(AccessTokenAtom);
+    if (token) return token;
+    if (typeof window !== 'undefined') {
+      const user = window.localStorage.getItem('plip-user');
+      if (user) {
+        const transformed = JSON.parse(user);
+        if ('id' in transformed) {
+          const response = await refreshSignInProcess(transformed.id);
+          console.log(await response.json());
+        } else {
+          return;
+        }
+      }
+    }
+  },
+  set: ({ set }: any, newValue: any) => set(AccessTokenAtom, newValue)
 });

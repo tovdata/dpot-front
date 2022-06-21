@@ -1,17 +1,19 @@
 import { NextPage } from "next";
+import dynamic from "next/dynamic";
 // Component
-import { TOVLayoutPadding, TOVPageLayout, TOVSession } from "@/components/common/Layout";
+import { TOVLayoutPadding, TOVPageLayout } from "@/components/common/Layout";
 import { ConsentMain } from "@/components/Consent";
+const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
 
 const Page: NextPage = ({ expand, onExpand }: any) => {
   return (
-    <TOVSession type='service'>
+    <PILPSession>
       <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/doc/consent'>
         <TOVLayoutPadding>
           <ConsentMain />
         </TOVLayoutPadding>
       </TOVPageLayout>
-    </TOVSession>
+    </PILPSession>
   );
 }
 

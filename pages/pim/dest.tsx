@@ -1,8 +1,10 @@
 
+import dynamic from 'next/dynamic';
 import { useCallback, useState } from 'react';
 // Component
-import { TOVLayoutPadding, TOVPageLayout, TOVSession } from '../../components/common/Layout';
+import { TOVLayoutPadding, TOVPageLayout } from '../../components/common/Layout';
 import { DPITableForm, InformationForm } from '../../components/DPI';
+const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
 // Data
 import { defaultDPIData } from '../../models/static/data';
 
@@ -19,7 +21,7 @@ const Page = ({ expand, onExpand }: any) => {
 
   // 컴포넌트 반환
   return (
-    <TOVSession type='service'>
+    <PILPSession>
       <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/dest'>
         <TOVLayoutPadding>
           {Object.keys(data).length !== 0 ? (
@@ -29,7 +31,7 @@ const Page = ({ expand, onExpand }: any) => {
           )}
         </TOVLayoutPadding>
       </TOVPageLayout>
-    </TOVSession>
+    </PILPSession>
   )
 }
 

@@ -2,9 +2,11 @@ import type { NextPage } from 'next';
 import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import { useRecoilValue } from 'recoil';
+import dynamic from 'next/dynamic';
 // Component
 import { TOVLayoutPadding, TOVPageLayout } from '@/components/common/Layout';
 import { Col, Row, Tabs, Timeline } from 'antd';
+const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
 // Module
 import moment from 'moment';
 // State
@@ -19,22 +21,24 @@ const Page: NextPage = ({ expand, onExpand }: any) => {
 
   // 컴포넌트 반환
   return (
-    <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/log/activity'>
-      <TOVLayoutPadding style={{ paddingTop: 42 }}>
-        <Tabs activeKey={key} onChange={(value: string) => setKey(value)}>
-          <Tabs.TabPane tab='나의 활동내역' key='my'>
-            <div style={{ marginTop: 48 }}>
-              <UserActivity />
-            </div>
-          </Tabs.TabPane>
-          <Tabs.TabPane tab='전체 활동내역' key='total'>
-            <div style={{ marginTop: 48 }}>
-              <ServiceActivity />
-            </div>
-          </Tabs.TabPane>
-        </Tabs>       
-      </TOVLayoutPadding>
-    </TOVPageLayout>
+    <PILPSession>
+      <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/log/activity'>
+        <TOVLayoutPadding style={{ paddingTop: 42 }}>
+          <Tabs activeKey={key} onChange={(value: string) => setKey(value)}>
+            <Tabs.TabPane tab='나의 활동내역' key='my'>
+              <div style={{ marginTop: 48 }}>
+                <UserActivity />
+              </div>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='전체 활동내역' key='total'>
+              <div style={{ marginTop: 48 }}>
+                <ServiceActivity />
+              </div>
+            </Tabs.TabPane>
+          </Tabs>       
+        </TOVLayoutPadding>
+      </TOVPageLayout>
+    </PILPSession>
   );
 }
 

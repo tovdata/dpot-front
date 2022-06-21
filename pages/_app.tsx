@@ -1,5 +1,5 @@
 import type { AppProps } from 'next/app'
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 // Component
 import { RecoilRoot } from 'recoil';
 import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
@@ -75,8 +75,10 @@ function MyApp({ Component, pageProps }: AppProps) {
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
         <RecoilRoot>
-          <GlobalStyle />
-          <Component {...pageProps} expand={expand} onExpand={onExpand} />
+          {/* <Suspense fallback={<></>}> */}
+            <GlobalStyle />
+            <Component {...pageProps} expand={expand} onExpand={onExpand} />
+          {/* </Suspense> */}
         </RecoilRoot>
       </Hydrate>
     </QueryClientProvider>
