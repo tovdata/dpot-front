@@ -81,7 +81,11 @@ export const extractData = async (response: Response, mode?: string): Promise<Re
   const json: any = await response.json();
   // 에러 확인
   if (catchAPIRequestError(json)) {
-    return { result: false };
+    if (json.message && json.message.includes('UserNotConfirmedException')) {
+      return { result: false, data: { noConfirm: true } };
+    } else {
+      return { result: false };
+    }
   }
   // 결과 반환
   if (mode === undefined || mode === 'add') {

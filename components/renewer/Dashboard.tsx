@@ -1,20 +1,22 @@
+import { useMemo } from 'react';
 import { useQuery } from 'react-query';
+import { useRecoilValue } from 'recoil';
 // Chart
 import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 // Component
 import { Col, Row, Spin, Tag } from 'antd';
-import { TOVLayoutPadding } from './common/Layout';
+import { TOVLayoutPadding } from '../common/Layout';
+// State
+import { companySelector, serviceSelector, userSelector } from '@/models/session';
 // Styled
-import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader } from './styled/Dashboard';
-import { StyledTag, StyledTagList } from './styled/Dashboard';
-import { StyledLatestInfoRow } from './styled/Dashboard';
-import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader } from './styled/Dashboard';
+import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader } from '../styled/Dashboard';
+import { StyledTag, StyledTagList } from '../styled/Dashboard';
+import { StyledLatestInfoRow } from '../styled/Dashboard';
+import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader } from '../styled/Dashboard';
 // Query
 import { getConsentList, getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/api';
-import { useMemo } from 'react';
-import { useRecoilValue } from 'recoil';
-import { companySelector, serviceSelector, userSelector } from '@/models/session';
+import { getUserActivityForWeek } from '@/models/queries/apis/activity';
 
 // Set chart
 ChartJS.register(ArcElement, Tooltip);
@@ -30,7 +32,7 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
     <div style={{ backgroundColor: '#F0F5FF', height: '100%' }}>
       <TOVLayoutPadding>
         <StyledDashboardHeader>
-          <h2 style={{ fontSize: 20, fontWeight: '500', lineHeight: '28px', margin: 0 }}>{user.name} 님 안녕하세요 😊</h2>
+          <h2>{user.name} 님 안녕하세요 😊</h2>
           <span className='company'>{company.name}</span>
         </StyledDashboardHeader>
         <Row gutter={[24, 24]}>
@@ -62,9 +64,7 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
             </Row>
           </Col>
           <Col span={10}>
-            <DashboardItemCard>
-              <MyActivieList />
-            </DashboardItemCard>
+            <MyActivieList userId={user.id} />
           </Col>
           <Col span={24}>
             <DashboardItemCard>
@@ -106,7 +106,7 @@ const ChargerForCompany: React.FC<any> = ({ manager }): JSX.Element => {
       <StyledManagerSection>
         <StyledManagerSectionHeader>
           <h4>우리 회사의 개인정보 보호책임자</h4>
-          <i>👑</i>
+          <span className='icon'>👑</span>
         </StyledManagerSectionHeader>
         <Row gutter={16} style={{ marginBottom: 18 }}>
           <Col span={8}>
@@ -271,12 +271,15 @@ const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
   );
 }
 /** [Internal Component] 나의 활동 내역 */
-const MyActivieList: React.FC<any> = (): JSX.Element => {
+const MyActivieList: React.FC<any> = (userId: string): JSX.Element => {
+  const { isLoading, data } = useQuery("dashboard-activity", async () => await getUserActivityForWeek(userId));
+  console.log(data);
+
   return (
-    <>
-      <DashboardItemHeader extra={<ViewAll href='/log/activity' />} title='나의 활동 내역' />
+    <DashboardItemCard loading={isLoading}>
+      <DashboardItemHeader extra={<ViewAll href='/log/activity/' />} title='나의 활동 내역' />
       <div></div>
-    </>
+    </DashboardItemCard>
   );
 }
 /** [Internal Component] 최근 개인정보 뉴스 */

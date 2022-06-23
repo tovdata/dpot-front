@@ -11,7 +11,6 @@ export interface Session {
 }
 /** [Interface] 회사 데이터 구조 */
 export interface Company extends Session {
-  en: string;
   url?: string;
   manager: PIManager;
 }
@@ -58,7 +57,7 @@ const AccessTokenAtom = atom<any>({
 /** [Atom] 회사 정보 */
 const companyAtom = atom<Company>({
   key: 'companyAtom',
-  default: { id: '', name: '', en: '', manager: { name: '', position: '', email: '' } },
+  default: { id: '', name: '', manager: { name: '', position: '', email: '' } },
   effects: [localStorageEffects(KEY_COMPANY)],
 });
 /** [Atom] 서비스 정보 */
@@ -104,7 +103,8 @@ export const accessTokenSelector = selector<string>({
         const transformed = JSON.parse(user);
         if ('id' in transformed) {
           const response = await refreshSignInProcess(transformed.id);
-          console.log(await response.json());
+          const data = await response.json();
+          return data.AccessToken;
         } else {
           return;
         }

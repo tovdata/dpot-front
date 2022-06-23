@@ -25,7 +25,15 @@ export const StyledInputGroup = styled.div`
     }
     .plip-required {
       color: #FF4D4F;
-      margin-left: 6;
+      margin-left: 6px;
     }
+  }
+  .ant-form-item {
+    margin-bottom: 0;
+  }
+  .ant-form-item-label > label {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
   }
 `;

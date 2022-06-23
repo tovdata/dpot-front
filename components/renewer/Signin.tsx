@@ -1,15 +1,18 @@
-import { useSetRecoilState } from 'recoil';
 import { decode } from 'jsonwebtoken';
 import Link from 'next/link';
+import Router from 'next/router';
+import { useCallback } from 'react';
+import { useSetRecoilState } from 'recoil';
 // Component
-import { Divider, Form, Input } from 'antd';
-import { errorNotification } from '../common/Notification';
-import { StyledFinishButton, StyledSigninContainer, StyledSigninFooter, StyledSigninForm, StyledSigninHeader } from '../styled/Signin';
+import { Divider, Form, Input, Modal } from 'antd';
+import { errorNotification, successNotification, warningNotification } from '../common/Notification';
+import { StyledFinishButton, StyledResendMailModalContent, StyledSigninContainer, StyledSigninFooter, StyledSigninForm, StyledSigninHeader } from '../styled/Signin';
 import { PLIPInputGroup } from './Input';
 // State
 import { accessTokenSelector, userSelector } from '@/models/session';
 // Query
-import { signInProcess } from '@/models/queries/api';
+import { getUser, signInProcess } from '@/models/queries/api';
+import { resendAuthMail } from '@/models/queries/apis/signin-up';
 
 /** [Component] 로그인 컴포넌트 */
 const PLIPSignin: React.FC<any> = (): JSX.Element => {
@@ -62,6 +65,21 @@ const SigninForm: React.FC<any> = (): JSX.Element => {
       setUser({ id: info.sub, name: info.name });
       // 액세스 토큰 저장
       setAccessToken(response.data.AccessToken);
+
+      // 회사 등록 여부 확인 및 라우팅
+      const result = await getUser(info.sub);
+      if (result.affiliations && result.affiliations.length > 0) {
+        Router.push('/company/services');
+      } else {
+        Router.push('/company/join');
+      }
+    } else if (response.data && response.data.noConfirm) {
+      Modal.warning({
+        centered: true,
+        content: (<ResendMailModalContent email={form.getFieldValue('email')} />),
+        okText: '닫기',
+        title: '이메일 인증이 완료되지 않았습니다.'
+      });
     } else {
       errorNotification('아이디 혹은 비밀번호가 올바르지 않습니다.');
     }
@@ -84,6 +102,25 @@ const SigninForm: React.FC<any> = (): JSX.Element => {
       <StyledFinishButton htmlType='submit' type='primary'>로그인</StyledFinishButton>
       <SigninFooter />
     </Form>
+  );
+}
+/** [Internal Component] 메일 재전송 모달 내용 */
+const ResendMailModalContent: React.FC<any> = ({ email }): JSX.Element => {
+  /** [Event handler] 메일 전송 */
+  const onSendEmail = useCallback(async() => {
+    const result = await resendAuthMail(email);
+    if (result) {
+      successNotification('이메일이 재전송되었습니다.');
+    } else {
+      warningNotification('이메일 전송에 실패하였습니다.');
+    }
+  }, []);
+  // 컴포넌트 반환
+  return (
+    <StyledResendMailModalContent>
+      <p>이메일 인증 후 서비스 이용이 가능합니다. 가입 시 입력했던 이메일의 받은 편지함을 확인해주세요!</p>
+      <a onClick={onSendEmail}>인증 메일 재전송</a>
+    </StyledResendMailModalContent>
   );
 }
 

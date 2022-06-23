@@ -355,7 +355,6 @@ export const setCompany = async (data: any, id?: string): Promise<ResponseDF> =>
   const request: RequestDF = {
     body: JSON.stringify({
       companyName: data.name,
-      en: data.en,
       manager: data.manager,
       url: data.url
     }),
@@ -390,6 +389,19 @@ export const setConsentData = async (serviceId: string, data: any, html?: string
   // 응답 데이터 반환
   return await fetch(url, request);
 }
+export const deleteConsentData = async (serviceId:string, id:string): Promise<any> => {
+  // 초기 저장인지 아닌지를 확인하여 API 호출을 위한 URL 정의
+  const url: string = `${SERVER_URL}consent/${serviceId}?target=${id}`;
+  const request: any = {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'DELETE'
+  };
+  // 응답 데이터 반환
+  return await fetch(url, request);
+}
+
 export const getConsentList = async (serviceId: string): Promise<any[]> => {
   // API 호출
   const response: Response = await fetch(`${SERVER_URL}consent/${serviceId}`);
@@ -419,6 +431,7 @@ export const getConsentList = async (serviceId: string): Promise<any[]> => {
 export const signInProcess = async (email:string, password:string):Promise<ResponseDF> => {
   // API 호출에 필요한 Request 생성
   const request: RequestDF = {
+    credentials: 'include',
     body: JSON.stringify({
       email: email,
       password: password
@@ -441,6 +454,7 @@ export const signInProcess = async (email:string, password:string):Promise<Respo
 export const refreshSignInProcess = async (id: string) : Promise<any> => {
   // API 호출에 필요한 Request 생성
   const request: RequestDF = {
+    credentials: 'include',
     body: JSON.stringify({ id }),
     headers: {
       'Content-Type': 'application/json'

@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import { useRecoilValueLoadable } from 'recoil';
 // Component
 import { TOVPageLayout } from '@/components/common/Layout'
-import Dashboard from '@/components/Dashboard'
+import Dashboard from '@/components/renewer/Dashboard'
 const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
 // State
 import { accessTokenSelector } from '@/models/session';

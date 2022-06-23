@@ -179,7 +179,7 @@ export const consentListHeader: TableHeadersData = {
   },
   url: {
     display: 'url',
-    name: '링크',
+    name: '',
     required: true,
     width: '10%'
   }

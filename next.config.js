@@ -6,7 +6,7 @@ module.exports = {
     return [
       {
         source: '/server/:path*',
-        destination: 'https://dpot-dev.tovdata.com:8081/api/:path*',
+        destination: 'https://api-dev.plip.kr:8081/api/:path*',
       },
     ];
   },

@@ -140,7 +140,7 @@ export const StyledManagerSectionHeader = styled.div`
     line-height: 24px;
     margin: 0;
   }
-  i {
+  .icon {
     font-size: 16px;
     margin-left: 8px;
   }
