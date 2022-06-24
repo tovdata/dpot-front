@@ -1,14 +1,19 @@
-import { useRecoilValue } from 'recoil';
+import Router from 'next/router';
+import { useQuery } from 'react-query';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 // Component
 import { StyledPageBackground, StyledPageLayout } from '@/components/styled/JoinCompany';
 import { StyledAddButton, StyledServiceCard } from '../styled/ChoiceService';
 // Icon
 import { IoAddOutline, IoBusinessSharp, IoDesktopOutline, IoPhonePortraitOutline, IoSettingsOutline } from 'react-icons/io5';
 import { Button, Checkbox, Col, Form, Input, Modal, Row } from 'antd';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { PLIPInputGroup } from './Input';
 // State
-import { userSelector } from '@/models/session';
+import { companySelector, serviceSelector, userSelector } from '@/models/session';
+import { getServiceList } from '@/models/queries/apis/company';
+// Query key
+const KEY_SERVICES = "plip-services"
 
 const ChoiceService: React.FC<any> = (): JSX.Element => {
   // 사용자 정보 조회
@@ -26,24 +31,28 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
 
 /** [Internal Component] 서비스 카드 목록 */
 const ServiceCardList: React.FC<any> = (): JSX.Element => {
+  // 회사 정보 조회
+  const company = useRecoilValue(companySelector);
+  // 서비스 목록 조회
+  const { isLoading, data } = useQuery(KEY_SERVICES, async () => await getServiceList(company.id));
   // 모달 열기/닫기 상태
   const [visible, setVisible] = useState<boolean>(false);
 
-  // 
-
-  // 
-  const [list, setList] = useState<any[]>([
-    { id: '0', serviceName: '주식회사 토브데이터', types: ['default'] },
-    { id: '1', serviceName: '플립(plip)', types: ['web', 'app'] }
-  ]);
-
-  const onClose = () => setVisible(false);
-  const onOpen = () => setVisible(true);
+  /** [Event handler] 모달 종료 */
+  const onClose = () => useCallback(() => setVisible(false), []);
+  /** [Event handler] 모달 열기 */
+  const onOpen = () => useCallback(() => setVisible(true), []);
 
   return (
     <>
       <Row gutter={[20, 20]}>
-        {list.map((service: any): JSX.Element => (<ServiceCard key={service.id} name={service.serviceName} types={service.types} />))}
+        {isLoading ? (
+          <></>
+        ) : data === undefined ? (
+          <></>
+        ) : data.map((service: any): JSX.Element => (
+          <ServiceCard key={service.id} service={service} />
+        ))}
         <AddButton onOpen={onOpen} />
       </Row>
       <EditableModal onClose={onClose} visible={visible} />
@@ -51,17 +60,26 @@ const ServiceCardList: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Internal Component] 서비스 카드 */
-const ServiceCard: React.FC<any> = ({ name, types }): JSX.Element => {
+const ServiceCard: React.FC<any> = ({ service }): JSX.Element => {
+  // 서비스 설정 Handler
+  const setService = useSetRecoilState(serviceSelector);
+  /** [Event handler] 서비스 선택 */
+  const onSelect = () => {
+    setService(service);
+    // 이동
+    Router.push('/');
+  }
+
   return (
     <Col span={12}>
       <StyledServiceCard>
         <div className='content'>
           <div className='icons'>
-            {types.map((type: string): JSX.Element => (<span className='icon' key={type}>{
+            {service.types.map((type: string): JSX.Element => (<span className='icon' key={type}>{
               type === 'default' ? (<IoBusinessSharp />) : type === 'web' ? (<IoDesktopOutline />) : (<IoPhonePortraitOutline />)
             }</span>))}
           </div>
-          <span className='name'>{name}</span>
+          <span className='name' onClick={onSelect}>{service.serviceName}</span>
         </div>
         <span className='setting'>
           <IoSettingsOutline />

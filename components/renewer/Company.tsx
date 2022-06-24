@@ -11,21 +11,29 @@ import { CloseOutlined, EditOutlined } from '@ant-design/icons';
 import moment from 'moment';
 // State
 import { companySelector } from '@/models/session';
+import { useQuery, useQueryClient } from 'react-query';
+import { getUserList } from '@/models/queries/apis/user';
+// Query key
+const KEY_USERS = 'plip-users';
 
 /** [Component] 회사 관리 페이지 */
 const ManageCompany: React.FC<any> = (): JSX.Element => {
+  // 회사 정보
+  const [company, setCompany] = useRecoilState(companySelector);
+
+  // 컴포넌트 반환
   return (
     <StyledPageLayout>
       <div className='container'>
         <Tabs centered defaultActiveKey='company'>
           <Tabs.TabPane key='company' tab='회사 정보'>
             <StyledTabSection>
-              <CompanyInfoSection />
+              <CompanyInfoSection company={company} setCompany={setCompany} />
             </StyledTabSection>
           </Tabs.TabPane>
           <Tabs.TabPane key='organization' tab='개인정보 보호조직'>
             <StyledTabSection>
-              <OrganizationInfoSection />
+              <OrganizationInfoSection company={company} />
             </StyledTabSection>
           </Tabs.TabPane>
         </Tabs>
@@ -34,9 +42,7 @@ const ManageCompany: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Internal Component] 회사 정보 관리 Section */
-const CompanyInfoSection: React.FC<any> = ({ change }): JSX.Element => {
-  // 회사 정보
-  const [company, setCompany] = useRecoilState(companySelector);
+const CompanyInfoSection: React.FC<any> = ({ company, setCompany }): JSX.Element => {
   // Form 객체 생성
   const [form] = Form.useForm();
   // 탭 변경에 따라 Form 내에 필드 초기화
@@ -85,29 +91,31 @@ const CompanyInfoSection: React.FC<any> = ({ change }): JSX.Element => {
   );
 }
 /** [Internal Component] 조직 정보 관리 Section */
-const OrganizationInfoSection: React.FC<any> = (): JSX.Element => {
-  const [dataSource, setDataSource] = useState<any[]>([{ name: '김토브', department: '정보보안팀', position: '대리', email: 'tov@tovdata.com', contact: '01022223333', createAt: 1654642176, task: '' }]);
+const OrganizationInfoSection: React.FC<any> = ({ company }): JSX.Element => {
+  // 회사에 소속된 사용자 조회
+  const { isLoading, data } = useQuery(KEY_USERS, async () => await getUserList(company.id));
 
+  // const [dataSource, setDataSource] = useState<any[]>([{ name: '김토브', department: '정보보안팀', position: '대리', email: 'tov@tovdata.com', contact: '01022223333', createAt: 1654642176, task: '' }]);
+
+  // 
+  const queryClient = useQueryClient();
   // 폼 객체 생성
   const [form] = Form.useForm();
   // Drawer 열기/닫기 상태
   const [visible, setVisible] = useState<boolean>(false);
-  // 선택된 Row index
-  const [index, setIndex] = useState<number>(0);
 
   /** [Event handler] Drawer 열기 */
-  const onOpen = useCallback((index: number, record: any) => {
+  const onOpen = useCallback((record: any) => {
     // 폼 데이터 설정
-    form.setFieldsValue({ ...record, createAt: moment.unix(record.createAt).format('YYYY-MM-DD'), index: index });
-    //
-    setIndex(index);
+    form.setFieldsValue({ ...record, createAt: moment.unix(record.createAt / 1000).format('YYYY-MM-DD') });
+    // 모달 열기
     setVisible(true);
   }, []);
   /** [Event handler] Drawer 닫기 */
   const onClose = () => setVisible(false);
   /** [Event handler] 테이블 데이터 변경 저장 */
-  const onSetTable = (index: number, record: any) => {
-    index === dataSource.length - 1 ? setDataSource([...dataSource.slice(0, index), record]) : setDataSource([...dataSource.slice(0, index), record, ...dataSource.slice(index + 1)]);
+  const onSetTable = (record: any) => {
+    queryClient.invalidateQueries(KEY_USERS);
     successNotification('저장되었습니다.');
     onClose();
   }
@@ -116,20 +124,20 @@ const OrganizationInfoSection: React.FC<any> = (): JSX.Element => {
   return (
     <StyledTableForm>
       <Table columns={[
-        { title: '이름', dataIndex: 'name', key: 'name' },
+        { title: '이름', dataIndex: 'userName', key: 'userName' },
         { title: '부서', dataIndex: 'department', key: 'department' },
         { title: '직책', dataIndex: 'position', key: 'position' },
         { title: '이메일', dataIndex: 'email', key: 'email' },
         { title: '연락처', dataIndex: 'contact', key: 'contact' },
-        { title: '가입일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => moment.unix(value).format('YYYY-MM-DD') },
+        { title: '가입일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => moment.unix(value / 1000).format('YYYY-MM-DD') },
         { title: '담당업무', dataIndex: 'task', key: 'task' },
-        { title: '', dataIndex: 'edit', key: 'edit', render: (_: any, record: any, index: number): JSX.Element => (<EditButton onOpen={() => onOpen(index, record)} />) },
-      ]} dataSource={dataSource} style={{ marginBottom: 48 }} />
+        { title: '', dataIndex: 'edit', key: 'edit', render: (_: any, record: any, index: number): JSX.Element => (<EditButton onOpen={() => onOpen(record)} />) },
+      ]} loading={isLoading} dataSource={isLoading ? [] : data ? data : []} style={{ marginBottom: 48 }} />
       <StyledInviteForm>
         <p className='content'>아직 가입되어 있지 않은 담당자가 있다면?</p>
         <Button type='default'>초대하기</Button>
       </StyledInviteForm>
-      <EditableDrawer form={form} index={index} onClose={onClose} onSetTable={onSetTable} visible={visible} />
+      <EditableDrawer form={form} onClose={onClose} onSetTable={onSetTable} visible={visible} />
     </StyledTableForm>
   );
 }
@@ -144,14 +152,14 @@ const EditButton: React.FC<any> = ({ onOpen }): JSX.Element => {
 /** [Internal Component] 조직 구성원 정보 수정을 위한 Drawer */
 const EditableDrawer: React.FC<any> = ({ form, index, onClose, onSetTable, visible }): JSX.Element => { 
   /** [Event handler] 데이터 저장 */
-  const onSave = useCallback(() => onSetTable(index, form.getFieldsValue()), [form]);
+  const onSave = useCallback(() => onSetTable(form.getFieldsValue()), [form]);
 
   // 컴포넌트 반환
   return (
     <Drawer closable={false} extra={<DrawerExtra onClick={onClose} />} footer={<DrawerFooter onSave={onSave} />} onClose={onClose} title='조직 구성원 정보 수정하기' visible={visible}>
       <Form form={form}>
         <PLIPInputGroup label='이름' required>
-          <Form.Item name='name'>
+          <Form.Item name='userName'>
             <Input disabled />
           </Form.Item>
         </PLIPInputGroup>

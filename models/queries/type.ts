@@ -69,6 +69,7 @@ export const createRequest = (method: string, data: any): RequestDF => {
 /** [Interface] 회사 */
 export interface Company {
   companyName: string;
+  createAt?: number;
   id?: string;
   manager: Manager;
   url?: string;
@@ -81,10 +82,22 @@ export interface Manager {
 }
 /** [Interface] 서비스 */
 export interface PLIPService {
+  createAt?: number;
   id?: string;
   serviceName: string;
   types: PLIPServiceType[];
   url?: string;
+}
+/** [Interface] 사용자 */
+export interface PLIPUser {
+  contact?: string;
+  createAt?: number;
+  department?: string;
+  email?: string;
+  id?: string;
+  position?: string;
+  task?: string;
+  userName: string;
 }
 /** [Type] 서비스 유형 */
 export type PLIPServiceType = 'default' | 'web' | 'app';

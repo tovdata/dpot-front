@@ -7,6 +7,7 @@ import { StyledJoinCompanyTypeCard, StyledPageBackground, StyledPageLayout } fro
 import { StyledChoiceCompanyForm, StyledCompanyList, StyledCompanyItem } from '../styled/JoinCompany';
 import { PLIPInputGroup } from './Input';
 import { errorNotification } from '../common/Notification';
+import { PLIP401Page } from './Page';
 // Icon
 import { PlusCircleOutlined, SearchOutlined } from '@ant-design/icons';
 // State
@@ -17,6 +18,9 @@ import { Company } from '@/models/queries/type';
 
 /** [Component] 초기 회사 참여 (생성 또는 참여) */
 const JoinCompany: React.FC<any> = (): JSX.Element => {
+  // 회사 정보 조회
+  const company = useRecoilValue(companySelector);
+  // 회사 검색 여부
   const [search, setSearch] = useState<boolean|undefined>(undefined);
   /** [Event handler] 이전 단계로 이동 */
   const onBack = () => setSearch(undefined);
@@ -24,14 +28,20 @@ const JoinCompany: React.FC<any> = (): JSX.Element => {
   const onChoice = (search: boolean) => setSearch(search);
 
   return (
-    <StyledPageBackground>
-      {search === undefined ? (
-        <JoinCompanyType onChoice={onChoice} />
+    <>
+      {company && company.id !== '' ? (
+        <PLIP401Page />
       ) : (
-        <ChoiceCompanyForm onBack={onBack} search={search} />
+        <StyledPageBackground>
+          {search === undefined ? (
+            <JoinCompanyType onChoice={onChoice} />
+          ) : (
+            <ChoiceCompanyForm onBack={onBack} search={search} />
+          )}
+        </StyledPageBackground>
       )}
-    </StyledPageBackground>
-  )
+    </>
+  );
 }
 
 /** [Internal Component] 초기 회사에 참여하기 위한 유형 선택 (생성 or 검색) */

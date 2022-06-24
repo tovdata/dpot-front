@@ -2,6 +2,45 @@
 import styled from 'styled-components';
 
 /** [Styled Component] 풀 스크린 */
+export const StyledContainer = styled.div`
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  user-select: none;
+  .section {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    text-align: center;
+    .icon {
+      margin-bottom: 64px;
+    }
+    .content {
+      position: relative;
+      h2 {
+        color: #000000;
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 28px;
+        margin-bottom: 8px;
+      }
+      p {
+        color: #000000D9;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+        margin: 0;
+      }
+      button {
+        margin-top: 16px;
+      }
+    }
+  }
+`;
+/** [Styled Component] 풀 스크린 */
 export const StyledFullScreen = styled.div`
   align-items: center;
   display: flex;
@@ -16,22 +55,22 @@ export const StyledFullScreen = styled.div`
     position: relative;
     text-align: center;
     .icon {
-      margin-bottom: 16px;
+      margin-bottom: 64px;
     }
     .content {
       position: relative;
       h2 {
-        color: #000000D9;
-        font-size: 24px;
+        color: #000000;
+        font-size: 20px;
         font-weight: 600;
         line-height: 28px;
         margin-bottom: 8px;
       }
       p {
-        color: #00000052;
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 20px;
+        color: #000000D9;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
         margin: 0;
       }
       button {

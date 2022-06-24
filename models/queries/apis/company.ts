@@ -49,10 +49,12 @@ export const setCompany = async (data: Company, id?: string): Promise<ResponseDF
   try {
     // URL 정의
     const url: string = id ? `${SERVER_URL}company/${id}` : `${SERVER_URL}company/new`;
+    // 데이터 복사
+    const copy: Company = JSON.parse(JSON.stringify(data));
     // 파라미터 데이터 가공 (id 속성이 있을 경우 제거)
-    if ('id' in data) delete data.id;
+    if ('id' in copy) delete copy.id;
     // 요청 객체 생성
-    const request: RequestDF = createRequest(id ? 'PUT' : 'POST', data);
+    const request: RequestDF = createRequest(id ? 'PUT' : 'POST', copy);
     // API 호출
     const response: any = await fetch(url, request);
     // 데이터 추출 및 반환
@@ -90,6 +92,28 @@ export const createService = async (companyId: string, data: PLIPService): Promi
   }
 }
 /**
+ * [API Caller] 회사 내 서비스 목록 조회
+ * @param companyId 회사 ID
+ * @returns 조회 결과
+ */
+export const getServiceList = async (companyId: string): Promise<PLIPService[]> => {
+  try {
+    // API 요청
+    const response: any = await fetch(`${SERVER_URL}company/${companyId}/details`);
+    // 응답 데이터 추출
+    const result: ResponseDF = await extractData(response);
+    // 데이터 가공 및 반환
+    if (result.result && result.data && result.data.services) {
+      return result.data.services.map((elem: any): PLIPService => ({ id: elem.id, serviceName: elem.serviceName, types: elem.types, url: elem.url })); 
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return [];
+  }
+}
+/**
  * [API Caller] 서비스 수정
  * @param serviceId 서비스 ID
  * @param data 서비스 데이터
@@ -97,10 +121,12 @@ export const createService = async (companyId: string, data: PLIPService): Promi
  */
 export const updateService = async (serviceId: string, data: PLIPService): Promise<ResponseDF> => {
   try {
+    // 데이터 복사
+    const copy: PLIPService = JSON.parse(JSON.stringify(data));
     // 파라미터 데이터 가공 (id 속성이 있을 경우 제거)
-    if ('id' in data) delete data.id;
+    if ('id' in copy) delete copy.id;
     // 요청 객체 생성
-    const request: RequestDF = createRequest('PUT', data);
+    const request: RequestDF = createRequest('PUT', copy);
     // API 호출
     const response: any = await fetch(`${SERVER_URL}service/${serviceId}`, request);
     // 데이터 추출 및 반환
