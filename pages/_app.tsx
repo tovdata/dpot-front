@@ -1,7 +1,8 @@
 import type { AppProps } from 'next/app'
-import React, { Suspense, useState } from 'react';
-// Component
+import React, { useState } from 'react';
 import { RecoilRoot } from 'recoil';
+// Component
+import Head from 'next/head';
 import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
 // Font
 import '../public/fonts/pretendard.css';
@@ -75,10 +76,15 @@ function MyApp({ Component, pageProps }: AppProps) {
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
         <RecoilRoot>
-          {/* <Suspense fallback={<></>}> */}
-            <GlobalStyle />
-            <Component {...pageProps} expand={expand} onExpand={onExpand} />
-          {/* </Suspense> */}
+          <Head>
+            <title>Plip</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0, maxium-scale=1.0, user-scalable=0' />
+            <meta name='keyword' content='Privacy, privacy, privacy information, documentation, policy' />
+            <meta name='author' content='TOVDATA' />
+            <meta charSet='utf-8' />
+          </Head>
+          <GlobalStyle />
+          <Component {...pageProps} expand={expand} onExpand={onExpand} />
         </RecoilRoot>
       </Hydrate>
     </QueryClientProvider>

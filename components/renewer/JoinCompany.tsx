@@ -1,7 +1,6 @@
 import Router from 'next/router';
 import { useCallback, useState } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-
 // Component
 import { Button, Form, Input, Modal } from 'antd';
 import { StyledJoinCompanyTypeCard, StyledPageBackground, StyledPageLayout } from '../styled/JoinCompany';
@@ -13,7 +12,7 @@ import { PlusCircleOutlined, SearchOutlined } from '@ant-design/icons';
 // State
 import { companySelector, userSelector } from '@/models/session';
 // Query
-import { findCompanies, registerCompany, setCompany, setService } from '@/models/queries/apis/company';
+import { createService, findCompanies, registerUser, setCompany } from '@/models/queries/apis/company';
 import { Company } from '@/models/queries/type';
 
 /** [Component] 초기 회사 참여 (생성 또는 참여) */
@@ -108,7 +107,7 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search }): JSX.Element => {
         // 회사에 사용자를 등록
         if (await joinCompany(response.data.id, user.id)) {
           // 서비스 생성
-          if (await createService(company.companyName)) {
+          if (await createServiceInCompany(response.data.id, company.companyName)) {
             setCompany({ id: response.data.id, name: company.companyName, manager: company.manager });
             return createFinishModal('회사가 생성되었습니다 !', '플립(Plip)과 함께 개인정보를 관리해보아요 :)', '시작하기');
           }
@@ -214,8 +213,8 @@ const createCompany = async (company: any): Promise<any> => {
  * @param companyName 회사 이름
  * @returns 생성 결과
  */
-const createService = async (companyName: string): Promise<boolean> => {
-  return (await setService({ serviceName: companyName, types: ['default'] })).result;
+const createServiceInCompany = async (companyId: string, companyName: string): Promise<boolean> => {
+  return (await createService(companyId, { serviceName: companyName, types: ['default'] })).result;
 };
 /**
  * [Internal Function] 사용자를 회사에 등록하는 함수
@@ -224,7 +223,7 @@ const createService = async (companyName: string): Promise<boolean> => {
  * @returns 처리 결과
  */
 const joinCompany = async (companyId: string, userId: string): Promise<boolean> => {
-  return await registerCompany(companyId, userId, 4);
+  return await registerUser(companyId, userId, 4);
 };
 
 export default JoinCompany;

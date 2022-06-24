@@ -56,11 +56,11 @@ export const UserInfoSection: React.FC<any> = ({ style }): JSX.Element => {
           <Input disabled />
         </Form.Item>
       </TOVInputGroup>
-      <TOVInputGroup label='회사명(영문)'>
+      {/* <TOVInputGroup label='회사명(영문)'>
         <Form.Item initialValue={company.en} name='en'>
           <Input disabled />
         </Form.Item>
-      </TOVInputGroup>
+      </TOVInputGroup> */}
       <TOVInputGroup label='이름' required>
         <Form.Item initialValue={data ? data.name : ''} name='name'>
           <Input />

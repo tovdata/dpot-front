@@ -1,14 +1,14 @@
 import Router from 'next/router';
+import { useCallback, useState } from 'react';
 // Component
 import { Checkbox, Divider, Form, Input, Modal } from 'antd';
 import Link from 'next/link';
 import { StyledFinishButton, StyledSigninContainer, StyledSigninFooter } from '../styled/Signin';
 import { StyledAgreementForm, StyledAgreementItem, StyledSignupForm, StyledSignupHeader } from '../styled/Signup';
 import { PLIPInputGroup } from './Input';
+import { warningNotification } from '../common/Notification';
 // Query
 import { addUser, checkDuplicate, signup, SignupProps } from '@/models/queries/apis/signin-up';
-import { useCallback, useState } from 'react';
-import { warningNotification } from '../common/Notification';
 
 /** [Interface] 약관 동의 항목에 대한 속성 */
 interface AgreementItemProps {
@@ -88,7 +88,7 @@ const SignupForm: React.FC<any> = (): JSX.Element => {
     }
   }, [form, loading, validate]);
   /** [Event handler] 이메일 중복 확인 */
-  const onDuplicate = (value: string): void => {
+  const onDuplicate = useCallback((value: string): void => {
     // 로딩 상태 설정
     setLoading(true);
     // 이메일 형식 검증 및 중복 확인
@@ -103,9 +103,9 @@ const SignupForm: React.FC<any> = (): JSX.Element => {
         setLoading(false);
       }, 600);
     }
-  }
+  }, []);
   /** [Event handler] 회원가입 */
-  const onSignup = async () => {
+  const onSignup = useCallback(async () => {
     if (validate.status === 'success') {
       // 폼 데이터 가져오기
       const formData: any = form.getFieldsValue();
@@ -128,7 +128,6 @@ const SignupForm: React.FC<any> = (): JSX.Element => {
         const response = await signup(data);
         // 결과 처리
         if (response.result) {
-          console.log(response.data)
           // 사용자 약관 동의 내역 저장
           const result = await addUser(response.data.UserSub, formData.name, { esa1: formData.esa1, esa2: formData.esa2, ssa1: formData.ssa1 });
           if (result) {
@@ -143,7 +142,7 @@ const SignupForm: React.FC<any> = (): JSX.Element => {
     } else {
       setValidate({ email: '', message: '이메일에 대한 중복 확인을 해주세요.', status: 'warning' });
     }
-  }
+  }, [form]);
 
   // 컴포넌트 반환
   return (

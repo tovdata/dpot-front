@@ -54,7 +54,7 @@ const SigninForm: React.FC<any> = (): JSX.Element => {
   const setAccessToken = useSetRecoilState(accessTokenSelector);
 
   /** [Event handler] 로그인 */
-  const onSignin = async () => {
+  const onSignin = useCallback(async () => {
     // API 호출
     const response = await signInProcess(form.getFieldValue('email'), form.getFieldValue('password'));
     // 결과에 따른 처리
@@ -83,7 +83,7 @@ const SigninForm: React.FC<any> = (): JSX.Element => {
     } else {
       errorNotification('아이디 혹은 비밀번호가 올바르지 않습니다.');
     }
-  }
+  }, [form]);
 
   // 컴포넌트 반환
   return (

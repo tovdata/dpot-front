@@ -15,9 +15,9 @@ const Company: NextPage = () => {
   /** [Event handler] 로컬 스토리지에서 서비스 정보 초기화 */
   const onClearForService = useCallback(() => setService({ id: '', name: '' }), []);
   /** [Event handler] 회사 정보를 로컬 스토리지에 저장 */
-  const onSaveForCompany = useCallback(() => setCompany({ id: '0', name: '토브데이터', en: 'TOVDATA', manager: { name: '박효진', position: 'CEO', email: 'contact@tovdata.com' } }), []);
+  const onSaveForCompany = useCallback(() => setCompany({ id: '0', name: '토브데이터', manager: { name: '박효진', position: 'CEO', email: 'contact@tovdata.com' } }), []);
   /** [Event handler] 로컬 스토리지에서 회사 정보 초기화 */
-  const onClearForCompany = useCallback(() => setCompany({ id: '', name: '', en: '', manager: { name: '', position: '', email: '' } }), []);
+  const onClearForCompany = useCallback(() => setCompany({ id: '', name: '', manager: { name: '', position: '', email: '' } }), []);
   /** [Event handler] 사용자 정보를 로컬 스토리지에 저장 */
   const onSaveForUser = useCallback(() => setUser({ id: '4', name: '홍길동' }), []);
   /** [Event handler] 로컬 스토리지에서 사용자 정보 초기화 */

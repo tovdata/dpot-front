@@ -26,7 +26,11 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
 
 /** [Internal Component] 서비스 카드 목록 */
 const ServiceCardList: React.FC<any> = (): JSX.Element => {
+  // 모달 열기/닫기 상태
   const [visible, setVisible] = useState<boolean>(false);
+
+  // 
+
   // 
   const [list, setList] = useState<any[]>([
     { id: '0', serviceName: '주식회사 토브데이터', types: ['default'] },
