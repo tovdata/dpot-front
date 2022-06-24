@@ -39,9 +39,9 @@ const ServiceCardList: React.FC<any> = (): JSX.Element => {
   const [visible, setVisible] = useState<boolean>(false);
 
   /** [Event handler] 모달 종료 */
-  const onClose = () => useCallback(() => setVisible(false), []);
+  const onClose = useCallback(() => setVisible(false), []);
   /** [Event handler] 모달 열기 */
-  const onOpen = () => useCallback(() => setVisible(true), []);
+  const onOpen = useCallback(() => setVisible(true), []);
 
   return (
     <>

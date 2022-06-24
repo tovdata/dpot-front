@@ -41,9 +41,9 @@ const UserInfoSection: React.FC<any> = (): JSX.Element => {
   useEffect(() => form.setFieldsValue({ name: data ? data.userName : '', contact: data ? data.contact : '' }), [isLoading]);
 
   /** [Event handler] 모달 열기 */
-  const onOpen = () => useCallback(() => setVisible(true), []);
+  const onOpen = useCallback(() => setVisible(true), []);
   /** [Event handler] 모달 닫기 */
-  const onCancel = () => useCallback(() => setVisible(false), []);
+  const onCancel = useCallback(() => setVisible(false), []);
   /** [Event handler] 변경한 회사 정보 저장 */
   const onSave = useCallback(async () => {
     const response = await updateUser(user.id, { ...data, userName: form.getFieldValue('name'), contact: form.getFieldValue('contact') });
