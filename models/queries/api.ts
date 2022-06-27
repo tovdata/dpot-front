@@ -1,7 +1,9 @@
 // Data
-import { SERVER_URL, RequestDF, SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_DPI, ResponseDF } from './type';
+import { SERVER_URL, RequestDF, SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_DPI, ResponseDF, RESPONSE_STATUS_OK } from './type';
 // Module
-import { createRequest, extractData, processArrayResponse, processResponse } from './internal';
+import { catchAPIRequestError, createRequest, extractData, processArrayResponse, processResponse } from './internal';
+import { writeActivityLog } from 'utils/utils';
+import { User } from '../session';
 
 /**
  * [API Caller] 개인정보 수집 및 이용에 대한 데이터 불러오기
@@ -89,9 +91,22 @@ export const getPIItems = async (serviceId: string): Promise<any[]> => {
   // API 호출
   const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pi/allitems`);
   // 응답 데이터 추출
-  const result = await extractData(response);
+  const result = await extractData(response);  
   // 결과 반환
-  return result.result ? result.data.sort() : [];
+  return result.result ? result.data.allItems.sort() : [];
+}
+/**
+ * [API Caller] 개인정보 수집 및 이용 내 필수/선택 항목 데이터 불러오기
+ * @param serviceId 현재 서비스 ID
+ * @returns 결과 데이터
+ */
+export const getPIItemsByType = async (serviceId: string): Promise<any[]> => {
+  // API 호출
+  const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pi/allitems`);
+  // 응답 데이터 추출
+  const result = await extractData(response);  
+  // 결과 반환
+  return result.result ? result.data : { allItems: [], essentialItemsOnly: [], selectionItemsOnly: [] };
 }
 /**
  * [API Caller] 테이블 유형에 따른 데이터 불러오기
@@ -121,21 +136,30 @@ export const getDatasByTableType = async (serviceId: string, type: string): Prom
 }
 /**
  * [API Caller] 테이블 유형에 따라 데이터 처리
+ * @param user 사용자 정보
  * @param serviceId 현재 서비스 ID
  * @param type 테이블 유형 [ pi | fni | ppi | pfni | cpi | cfni | dpi ]
  * @param mode 처리 유형 [ add | delete | save ]
  * @param data 처리하고자는 데이터
  * @returns 결과 데이터
  */
-export const setDataByTableType = async (serviceId: string, type: string, mode: string, data: any): Promise<any> => {
+export const setDataByTableType = async (user: User, serviceId: string, type: string, mode: string, data: any): Promise<any> => {
   // URL 및 Request 정의
   const url: string = mode === 'add' ? `${SERVER_URL}${type}/new` : `${SERVER_URL}${type}/${data.id}`;
-  console.log('url', url)
   const request: RequestDF = createRequest(serviceId, mode, data);
   // API 요청
   const response: Response = await fetch(url, request);
-  // 에러 처리
-  return await processResponse(response, mode);
+  // 데이터 변환
+  const result = await extractData(response, mode);
+  console.log('result', result);
+  // 에러 확인 및 로그 작성
+  if (result) {
+    // 서비스 로그
+    writeActivityLog(mode, type, serviceId, user.name);
+    // 사용자 로그
+    writeActivityLog(mode, type, user.id);
+  }
+  return result;
 }
 /**
  * [API Caller] 개인정보 처리방침을 생성하기 위한 데이터 불러오기
@@ -215,6 +239,137 @@ export const setPIPPData = async (serviceId: string, data: any, status: string, 
   // 응답 데이터 반환
   return await fetch(url, request);
 }
+/**
+ * [API Caller] 활동 내역 저장
+ * @param type 활동 기준 [service | user]
+ * @param id 식별 아이디 (service_id or user_id)
+ * @param data 활동 내역
+ * @returns API로부터 응답받은 데이터
+ */
+export const setActivity = async (type: string, id: string, data: any): Promise<void> => {
+  // 활동 내용 기준에 따라 URL 정의 (서비스 or 사용자)
+  const url: string = `${SERVER_URL}activity/${type}/${id}`;
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify({ text: data }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'PUT'
+  };
+  // API 호출 및 데이터 반환
+  await fetch(url, request);
+}
+/**
+ * [API Caller] 활동 내역 가져오기
+ * @param type 활동 기준 [service | user]
+ * @param id 식별 아이디 (service_id or user_id)
+ * @returns 가공 데이터 반환
+ */
+export const getActivity = async (type: string, id: string): Promise<any> => {
+  // 활동 내역 기준에 따라 API 호출 (서비스 or 사용자)
+  const response: any = await fetch(`${SERVER_URL}activity/${type}/${id}`);
+  // 응답 데이터 추출
+  const result: ResponseDF = await extractData(response);
+  // 데이터 반환
+  return result.result ? result.data : [];
+}
+/**
+ * [API Caller] 회원가입 (사용자 데이터 저장)
+ * @param id AWS Cognito로부터 부여받은 id
+ * @param data 사용자 정보
+ */
+export const addUser = async (id: string, companyId: string, data: any): Promise<ResponseDF> => {
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify({
+      companyId: companyId,
+      email: data.email,
+      name: data.name,
+      contact: data.tel,
+      agree: {
+        service: data.esa1,
+        pi: data.esa2,
+        marketing: data.ssa1
+      }
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST'
+  };
+  // API 호출
+  const response = await fetch(`${SERVER_URL}user/new/${id}`, request);
+  // 응답 데이터 추출 및 반환
+  return await extractData(response);
+}
+/**
+ * [API Caller] 사용자 조회
+ * @param id 사용자 ID
+ * @returns 조회 결과
+ */
+export const getUser = async (id: string): Promise<any> => {
+  const response = await fetch(`${SERVER_URL}user/${id}`);
+  // 응답 데이터 추출 및 반환
+  return await processResponse(response);
+}
+/**
+ * [API Caller] 사용자 정보 갱신
+ * @param data 사용자 정보
+ * @returns 결과 데이터
+ */
+export const updateUser = async (data: any): Promise<boolean> => {
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'PUT'
+  };
+  // API 호출
+  const response = await fetch(`${SERVER_URL}user/${data.id}`, request);
+  // 결과 반환
+  return !catchAPIRequestError(await response.json());
+}
+/**
+ * [API Caller] 회사 검색
+ * @param name 검색할 값
+ * @returns 검색 결과
+ */
+export const findCompany = async (name: string): Promise<any[]> => {
+  const response = await fetch(`${SERVER_URL}company/find?name=${encodeURIComponent(name)}`);
+  // 응답 데이터 추출
+  const result = await extractData(response);
+  // 데이터 반환
+  return result.result ? result.data.list : [];
+}
+/**
+ * [API Caller] 회사 생성/수정
+ * @param data 회사 정보 데이터
+ * @param id 회사 ID
+ * @returns 응답 결과
+ */
+export const setCompany = async (data: any, id?: string): Promise<ResponseDF> => {
+  // API 호출을 위한 URL 정의
+  const url: string = id ? `${SERVER_URL}/${id}` : `${SERVER_URL}company/new`;
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    body: JSON.stringify({
+      companyName: data.name,
+      manager: data.manager,
+      url: data.url
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: id ? 'PUT' : 'POST'
+  };
+  // API 호출
+  const response = await fetch(url, request);
+  // 응답 데이터 추출 및 반환
+  return await extractData(response);
+}
 
 export const setConsentData = async (serviceId: string, data: any, html?: string): Promise<any> => {
   // 초기 저장인지 아닌지를 확인하여 API 호출을 위한 URL 정의
@@ -236,6 +391,19 @@ export const setConsentData = async (serviceId: string, data: any, html?: string
   // 응답 데이터 반환
   return await fetch(url, request);
 }
+export const deleteConsentData = async (serviceId:string, id:string): Promise<any> => {
+  // 초기 저장인지 아닌지를 확인하여 API 호출을 위한 URL 정의
+  const url: string = `${SERVER_URL}consent/${serviceId}?target=${id}`;
+  const request: any = {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'DELETE'
+  };
+  // 응답 데이터 반환
+  return await fetch(url, request);
+}
+
 export const getConsentList = async (serviceId: string): Promise<any[]> => {
   // API 호출
   const response: Response = await fetch(`${SERVER_URL}consent/${serviceId}`);
@@ -254,4 +422,48 @@ export const getConsentList = async (serviceId: string): Promise<any[]> => {
   // }
   // // 데이터 가공 및 반환
   // return sorted;
+}
+
+/**
+ * [API Calller] 로그인
+ * @param email 이메일
+ * @param password 비밀번호
+ * @returns 로그인 결과
+ */
+export const signInProcess = async (email:string, password:string):Promise<ResponseDF> => {
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    credentials: 'include',
+    body: JSON.stringify({
+      email: email,
+      password: password
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST'
+  };
+  // API 호출
+  const response = await fetch(`${SERVER_URL}auth/signin`, request);
+  // 에러 확인 및 반환
+  return await extractData(response);
+}
+/**
+ * [API Caller] 로그인 (Refresh)
+ * @param id 사용자 ID
+ * @returns 액세스 토큰
+ */
+export const refreshSignInProcess = async (id: string) : Promise<any> => {
+  // API 호출에 필요한 Request 생성
+  const request: RequestDF = {
+    credentials: 'include',
+    body: JSON.stringify({ id }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST'
+  };  
+  // 응답 데이터
+  const response = await fetch(`${SERVER_URL}auth/silentrefresh`, request);
+  return response;
 }

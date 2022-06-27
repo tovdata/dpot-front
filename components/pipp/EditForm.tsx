@@ -43,6 +43,7 @@ interface ReadableTableProps {
   columns: any[],
   dataSource: any[],
   preview?: boolean;
+  style?: React.CSSProperties;
 }
 
 /** [Component] 개인정보 처리방침 편집을 위한 Input section */
@@ -153,9 +154,9 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
       </DIRow>
       <DIRowDivider />
       <DIRow self={refElements ? (el: any) => (refElements.current[8] = el) : undefined}>
-        <DIRowHeader title='개인정보보호책임자 및 개인정보 열람청구' />
-        <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. 연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다.' required title='개인정보보호 책임자' />
-        <Row gutter={8} style={{ marginBottom: 24 }}>
+        <DIRowHeader title='개인정보 보호책임자 및 개인정보 열람청구' />
+        <DIRowSubject description='개인정보 보호책임자의 성명, 부서의 명칭과 연락처에 관한 안내는 필수 기재사항입니다. 연락처의 경우 직통 연락처가 아닌, 정보주체의 개인정보 관련 문의나 고충처리를 담당하는 개인정보 보호책임자의 소속 부서 연락처 등을 기재해도 됩니다.' required title='개인정보 보호책임자' />
+        {/* <Row gutter={8} style={{ marginBottom: 24 }}>
           <Col span={7}>
             <DIInputGroup label='직책'>
               <Input allowClear onChange={(e: any) => onChange(sectionType, e.target.value, 'manager', 'charger', 'position')} onClick={() => onFocus('preview', 8)} value={data.manager.charger.position} />
@@ -171,7 +172,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
               <Input allowClear onChange={(e: any) => onChange(sectionType, e.target.value, 'manager', 'charger', 'contact')} onClick={() => onFocus('preview', 8)} placeholder='예 : privacy@company.com' value={data.manager.charger.contact} />
             </DIInputGroup>
           </Col>
-        </Row>
+        </Row> */}
         {/* <Button size='small' style={{ fontSize: 12, marginBottom: 24, padding: '0 12px' }} type='default'>수정하기</Button> */}
         <DIRowSubject description='필요에 따라 개인정보보호 담당부서와 연락처 정보도 함께 안내하는 것을 권장합니다.' title='개인정보보호 담당부서' />
         <Row gutter={8} style={{ marginBottom: 24 }}>
@@ -280,7 +281,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
     <div id={preview ? 'preview' : 'report'}>
       <h2 ref={refElements ? (el: any) => (refElements.current[0] = el) : undefined} style={{ fontSize: preview ? 18 : 24, fontWeight: '700', lineHeight: '22px', marginBottom: 30, textAlign: 'center' }}>{stmt.title}</h2>
       {!preview ? (
-        <p style={{ color: '#262626', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 32, textAlign: 'right' }}>{moment.unix(data.cInfo.applyAt).format('YYYY-MM-DD')}</p>
+        <p style={{ color: '#262626', fontSize: 14, fontWeight: '500', lineHeight: '22px', marginBottom: 32, textAlign: 'right' }}>적용일자 : {moment.unix(data.cInfo.applyAt).format('YYYY-MM-DD')}</p>
       ) : (<></>)}
       <DDRow>
         <DDRowContent items={[`${stmt.introduction}`]} />
@@ -363,17 +364,18 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
         {data.dInfo.ppi.usage ? (
           <>
             <DDRowHeader title={stmt.ppi.title} />
-            { console.log('url', data.dInfo.ppi) }
-            <DDRowContent items={stmt.ppi.content.common[1]} links={data.dInfo.ppi.url ? ['', data.dInfo.ppi.url] : undefined} />
-            <ReadableTable columns={[
-              { title: '제공받는 자', dataIndex: 'recipient', key: 'recipient', width: '16%' },
-              { title: '제공받는 자의 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
-              { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => (<>{value.join(', ')}</>), width: '36%' },
-              { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
-            ]} dataSource={refTables.ppi} />
+            <DDRowContent items={stmt.ppi.content.common[1]} links={data.dInfo.ppi.url ? ['', data.dInfo.ppi.url] : undefined} style={{ marginBottom: 0 }} />
+            {refTables.ppi.some((row: any): boolean => !('url' in row)) ? (
+              <ReadableTable columns={[
+                { title: '제공받는 자', dataIndex: 'recipient', key: 'recipient', width: '16%' },
+                { title: '제공받는 자의 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
+                { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => (<>{value.join(', ')}</>), width: '36%' },
+                { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
+              ]} dataSource={refTables.ppi} style={{ marginTop: 8 }} />
+            ) : (<></>)}
             {refTables.ppi ? refTables.ppi.some((item: any): boolean => item.isForeign) ? (
               <>
-                <DDRowContent items={stmt.ppi.content.foreign[1]} />
+                <DDRowContent items={stmt.ppi.content.foreign[1]} style={{ marginTop: 8 }} />
                 <ReadableTable columns={[
                   { title: '업체명', dataIndex: 'recipient', key: 'recipient', width: '15%', },
                   { title: '국가', dataIndex: 'country', key: 'country', width: '11%' },
@@ -391,14 +393,16 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
         {data.dInfo.cpi.usage ? (
           <>
             <DDRowHeader title={stmt.cpi.title} />
-            <DDRowContent items={stmt.cpi.content.common[1]} links={data.dInfo.cpi.url ? [data.dInfo.cpi.url] : undefined} />
-            <ReadableTable columns={[
-              { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company', width: '42%' },
-              { title: '위탁업무', dataIndex: 'content', key: 'content', render: (value: string[]) => (<ListInTable items={value} />), width: '58%' },
-            ]} dataSource={refTables.cpi} />
+            <DDRowContent items={stmt.cpi.content.common[1]} links={data.dInfo.cpi.url ? [data.dInfo.cpi.url] : undefined} style={{ marginBottom: 8 }} />
+            {refTables.cpi.some((row: any): boolean => !('url' in row)) ? (
+              <ReadableTable columns={[
+                { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company', width: '42%' },
+                { title: '위탁업무', dataIndex: 'content', key: 'content', render: (value: string[]) => (<ListInTable items={value} />), width: '58%' },
+              ]} dataSource={refTables.cpi} style={{ marginTop: 8 }} />
+            ) : (<></>)}
             {refTables.cpi ? refTables.cpi.some((item: any): boolean => item.isForeign) ? (
               <>
-                <DDRowContent items={stmt.cpi.content.foreign[1]} />
+                <DDRowContent items={stmt.cpi.content.foreign[1]} style={{ marginTop: 8 }} />
                 <ReadableTable columns={[
                   { title: '업체명', dataIndex: 'company', key: 'company' },
                   { title: '국가', dataIndex: 'country', key: 'country' },
@@ -603,10 +607,10 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
         {data.dInfo.fni.usage ? (
           <>
             <DDRowHeader title={stmt.fni.title} />
-            <DDRowContent items={stmt.fni.content.common[1]} />
+            <DDRowContent items={stmt.fni.content.common[1]} style={{ marginBottom: 0 }} />
             {refTables.fni && refTables.fni.length > 0 ? (
               <>
-                <DDRowItemList items={['가명정보의 처리에 관한 사항']} style={{ marginBottom: 4 }} />
+                <DDRowItemList items={['가명정보의 처리에 관한 사항']} style={{ marginBottom: 4, marginTop: 8 }} />
                 <ReadableTable columns={[
                   { title: '구분', dataIndex: 'subject', key: 'subject', width: '20%' },
                   { title: '처리 목적', dataIndex: 'purpose', key: 'purpose', width: '30%' },
@@ -661,9 +665,11 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
       </DDRow>
       {preview ? (<></>) : (
         <DDRow>
+          <DDRowHeader title='개인정보 처리방침의 변경에 관한 사항' />
+          <DDRowContent items={[`① 본 방침은 ${moment.unix(data.cInfo.applyAt).format('YYYY년 M월 D일')}부터 시행됩니다.`]} style={{ marginBottom: 0 }} />
           {prevPIPPList.length > 0 ? (
             <>
-              <DDRowHeader title='이전 개인정보 처리방침' />
+              <DDRowContent items={['② 이전의 개인정보 처리방침은 아래에서 확인할 수 있습니다.']} />
               <select id='prev-list' onChange={(e: any) => e.target.value !== 'none' ? window.open(e.target.value, '_blank') : undefined} style={{ border: '1px solid #C0C0C0', padding: '6px 9px' }}>
                 <option key={-1} value='none'>선택하세요.</option>
                 {prevPIPPList.map((item: any, index: number): JSX.Element => (
@@ -692,9 +698,9 @@ const ListInTable: React.FC<any> = ({ items }: any): JSX.Element => {
   );
 }
 /** [Internal Component] 읽기 전용 테이블 */
-const ReadableTable: React.FC<ReadableTableProps> = ({ columns, dataSource, preview }: ReadableTableProps): JSX.Element => {
+const ReadableTable: React.FC<ReadableTableProps> = ({ columns, dataSource, preview, style }: ReadableTableProps): JSX.Element => {
   return (
-    <DDRowTableForm preview={preview}>
+    <DDRowTableForm preview={preview} style={style}>
       <Table columns={columns} dataSource={dataSource} pagination={false} size='small' />
     </DDRowTableForm>
   );

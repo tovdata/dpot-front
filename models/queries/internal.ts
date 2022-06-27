@@ -81,7 +81,11 @@ export const extractData = async (response: Response, mode?: string): Promise<Re
   const json: any = await response.json();
   // 에러 확인
   if (catchAPIRequestError(json)) {
-    return { result: false };
+    if (json.message && json.message.includes('UserNotConfirmedException')) {
+      return { result: false, data: { noConfirm: true } };
+    } else {
+      return { result: false };
+    }
   }
   // 결과 반환
   if (mode === undefined || mode === 'add') {
@@ -133,7 +137,8 @@ const transformData = async (response: Response): Promise<ResponseDF> => {
  * @param response 응답 데이터
  * @returns 에러 결과
  */
-const catchAPIRequestError = (response: any): boolean => {
+export const catchAPIRequestError = (response: any): boolean => {
+  // 상태 확인
   if ('status' in response) {
     // 상태별 구문 정의
     let stmt: string|undefined = undefined;
@@ -153,7 +158,7 @@ const catchAPIRequestError = (response: any): boolean => {
     }
     // 에러 메시지 출력 및 결과 반환
     if (stmt) {
-      console.error('[Query Error]', stmt, response.message);
+      console.error('[Query Error]', stmt, response.message ? response.message : '');
       return true;
     } else {
       return false;

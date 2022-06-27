@@ -1,21 +1,26 @@
-import { Input } from 'antd'
-import type { NextPage } from 'next'
-import { TOVInputGroup } from '../components/common/Input'
-import { TOVPageLayout } from '../components/common/Layout'
+import type { NextPage } from 'next';
+import dynamic from 'next/dynamic';
+import { useRecoilValueLoadable } from 'recoil';
 // Component
-import { TestSession } from '../components/TestSession'
+import { TOVPageLayout } from '@/components/common/Layout'
+import Dashboard from '@/components/renewer/Dashboard'
+const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
+// State
+import { accessTokenSelector } from '@/models/session';
+import { PLIPPageLayout } from '@/components/renewer/Layout';
 
-const Home: NextPage = ({ expand, onExpand }: any) => {
+const Page: NextPage = ({ expand, onExpand }: any) => {
+  const accessToken = useRecoilValueLoadable(accessTokenSelector);
+  console.log(accessToken);
+
   return (
-    <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/'>
-      <div style={{ marginBottom: 74, marginTop: 74 }}>
-        <TestSession />
-        <TOVInputGroup label='테스트' required tooltip='asdfas'>
-          <Input />
-        </TOVInputGroup>
-      </div>
-    </TOVPageLayout>
+    <PILPSession>
+      <PLIPPageLayout expand={expand} onExpand={onExpand} selectedKey='/'>
+        <Dashboard />
+      </PLIPPageLayout>
+      {/* <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/'> */}
+      {/* </TOVPageLayout> */}
+    </PILPSession>
   )
 }
-
-export default Home
+export default Page;

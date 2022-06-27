@@ -1,5 +1,5 @@
 /** 기본 Backend Server URL*/
-export const SERVER_URL = 'https://dpot-dev.tovdata.com:8081/api/';
+export const SERVER_URL = 'https://api-dev.plip.kr:8081/api/';
 /** API 응답 상태 */
 export const RESPONSE_STATUS_OK = 'OK';
 export const RESPONSE_STATUS_ERROR = 'ERROR';
@@ -45,7 +45,59 @@ export interface NumberDF { N: number };
 export interface BooleanDF { BOOL: boolean };
 /** API 요청 데이터 형태 */
 export interface RequestDF {
+  credentials?: any,
   body: any;
   headers: any;
   method: string;
 }
+/**
+ * 기본적인 Request 생성 함수
+ * @param method API Method
+ * @param data 요청 데이터
+ * @returns 요청 객체
+ */
+export const createRequest = (method: string, data: any): RequestDF => {
+  return {
+    body: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: method
+  };
+}
+
+/** [Interface] 회사 */
+export interface Company {
+  companyName: string;
+  createAt?: number;
+  id?: string;
+  manager: Manager;
+  url?: string;
+}
+/** [Interface] 개인정보 책임자  */
+export interface Manager {
+  email: string;
+  name: string;
+  position: string;
+}
+/** [Interface] 서비스 */
+export interface PLIPService {
+  createAt?: number;
+  id?: string;
+  serviceName: string;
+  types: PLIPServiceType[];
+  url?: string;
+}
+/** [Interface] 사용자 */
+export interface PLIPUser {
+  contact?: string;
+  createAt?: number;
+  department?: string;
+  email?: string;
+  id?: string;
+  position?: string;
+  task?: string;
+  userName: string;
+}
+/** [Type] 서비스 유형 */
+export type PLIPServiceType = 'default' | 'web' | 'app';

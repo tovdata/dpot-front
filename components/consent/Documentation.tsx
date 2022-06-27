@@ -3,8 +3,10 @@ import { consentEPIHeader, consentPPIHeader, historyHeader } from '@/components/
 import { ConfirmItemComponent } from "./Atom";
 import { ConsentTable } from "./Table";
 
-export const ConfirmPage = ({ type, consentData }: any): JSX.Element => {
-  const word = type === 4 ? '개인정보' : staticConsentData[type].word;
+export const ConfirmPage = ({ type, consentData, companyName }: any): JSX.Element => {
+  const word = type === 4 ? '개인정보' : staticConsentData('')[type].word;
+  const title = type === 4 ? '개인정보 제공 내역' : `${word} 수집·이용 내역`;
+  const mode = type === 4 ? 'ppi' : 'pi';
   const fixedText = (text: string, important: boolean, index: number): JSX.Element => {
     return <span key={index} style={important ? { fontWeight: 'bold', textDecoration: 'underline' } : {}}>{text}</span>
   }
@@ -34,13 +36,10 @@ export const ConfirmPage = ({ type, consentData }: any): JSX.Element => {
     }
     return header;
   }
-  const title = type === 4 ? '개인정보 제공 내역' : `${word} 수집·이용 내역`;
-  const mode = type === 4 ? 'ppi' : 'pi';
-  const companyName = "회사명";
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }} id='report'>
       <h1 style={{ fontWeight: '700', fontSize: '24px', width: '100%', textAlign: 'center' }}>{consentData.title}</h1>
-      <span style={{ display: 'flex', flexDirection: 'column', margin: '1rem' }}>{staticConsentData[type].document?.fixedText.map((item: any, index: number) => fixedText(item.text, item.important, index))}</span>
+      <span style={{ display: 'flex', flexDirection: 'column', margin: '1rem' }}>{staticConsentData(companyName)[type].document?.fixedText.map((item: any, index: number) => fixedText(item.text, item.important, index))}</span>
       <ConfirmItemComponent title={title} footerText={consentData.disadvantage}>
         <ConsentTable data={consentData.pData} headers={getHistoryHeader()} mode={mode} />
       </ConfirmItemComponent>
@@ -49,7 +48,7 @@ export const ConfirmPage = ({ type, consentData }: any): JSX.Element => {
           <ConsentTable data={consentData.epiData} headers={otherNoticeHeader()} />
         </ConfirmItemComponent>
       )}
-      <span style={{ whiteSpace: 'pre-line', marginTop: '16px' }}>{`위와 같이 ${staticConsentData[type].word}를 제공하는데 동의합니다.`} </span>
+      <span style={{ whiteSpace: 'pre-line', marginTop: '16px' }}>{`위와 같이 ${staticConsentData(companyName)[type].word}를 제공하는데 동의합니다.`} </span>
       <div style={{ fontWeight: '700', fontSize: '20px', marginTop: '32px', textAlign: 'center' }}>{`"${companyName}" 귀중`}</div>
     </div>)
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useRef } from 'react';
 import { useEffect, useState } from 'react';
 // Component
 import { Button, Col, Input, Modal, Popover, Result, Row, Table, Tag } from 'antd';
@@ -17,7 +17,6 @@ import moment from 'moment';
 import { FNITable, PITable } from './PITable';
 import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from './PCTable';
 import { useQueries, useQuery, useQueryClient } from 'react-query';
-import { getListForPIM, PIMType } from '../models/queryState';
 // Type
 import { DocProgressStatus } from '../models/type';
 import { InputSection, PreviewSection } from './pipp/EditForm';
@@ -25,7 +24,16 @@ import { DRModal } from './pipp/Documentation';
 import { ConfirmSection } from './pipp/ConfirmForm';
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from '../models/queries/type';
 import { BasicPageLoading } from './common/Loading';
-import { getPIPPData, setPIPPData } from '../models/queries/api';
+import { getDatasByTableType, getPIPPData, setPIPPData } from '../models/queries/api';
+import { blankCheck, copyTextToClipboard } from 'utils/utils';
+import { useRecoilValue } from 'recoil';
+import { companySelector, serviceSelector } from '@/models/session';
+// Query
+import { getPIPPList, getPIPPStatus } from '@/models/queries/api';
+import { TOVLayoutPadding } from './common/Layout';
+// Query key
+const PIPP_LIST: string = 'pippList';
+const PIPP_STATUS: string = 'pippStatus';
 
 /** [Interface] PIPP process */
 interface PIPPProcess {
@@ -36,21 +44,65 @@ interface PIPPProcess {
 /** [Type] Scroll position */
 type ScrollPosition = 'start'|'end';
 
-/**
- * [Component] 개인정보 처리방침 메인 페이지
- */
-export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIPPProcess): JSX.Element => {
+export const PIPPMain: React.FC<any> = (): JSX.Element => {
+  // 현재 서비스 조회
+  const service = useRecoilValue(serviceSelector);
+  // 개인정보 처리방침 상태 조회 API
+  const { isLoading: isLoadingForStatus, data: status } = useQuery(PIPP_STATUS, async () => await getPIPPStatus(service.id));
+  // 생성된 개인정보 처리방침 목록 조회 API
+  const { isLoading: isLoadingForList, data: list } = useQuery(PIPP_LIST, async () => await getPIPPList(service.id));
+
+  // 현재 페이지 상태
+  const [progress, setProgress] = useState<string>('none');
+  // 처리방침 생성 상태에 대한 쿼리 관리 객체
+  const queryClient = useQueryClient();
+  /** [Event handler] 처리방침 상태 및 목록 갱신 함수 */
+  const onUpdateStatus = () => {
+    queryClient.invalidateQueries(PIPP_LIST);
+    queryClient.invalidateQueries(PIPP_STATUS);
+    queryClient.invalidateQueries(SERVICE_PIPP);
+  }
+  /** [Event handler] 처리방침 생성 및 편집 */
+  const onProcess = (process: DocProgressStatus) => {
+    process ? setProgress(process) : setProgress('none');
+  }
+  /** [Event handler] 처리방침 생성 취소 */
+  const onBack = () => {
+    onUpdateStatus();
+    setProgress('none');
+  }
+
+  // 컴포넌트 반환
+  return (
+    <>
+      {isLoadingForStatus && isLoadingForList ? (
+        <BasicPageLoading />
+      ) : (
+        <TOVLayoutPadding>
+          {progress === 'none' ? (
+            <PIPPList list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.version - a.version) : []} onProcess={onProcess} status={status} />
+          ) : (
+            <CreatePIPPForm list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.applyAt - a.applyAt) : []} onBack={onBack} onUpdateStatus={onUpdateStatus} progress={progress} status={status} />
+          )}
+        </TOVLayoutPadding>
+      )}
+    </>
+  );
+}
+
+/** [Component] 개인정보 처리방침 메인 페이지 */
+export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIPPProcess): JSX.Element => {
   return (
     <>
       <MainPageHeader onProcess={onProcess} status={status} />
       <StyledTableForm>
         <TableFormHeader title='개인정보 처리방침 이력' />
         <Table columns={[
-          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number, record: any): string => record.version === 0 ? '이전 개인정보 처리방침' : `개인정보 처리방침 (ver. ${value === 9999 ? 'latest' : value})`, sorter: (a: any, b: any): number => a.version - b.version },
+          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number, record: any): JSX.Element => record.version === 0 ? (<Subject subject='이전 개인정보 처리방침' url={record.url} />) : (<Subject subject={`개인정보 처리방침 (ver. ${value === 9999 ? 'latest' : value})`} url={record.url} />), sorter: (a: any, b: any): number => a.version - b.version },
           { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (_: string, record: any): JSX.Element => list ? record.version === 0 ? (<Tag color='default'>외부링크</Tag>) : record.version === 9999 ? (<Tag color='geekblue'>현재</Tag>) : (<Tag color='green'>이전</Tag>) : (<></>) },
           { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value / 1000).format('YYYY-MM-DD HH:mm'), sorter: (a: any, b: any): number => a.createAt - b.createAt },
           { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value).format('YYYY-MM-DD'), sorter: (a: any, b: any): number => a.applyAt - b.applyAt },
-          { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => <a href={value} style={{ color: '#000000D9', cursor: 'pointer' }} target='_blank' rel='noreferrer'><LinkOutlined /></a> }
+          { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => (<LinkButton url={value} />) }
         ]} dataSource={list} showSorterTooltip={false} />
       </StyledTableForm>
     </>
@@ -60,12 +112,16 @@ export const PIPPMain: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
  * [Component] 개인정보 처리방침 생성 페이지
  */
 export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, progress, status }: any): JSX.Element => {
+  // 현재 회사 및 서비스 조회
+  const company = useRecoilValue(companySelector);
+  const service = useRecoilValue(companySelector);
+
   // 데이터 불러오기에 대한 상태
   const [loading, setLoading] = useState<boolean>(true);
   // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
-  const { isLoading: isLoadingForData, data: loadData } = useQuery(SERVICE_PIPP, async () => await getPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading: isLoadingForData, data: loadData } = useQuery(SERVICE_PIPP, async () => await getPIPPData(service.id));
   // 테이블 데이터 쿼리 (API 호출)
-  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getListForPIM('b7dc6570-4be9-4710-85c1-4c3788fcbd12', type as PIMType) })));
+  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getDatasByTableType(service.id, type) })));
   // 로딩 데이터 Hook
   useEffect(() => setLoading(isLoadingForData || results.some((result: any): boolean => result.isLoading)), [isLoadingForData, results]);
   // 임시 저장 데이터가 있을 경우, 데이터 갱신
@@ -103,12 +159,12 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
   const [visible, setVisible] = useState<boolean>(false);
   const [visible2, setVisible2] = useState<boolean>(false);
   // 처리방침 생성 과정에서 사용될 데이터 구조
-  const [data, setData] = useState<any>(defaultPIPPData);
+  const [data, setData] = useState<any>({ ...defaultPIPPData, dInfo: { ...defaultPIPPData.dInfo, manager: { ...defaultPIPPData.dInfo.manager, charger: { name: company.manager.name, position: company.manager.position, contact: company.manager.email } } } });
   // 생성된 URL
   const [url, setUrl] = useState<string>('');
 
   // 요청으로 응답된 데이터 가공 및 처리
-  if (results.every((result: any): boolean => !result.isLoading)) {
+  if (!loading) {
     if (!initQuery) {
       setInitQuery(true);
       // 가공을 위한 임시 데이터 셋 정의
@@ -118,8 +174,10 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
       SERVICE_LIST.forEach((type: string, index: number): any => {
         tempRef[type] = results[index].isSuccess ? results[index].data ? results[index].data : [] : [];
         // URL filter
-        if ((type === SERVICE_PI || type === SERVICE_PPI || type === SERVICE_CPI || type === SERVICE_FNI || type === SERVICE_CFNI || type === SERVICE_PFNI) && tempRef[type].length > 0) {
-          if (type in tempData) {
+        if ((type === SERVICE_PPI || type === SERVICE_CPI || type === SERVICE_FNI || type === SERVICE_CFNI || type === SERVICE_PFNI) && tempRef[type].length > 0) {
+          if (type === SERVICE_PFNI || type === SERVICE_CFNI) {
+            tempData.fni.usage = true;
+          } else {
             tempData[type].usage = true;
           }
           // Extract a url
@@ -144,6 +202,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
       setRef(tempRef);
       // 상태 데이터 갱신
       setData({ ...data, dInfo: { ...tempData } });
+      console.log(tempRef.cpi);
     }
   }
 
@@ -199,13 +258,13 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
         } else if (dInfo.ppi.usage === undefined) {
           warningNotification('제3자 제공 여부를 선택해주세요.');
           onFocus('input', 3);
-        } else if (dInfo.ppi.usage && ref.ppi.length === 0) {
+        } else if (dInfo.ppi.usage && (dInfo.ppi.url === undefined && ref.ppi.length === 0)) {
           warningNotification('개인정보 제공에 대한 정보를 입력해주세요.');
           onFocus('input', 3);
         } else if (dInfo.cpi.usage === undefined) {
           warningNotification('위탁 여부를 선택해주세요.');
           onFocus('input', 4);
-        } else if (dInfo.cpi.usage && ref.cpi.length === 0) {
+        } else if (dInfo.cpi.usage && (dInfo.cpi.url === undefined && ref.cpi.length === 0)) {
           warningNotification('개인정보 위탁에 대한 정보를 입력해주세요.');
           onFocus('input', 4);
         } else if (dInfo.destructionUnused.type === undefined) {
@@ -227,7 +286,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
           warningNotification('가명정보 처리에 대한 정보를 입력해주세요.');
           onFocus('input', 7);
         } else if (blankCheck(dInfo.manager.charger.name) || blankCheck(dInfo.manager.charger.position)) {
-          warningNotification('개인정보보호 책임자에 대한 정보를 입력해주세요.');
+          warningNotification('개인정보 보호책임자에 대한 정보를 입력해주세요.');
           onFocus('input', 8);
         } else if (blankCheck(dInfo.manager.request.department) || blankCheck(dInfo.manager.request.charger) || blankCheck(dInfo.manager.request.contact)) {
           warningNotification('개인정보 열람 청구 부서에 대한 정보를 입력해주세요.');
@@ -257,7 +316,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
     // 처리 상태 정의
     const apiStatus: string = status === 'none' ? 'create' : temp ? 'update' : 'publish';
     // API 호출
-    const response = await setPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', data, apiStatus, apiStatus ? document.getElementById('report')?.outerHTML : undefined);
+    const response = await setPIPPData(service.id, data, apiStatus, apiStatus ? document.getElementById('report')?.outerHTML : undefined);
     if (response) {
       const result = await response.json();
       if (result.status === "OK") {
@@ -319,7 +378,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
               <h3 style={{ fontSize: 16, fontWeight: '600', lineHeight: '24px', marginBottom: 16 }}>개인정보 처리방침 작성 완료</h3>
               <Input.Group compact style={{ display: 'flex' }}>
                 <Input value={url} style={{ flex: 1 }} />
-                <Button onClick={() => {navigator.clipboard.writeText(url)}} type='primary'>복사</Button>
+                <Button onClick={() => copyTextToClipboard(url)} type='primary'>복사</Button>
               </Input.Group>
             </div>            
           </Modal>
@@ -454,7 +513,15 @@ const CreatePIPP: React.FC<any> = ({ onChange, data, onFocus, onRefresh, refElem
   );
 }
 
-const blankCheck = (value: string): boolean => {
-  const blankPattern: RegExp = /^\s+|\s+$/g;
-  return value.trim().replace(blankPattern, '') === '';
+/** [Internal Compoent] 테이블 내 Row 제목 */
+const Subject: React.FC<any> = ({ subject, url }): JSX.Element => {
+  return (
+    <a href={url} rel='noreferrer' style={{ color: '#000000D9', fontSize: 14 }} target='_blank'>{subject}</a>
+  );
+}
+/** [Internal Component] 테이블 내 Link */
+const LinkButton: React.FC<any> = ({ url }): JSX.Element => {
+  return (
+    <Button icon={<LinkOutlined style={{ color: '#000000D9', fontSize: 14 }} />} onClick={() => copyTextToClipboard(url)} style={{ backgroundColor: 'transparent', border: 'none' }}></Button>
+  );
 }

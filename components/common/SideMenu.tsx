@@ -8,6 +8,9 @@ import { IoBusinessOutline } from 'react-icons/io5';
 import { DashboardOutlined, DatabaseOutlined, FireOutlined, PartitionOutlined } from '@ant-design/icons';
 import { CheckCircleOutlined, PaperClipOutlined, SolutionOutlined, ToolOutlined } from '@ant-design/icons';
 import { AuditOutlined, HistoryOutlined } from '@ant-design/icons';
+import { useRecoilState } from 'recoil';
+import { activeKeySelector } from '@/models/state';
+import { useCallback } from 'react';
 
 // Styled component (sideMenuToggle)
 const StyledSideMenuToggle = styled.div<MenuOpenStatus>`
@@ -30,7 +33,7 @@ const StyledSideMenuToggle = styled.div<MenuOpenStatus>`
   ${(props: any) => !props.open && css`
     background-color: #0050B3;
     color: #ffffff;
-    right: 32px;
+    right: 34px;
     svg {
       transform: rotate(180deg);
     }
@@ -103,7 +106,9 @@ const SideMenuLayout = styled.div<SideMenuLayoutProps>`
   position: relative;
   width: 100%;
   .ant-menu .ant-menu-item {
-    padding-left: ${(props: any) => props.expand ? '40px !important' : '31.5px !important'};
+    margin-bottom: 2px;
+    margin-top: 2px;
+    padding-left: ${(props: any) => props.expand ? '40px !important' : '35px !important'};
   }
   .ant-menu .ant-menu-item-divider {
     margin: ${(props: any) => props.expand ? '16px 20px 8px 20px' : '16px 16px 8px 16px'};
@@ -116,7 +121,7 @@ const SideMenuLayout = styled.div<SideMenuLayoutProps>`
     font-size: 12px;
     font-weight: 400;
     line-height: 22px;
-    padding-left: ${(props: any) => props.expand ? '40px !important' : '20px'};
+    padding-left: ${(props: any) => props.expand ? '40px !important' : '23px'};
     text-overflow: ellipsis;
     white-space: nowrap;
     ${(props: any) => props.expand && css`
@@ -146,9 +151,11 @@ export const TOVSideMenu: React.FC<TOVSideMenuProps> = ({ expand, onExpand, sele
     ] },
     { label: '활동이력', key: 'group3', type: 'group', children: [
       { label: '결재・승인', key: '/log/sa', icon: (<AuditOutlined />) },
-      { label: '활동 내역', key: '/log/history', icon: (<HistoryOutlined />) }
+      { label: '활동 내역', key: '/log/activity', icon: (<HistoryOutlined />) }
     ] }
   ]
+
+  const onSelect = useCallback((value: any) => Router.push(value.key), []);
 
   // 컴포넌트 반환
   return (
@@ -162,7 +169,7 @@ export const TOVSideMenu: React.FC<TOVSideMenuProps> = ({ expand, onExpand, sele
           <AiOutlineArrowLeft />
         </StyledSideMenuToggle>
       </StyledSideMenuProfile>
-      <Menu mode='inline' items={items} onClick={(value: any): Promise<boolean> => Router.push(value.key)} selectedKeys={[selectedKey]} style={{ borderRight: 'none', paddingTop: 0 }} />
+      <Menu mode='inline' items={items} onClick={onSelect} selectedKeys={[selectedKey]} style={{ borderRight: 'none', paddingTop: 0 }} />
     </SideMenuLayout>
   );
 }

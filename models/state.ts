@@ -11,7 +11,17 @@ const PersonalInfoSelectOptionsAtom = atom<any>({
 const DefaultCPIAtom = atom<any>({
   key: 'DefaultCPIAtom',
   default: infoFromSubjectInCPI
-})
+});
+/** [Atom] 사이드 메뉴 확장 여부 */
+const expandSider = atom<boolean>({
+  key: 'expandSider',
+  default: false
+});
+/** [Atom] 사이드 메뉴 아이템 */
+const activeKey = atom<string>({
+  key: 'activeKey',
+  default: '/'
+});
 
 /** [Selector] Personal information select options selector for reference */
 export const GetPersonalInfoSelectOptionsSelector = selector<any[]>({
@@ -22,4 +32,16 @@ export const GetPersonalInfoSelectOptionsSelector = selector<any[]>({
 export const GetCPIDefaultSelector = selector<any[]>({
   key: 'GetCPIDefaultSelector',
   get: ({ get }) => get(DefaultCPIAtom)
-})
+});
+/** [Selector] 사이드 메뉴 확장 여부 */
+export const expandSiderSelector = selector<boolean>({
+  key: 'expandSiderSelector',
+  get: ({ get }) => get(expandSider),
+  set: ({ set }, newValue) => set(expandSider, newValue)
+});
+/** [Selector] 사이드 메뉴 아이템 */
+export const activeKeySelector = selector<string>({
+  key: 'activeKeySelector',
+  get: ({ get }) => get(activeKey),
+  set: ({ set }, newValue) => set(activeKey, newValue)
+});

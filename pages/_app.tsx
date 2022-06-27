@@ -1,7 +1,8 @@
 import type { AppProps } from 'next/app'
-import React, { useState } from 'react';
-// Component
+import React, { useCallback, useState } from 'react';
 import { RecoilRoot } from 'recoil';
+// Component
+import Head from 'next/head';
 import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
 // Font
 import '../public/fonts/pretendard.css';
@@ -12,7 +13,7 @@ import 'antd/dist/antd.css';
 const GlobalStyle = createGlobalStyle`
   body {
     font-family: Pretendard;
-    box-size: border-box;
+    box-sizing: border-box;
   }
   body * {
     font-family: Pretendard !important;
@@ -56,7 +57,6 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-// const queryClient = new QueryClient();
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -69,13 +69,20 @@ function MyApp({ Component, pageProps }: AppProps) {
   // 사이드 메뉴 확장 상태 (Default: 확장)
   const [expand, setExpand] = useState<boolean>(true);
   /** [Event handler] 메뉴 확장/축소 이벤트 */
-  const onExpand = (): void => setExpand(!expand);
+  const onExpand = useCallback((): void => setExpand(!expand), [expand]);
 
   // 컴포넌트 반환
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
         <RecoilRoot>
+          <Head>
+            <title>Plip</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
+            <meta name='keyword' content='Privacy, privacy, privacy information, documentation, policy' />
+            <meta name='author' content='TOVDATA' />
+            <meta charSet='utf-8' />
+          </Head>
           <GlobalStyle />
           <Component {...pageProps} expand={expand} onExpand={onExpand} />
         </RecoilRoot>

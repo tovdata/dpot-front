@@ -10,6 +10,7 @@ import { copyTextToClipboard } from "utils/utils";
 import { TagSelect } from "../common/Select";
 import { createTableColumnProps, EditableTable, EditableTableForm, TableContentForList, TableContentForTags } from "../common/Table";
 import { consentListHeader } from "./Header";
+import { AiOutlineDelete } from "react-icons/ai";
 
 /**
  * [Component] '정보 입력'에서 수정되는 개인정보 테이블
@@ -181,7 +182,7 @@ const StyledCopyButton = styled.button`
   border: none;
   background-color: transparent;
 `;
-export const ConsentListTable = ({ data }: any): JSX.Element => {
+export const ConsentListTable = ({ data, onRemove }: any): JSX.Element => {
   const headers = consentListHeader;
   const docType: any = {
     'pi': { name: '개인정보', color: 'geekblue' },
@@ -204,14 +205,17 @@ export const ConsentListTable = ({ data }: any): JSX.Element => {
         case 'title':
           return <StyledLinkText href={record.url} target='_blank'>{item}</StyledLinkText>
         case 'url':
-          return <StyledCopyButton onClick={() => copyTextToClipboard(item)} style={{ color: '#000000D9', cursor: 'pointer' }}><LinkOutlined /></StyledCopyButton>
+          return <>
+          <StyledCopyButton onClick={() => copyTextToClipboard(item)} style={{ color: '#000000D9', cursor: 'pointer' }}><LinkOutlined /></StyledCopyButton>
+          <StyledCopyButton onClick={() => onRemove(record.id)} style={{ color: '#000000D9', cursor: 'pointer' }}><AiOutlineDelete /></StyledCopyButton>
+          </>
         default:
           return <>{item}</>
       }
     };
     return column;
   });
-  return <Table
+  return <Table 
     columns={columns}
     dataSource={data}
     pagination={{

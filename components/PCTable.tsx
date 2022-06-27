@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient, QueryClient, UseMutateFunction } from 'react-query';
-// API
-import { getCFNIDatas, getCPIDatas, getFNIDatas, getPFNIDatas, getPIDatas, getPPIDatas, setDataByTableType } from '../models/queries/api';
+import { useRecoilValue } from 'recoil';
 // Component
+import { Button, Tooltip } from 'antd';
 import { ModalToInputURL } from './common/Modal';
 import { EditableExpandTable } from "./common/ExpandTable";
 import { EditableTableForm } from "./common/Table";
 // Data (header)
-import { cfniTableHeader, cpiTableHeader, ecfniTableHeader, ecpiTableHeader, epfniTableHeader, eppiTableHeader, pfniTableHeader, ppiTableHeader } from '../models/static/header';
-import { setQueryData } from '../models/queryState';
-import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_PFNI,SERVICE_PI, SERVICE_PPI } from '../models/queries/type';
-// Type
-import { SelectOptionsByColumn } from '../models/type';
-// Status
-import { Button, Tooltip } from 'antd';
+import { cfniTableHeader, cpiTableHeader, ecfniTableHeader, ecpiTableHeader, epfniTableHeader, eppiTableHeader, pfniTableHeader, ppiTableHeader } from '@/models/static/header';
+import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_PFNI,SERVICE_PI, SERVICE_PPI } from '@/models/queries/type';
+// Icon
 import { LinkOutlined } from '@ant-design/icons';
-import { useRecoilValue } from 'recoil';
-import { GetCPIDefaultSelector } from '../models/state';
+// Type
+import { SelectOptionsByColumn } from '@/models/type';
+// Status
+import { GetCPIDefaultSelector } from '@/models/state';
+import { serviceSelector, userSelector } from '@/models/session';
+// Query
+import { setQueryData } from '@/models/queryState';
+import { getCFNIDatas, getCPIDatas, getFNIDatas, getPFNIDatas, getPIDatas, getPPIDatas, setDataByTableType } from '@/models/queries/api';
 
 /** [Interface] Properties for LinkButton */
 interface LinkButtonProps {
@@ -54,18 +56,23 @@ const onURLSaveHandler = (newUrl: string, url:any, serviceType:string, queryClie
  * [Component] 개인정보 제공 테이블 Form
  */
 export const PPITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
+  // 서비스 정보 가져오기
+  const service = useRecoilValue(serviceSelector);
+  // 사용자 정보 가져오기
+  const user = useRecoilValue(userSelector);
+
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = {
     period: ["제공동의", "구매", "거래종료", "배송 완료", "서비스 해지", "회원 탈퇴", "위탁계약 종료"]
   };
 
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(SERVICE_PPI, async () => await getPPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading, data } = useQuery(SERVICE_PPI, async () => await getPPIDatas(service.id));
   // Get a state (for select options)
-  const { isLoading: piLoading, data: piData } = useQuery(SERVICE_PI, async () => await getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading: piLoading, data: piData } = useQuery(SERVICE_PI, async () => await getPIDatas(service.id));
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_PPI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => setDataByTableType(user, service.id, SERVICE_PPI, val.mode, val.data));
   // Set a URL modal open state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // Set a url value
@@ -73,6 +80,7 @@ export const PPITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
 
   // data로 부터 url 셋팅
   useEffect(() => {
+    console.log(data);
     const _url = data?.filter((item:any) => typeof item.url !== 'undefined');
     if (_url && _url.length > 0) setUrl(_url[0]);
   }, [data]);
@@ -120,18 +128,23 @@ export const PPITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
  * [Component] 가명정보 제공 테이블 Form
  */
 export const PFNITableForm: React.FC<any> = ({ modal, style }: any): JSX.Element => {
+  // 서비스 정보 가져오기
+  const service = useRecoilValue(serviceSelector);
+  // 사용자 정보 가져오기
+  const user = useRecoilValue(userSelector);
+
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = {
     period: ["연구 종료", "계약", "처리 완료", "이용신청"]
   };
 
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(SERVICE_PFNI, async () => await getPFNIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading, data } = useQuery(SERVICE_PFNI, async () => await getPFNIDatas(service.id));
   // Get a state (for select options)
-  const { isLoading: fniLoading, data: fniData } = useQuery(SERVICE_FNI, async () => await getFNIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading: fniLoading, data: fniData } = useQuery(SERVICE_FNI, async () => await getFNIDatas(service.id));
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_PFNI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => setDataByTableType(user, service.id, SERVICE_PFNI, val.mode, val.data));
   // Set a URL modal open state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // Set a url value
@@ -183,14 +196,19 @@ export const PFNITableForm: React.FC<any> = ({ modal, style }: any): JSX.Element
  * [Component] 개인정보 위탁 테이블 Form
  */
 export const CPITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
+  // 서비스 정보 가져오기
+  const service = useRecoilValue(serviceSelector);
+  // 사용자 정보 가져오기
+  const user = useRecoilValue(userSelector);
+
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = {
     subject: ["본인확인", "안심번호 서비스", "결제 및 요금정산", "고객 상담 및 문의", "상품 배송", "클라우드 및 인프라", "알림 발송", "홍보 및 마케팅", "방문 트래픽·로그 분석"],
   };
 
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(SERVICE_CPI, async () => await getCPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
-  const { isLoading: piLoading, data: piData } = useQuery(SERVICE_PI, async () => await getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading, data } = useQuery(SERVICE_CPI, async () => await getCPIDatas(service.id));
+  const { isLoading: piLoading, data: piData } = useQuery(SERVICE_PI, async () => await getPIDatas(service.id));
   // Get a state (for select options)
   const ref: any = {
     [SERVICE_PI]: piLoading ? [] : piData,
@@ -198,7 +216,7 @@ export const CPITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
   }
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_CPI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => setDataByTableType(user, service.id, SERVICE_CPI, val.mode, val.data));
   // Set a URL modal open state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // Set a url value
@@ -253,13 +271,18 @@ export const CPITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
  * [Component] 가명정보 위탁 테이블 Form
  */
 export const CFNITableForm: React.FC<any> = ({ modal, style }: any): JSX.Element => {
+  // 서비스 정보 가져오기
+  const service = useRecoilValue(serviceSelector);
+  // 사용자 정보 가져오기
+  const user = useRecoilValue(userSelector);
+
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(SERVICE_CFNI, async () => await getCFNIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading, data } = useQuery(SERVICE_CFNI, async () => await getCFNIDatas(service.id));
   // Get a state (for select options)
-  const { isLoading: fniLoading, data: fniData } = useQuery(SERVICE_FNI, async () => await getFNIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading: fniLoading, data: fniData } = useQuery(SERVICE_FNI, async () => await getFNIDatas(service.id));
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_CFNI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => setDataByTableType(user, service.id, SERVICE_CFNI, val.mode, val.data));
   // Set a URL modal open state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // Set a url value

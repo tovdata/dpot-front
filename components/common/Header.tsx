@@ -2,55 +2,10 @@ import styled from 'styled-components';
 import { useRouter, NextRouter } from 'next/router';
 // Component
 import { Button, Col, Modal, Row, Steps } from 'antd';
-// import Link from 'next/link';
 // Icon
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { VscChevronLeft } from 'react-icons/vsc';
 
-// // Styled element (HeaderNav)
-// const StyledHeaderNav = styled.div`
-//   align-items: center;
-//   background-color: #ffffff;
-//   box-shadow: inset 0px -1px 0px #f0f0f0;
-//   display: flex;
-//   height: 3.5rem;
-//   justify-content: space-between;
-//   padding: 0 1.875rem;
-//   position: relative;
-//   user-select: none;
-//   width: 100vw;
-//   z-index: 99;
-// `;
-// // Styled element (HeaderLogo)
-// const StyledHeaderLogo = styled.div`
-//   background-color: #C4C4C4;
-//   border-radius: 0.25rem;
-//   height: 1.5rem;
-//   width: 5rem;
-// `;
-// // Styled element (HeaderTool)
-// const StyledHeaderTool = styled.div`
-//   align-items: center;
-//   display: flex;
-//   justify-content: end;
-//   position: relative;
-// `;
-// // Styled element (HeaderToolItem)
-// const StyledHeaderToolItem = styled.span`
-//   align-items: center;
-//   border-right: 1px solid #F0F0F0;
-//   cursor: pointer;
-//   display: flex;
-//   font-size: 12px;
-//   font-weight: 600;
-//   justify-content: center;
-//   line-height: 20px;
-//   padding: 0 24px;
-//   transition: background-color 0.25s;
-//   &:last-child {
-//     border-right: none;
-//   }
-// `;
 // Styled component (pageHeader)
 const StyledPageHeader = styled.div`
   margin-bottom: 2rem;
@@ -109,20 +64,7 @@ export const TOVPageTitle: React.FC<TOVPageTitleProps> = ({ title, style }): JSX
     <h2 style={{ color: '#000000D9', fontSize: 20, fontWeight: '600', lineHeight: '28px', ... style }}>{title}</h2>
   );
 }
-// /** [Component] Main header */
-// export const Header = (): JSX.Element => {
-//   return (
-//     <StyledHeaderNav>
-//       <StyledHeaderLogo />
-//       <StyledHeaderTool>
-//         <StyledHeaderToolItem>사용 가이드</StyledHeaderToolItem>
-//         <StyledHeaderToolItem>
-//           <Link href='/company/info'>회사 관리</Link>
-//         </StyledHeaderToolItem>
-//       </StyledHeaderTool>
-//     </StyledHeaderNav>
-//   )
-// }
+
 /** [Component] Page header contain step */
 export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, onSave, title, steps, canTemporarySave = true }: PageHeaderContainStepProps): JSX.Element => {
   // Get a router

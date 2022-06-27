@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 // Component
 import { EditableTable, EditableTableForm } from './common/Table';
@@ -6,6 +7,7 @@ import { fniTableHeader, piTableHeader } from '../models/static/header';
 // Module
 import { warningNotification } from './common/Notification';
 // State
+import { serviceSelector, userSelector } from '@/models/session';
 import { GetPersonalInfoSelectOptionsSelector } from '../models/state';
 // Type
 import { SelectOptionsByColumn } from '../models/type';
@@ -13,16 +15,21 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { setQueryData } from '../models/queryState';
 import { SERVICE_PI,SERVICE_FNI } from '../models/queries/type';
 import { Button } from 'antd';
-// API
+// Query
 import { getFNIDatas, getPIDatas, setDataByTableType } from '../models/queries/api';
 /**
  * [Component] 가명정보 수집 및 이용 테이블
  */
 export const FNITable: React.FC<any> = (): JSX.Element => {
+  // 서비스 정보 가져오기
+  const service = useRecoilValue(serviceSelector);
+  // 사용자 정보 가져오기
+  const user = useRecoilValue(userSelector);
+
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery(SERVICE_FNI, async () => await getFNIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading, data } = useQuery(SERVICE_FNI, async () => await getFNIDatas(service.id));
   // Get a state (for select options)
-  const { isLoading: piLoading, data: piData } = useQuery(SERVICE_PI, async () => await getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading: piLoading, data: piData } = useQuery(SERVICE_PI, async () => await getPIDatas(service.id));
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = {
     basis: ['과학적 연구', '통계 작성', '공익적 기록 및 보존', '기타']
@@ -30,7 +37,7 @@ export const FNITable: React.FC<any> = (): JSX.Element => {
 
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_FNI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => setDataByTableType(user, service.id, SERVICE_FNI, val.mode, val.data));
 
   // [Event handler] 행(Row) 추가 이벤트
   const onAdd = (record: any): void => setQueryData(queryClient, SERVICE_FNI, mutate, 'create', record);
@@ -68,8 +75,13 @@ export const FNITableForm: React.FC<any> = (): JSX.Element => {
  * [Component] 개인정보 수집 및 이용 테이블
  */
 export const PITable: React.FC<any> = (): JSX.Element => {
+  // 서비스 정보 가져오기
+  const service = useRecoilValue(serviceSelector);
+  // 사용자 정보 가져오기
+  const user = useRecoilValue(userSelector);
+
   // 서버로부터 테이블 데이터 가져오기
-  const { isLoading, data } = useQuery(SERVICE_PI, () => getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading, data } = useQuery(SERVICE_PI, () => getPIDatas(service.id));
   // 셀렉트 옵션 데이터 가져오기 (Using recoil)
   const ref: any = useRecoilValue(GetPersonalInfoSelectOptionsSelector);
   // 기본적인 셀렉트 옵션 데이터 (정적)
@@ -79,7 +91,7 @@ export const PITable: React.FC<any> = (): JSX.Element => {
   };
 
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((val: any) => setDataByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', SERVICE_PI, val.mode, val.data));
+  const { mutate } = useMutation((val: any) => setDataByTableType(user, service.id, SERVICE_PI, val.mode, val.data));
 
   // [Event handler] 행(Row) 추가 이벤트
   const onAdd = (record: any): void => setQueryData(queryClient, SERVICE_PI, mutate, 'create', record);

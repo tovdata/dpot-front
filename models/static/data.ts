@@ -34,7 +34,7 @@ export const defaultPIPPData: any = {
   },
   dInfo: {
     name: '',
-    period: [],
+    period: ['통신비밀보호법 : 웹사이트 방문 기록(3개월)'],
     child: {
       method: [],
       usage: undefined
@@ -132,7 +132,7 @@ export const defaultConsentData: any = {
   checkList: false
 }
 
-export const staticConsentData = [
+export const staticConsentData =(companyName:string)=> [
   {
     name: '개인정보 수집 및 이용',
     information: undefined,
@@ -162,7 +162,7 @@ export const staticConsentData = [
     ],
     document: {
       fixedText: [
-        { text: '"회사명"은(는) "개인정보 보호법"에 따라 아래와 같이 수집하는 개인정보의 항목, 수집 및 이용 목적, 보유 및 이용 기간을 안내드리고 동의를 받고자 합니다.', important: false }
+        { text: `"${companyName}"은(는) "개인정보 보호법"에 따라 아래와 같이 수집하는 개인정보의 항목, 수집 및 이용 목적, 보유 및 이용 기간을 안내드리고 동의를 받고자 합니다.`, important: false }
       ]
     }
   },
@@ -199,7 +199,7 @@ export const staticConsentData = [
     document: {
       title: 'OOO 서비스를 위한 민감정보 수집 및 이용 동의서',
       fixedText: [
-        { text: '"회사명"은(는) 아래와 같이 민감정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.', important: false }
+        { text: `"${companyName}"은(는) 아래와 같이 민감정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.`, important: false }
       ]
     }
   },
@@ -227,7 +227,7 @@ export const staticConsentData = [
     ],
     document: {
       fixedText: [
-        { text: '"회사명"은(는) 아래와 같이 고유식별정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.', important: false }
+        { text: `"${companyName}"은(는) 아래와 같이 고유식별정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.`, important: false }
       ]
     }
   },
@@ -262,8 +262,8 @@ export const staticConsentData = [
     ],
     document: {
       fixedText: [
-        { text: '"회사명"은(는) 아래와 같이 마케팅 및 광고성 정보 수신을 위해 개인정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.', important: false },
-        { text: '"회사명"은(는) 상품이나 서비스의 홍보 또는 판매 권유 등을 위하여 해당 개인정보를 이용하여 정보주체에게 연락할 수 있습니다.', important: true }
+        { text: `"${companyName}"은(는) 아래와 같이 마케팅 및 광고성 정보 수신을 위해 개인정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.`, important: false },
+        { text: `"${companyName}"은(는) 상품이나 서비스의 홍보 또는 판매 권유 등을 위하여 해당 개인정보를 이용하여 정보주체에게 연락할 수 있습니다.`, important: true }
       ]
     }
   },
@@ -290,7 +290,7 @@ export const staticConsentData = [
     ],
     document: {
       fixedText: [
-        { text: '"회사명"은(는) 아래와 같이 개인정보를 제3자에게 제공하는 사항을 안내드리고 동의를 받고자 합니다.', bold: false }
+        { text: `"${companyName}"은(는) 아래와 같이 개인정보를 제3자에게 제공하는 사항을 안내드리고 동의를 받고자 합니다.`, bold: false }
       ]
     }
   },
