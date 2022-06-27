@@ -1,8 +1,7 @@
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 // Component
-import { TOVPageHeader } from '@/components/common/Layout';
-// import { UserInfoSection } from '@/components/User';
+const PLIPPageHeader = dynamic(() => import('@/components/renewer/Layout').then((module: any): any => module.PLIPPageHeader), { ssr: false });
 const PLIPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
 const PLIPUser = dynamic(() => import('@/components/renewer/User'), { ssr: false });
 
@@ -10,7 +9,7 @@ const PLIPUser = dynamic(() => import('@/components/renewer/User'), { ssr: false
 const Company: NextPage = () => {
   return (
     <PLIPSession>
-      <TOVPageHeader />
+      <PLIPPageHeader />
       <PLIPUser style={{ marginBottom: 64, marginTop: 84 }} />
     </PLIPSession>
   );

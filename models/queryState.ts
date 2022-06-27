@@ -34,23 +34,6 @@ export const setQueryData = (queryClient: QueryClient, type: string, mutate: Use
       }
     });
   }
-
-  // 활동 이력 기록을 위한 위치 추출
-  // writeActivityLog('service', mode, type)
-  // // 활동 이력 기록
-  // if (location !== '') {
-  //   switch (mode) {
-  //     case 'add':
-  //       setActivity('service', 'b7dc6570-4be9-4710-85c1-4c3788fcbd12', `OOO가 ${location}를 추가하였습니다.`);
-  //       break;
-  //     case 'delete':
-  //       setActivity('service', 'b7dc6570-4be9-4710-85c1-4c3788fcbd12', `OOO가 ${location}를 삭제하였습니다.`);
-  //       break;
-  //     case 'save':
-  //       setActivity('service', 'b7dc6570-4be9-4710-85c1-4c3788fcbd12', `OOO가 ${location}를 수정하였습니다.`);
-  //       break;
-  //   }
-  // }
 }
 /**
  * [Internal Function] Query Data 업데이트 함수 (Front-end 내에서 처리)

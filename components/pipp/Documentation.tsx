@@ -3,12 +3,12 @@ import styled, { css } from 'styled-components';
 // Component
 import { Col, Divider, Modal, Row, Tooltip } from 'antd';
 // Icon
-import IconPIItem from '../../public/images/piItem.svg';
-import IconPIPurpose from '../../public/images/piPurpose.svg';
-import IconPIPeriod from '../../public/images/period.svg';
-import IconProvision from '../../public/images/provision.svg';
-import IconConsignment from '../../public/images/consignment.svg';
-import IconComplaint from '../../public/images/complaint.svg';
+import IconPIItem from '../../public/images/pipp/pi.svg';
+import IconPIPurpose from '../../public/images/pipp/purpose.svg';
+import IconPIPeriod from '../../public/images/pipp/period.svg';
+import IconProvision from '../../public/images/pipp/provision.svg';
+import IconConsignment from '../../public/images/pipp/consignment.svg';
+import IconComplaint from '../../public/images/pipp/complaint.svg';
 /**
  * 컴포넌트들의 Props 형식
  */

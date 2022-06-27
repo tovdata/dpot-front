@@ -7,10 +7,11 @@ import { Doughnut } from 'react-chartjs-2';
 // Component
 import { Col, Row, Spin, Tag } from 'antd';
 import { TOVLayoutPadding } from '../common/Layout';
+import { PLIPActivityListForDashboard, sortByDatetime } from './Activity';
 // State
 import { companySelector, serviceSelector, userSelector } from '@/models/session';
 // Styled
-import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader } from '../styled/Dashboard';
+import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader, StyledDashboardItemContentForCPO } from '../styled/Dashboard';
 import { StyledTag, StyledTagList } from '../styled/Dashboard';
 import { StyledLatestInfoRow } from '../styled/Dashboard';
 import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader } from '../styled/Dashboard';
@@ -33,7 +34,7 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
       <TOVLayoutPadding>
         <StyledDashboardHeader>
           <h2>{user.name} 님 안녕하세요 😊</h2>
-          <span className='company'>{company.name}</span>
+          <span className='company'>{service.name}</span>
         </StyledDashboardHeader>
         <Row gutter={[24, 24]}>
           <Col span={14}>
@@ -78,11 +79,11 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
 }
 
 /** [Internal Component] 대시보드 아이템 카드  */
-const DashboardItemCard: React.FC<any> = ({ children, loading, style }): JSX.Element => {
+const DashboardItemCard: React.FC<any> = ({ children, cpo, loading }): JSX.Element => {
   return (
     <StyledDashboardItemCard>
       <Spin spinning={loading ? true : false} size='large'>
-        <StyledDashboardItemContent style={style}>
+        <StyledDashboardItemContent>
           {children}
         </StyledDashboardItemContent>
       </Spin>
@@ -102,36 +103,38 @@ const DashboardItemHeader: React.FC<any> = ({ extra, title }): JSX.Element => {
 /** [Internal Component] 개인정보 보호책임자 */
 const ChargerForCompany: React.FC<any> = ({ manager }): JSX.Element => {
   return (
-    <DashboardItemCard>
-      <StyledManagerSection>
-        <StyledManagerSectionHeader>
-          <h4>우리 회사의 개인정보 보호책임자</h4>
-          <span className='icon'>👑</span>
-        </StyledManagerSectionHeader>
-        <Row gutter={16} style={{ marginBottom: 18 }}>
-          <Col span={8}>
-            <StyledDescriptionForm>
-              <label className='subject'>이름</label>
-              <label className='content'>{manager.name}</label>
-            </StyledDescriptionForm>
-          </Col>
-          <Col span={8}>
-            <StyledDescriptionForm>
-              <label className='subject'>직위/직책</label>
-              <label className='content'>{manager.position}</label>
-            </StyledDescriptionForm>
-          </Col>
-        </Row>
-        <Row>
-          <Col span={16}>
-            <StyledDescriptionForm>
-              <label className='subject'>이메일</label>
-              <label className='content'>{manager.email}</label>
-            </StyledDescriptionForm>
-          </Col>
-        </Row>
-      </StyledManagerSection>
-    </DashboardItemCard>
+    <StyledDashboardItemCard>
+      <StyledDashboardItemContentForCPO>
+        <StyledManagerSection>
+          <StyledManagerSectionHeader>
+            <h4>우리 회사의 개인정보 보호책임자</h4>
+            <span className='icon'>👑</span>
+          </StyledManagerSectionHeader>
+          <Row gutter={16} style={{ marginBottom: 18 }}>
+            <Col span={8}>
+              <StyledDescriptionForm>
+                <label className='subject'>이름</label>
+                <label className='content'>{manager.name}</label>
+              </StyledDescriptionForm>
+            </Col>
+            <Col span={8}>
+              <StyledDescriptionForm>
+                <label className='subject'>직위/직책</label>
+                <label className='content'>{manager.position}</label>
+              </StyledDescriptionForm>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={16}>
+              <StyledDescriptionForm>
+                <label className='subject'>이메일</label>
+                <label className='content'>{manager.email}</label>
+              </StyledDescriptionForm>
+            </Col>
+          </Row>
+        </StyledManagerSection>
+      </StyledDashboardItemContentForCPO>
+    </StyledDashboardItemCard>
   );
 }
 /** [Internal Component] 최근 정보 수정일 */
@@ -271,14 +274,17 @@ const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
   );
 }
 /** [Internal Component] 나의 활동 내역 */
-const MyActivieList: React.FC<any> = (userId: string): JSX.Element => {
+const MyActivieList: React.FC<any> = ({ userId }): JSX.Element => {
+  // 사용자 활동 내역 조회
   const { isLoading, data } = useQuery("dashboard-activity", async () => await getUserActivityForWeek(userId));
-  console.log(data);
+  // 데이터 구분 및 정렬
+  const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data]);
 
+  // 컴포넌트 반환
   return (
     <DashboardItemCard loading={isLoading}>
       <DashboardItemHeader extra={<ViewAll href='/log/activity/' />} title='나의 활동 내역' />
-      <div></div>
+      <PLIPActivityListForDashboard data={sorted} />
     </DashboardItemCard>
   );
 }

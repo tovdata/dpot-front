@@ -40,6 +40,22 @@ export const registerUser = async (companyId: string, userId: string, accessLeve
   }
 }
 /**
+ * [API Caller] 회사 정보 조회
+ * @param companyId 회사 ID
+ * @returns 조회 결과
+ */
+export const getCompany = async (companyId: string): Promise<ResponseDF> => {
+  try {
+    // API 호출
+    const response: any = await fetch(`${SERVER_URL}company/${companyId}`);
+    // 데이터 추출 및 반환
+    return await extractData(response);
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return { result: false };
+  }
+}
+/**
  * [API Caller] 회사 생성/수정
  * @param data 회사 데이터
  * @param id 회사 ID
@@ -130,7 +146,7 @@ export const updateService = async (serviceId: string, data: PLIPService): Promi
     // API 호출
     const response: any = await fetch(`${SERVER_URL}service/${serviceId}`, request);
     // 데이터 추출 및 반환
-    return await extractData(response);
+    return await extractData(response, 'update');
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return { result: false };

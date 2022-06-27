@@ -112,14 +112,16 @@ export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
  * [Component] 개인정보 처리방침 생성 페이지
  */
 export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, progress, status }: any): JSX.Element => {
-  // 현재 서비스 조회
+  // 현재 회사 및 서비스 조회
   const company = useRecoilValue(companySelector);
+  const service = useRecoilValue(companySelector);
+
   // 데이터 불러오기에 대한 상태
   const [loading, setLoading] = useState<boolean>(true);
   // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
-  const { isLoading: isLoadingForData, data: loadData } = useQuery(SERVICE_PIPP, async () => await getPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading: isLoadingForData, data: loadData } = useQuery(SERVICE_PIPP, async () => await getPIPPData(service.id));
   // 테이블 데이터 쿼리 (API 호출)
-  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getDatasByTableType('b7dc6570-4be9-4710-85c1-4c3788fcbd12', type) })));
+  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getDatasByTableType(service.id, type) })));
   // 로딩 데이터 Hook
   useEffect(() => setLoading(isLoadingForData || results.some((result: any): boolean => result.isLoading)), [isLoadingForData, results]);
   // 임시 저장 데이터가 있을 경우, 데이터 갱신
@@ -200,6 +202,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
       setRef(tempRef);
       // 상태 데이터 갱신
       setData({ ...data, dInfo: { ...tempData } });
+      console.log(tempRef.cpi);
     }
   }
 
@@ -313,7 +316,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
     // 처리 상태 정의
     const apiStatus: string = status === 'none' ? 'create' : temp ? 'update' : 'publish';
     // API 호출
-    const response = await setPIPPData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', data, apiStatus, apiStatus ? document.getElementById('report')?.outerHTML : undefined);
+    const response = await setPIPPData(service.id, data, apiStatus, apiStatus ? document.getElementById('report')?.outerHTML : undefined);
     if (response) {
       const result = await response.json();
       if (result.status === "OK") {

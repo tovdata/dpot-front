@@ -17,8 +17,8 @@ import { AddEpiDataComponent, ConfirmCheckListComponent, DisadvantageComponent, 
 import { ConfirmPage } from "./consent/Documentation";
 import { ConsentEPITable, ConsentListTable } from "./consent/Table";
 import { copyTextToClipboard, unixTimeToTimeStamp } from "utils/utils";
-import { companySelector, userSelector } from "@/models/session";
-import { useRecoilValueLoadable } from "recoil";
+import { companySelector, serviceSelector, userSelector } from "@/models/session";
+import { useRecoilValue, useRecoilValueLoadable } from "recoil";
 import Router from "next/router";
 // Styled component(Card Container)
 const StyleCardContainer = styled.div`
@@ -73,6 +73,7 @@ const StyledJobSelection = styled.div`
 `;
 
 export const ConsentMain = () => {
+  const service = useRecoilValue(serviceSelector);
   // [수정] 동의서 Type
   // 0, pi : 개인정보 수집 및 이용 동의서
   // 1, si : 민감정보 수집 및 이용 동의서
@@ -87,10 +88,10 @@ export const ConsentMain = () => {
   const company = useRecoilValueLoadable(companySelector);
   const user = useRecoilValueLoadable(userSelector);
   // 생성된 개인정보 처리방침 목록 조회 API
-  const { isLoading: isLoadingForList, data: consentList } = useQuery(SERVICE_CONSENT, async () => await getConsentList('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading: isLoadingForList, data: consentList } = useQuery(SERVICE_CONSENT, async () => await getConsentList(service.id));
   // 서버로부터 개인정보 수집 이용 데이블 데이터 가져오기
-  const { data: PIData } = useQuery(SERVICE_PI, async () => await getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
-  const { data: PPIData } = useQuery(SERVICE_PPI, async () => await getPPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { data: PIData } = useQuery(SERVICE_PI, async () => await getPIDatas(service.id));
+  const { data: PPIData } = useQuery(SERVICE_PPI, async () => await getPPIDatas(service.id));
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
   const saveData = (newData: any) => setData({ ...data, ...newData });
@@ -106,7 +107,7 @@ export const ConsentMain = () => {
       const rData = JSON.parse(JSON.stringify(data));
       rData.type = DOC_TYPE[data.type];
       rData.creater = user.contents.name; // [임시]
-      const response = await setConsentData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', rData, document.getElementById('report')?.outerHTML);
+      const response = await setConsentData(service.id, rData, document.getElementById('report')?.outerHTML);
       queryClient.invalidateQueries(SERVICE_CONSENT);
       const json = await response.json();
       setUrl(json.data.url);
@@ -125,7 +126,7 @@ export const ConsentMain = () => {
       cancelText:'취소',
       onOk: async() => {
         try {
-          await deleteConsentData('b7dc6570-4be9-4710-85c1-4c3788fcbd12', id);
+          await deleteConsentData(service.id, id);
           queryClient.invalidateQueries(SERVICE_CONSENT);
         } catch (e:any) {
           console.log('[Error]:', e);

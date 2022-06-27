@@ -28,10 +28,9 @@ export const getUserActivityForWeek = async (id: string): Promise<any[]> => {
     // 오늘 날짜
     const today = moment(moment().format('YYYY-MM-DD'));
     // 조회 시작 및 마지막 일에 대한 Unix 값 정의
-    const start = today.add(-7, 'days').unix();
-    const end = today.add(1, 'days').unix();
+    const start = today.add(-7, 'day').unix();
     // API 호출
-    const response = await fetch(`${SERVER_URL}activity/user/${id}?start=${start}&end=${end}`);
+    const response = await fetch(`${SERVER_URL}activity/user/${id}?start=${start}`);
     // 데이터 추출
     const result: ResponseDF = await extractData(response);
     // 데이터 반환

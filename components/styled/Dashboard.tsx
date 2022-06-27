@@ -57,6 +57,19 @@ export const StyledDashboardItemContent = styled.div`
   height: 100%;
   padding: 24px 32px;
 `;
+/** [Styled Component] 대시보드 아이템 내용 (For CPO) */
+export const StyledDashboardItemContentForCPO = styled.div`
+  background-image: url(/images/CPO.svg);
+  background-position-y: bottom;
+  background-position-x: right;
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 24px 32px;
+`;
 /** [Styled Component] 대시보드 아이템 내용 */
 export const StyledDashboardItemContentEnd = styled.div`
   display: flex;

@@ -7,9 +7,24 @@ import styled from 'styled-components';
 interface SiderProps {
   scroll: number;
 }
+/** [Interface] Properties for SiderFooter */
+interface SiderFooterProps {
+  expand: boolean;
+}
+/** [Interface] Properties for StyledPageContent */
+interface StyledPageContentProps {
+  expand: boolean;
+  scroll: number;
+}
 
+/** [Styled Component] 페이지 내용 */
+export const StyledPageContent = styled(Layout.Content)<StyledPageContentProps>`
+  background-color: #FFFFFF;
+  margin-left: ${({ expand, scroll }) => scroll >= 64 ? expand ? '246px' : '80px' : undefined};
+  min-height: calc(100vh - 64px);
+`;
 /** [Styled Component] 페이지 사이드 */
-const StyledSider = styled(Layout.Sider)<SiderProps>`
+export const StyledPageSider = styled(Layout.Sider)<SiderProps>`
   background-color: #FFFFFF;
   border-right: 1px solid #F0F0F0;
   height: ${(props: any) => props.scroll < 64 ? `calc(100vh - 64px + ${props.scroll}px)` : '100vh'};
@@ -24,9 +39,49 @@ const StyledSider = styled(Layout.Sider)<SiderProps>`
   // 스크롤 스타일
   &::-webkit-scrollbar { background-color: transparent; width: 6px; }
   &::-webkit-scrollbar-thumb { background-color: transparent; border-radius: 8px; }
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100%;
+    padding-top: 32px;
+    width: 100%;
+  }
+`;
+export const StyledPageSiderFooter = styled.div<SiderFooterProps>`
+  align-items: center;
+  display: ${({ expand }) => expand ? 'flex' : 'none'};
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+  .menu {
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 20px;
+    margin-bottom: 8px;
+    .pipp {
+      border-right: 1px solid #8C8C8C;
+      color: #8C8C8C;
+      font-weight: 700;
+      padding: 0 10px;
+    }
+    .terms {
+      color: #8C8C8C;
+      font-weight: 400;
+      padding: 0 10px;
+    }
+  }
+  .copyright {
+    color: #8C8C8C;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 16px;
+    margin: 0;
+    text-align: center;
+  }
 `;
 /** [Styled Component] 페이지 헤더 */
-const StyledHeader = styled(Layout.Header)`
+export const StyledPageHeader = styled(Layout.Header)`
   background-color: #FFFFFF;
   box-shadow: inset 0px -1px 0px #F0F0F0;
   display: flex;
@@ -36,13 +91,22 @@ const StyledHeader = styled(Layout.Header)`
   padding-left: 40px;
   padding-right: 40px;
   text-decoration: none;
+  .logo {
+    color: #000000;
+    cursor: pointer;
+    margin: 0;
+  }
 `;
 /** [Styled Component] 페이지 헤더 메뉴 */
-const StyledHeaderNav = styled.div`
+export const StyledPageHeaderNav = styled.div`
   user-select: none;
+  .icon {
+    cursor: pointer;
+    font-size: 14px;
+  }
 `;
 /** [Styled Component] 페이지 헤더 메뉴 아이템 */
-const StyledHeaderMenuItem = styled.span`
+export const StyledPageHeaderMenuItem = styled.span`
   border-left: 1px solid #F0F0F0;
   cursor: pointer;
   font-size: 12px;

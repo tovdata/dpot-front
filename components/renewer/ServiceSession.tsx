@@ -4,7 +4,7 @@ import { companySelector, serviceSelector } from '@/models/session';
 import { PLIP403Page } from './Page';
 
 /** [Component] 현재 회사 및 서비스 확인 섹션 */
-const PILPServiceSession: React.FC<any> = ({ children, type }): JSX.Element => {
+const PILPServiceSession: React.FC<any> = ({ children }): JSX.Element => {
   const company = useRecoilValueLoadable(companySelector);
   const service = useRecoilValueLoadable(serviceSelector);
 

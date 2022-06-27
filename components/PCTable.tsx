@@ -80,6 +80,7 @@ export const PPITableForm: React.FC<any> = ({ modal }: any): JSX.Element => {
 
   // data로 부터 url 셋팅
   useEffect(() => {
+    console.log(data);
     const _url = data?.filter((item:any) => typeof item.url !== 'undefined');
     if (_url && _url.length > 0) setUrl(_url[0]);
   }, [data]);

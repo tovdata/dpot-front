@@ -30,7 +30,7 @@ export const PLIPLoadingPage: React.FC<any> = (): JSX.Element => {
 /** [Component] 유효하지 않은 인증 (HTTP code 401)  */
 export const PLIP401Page: React.FC<any> = (): JSX.Element => {
   return (
-    <PLIPPageLayout description='올바르지 않은 접근입니다.' icon={FrownIcon} isBack title='Unauthorized' />
+    <PLIPPageLayout description='올바르지 않은 접근입니다.' icon={FrownIcon} isBack redirectPath='/signin' title='Unauthorized' />
   );
 }
 /** [Component] 권한 없음 (HTTP code 403)  */
@@ -48,7 +48,7 @@ export const PLIP404Page: React.FC<any> = (): JSX.Element => {
 /** [Component] 서비스 준비 중 */
 export const PLIPPreparing: React.FC<any> = (): JSX.Element => {
   return (
-    <PLIPContainerLayout icon={PreparingIcon} title={<>페이지를 찾을 수 없습니다</>} />
+    <PLIPContainerLayout icon={PreparingIcon} title={<>서비스 준비중입니다.<br/>조금만 기다려주세요!</>} />
   );
 }
 

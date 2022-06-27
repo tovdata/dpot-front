@@ -8,6 +8,9 @@ import { IoBusinessOutline } from 'react-icons/io5';
 import { DashboardOutlined, DatabaseOutlined, FireOutlined, PartitionOutlined } from '@ant-design/icons';
 import { CheckCircleOutlined, PaperClipOutlined, SolutionOutlined, ToolOutlined } from '@ant-design/icons';
 import { AuditOutlined, HistoryOutlined } from '@ant-design/icons';
+import { useRecoilState } from 'recoil';
+import { activeKeySelector } from '@/models/state';
+import { useCallback } from 'react';
 
 // Styled component (sideMenuToggle)
 const StyledSideMenuToggle = styled.div<MenuOpenStatus>`
@@ -152,6 +155,8 @@ export const TOVSideMenu: React.FC<TOVSideMenuProps> = ({ expand, onExpand, sele
     ] }
   ]
 
+  const onSelect = useCallback((value: any) => Router.push(value.key), []);
+
   // 컴포넌트 반환
   return (
     <SideMenuLayout expand={expand}>
@@ -164,7 +169,7 @@ export const TOVSideMenu: React.FC<TOVSideMenuProps> = ({ expand, onExpand, sele
           <AiOutlineArrowLeft />
         </StyledSideMenuToggle>
       </StyledSideMenuProfile>
-      <Menu mode='inline' items={items} onClick={(value: any): Promise<boolean> => Router.push(value.key)} selectedKeys={[selectedKey]} style={{ borderRight: 'none', paddingTop: 0 }} />
+      <Menu mode='inline' items={items} onClick={onSelect} selectedKeys={[selectedKey]} style={{ borderRight: 'none', paddingTop: 0 }} />
     </SideMenuLayout>
   );
 }

@@ -1,5 +1,5 @@
 import type { AppProps } from 'next/app'
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { RecoilRoot } from 'recoil';
 // Component
 import Head from 'next/head';
@@ -13,7 +13,7 @@ import 'antd/dist/antd.css';
 const GlobalStyle = createGlobalStyle`
   body {
     font-family: Pretendard;
-    box-size: border-box;
+    box-sizing: border-box;
   }
   body * {
     font-family: Pretendard !important;
@@ -69,7 +69,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   // 사이드 메뉴 확장 상태 (Default: 확장)
   const [expand, setExpand] = useState<boolean>(true);
   /** [Event handler] 메뉴 확장/축소 이벤트 */
-  const onExpand = (): void => setExpand(!expand);
+  const onExpand = useCallback((): void => setExpand(!expand), [expand]);
 
   // 컴포넌트 반환
   return (

@@ -9,10 +9,11 @@ import { errorNotification, successNotification, warningNotification } from '../
 import { StyledFinishButton, StyledResendMailModalContent, StyledSigninContainer, StyledSigninFooter, StyledSigninForm, StyledSigninHeader } from '../styled/Signin';
 import { PLIPInputGroup } from './Input';
 // State
-import { accessTokenSelector, userSelector } from '@/models/session';
+import { accessTokenSelector, companySelector, userSelector } from '@/models/session';
 // Query
 import { getUser, signInProcess } from '@/models/queries/api';
 import { resendAuthMail } from '@/models/queries/apis/signin-up';
+import { getCompany } from '@/models/queries/apis/company';
 
 /** [Component] 로그인 컴포넌트 */
 const PLIPSignin: React.FC<any> = (): JSX.Element => {
@@ -49,6 +50,8 @@ const SigninFooter: React.FC<any> = (): JSX.Element => {
 const SigninForm: React.FC<any> = (): JSX.Element => {
   // Form 객체
   const [form] = Form.useForm();
+  // 회사 정보 Seletor
+  const setCompany = useSetRecoilState(companySelector);
   // 사용자 및 토큰 갱신을 위한 Setter
   const setUser = useSetRecoilState(userSelector);
   const setAccessToken = useSetRecoilState(accessTokenSelector);
@@ -67,8 +70,14 @@ const SigninForm: React.FC<any> = (): JSX.Element => {
       setAccessToken(response.data.AccessToken);
 
       // 회사 등록 여부 확인 및 라우팅
-      const result = await getUser(info.sub);
+      let result = await getUser(info.sub);
       if (result.affiliations && result.affiliations.length > 0) {
+        // 회사 정보 조회 및 저장
+        result = await getCompany(result.affiliations[0].id);
+        // 결과에 따른 처리
+        if (result.result) {
+          setCompany({ id: result.data.id, name: result.data.companyName, manager: result.data.manager });
+        }
         Router.push('/company/services');
       } else {
         Router.push('/company/join');

@@ -84,6 +84,8 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search }): JSX.Element => {
   // 회사 정보 저장을 위한 setter
   const setCompany = useSetRecoilState(companySelector);
 
+  /** [Event handler] 홈으로 이동 */
+  const goHome = useCallback(() => Router.push('/company/services'), []);
   /** [Event handler] 검색 모달 열기 */
   const onClose = useCallback(() => setVisible(false), []);
   /** [Event handler] 회사 선택 */
@@ -95,10 +97,14 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search }): JSX.Element => {
     // 검색 모달 종료
     setVisible(false);
   }, []);
+  const onCreate = useCallback((value: any) => {
+    setCompany(value);
+    goHome();
+  }, []);
   /** [Event handler] Submit */
   const onFinish = useCallback(async () => {
     if (search) {
-      createFinishModal('가입 승인을 요청하였습니다.', '승인이 완료되면, 알려주신 이메일로 연락드릴게요 👍');
+      createFinishModal('가입 승인을 요청하였습니다.', '승인이 완료되면, 알려주신 이메일로 연락드릴게요 👍', goHome);
     } else {
       // 폼 데이터 가져오기
       const formData: any = form.getFieldsValue();
@@ -118,8 +124,7 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search }): JSX.Element => {
         if (await joinCompany(response.data.id, user.id)) {
           // 서비스 생성
           if (await createServiceInCompany(response.data.id, company.companyName)) {
-            setCompany({ id: response.data.id, name: company.companyName, manager: company.manager });
-            return createFinishModal('회사가 생성되었습니다 !', '플립(Plip)과 함께 개인정보를 관리해보아요 :)', '시작하기');
+            return createFinishModal('회사가 생성되었습니다 !', '플립(Plip)과 함께 개인정보를 관리해보아요 :)', () => onCreate({ id: response.data.id, name: company.companyName, manager: company.manager }), '시작하기');
           }
         }
       }
@@ -203,11 +208,11 @@ const SearchCompanyModal: React.FC<any> = ({ onChoice, onClose, visible }): JSX.
  * @param okText 버튼 내용
  * @returns 모달
  */
-const createFinishModal = (title: string, content: string, okText?: string) => Modal.success({
+const createFinishModal = (title: string, content: string, onOk: () => void, okText?: string) => Modal.success({
   centered: true,
   content,
   okText: okText ? okText : '확인',
-  onOk: () => Router.push('/company/services'),
+  onOk: onOk,
   title,
 });
 /**

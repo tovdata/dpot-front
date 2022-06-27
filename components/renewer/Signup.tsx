@@ -1,5 +1,5 @@
 import Router from 'next/router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 // Component
 import { Checkbox, Divider, Form, Input, Modal } from 'antd';
 import Link from 'next/link';
@@ -142,7 +142,7 @@ const SignupForm: React.FC<any> = (): JSX.Element => {
     } else {
       setValidate({ email: '', message: '이메일에 대한 중복 확인을 해주세요.', status: 'warning' });
     }
-  }, [form]);
+  }, [form, validate]);
 
   // 컴포넌트 반환
   return (

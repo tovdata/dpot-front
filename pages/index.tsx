@@ -7,6 +7,7 @@ import Dashboard from '@/components/renewer/Dashboard'
 const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
 // State
 import { accessTokenSelector } from '@/models/session';
+import { PLIPPageLayout } from '@/components/renewer/Layout';
 
 const Page: NextPage = ({ expand, onExpand }: any) => {
   const accessToken = useRecoilValueLoadable(accessTokenSelector);
@@ -14,9 +15,11 @@ const Page: NextPage = ({ expand, onExpand }: any) => {
 
   return (
     <PILPSession>
-      <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/'>
+      <PLIPPageLayout expand={expand} onExpand={onExpand} selectedKey='/'>
         <Dashboard />
-      </TOVPageLayout>
+      </PLIPPageLayout>
+      {/* <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/'> */}
+      {/* </TOVPageLayout> */}
     </PILPSession>
   )
 }

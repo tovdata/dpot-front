@@ -7,6 +7,7 @@ export const StyledAddButton = styled.div`
   border: 1px dashed #D8DFED;
   border-radius: 12px;
   color: #0050B3;
+  cursor: pointer;
   display: flex;
   padding: 56px 60px;
   user-select: none;
@@ -18,7 +19,6 @@ export const StyledAddButton = styled.div`
     margin-right: 26px;
   }
   .name {
-    cursor: pointer;
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
