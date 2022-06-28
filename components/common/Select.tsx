@@ -57,7 +57,7 @@ export const SingleSelect = ({ error, onChange, placeholder, refresh, options, r
   // Set the options for select box
   const selectOptions: SelectOptionFormat[] = options.map((item: string): SelectOptionFormat => { return { label: item, value: item } });
   // Return an element
-  return (<Select style={{ 'width': '90%' }} key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} ref={refElement} status={error ? 'error' : undefined} value={value === '' ? undefined : value} />);
+  return (<Select style={{ width: '100%' }} key={refresh ? refresh.current : undefined} options={selectOptions} onSelect={onChange} placeholder={placeholder} ref={refElement} status={error ? 'error' : undefined} value={value === '' ? undefined : value} />);
 }
 /** 
  * [Component] Addable select
@@ -202,7 +202,7 @@ export const IFTTTSelect = ({ onAdd, options }: IFTTTSelectProps): JSX.Element =
         ) : (
           <>
             <Col span={12}>
-              <InputNumber max={999} min={1} onChange={(value: any) => onChange('digit', value === null ? 1 : value.toString())} value={data.digit} />
+              <InputNumber max={999} min={1} onChange={(value: any) => onChange('digit', value === null ? 1 : value.toString())} value={data.digit} style={{ width: '100%' }} />
             </Col>
             <Col span={12}>
               <SingleSelect onChange={(value: string | string[]) => onChange('unit', value as string)} options={['일', '개월', '년']} placeholder='기간' value={data.unit} />

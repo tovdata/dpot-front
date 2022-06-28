@@ -308,7 +308,7 @@ export const statementForPIPP = (company: string): any => {
       }
     },
     manager: {
-      title: '개인정보보호책임자 및 개인정보 열람청구',
+      title: '개인정보 보호책임자 및 개인정보 열람청구',
       content: {
         common: {
           1: [
@@ -349,7 +349,7 @@ export const statementForPIPP = (company: string): any => {
       content: {
         common: {
           1: [
-            '① 본 방침은 2022년 6월 1일부터 시행됩니다.'
+            '① 본 방침은 '
           ],
           2: [
             '② 이전의 개인정보 처리방침은 아래에서 확인할 수 있습니다.'

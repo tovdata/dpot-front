@@ -153,7 +153,7 @@ export const DIRowHeader: React.FC<DIRowHeaderProps> = ({ description, required,
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row subject */
 export const DIRowSubject: React.FC<DIRowHeaderProps> = ({ description, required, style, title, tools }: DIRowHeaderProps): JSX.Element => {
   // Description style
-  const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 12, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
+  const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 13, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
   // Return an element
   return (
     <div style={{ marginBottom: 8, width: '100%', ...style }}>

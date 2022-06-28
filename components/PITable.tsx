@@ -9,6 +9,8 @@ import { warningNotification } from './common/Notification';
 // State
 import { serviceSelector, userSelector } from '@/models/session';
 import { GetPersonalInfoSelectOptionsSelector } from '../models/state';
+// Static
+import { personalInfoSelectOptions } from '@/models/static/selectOption';
 // Type
 import { SelectOptionsByColumn } from '../models/type';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -86,7 +88,7 @@ export const PITable: React.FC<any> = (): JSX.Element => {
   const ref: any = useRecoilValue(GetPersonalInfoSelectOptionsSelector);
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = {
-    subject: ['회원가입 및 관리', '고객 상담 및 문의', '재화 및 서비스 이용', '요금 결제 및 환불', '상품 배송', '신규 서비스 개발', '홍보 및 마케팅', '인터넷 서비스 이용 과정에서 자동으로 수집되는 정보'],
+    subject: Object.keys(personalInfoSelectOptions),
     period: ["회원 탈퇴", "파기 요청", "동의 철회", "정보 입력"]
   };
 

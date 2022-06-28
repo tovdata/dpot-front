@@ -51,15 +51,15 @@ const CompanyInfoSection: React.FC<any> = ({ company, setCompany }): JSX.Element
   /** [Event handler] 변경한 회사 정보 저장 */
   const onSave = useCallback(() => {
     setCompany({ id: company.id, name: form.getFieldValue('name'), url: form.getFieldValue('url'), manager: { name: form.getFieldValue('manager'), position: form.getFieldValue('position'), email: form.getFieldValue('email') } });
-    successNotification('변경된 회사 정보가 저장되었습니다.');
+    successNotification('변경사항이 저장되었습니다.');
   }, [form]);
 
   // 컴포넌트 반환
   return (
     <Form form={form} labelCol={{ span: 5 }} onFinish={onSave} style={{ marginLeft: 'auto', marginRight: 'auto', width: 360 }}>
-      <PLIPInputGroup label='회사명' required>
+      <PLIPInputGroup label='회사명'>
         <Form.Item name='name' rules={[{ required: true, message: '회사명을 입력해주세요.' }]}>
-          <Input placeholder='회사명' />
+          <Input placeholder='회사명' disabled />
         </Form.Item>
       </PLIPInputGroup>
       {/* <PLIPInputGroup label='회사명(영문)' required>
@@ -72,7 +72,7 @@ const CompanyInfoSection: React.FC<any> = ({ company, setCompany }): JSX.Element
           <Input />
         </Form.Item>
       </PLIPInputGroup>
-      <PLIPInputGroup label='개인정보 보호책임자' required tooltip='개인정보 보호책임자 설명'>
+      <PLIPInputGroup label='개인정보 보호책임자' required tooltip='개인정보 보호 업무를 총괄하거나 업무처리를 최종 결정하는 사람으로, 대표 혹은 임원이어야 합니다. '>
         <Form.Item colon={false} label='직책/직위' labelAlign='left' name='position' required={false} rules={[{ required: true, message: '직책 또는 직위를 입력해주세요.' }]} style={{ marginBottom: 8 }} >
           <Input />
         </Form.Item>
@@ -95,8 +95,6 @@ const OrganizationInfoSection: React.FC<any> = ({ company }): JSX.Element => {
   // 회사에 소속된 사용자 조회
   const { isLoading, data } = useQuery(KEY_USERS, async () => await getUserList(company.id));
 
-  // const [dataSource, setDataSource] = useState<any[]>([{ name: '김토브', department: '정보보안팀', position: '대리', email: 'tov@tovdata.com', contact: '01022223333', createAt: 1654642176, task: '' }]);
-
   // 
   const queryClient = useQueryClient();
   // 폼 객체 생성
@@ -116,7 +114,7 @@ const OrganizationInfoSection: React.FC<any> = ({ company }): JSX.Element => {
   /** [Event handler] 테이블 데이터 변경 저장 */
   const onSetTable = (record: any) => {
     queryClient.invalidateQueries(KEY_USERS);
-    successNotification('저장되었습니다.');
+    successNotification('변경사항이 저장되었습니다.');
     onClose();
   }
 
@@ -131,7 +129,7 @@ const OrganizationInfoSection: React.FC<any> = ({ company }): JSX.Element => {
         { title: '연락처', dataIndex: 'contact', key: 'contact' },
         { title: '가입일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => moment.unix(value / 1000).format('YYYY-MM-DD') },
         { title: '담당업무', dataIndex: 'task', key: 'task' },
-        { title: '', dataIndex: 'edit', key: 'edit', render: (_: any, record: any, index: number): JSX.Element => (<EditButton onOpen={() => onOpen(record)} />) },
+        { title: '', dataIndex: 'edit', key: 'edit', render: (_: any, record: any): JSX.Element => (<EditButton onOpen={() => onOpen(record)} />) },
       ]} loading={isLoading} dataSource={isLoading ? [] : data ? data : []} style={{ marginBottom: 48 }} />
       <StyledInviteForm>
         <p className='content'>아직 가입되어 있지 않은 담당자가 있다면?</p>
@@ -158,37 +156,37 @@ const EditableDrawer: React.FC<any> = ({ form, index, onClose, onSetTable, visib
   return (
     <Drawer closable={false} extra={<DrawerExtra onClick={onClose} />} footer={<DrawerFooter onSave={onSave} />} onClose={onClose} title='조직 구성원 정보 수정하기' visible={visible}>
       <Form form={form}>
-        <PLIPInputGroup label='이름' required>
+        <PLIPInputGroup label='이름'>
           <Form.Item name='userName'>
             <Input disabled />
           </Form.Item>
         </PLIPInputGroup>
-        <PLIPInputGroup label='부서' required>
+        <PLIPInputGroup label='부서'>
           <Form.Item name='department'>
             <Input />
           </Form.Item>
         </PLIPInputGroup>
-        <PLIPInputGroup label='직책' required>
+        <PLIPInputGroup label='직책'>
           <Form.Item name='position'>
             <Input />
           </Form.Item>
         </PLIPInputGroup>
-        <PLIPInputGroup label='이메일' required>
+        <PLIPInputGroup label='이메일'>
           <Form.Item name='email'>
             <Input disabled/>
           </Form.Item>
         </PLIPInputGroup>
-        <PLIPInputGroup label='연락처' required>
+        <PLIPInputGroup label='연락처'>
           <Form.Item name='contact'>
             <Input disabled/>
           </Form.Item>
         </PLIPInputGroup>
-        <PLIPInputGroup label='가입일' required>
+        <PLIPInputGroup label='가입일'>
           <Form.Item name='createAt'>
             <Input disabled/>
           </Form.Item>
         </PLIPInputGroup>
-        <PLIPInputGroup label='담당업무' required>
+        <PLIPInputGroup label='담당업무'>
           <Form.Item name='task'>
             <Input />
           </Form.Item>

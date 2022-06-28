@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { useQuery } from 'react-query';
 import { useRecoilValue } from 'recoil';
 // Component
-import { Col, Row, Tabs, Timeline } from 'antd';
-import { StyledDate, StyledDateForDashboard, StyledEmpty, StyledEmptyForDashboard, StyledList, StyledRow, StyledRowForDashboard, StyledTabSection } from '../styled/Activity';
+import { Col, Tabs, Timeline } from 'antd';
+import { StyledDate, StyledDateForDashboard, StyledEmpty, StyledEmptyForDashboard, StyledList, StyledRow, StyledTabSection, StyledTimelineRow, StyledTimelineRowForDashboard } from '../styled/Activity';
 // Module
 import moment from 'moment';
 // State
@@ -79,10 +79,10 @@ const PLIPActivityList: React.FC<any> = ({ data }): JSX.Element => {
     <Timeline.Item key={date}>
       <StyledDate>{date}</StyledDate>
       {data[date].map((item: any): JSX.Element => (
-        <StyledRow key={item.date} gutter={20}>
+        <StyledTimelineRow key={item.date} gutter={20}>
           <Col className='time'>{moment.unix(item.date / 1000).format('HH:mm')}</Col>
           <Col className='content' flex={1}>{item.content}</Col>
-        </StyledRow>
+        </StyledTimelineRow>
       ))}
     </Timeline.Item>
   ));
@@ -102,15 +102,15 @@ const PLIPActivityList: React.FC<any> = ({ data }): JSX.Element => {
 export const PLIPActivityListForDashboard: React.FC<any> = ({ data }): JSX.Element => {
   // 타임라인 아이템 생성
   const items: JSX.Element[] = Object.keys(data).map((date: string): JSX.Element => (
-    <div key={date}>
+    <StyledRow key={date}>
       <StyledDateForDashboard>{date}</StyledDateForDashboard>
       {data[date].map((item: any): JSX.Element => (
-        <StyledRowForDashboard key={item.date} gutter={20}>
+        <StyledTimelineRowForDashboard key={item.date} gutter={20}>
           <Col className='time'>{moment.unix(item.date / 1000).format('HH:mm')}</Col>
           <Col className='content' flex={1}>{item.content}</Col>
-        </StyledRowForDashboard>
+        </StyledTimelineRowForDashboard>
       ))}
-    </div>
+    </StyledRow>
   ));
 
   // 컴포넌트 반환

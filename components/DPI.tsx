@@ -195,7 +195,7 @@ const InformationFormHeader: React.FC<InformationFormHeaderProps> = ({ edit, onB
           </>
         ) : (
           <>
-            <ReactToPrint trigger={() => (<Button style={{ marginRight: 16 }} type='default'>인쇄</Button>)} content={() => printRef.current} />
+            <ReactToPrint trigger={() => (<Button style={{ marginRight: 16 }} type='default'>확인서 인쇄</Button>)} content={() => printRef.current} />
             <Button onClick={() => onEdit(true)} type='primary'>편집</Button>
           </>
         )}

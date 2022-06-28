@@ -74,7 +74,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
         <Collapse activeKey={data.child.usage ? ['1'] : []} ghost>
           <Collapse.Panel header={<DIRowHeader description='만 14세 미만 아동의 개인정보를 처리하고 있다면 그에 관한 안내를 기재할 것을 권고하고 있습니다. 현재 법정대리인의 동의를 확인하기 위해 사용하는 방법을 아래에서 선택하면, 개인정보보호위원회에서 권장하는 안내 사항과 함께 입력됩니다.' required style={{ marginBottom: 0 }} title='만 14세 미만 아동의 개인정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => { onChange(sectionType, e.target.value, 'child', 'usage'); e.target.value ? onFocus('preview', 2) : undefined }} size='small' value={data.child.usage} />} />} key='1' showArrow={false}>
             <DIRowSubject required title='법정대리인의 동의 확인 방법' />
-            <TreeSelect showArrow={false} treeData={exampleForMethodConsent} treeCheckable={true} onChange={(value: string[]): void => onChange(sectionType, value, 'child', 'method')} onClick={() => onFocus('preview', 2, 'end')} placeholder='예시에서 선택' style={{ width: '100%' }} value={data.child.method} />
+            <TreeSelect showArrow={false} treeData={exampleForMethodConsent} treeCheckable={true} onChange={(value: string[]): void => onChange(sectionType, value, 'child', 'method')} onClick={() => onFocus('preview', 2)} placeholder='예시에서 선택' style={{ width: '100%' }} value={data.child.method} />
           </Collapse.Panel>
         </Collapse>
       </DIRow>
@@ -221,7 +221,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
 export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, prevList, refElements, refTables, stmt }: PreviewSectionProps): JSX.Element => {
   const managerTableData: any[] = [];
   if (!blankCheck(data.dInfo.manager.charger.name) || !blankCheck(data.dInfo.manager.charger.position) || !blankCheck(data.dInfo.manager.charger.contact)) {
-    managerTableData.push({ identity: '개인정보보호책임자', charger: !blankCheck(data.dInfo.manager.charger.name) && !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`, `성명 : ${data.dInfo.manager.charger.name}`] : !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`] : !blankCheck(data.dInfo.manager.charger.name) ? [`성명 : ${data.dInfo.manager.charger.name}`] : [], contact: !blankCheck(data.dInfo.manager.charger.contact) ? data.dInfo.manager.charger.contact : '' });
+    managerTableData.push({ identity: '개인정보 보호책임자', charger: !blankCheck(data.dInfo.manager.charger.name) && !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`, `성명 : ${data.dInfo.manager.charger.name}`] : !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`] : !blankCheck(data.dInfo.manager.charger.name) ? [`성명 : ${data.dInfo.manager.charger.name}`] : [], contact: !blankCheck(data.dInfo.manager.charger.contact) ? data.dInfo.manager.charger.contact : '' });
   }
   if (!blankCheck(data.dInfo.manager.department.name) || !blankCheck(data.dInfo.manager.department.contact)) {
     managerTableData.push({ identity: '개인정보 담당부서', charger: !blankCheck(data.dInfo.manager.department.name) ? [`부서명 : ${data.dInfo.manager.department.name}`] : [], contact: !blankCheck(data.dInfo.manager.department.contact) ? data.dInfo.manager.department.contact : '' });

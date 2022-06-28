@@ -145,11 +145,11 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search }): JSX.Element => {
             {search ? (
               <Input.Search autoComplete='off' onClick={onOpen} onSearch={onOpen} placeholder='회사명 검색' readOnly />
             ) : (
-              <Input />
+              <Input placeholder='주식회사 플립' />
             )}
           </Form.Item>
         </PLIPInputGroup>
-        <PLIPInputGroup label='개인정보 보호책임자' required tooltip='개인정보 보호책임자 설명'>
+        <PLIPInputGroup label='개인정보 보호책임자' required tooltip='개인정보 보호 업무를 총괄하거나 업무처리를 최종 결정하는 사람으로, 대표 혹은 임원이어야 합니다. '>
           <Form.Item colon={false} label='직책/직위' labelAlign='left' name='position' required={false} rules={[{ required: true, message: '직책 또는 직위를 입력해주세요.' }]} style={{ marginBottom: 8 }} >
             <Input disabled={search} />
           </Form.Item>

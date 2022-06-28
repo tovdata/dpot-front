@@ -9,6 +9,12 @@ export const StyledTabSection = styled.div`
   position: relative;
   width: 100%;
 `;
+export const StyledRow = styled.div`
+  margin-bottom: 16px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
 /** [Styled Component] 날짜 */
 export const StyledDate = styled.h5`
   color: #000000D9;
@@ -24,10 +30,6 @@ export const StyledDateForDashboard = styled.h5`
   font-weight: 400;
   line-height: 20px;
   margin-bottom: 4px;
-  margin-top: 16px;
-  &:first-child {
-    margin-top: 0;
-  }
 `;
 /** [Styled Component] 빈 값 */
 export const StyledEmpty = styled.div`
@@ -48,7 +50,7 @@ export const StyledList = styled.div`
   height: 100%;
 `;
 /** [Styled Component] 타임라인 행 */
-export const StyledRow = styled(Row)`
+export const StyledTimelineRow = styled(Row)`
   color: #000000D9;
   font-size: 14px;
   font-weight: 500;
@@ -62,7 +64,7 @@ export const StyledRow = styled(Row)`
   }
 `;
 /** [Styled Component] 타임라인 행 (대시보드) */
-export const StyledRowForDashboard = styled(Row)`
+export const StyledTimelineRowForDashboard = styled(Row)`
   color: #000000D9;
   font-size: 14px;
   font-weight: 500;
