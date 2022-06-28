@@ -11,8 +11,8 @@ import { PLIPInputGroup } from './Input';
 // State
 import { accessTokenSelector, companySelector, userSelector } from '@/models/session';
 // Query
-import { getUser, signInProcess } from '@/models/queries/api';
-import { resendAuthMail } from '@/models/queries/apis/signin-up';
+import { getUser } from '@/models/queries/apis/user';
+import { resendAuthMail, signin } from '@/models/queries/apis/signin-up';
 import { getCompany } from '@/models/queries/apis/company';
 
 /** [Component] 로그인 컴포넌트 */
@@ -59,7 +59,7 @@ const SigninForm: React.FC<any> = (): JSX.Element => {
   /** [Event handler] 로그인 */
   const onSignin = useCallback(async () => {
     // API 호출
-    const response = await signInProcess(form.getFieldValue('email'), form.getFieldValue('password'));
+    const response = await signin(form.getFieldValue('email'), form.getFieldValue('password'));
     // 결과에 따른 처리
     if (response.result) {
       // 토큰에서 사용자 정보 추출
@@ -70,10 +70,10 @@ const SigninForm: React.FC<any> = (): JSX.Element => {
       setAccessToken(response.data.AccessToken);
 
       // 회사 등록 여부 확인 및 라우팅
-      let result = await getUser(info.sub);
-      if (result.affiliations && result.affiliations.length > 0) {
+      let user = await getUser(info.sub);
+      if (user && user.affiliations && user.affiliations.length > 0) {
         // 회사 정보 조회 및 저장
-        result = await getCompany(result.affiliations[0].id);
+        const result: any = await getCompany(user.affiliations[0].id);
         // 결과에 따른 처리
         if (result.result) {
           setCompany({ id: result.data.id, name: result.data.companyName, manager: result.data.manager });

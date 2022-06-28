@@ -129,7 +129,7 @@ const SignupForm: React.FC<any> = (): JSX.Element => {
         // 결과 처리
         if (response.result) {
           // 사용자 약관 동의 내역 저장
-          const result = await addUser(response.data.UserSub, formData.name, { esa1: formData.esa1, esa2: formData.esa2, ssa1: formData.ssa1 });
+          const result = await addUser(response.data.UserSub, { userName: formData.name, email: formData.email, contact: formData.phone }, { esa1: formData.esa1, esa2: formData.esa2, ssa1: formData.ssa1 });
           if (result) {
             createSuccessModal();
           } else {

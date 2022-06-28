@@ -308,11 +308,11 @@ export const addUser = async (id: string, companyId: string, data: any): Promise
  * @param id 사용자 ID
  * @returns 조회 결과
  */
-export const getUser = async (id: string): Promise<any> => {
-  const response = await fetch(`${SERVER_URL}user/${id}`);
-  // 응답 데이터 추출 및 반환
-  return await processResponse(response);
-}
+// export const getUser = async (id: string): Promise<any> => {
+//   const response = await fetch(`${SERVER_URL}user/${id}`);
+//   // 응답 데이터 추출 및 반환
+//   return await processResponse(response);
+// }
 /**
  * [API Caller] 사용자 정보 갱신
  * @param data 사용자 정보
@@ -337,39 +337,39 @@ export const updateUser = async (data: any): Promise<boolean> => {
  * @param name 검색할 값
  * @returns 검색 결과
  */
-export const findCompany = async (name: string): Promise<any[]> => {
-  const response = await fetch(`${SERVER_URL}company/find?name=${encodeURIComponent(name)}`);
-  // 응답 데이터 추출
-  const result = await extractData(response);
-  // 데이터 반환
-  return result.result ? result.data.list : [];
-}
+// export const findCompany = async (name: string): Promise<any[]> => {
+//   const response = await fetch(`${SERVER_URL}company/find?name=${encodeURIComponent(name)}`);
+//   // 응답 데이터 추출
+//   const result = await extractData(response);
+//   // 데이터 반환
+//   return result.result ? result.data.list : [];
+// }
 /**
  * [API Caller] 회사 생성/수정
  * @param data 회사 정보 데이터
  * @param id 회사 ID
  * @returns 응답 결과
  */
-export const setCompany = async (data: any, id?: string): Promise<ResponseDF> => {
-  // API 호출을 위한 URL 정의
-  const url: string = id ? `${SERVER_URL}/${id}` : `${SERVER_URL}company/new`;
-  // API 호출에 필요한 Request 생성
-  const request: RequestDF = {
-    body: JSON.stringify({
-      companyName: data.name,
-      manager: data.manager,
-      url: data.url
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    method: id ? 'PUT' : 'POST'
-  };
-  // API 호출
-  const response = await fetch(url, request);
-  // 응답 데이터 추출 및 반환
-  return await extractData(response);
-}
+// export const setCompany = async (data: any, id?: string): Promise<ResponseDF> => {
+//   // API 호출을 위한 URL 정의
+//   const url: string = id ? `${SERVER_URL}/${id}` : `${SERVER_URL}company/new`;
+//   // API 호출에 필요한 Request 생성
+//   const request: RequestDF = {
+//     body: JSON.stringify({
+//       companyName: data.name,
+//       manager: data.manager,
+//       url: data.url
+//     }),
+//     headers: {
+//       'Content-Type': 'application/json'
+//     },
+//     method: id ? 'PUT' : 'POST'
+//   };
+//   // API 호출
+//   const response = await fetch(url, request);
+//   // 응답 데이터 추출 및 반환
+//   return await extractData(response);
+// }
 
 export const setConsentData = async (serviceId: string, data: any, html?: string): Promise<any> => {
   // 초기 저장인지 아닌지를 확인하여 API 호출을 위한 URL 정의

@@ -4,48 +4,58 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 // Component
 import { StyledPageBackground, StyledPageLayout } from '@/components/styled/JoinCompany';
 import { StyledAddButton, StyledServiceCard } from '../styled/ChoiceService';
-import { PLIP401Page, PLIP403Page } from './Page';
+import { PLIP401Page, PLIP403Page, PLIPAwaitingApprovalPage } from './Page';
 // Icon
 import { IoAddOutline, IoBusinessSharp, IoDesktopOutline, IoPhonePortraitOutline, IoSettingsOutline } from 'react-icons/io5';
 import { Button, Checkbox, Col, Form, Input, Modal, Row } from 'antd';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PLIPInputGroup } from './Input';
 // State
-import { companySelector, serviceSelector, userSelector } from '@/models/session';
+import { serviceSelector, userSelector } from '@/models/session';
 import { createService, getServiceList, updateService } from '@/models/queries/apis/company';
 import { errorNotification, successNotification } from '../common/Notification';
 // Query key
-const KEY_SERVICES = "plip-services"
+import { KEY_SERVICES, KEY_USER } from '@/models/queries/type';
+import { getUser } from '@/models/queries/apis/user';
 
 const ChoiceService: React.FC<any> = (): JSX.Element => {
-  // 회사 정보 조회
-  const company = useRecoilValue(companySelector);
-  // 사용자 정보 조회
-  const user = useRecoilValue(userSelector);
+  // 세션 내 사용자 정보 조회
+  const sessionUser = useRecoilValue(userSelector);
+  // 사용자 정보 조회 (API)
+  const { isLoading, data: user } = useQuery(KEY_USER, async () => await getUser(sessionUser.id));
+  // 표시될 컴포넌트
+  const [component, setComponent] = useState<JSX.Element>(<></>);
+
+  // 회사 소속 여부 확인
+  useEffect(() => {
+    if (user) {
+      if (user.affiliations === undefined || (user.affiliations && user.affiliations.length === 0)) {
+        setComponent(<PLIP403Page redirectPath='/company/join' />);
+      } else if (user.affiliations[0].accessLevel === 0) {
+        setComponent(<PLIPAwaitingApprovalPage />);
+      } else {
+        setComponent(
+          <StyledPageBackground>
+            <StyledPageLayout>
+              <h2 className='title'>{user.userName} 님 안녕하세요 😊</h2>
+              <ServiceCardList companyId={user.affiliations[0].id} />
+            </StyledPageLayout>
+          </StyledPageBackground>
+        );
+      }
+    } else {
+      setComponent(<PLIP401Page />);
+    }
+  }, [isLoading]);
 
   // 컴포넌트 반환
-  return (
-    <>
-      {user.id === '' ? (
-        <PLIP401Page />
-      ) : company.id === '' ? (
-        <PLIP403Page />
-      ) : (
-        <StyledPageBackground>
-          <StyledPageLayout>
-            <h2 className='title'>{user.name} 님 안녕하세요 😊</h2>
-            <ServiceCardList companyId={company.id} />
-          </StyledPageLayout>
-        </StyledPageBackground>
-      )}
-    </>
-  );
+  return (component);
 }
 
 /** [Internal Component] 서비스 카드 목록 */
 const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
   // 서비스 목록 조회
-  const { isLoading, data } = useQuery(KEY_SERVICES, async () => await getServiceList(companyId));
+  const { isLoading, data: services } = useQuery(KEY_SERVICES, async () => await getServiceList(companyId));
   // Query client
   const queryClient = useQueryClient();
 
@@ -106,11 +116,9 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
   return (
     <>
       <Row gutter={[20, 20]}>
-        {isLoading ? (
+        {isLoading || services === undefined ? (
           <></>
-        ) : data === undefined ? (
-          <></>
-        ) : data.map((service: any): JSX.Element => (
+        ) : services.map((service: any): JSX.Element => (
           <ServiceCard key={service.id} onEditService={onEditService} service={service} />
         ))}
         <AddButton onOpen={onOpen} />

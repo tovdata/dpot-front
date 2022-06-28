@@ -6,7 +6,11 @@ import { StyledContainer, StyledFullScreen } from '../styled/Page';
 import { FrownTwoTone, LoadingOutlined, WarningTwoTone } from '@ant-design/icons';
 import { useCallback } from 'react';
 
-/** [Interface] Properties for PLIPPageLayout */
+/** [Interface] Properties for PLIPPage */
+interface PLIPPageProps {
+  redirectPath?: string;
+}
+/** [Interface] Properties for PLIPContainerLayout */
 interface PLIPContainerLayout {
   description?: React.ReactNode;
   icon: JSX.Element;
@@ -28,19 +32,19 @@ export const PLIPLoadingPage: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Component] 유효하지 않은 인증 (HTTP code 401)  */
-export const PLIP401Page: React.FC<any> = (): JSX.Element => {
+export const PLIP401Page: React.FC<PLIPPageProps> = ({ redirectPath }): JSX.Element => {
   return (
-    <PLIPPageLayout description='올바르지 않은 접근입니다.' icon={FrownIcon} isBack redirectPath='/signin' title='Unauthorized' />
+    <PLIPPageLayout description='올바르지 않은 접근입니다.' icon={FrownIcon} isBack redirectPath={ redirectPath ? redirectPath : '/signin'} title='Unauthorized' />
   );
 }
 /** [Component] 권한 없음 (HTTP code 403)  */
-export const PLIP403Page: React.FC<any> = (): JSX.Element => {
+export const PLIP403Page: React.FC<PLIPPageProps> = ({ redirectPath }): JSX.Element => {
   return (
-    <PLIPPageLayout description='해당 페이지에 대한 권한이 없습니다.' icon={FrownIcon} isBack redirectPath='/company/services' title='Forbidden' />
+    <PLIPPageLayout description='해당 페이지에 대한 권한이 없습니다.' icon={FrownIcon} isBack redirectPath={ redirectPath ? redirectPath : '/company/services'} title='Forbidden' />
   );
 }
 /** [Component] 페이지 없음 (HTTP code 404) */
-export const PLIP404Page: React.FC<any> = (): JSX.Element => {
+export const PLIP404Page: React.FC<PLIPPageProps> = (): JSX.Element => {
   return (
     <PLIPPageLayout description={<>주소가 잘못되었거나 더 이상 제공되지 않는 페이지 입니다.</>} icon={NotFoundIcon} isBack title={<>페이지를 찾을 수 없습니다</>} />
   );
