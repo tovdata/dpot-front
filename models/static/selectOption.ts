@@ -284,7 +284,7 @@ export const additionalInfoOptions: any = {
   },
   webLog: {
     purpose: ["이용자의 서비스 이용 통계 분석을 통한 서비스 개선", "맞춤형 서비스 및 혜택 제공", "맞춤형 광고 제공"],
-    method: ["[Google Analytics] https://tools.google.com/dlpage/gaoptout", "[Firebase Analytics] https://tools.google.com/dlpage/gaoptout", "[Clicky] https://clicky.com/optout?optin=1", "[Internet Explorer] 도구 → 인터넷 옵션 → 개인정보 → 설정 → 고급 → '쿠키의 차단' 선택", "[Microsoft Edge] 설정 → 개인정보, 검색 및 서비스 → 추적방지 →'추적방지 엄격' 선택, 'Inprivate를 검색할 때 항상 엄격 추적 방지 사용', '추적 안함 요청보내기' 선택", "[Chrome] 설정 → 개인정보 및 보안 → 쿠키 및 기타 사이 데이터 →'쿠키 차단' 선택", "[Firefox] 우클릭 → 페이지 정보 → 권한 → 쿠키 저장 → '기본 설정 이용' 해제, '차단' 선택", "[안드로이드] 브라우저 설정 → 인터넷 사용 기록/개인정보 및 보안 설정 → '쿠키의 허용' 끔, '타사 쿠키 차단'", "[아이폰] 설정 → 개인정보보호 → 추적 → '앱이 추적을 요청하도록 허용' 끔"],
+    method: ["[Google Analytics] https://tools.google.com/dlpage/gaoptout", "[Firebase Analytics] https://tools.google.com/dlpage/gaoptout", "[Clicky] https://clicky.com/optout?optin=1", "[웹 브라우저] (거부 방법 자동입력)", "[Android] 브라우저 설정 → 인터넷 사용 기록/개인정보 및 보안 설정 → '쿠키의 허용' 끔, '타사 쿠키 차단'", "[iOS] 설정 → 개인정보보호 → 추적 → '앱이 추적을 요청하도록 허용' 끔"],
   },
   advertising: {
     items: ["이용자의 서비스 방문이력", "검색이력", "구매이력", "클릭내역", "광고식별자"],

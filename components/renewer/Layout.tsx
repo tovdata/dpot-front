@@ -59,7 +59,7 @@ export const PLIPPageLayout: React.FC<any> = ({ children, expand, onExpand, sele
       <PLIPPageHeader />
       <Layout hasSider>
         <PLIPPageSider expand={expand} onExpand={onExpand} scroll={scroll} selectedKey={selectedKey} />
-        <StyledPageContent expand={expand} scroll={scroll}>{children}</StyledPageContent>
+        <StyledPageContent expand={expand.toString()} scroll={scroll}>{children}</StyledPageContent>
       </Layout>
     </Layout>
   );
@@ -70,7 +70,7 @@ export const PLIPPageSider: React.FC<any> = ({ expand, onExpand, scroll, selecte
     <StyledPageSider collapsed={!expand} collapsedWidth={88} scroll={scroll} width={246}>
       <div className='container'>
         <TOVSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
-        <StyledPageSiderFooter expand={expand}>
+        <StyledPageSiderFooter expand={expand.toString()}>
           <div className='menu'>
             <a className='pipp'>개인정보처리방침</a>
             <a className='terms'>이용약관</a>

@@ -9,28 +9,28 @@ interface SiderProps {
 }
 /** [Interface] Properties for SiderFooter */
 interface SiderFooterProps {
-  expand: boolean;
+  expand: string;
 }
 /** [Interface] Properties for StyledPageContent */
 interface StyledPageContentProps {
-  expand: boolean;
+  expand: string;
   scroll: number;
 }
 
 /** [Styled Component] 페이지 내용 */
 export const StyledPageContent = styled(Layout.Content)<StyledPageContentProps>`
   background-color: #FFFFFF;
-  margin-left: ${({ expand, scroll }) => scroll >= 64 ? expand ? '246px' : '80px' : undefined};
+  margin-left: ${({ expand, scroll }) => scroll >= 64 ? expand === 'true' ? '246px' : '80px' : 0};
   min-height: calc(100vh - 64px);
 `;
 /** [Styled Component] 페이지 사이드 */
 export const StyledPageSider = styled(Layout.Sider)<SiderProps>`
   background-color: #FFFFFF;
   border-right: 1px solid #F0F0F0;
-  height: ${(props: any) => props.scroll < 64 ? `calc(100vh - 64px + ${props.scroll}px)` : '100vh'};
+  height: ${({ scroll }) => scroll < 64 ? `calc(100vh - 64px + ${scroll}px)` : '100vh'};
   overflow-x: hidden;
   overflow-y: overlay;
-  position: ${(props: any) => props.scroll >= 64 ? 'fixed' : 'relative'};
+  position: ${({ scroll }) => scroll >= 64 ? 'fixed' : 'relative'};
   top: 0;
   // 스크롤 보이기
   &:hover {
@@ -50,7 +50,7 @@ export const StyledPageSider = styled(Layout.Sider)<SiderProps>`
 `;
 export const StyledPageSiderFooter = styled.div<SiderFooterProps>`
   align-items: center;
-  display: ${({ expand }) => expand ? 'flex' : 'none'};
+  display: ${({ expand }) => expand === 'true' ? 'flex' : 'none'};
   flex-direction: column;
   justify-content: space-between;
   padding: 24px;

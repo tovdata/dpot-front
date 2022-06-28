@@ -219,6 +219,12 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
 }
 /** [Component] 개인정보 처리방침 편집을 위한 Preview section */
 export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, prevList, refElements, refTables, stmt }: PreviewSectionProps): JSX.Element => {
+  let webLogMethod: string[] = [...data.aInfo.webLog.method];
+  if (data.aInfo.webLog.method.includes('[웹 브라우저] (거부 방법 자동입력)')) {
+    webLogMethod = data.aInfo.webLog.method.filter((elem: string): boolean => elem !== '[웹 브라우저] (거부 방법 자동입력)');
+    webLogMethod.push('[Internet Explorer] 도구 → 인터넷 옵션 → 개인정보 → 설정 → 고급 → "쿠키의 차단" 선택', '[Microsoft Edge] 설정 → 개인정보, 검색 및 서비스 → 추적방지 → "추적방지 엄격" 선택, "Inprivate를 검색할 때 항상 엄격 추적 방지 사용", "추적 안함 요청보내기" 선택', '[Chrome] 설정 → 개인정보 및 보안 → 쿠키 및 기타 사이 데이터 → "쿠키 차단" 선택', '[Naver whale] 설정 → 개인정보 보호 → 쿠키 및 기타 사이트 데이터 → "타사 쿠키 차단" 선택', '[Firefox] 우클릭 → 페이지 정보 → 권한 → 쿠키 저장 → "기본 설정 이용" 해제, "차단" 선택');
+  }
+
   const managerTableData: any[] = [];
   if (!blankCheck(data.dInfo.manager.charger.name) || !blankCheck(data.dInfo.manager.charger.position) || !blankCheck(data.dInfo.manager.charger.contact)) {
     managerTableData.push({ identity: '개인정보 보호책임자', charger: !blankCheck(data.dInfo.manager.charger.name) && !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`, `성명 : ${data.dInfo.manager.charger.name}`] : !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`] : !blankCheck(data.dInfo.manager.charger.name) ? [`성명 : ${data.dInfo.manager.charger.name}`] : [], contact: !blankCheck(data.dInfo.manager.charger.contact) ? data.dInfo.manager.charger.contact : '' });
@@ -491,12 +497,13 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
           </>
         ) : data.aInfo.webLog.usage ? (
           <>
+            <DDRowContent items={stmt.auto.content.common[1]} style={{ marginBottom: 0 }} />
             <DDRowContent items={stmt.auto.content.webLog[1]} style={{ marginBottom: 0 }} />
             <DDRowContent items={[
               `1) 웹 로그 분석 도구의 사용 목적 : ${data.aInfo.webLog.purpose.join(', ')}`,
               '2) 웹 로그 분석 도구의 거부∙차단 방법 :'
             ]} style={{ marginBottom: 0 }} />
-            <DDRowItemList items={data.aInfo.webLog.method} />
+            <DDRowItemList items={webLogMethod} />
             <DDRowContent items={[
               `3) 거부 시 불이익 : ${data.aInfo.webLog.disadvantage}`
             ]} />
