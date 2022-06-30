@@ -2,6 +2,7 @@
   "name": "practice-nextjs",
   "version": "0.1.0",
   "private": true,
+  "sideEffects": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build && next export",
@@ -9,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@next/bundle-analyzer": "^12.2.0",
     "@types/jsonwebtoken": "^8.5.8",
     "babel-preset-next": "^1.4.0",
     "chart.js": "^3.8.0",

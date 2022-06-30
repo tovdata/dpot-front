@@ -92,8 +92,9 @@ export const getPIItems = async (serviceId: string): Promise<any[]> => {
   const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pi/allitems`);
   // 응답 데이터 추출
   const result = await extractData(response);  
+  console.log(result);
   // 결과 반환
-  return result.result ? result.data.allItems.sort() : [];
+  return result.result ? result.data.allItems ? result.data.allItems.sort() : [] : [];
 }
 /**
  * [API Caller] 개인정보 수집 및 이용 내 필수/선택 항목 데이터 불러오기

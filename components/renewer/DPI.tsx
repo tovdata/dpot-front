@@ -1,13 +1,13 @@
 import { MutableRefObject, useCallback, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
-import { useRecoilValue } from 'recoil';
+import ReactToPrint from 'react-to-print';
 // Component
 import { Button, DatePicker, Descriptions, Input, Popconfirm, Table } from 'antd';
-import ReactToPrint from 'react-to-print';
-import { BasicPageLoading } from '../common/Loading';
 import { warningNotification } from '../common/Notification';
 import { EditableTableForm, TableContentForList, TableContentForTags } from '../common/Table';
 import { AddableTagSelect, TagSelect } from '../common/Select';
+import { StyledDescriptionLabel, StyledInformationFormFooter, StyledInformationFormHeader, StyledPrintLayout } from '../styled/DPI';
+import { PLIPLoadingContainer } from './Page';
 // Icon
 import { PlusOutlined } from '@ant-design/icons';
 import { VscChevronLeft } from 'react-icons/vsc';
@@ -15,11 +15,11 @@ import { VscChevronLeft } from 'react-icons/vsc';
 import { blankCheck } from '../../utils/utils';
 import moment from 'moment';
 // State
-import { Company, companySelector, serviceSelector, User, userSelector } from '@/models/session';
+import { Company, User } from '@/models/session';
 // Query
 import { getDPIDatas, getPIItems, setDataByTableType } from '@/models/queries/api';
+// Query key
 import { SERVICE_DPI } from '@/models/queries/type';
-import { StyledDescriptionLabel, StyledInformationFormFooter, StyledInformationFormHeader, StyledPrintLayout } from '../styled/DPI';
 
 /** [Interface] Properties for DPITable */
 interface DPITableProps {
@@ -152,7 +152,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ company, data,
   return (
     <>
       {isLoading ? (
-        <BasicPageLoading />
+        <PLIPLoadingContainer />
       ) : (
         <>
           <InformationFormHeader edit={edit} onBack={onBack} onEdit={onEdit} onSave={onSave} printRef={printRef} />
@@ -272,7 +272,7 @@ const InformationFormHeader: React.FC<InformationFormHeaderProps> = ({ edit, onB
   return (
     <StyledInformationFormHeader>
       <div className='left'>
-        <span className='back'>
+        <span className='back' onClick={onBack}>
           <VscChevronLeft />
         </span>
         <h2 className='title'>개인정보 파기 정보</h2>

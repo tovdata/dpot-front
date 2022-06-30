@@ -16,7 +16,7 @@ export const StyledContainer = styled.div`
     position: relative;
     text-align: center;
     .icon {
-      margin-bottom: 64px;
+      margin-bottom: 56px;
     }
     .content {
       position: relative;
@@ -58,7 +58,7 @@ export const StyledFullScreen = styled.div`
       position: relative;
     }
     .content {
-      margin-top: 64px;
+      margin-top: 56px;
       position: relative;
       h2 {
         color: #000000;

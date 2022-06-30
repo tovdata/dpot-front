@@ -31,6 +31,12 @@ export const PLIPSimpleLoadingPage: React.FC<any> = (): JSX.Element => {
     <PLIPPageLayout icon={SimpleLoadingIcon} />
   );
 }
+/** [Component] 로딩 컨테이너 */
+export const PLIPLoadingContainer: React.FC<any> = (): JSX.Element => {
+  return (
+    <PLIPContainerLayout description='페이지를 불러오는 중입니다. 잠시만 기다려주세요.' icon={LoadingIcon} title='Loading' />
+  );
+}
 /** [Component] 로딩 페이지 */
 export const PLIPLoadingPage: React.FC<any> = (): JSX.Element => {
   return (
