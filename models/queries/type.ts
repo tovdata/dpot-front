@@ -58,6 +58,7 @@ export interface RequestDF {
  */
 export const createRequest = (method: string, data: any): RequestDF => {
   return {
+    credentials: 'include',
     body: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json'
@@ -102,9 +103,3 @@ export interface PLIPUser {
 }
 /** [Type] 서비스 유형 */
 export type PLIPServiceType = 'default' | 'web' | 'app';
-/** Query key */
-export const KEY_COMPANY = 'plip-company';
-export const KEY_SERVICE = 'plip-service';
-export const KEY_SERVICES = 'plip-services';
-export const KEY_USER = 'plip-user';
-export const KEY_USERS = 'plip-users';

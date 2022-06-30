@@ -2,25 +2,25 @@ import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 import { useRecoilValueLoadable } from 'recoil';
 // Component
-import { TOVPageLayout } from '@/components/common/Layout'
-import Dashboard from '@/components/renewer/Dashboard'
-const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
+import { PLIPPageLayout } from '@/components/renewer/Layout';
+const PLIPDashboard = dynamic(() => import('@/components/renewer/Dashboard'), { ssr: false });
+const PLIPSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PILPServiceSession), { ssr: false });
 // State
 import { accessTokenSelector } from '@/models/session';
-import { PLIPPageLayout } from '@/components/renewer/Layout';
 
 const Page: NextPage = ({ expand, onExpand }: any) => {
   const accessToken = useRecoilValueLoadable(accessTokenSelector);
   console.log(accessToken);
 
   return (
-    <PILPSession>
+    <PLIPSession>
       <PLIPPageLayout expand={expand} onExpand={onExpand} selectedKey='/'>
-        <Dashboard />
+        <PLIPDashboard />
       </PLIPPageLayout>
+      {/* </TOVPageLayout> */}
       {/* <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/'> */}
       {/* </TOVPageLayout> */}
-    </PILPSession>
+    </PLIPSession>
   )
 }
 export default Page;

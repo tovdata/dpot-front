@@ -1,52 +1,55 @@
 import Router from 'next/router';
+import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 // Component
 import { StyledPageBackground, StyledPageLayout } from '@/components/styled/JoinCompany';
 import { StyledAddButton, StyledServiceCard } from '../styled/ChoiceService';
-import { PLIP401Page, PLIP403Page, PLIPAwaitingApprovalPage } from './Page';
+import { PLIP401Page, PLIP403Page, PLIPAwaitingApprovalPage, PLIPSimpleLoadingPage } from './Page';
+import { errorNotification, successNotification } from '../common/Notification';
+import { PLIPInputGroup } from './Input';
 // Icon
 import { IoAddOutline, IoBusinessSharp, IoDesktopOutline, IoPhonePortraitOutline, IoSettingsOutline } from 'react-icons/io5';
-import { Button, Checkbox, Col, Form, Input, Modal, Row } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
-import { PLIPInputGroup } from './Input';
+import { Button, Checkbox, Col, Form, Input, Modal, Popconfirm, Row } from 'antd';
 // State
-import { serviceSelector, userSelector } from '@/models/session';
-import { createService, getServiceList, updateService } from '@/models/queries/apis/company';
-import { errorNotification, successNotification } from '../common/Notification';
-// Query key
-import { KEY_SERVICES, KEY_USER } from '@/models/queries/type';
+import { defaultService, serviceSelector, userSelector } from '@/models/session';
+import { createService, deleteService, getServiceList, updateService } from '@/models/queries/apis/company';
+// Query
 import { getUser } from '@/models/queries/apis/user';
+// Query key
+import { KEY_SERVICES, KEY_USER } from '@/models/queries/key';
 
 const ChoiceService: React.FC<any> = (): JSX.Element => {
-  // 세션 내 사용자 정보 조회
+  // 로컬 스토리지 내 사용자 정보 조회
   const sessionUser = useRecoilValue(userSelector);
   // 사용자 정보 조회 (API)
-  const { isLoading, data: user } = useQuery(KEY_USER, async () => await getUser(sessionUser.id));
+  const { isLoading, data: user } = useQuery([KEY_USER, sessionUser.id], async () => await getUser(sessionUser.id));
   // 표시될 컴포넌트
-  const [component, setComponent] = useState<JSX.Element>(<></>);
+  const [component, setComponent] = useState<JSX.Element>(<PLIPSimpleLoadingPage />);
 
   // 회사 소속 여부 확인
   useEffect(() => {
-    if (user) {
-      if (user.affiliations === undefined || (user.affiliations && user.affiliations.length === 0)) {
-        setComponent(<PLIP403Page redirectPath='/company/join' />);
-      } else if (user.affiliations[0].accessLevel === 0) {
-        setComponent(<PLIPAwaitingApprovalPage />);
+    if (!isLoading) {
+      if (user) {
+        if (user.affiliations === undefined || (user.affiliations && user.affiliations.length === 0)) {
+          setComponent(<PLIP403Page redirectPath='/company/join' />);
+        } else if (user.affiliations[0].accessLevel === 0) {
+          setComponent(<PLIPAwaitingApprovalPage />);
+        } else {
+          setComponent(
+            <StyledPageBackground>
+              <StyledPageLayout>
+                <h2 className='title'>{user.userName} 님 안녕하세요 😊</h2>
+                <ServiceCardList companyId={user.affiliations[0].id} />
+              </StyledPageLayout>
+            </StyledPageBackground>
+          );
+        }
       } else {
-        setComponent(
-          <StyledPageBackground>
-            <StyledPageLayout>
-              <h2 className='title'>{user.userName} 님 안녕하세요 😊</h2>
-              <ServiceCardList companyId={user.affiliations[0].id} />
-            </StyledPageLayout>
-          </StyledPageBackground>
-        );
+        setComponent(<PLIP401Page />);
       }
-    } else {
-      setComponent(<PLIP401Page />);
     }
-  }, [isLoading]);
+  }, [isLoading, user]);
 
   // 컴포넌트 반환
   return (component);
@@ -54,8 +57,10 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
 
 /** [Internal Component] 서비스 카드 목록 */
 const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
+  // 로컬 스토리지 내 서비스 정보
+  const [sessionService, setSessionService] = useRecoilState(serviceSelector);
   // 서비스 목록 조회
-  const { isLoading, data: services } = useQuery(KEY_SERVICES, async () => await getServiceList(companyId));
+  const { isLoading, data: services } = useQuery([KEY_SERVICES, companyId], async () => await getServiceList(companyId));
   // Query client
   const queryClient = useQueryClient();
 
@@ -68,6 +73,23 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
 
   /** [Event handler] 모달 종료 */
   const onClose = useCallback(() => setVisible(false), []);
+  /** [Event handler] 서비스 삭제 */
+  const onDelete = useCallback(async () => {
+    const response = await deleteService(serviceId);
+    if (response) {
+      successNotification('서비스를 삭제하였습니다.');
+      // 로컬 스토리지에 저장된 서비스와 같을 경우, 삭제
+      if (sessionService.id === serviceId) {
+        setSessionService(defaultService);
+      }
+      // 모달 종료
+      setVisible(false);
+      // 쿼리 초기화
+      queryClient.invalidateQueries([KEY_SERVICES, companyId]);
+    } else {
+      errorNotification('서비스를 삭제하는 과정에서 오류가 발생하였습니다.');
+    }
+  }, [companyId, serviceId, queryClient]);
   /** [Event handler] 서비스 수정 */
   const onEditService = useCallback((service: any) => {
     // 서비스 ID 설정
@@ -76,7 +98,7 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
     form.setFieldsValue(service);
     // 모달 열기
     setVisible(true);
-  }, []);
+  }, [form]);
   /** [Event handler] 모달 열기 */
   const onOpen = useCallback(() => {
     // 서비스 ID 초기화
@@ -85,7 +107,7 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
     form.resetFields();
     // 모달 열기
     setVisible(true);
-  }, []);
+  }, [form]);
   /** [Event handler] 서비스 생성 */
   const onSave = useCallback(() => form.validateFields().then(async (values: any): Promise<void> => {
     const isCreate: boolean = serviceId === '' ? true : false;
@@ -95,9 +117,9 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
       // 폼 필드 초기화
       form.resetFields();
       // 모달 종료
-      onClose();
+      setVisible(false);
       // 서비스 목록 갱신
-      queryClient.setQueryData(KEY_SERVICES, (oldData: any) => {
+      queryClient.setQueryData([KEY_SERVICES, companyId], (oldData: any) => {
         if (isCreate) {
           return [...oldData, values];
         } else {
@@ -110,7 +132,7 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
     } else {
       errorNotification(serviceId === '' ? '서비스 생성 과정에서 문제가 발생하였습니다.' : '서비스 변경 과정에서 문제가 발생하였습니다.');
     }
-  }).catch((err: any): void => {}), [form, serviceId]);
+  }).catch((err: any): void => {}), [companyId, form, serviceId]);
 
   // 컴포넌트 반환
   return (
@@ -123,20 +145,20 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
         ))}
         <AddButton onOpen={onOpen} />
       </Row>
-      <EditableModal edit={serviceId === '' ? false : true} form={form} onClose={onClose} onSave={onSave} visible={visible} />
+      <EditableModal edit={serviceId === '' ? false : true} form={form} onClose={onClose} onDelete={onDelete} onSave={onSave} visible={visible} />
     </>
   );
 }
 /** [Internal Component] 서비스 카드 */
 const ServiceCard: React.FC<any> = ({ onEditService, service }): JSX.Element => {
-  // 서비스 설정 Handler
-  const setService = useSetRecoilState(serviceSelector);
+  // 로컬 스토리지 내 서비스 정보
+  const setSessionService = useSetRecoilState(serviceSelector);
   /** [Event handler] 서비스 선택 */
   const onSelect = useCallback(() => {
-    setService({ ...service, name: service.serviceName });
+    setSessionService({ ...service, name: service.serviceName });
     // 이동
     Router.push('/');
-  }, []);
+  }, [service]);
   /** [Event handler] 서비스 수정 */
   const onEdit = useCallback(() => onEditService(service), [service]);
 
@@ -177,7 +199,7 @@ const AddButton: React.FC<any> = ({ onOpen }): JSX.Element => {
   );
 }
 /** [Internal Component] 서비스 추가/편집 모달 */
-const EditableModal: React.FC<any> = ({ edit, form, onClose, onSave, visible }): JSX.Element => {
+const EditableModal: React.FC<any> = ({ edit, form, onClose, onDelete, onSave, visible }): JSX.Element => {
   return (
     <Modal centered footer={<Button onClick={onSave} type='primary'>{edit ? '저장' : '추가'}</Button>} onCancel={onClose} title={edit ? '서비스 편집' : '서비스 추가'} visible={visible} width={400}>
       <Form form={form}>
@@ -200,7 +222,9 @@ const EditableModal: React.FC<any> = ({ edit, form, onClose, onSave, visible }):
           </Form.Item>
         </PLIPInputGroup>
         {edit ? (
-          <Button danger>서비스 삭제</Button>
+          <Popconfirm cancelText='아니오' okText='예' onConfirm={onDelete} title='해당 서비스를 삭제하시겠습니다?'>
+            <Button danger>서비스 삭제</Button>
+          </Popconfirm>
         ) : (<></>)}
       </Form>
     </Modal>

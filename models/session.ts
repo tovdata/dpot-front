@@ -4,13 +4,35 @@ import { refreshSignInProcess } from './queries/api';
 const KEY_COMPANY = 'plip-company';
 const KEY_SERVICE = 'plip-service';
 const KEY_USER = 'plip-user';
+
+/** [Default] 기본 회사 정보 */
+export const defaultCompany: Company = {
+  id: '',
+  companyName: '',
+  manager: { 
+    name: '',
+    position: '',
+    email: ''
+  }
+}
+/** [Default] 기본 서비스 정보 */
+export const defaultService: Service = {
+  id: '',
+  serviceName: ''
+}
+/** [Default] 기본 사용자 정보 */
+export const defaultUser: User = {
+  id: '',
+  userName: ''
+}
+
 /** [Interface] 기본적인 데이터 구조 */
 export interface Session {
   id: string;
-  name: string;
 }
 /** [Interface] 회사 데이터 구조 */
 export interface Company extends Session {
+  companyName: string;
   url?: string;
   manager: PIManager;
 }
@@ -21,9 +43,13 @@ export interface PIManager {
   email: string;
 }
 /** [Interface] 서비스 데이터 구조 */
-export interface Service extends Session {}
+export interface Service extends Session {
+  serviceName: string;
+}
 /** [Interface] 사용자 데이터 구조 */
-export interface User extends Session {}
+export interface User extends Session {
+  userName: string;
+}
 
 /**
  * [Internal Function] 로컬 스토리지에 대한 데이터 동기 (조회/저장)
@@ -57,19 +83,19 @@ const AccessTokenAtom = atom<any>({
 /** [Atom] 회사 정보 */
 const companyAtom = atom<Company>({
   key: 'companyAtom',
-  default: { id: '', name: '', manager: { name: '', position: '', email: '' } },
+  default: defaultCompany,
   effects: [localStorageEffects(KEY_COMPANY)],
 });
 /** [Atom] 서비스 정보 */
 const serviceAtom = atom<Service>({
   key: 'serviceAtom',
-  default: { id: '', name: '' },
+  default: defaultService,
   effects: [localStorageEffects(KEY_SERVICE)],
 });
 /** [Atom] 사용자 정보 */
 const userAtom = atom<User>({
   key: 'userAtom',
-  default: { id: '', name: '' },
+  default: defaultUser,
   effects: [localStorageEffects(KEY_USER)],
 });
 

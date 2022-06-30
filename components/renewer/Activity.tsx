@@ -12,8 +12,7 @@ import { serviceSelector, userSelector } from '@/models/session';
 import { getActivity } from '@/models/queries/api';
 import { BasicPageLoading } from '../common/Loading';
 // Query key
-const KEY_USER_ACTIVITY: string = 'userActivity';
-const KEY_SERVICE_ACTIVITY: string = 'serviceActivity'; 
+import { KEY_SERVICE_ACTIVITY, KEY_USER_ACTIVITY } from '@/models/queries/key';
 
 /** [Component] 활동 내역 메인 컴포넌트 */
 const ActivityMain: React.FC<any> = (): JSX.Element => {
@@ -37,9 +36,9 @@ const ServiceActivity: React.FC<any> = (): JSX.Element => {
   // 서비스 정보 조회
   const service = useRecoilValue(serviceSelector);
   // 서비스 활동 내역 조회
-  const { isLoading, data } = useQuery(KEY_SERVICE_ACTIVITY, async () => await getActivity('service', service.id));
+  const { isLoading, data } = useQuery([KEY_SERVICE_ACTIVITY, service.id], async () => await getActivity('service', service.id));
   // 데이터 구분 및 정렬
-  const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data]);
+  const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data, isLoading]);
 
   // 컴포넌트 반환
   return (
@@ -57,9 +56,9 @@ const UserActivity: React.FC<any> = (): JSX.Element => {
   // 사용자 정보 조회
   const user = useRecoilValue(userSelector);
   // 사용자 활동 내역 조회
-  const { isLoading, data } = useQuery(KEY_USER_ACTIVITY, async () => await getActivity('user', user.id));
+  const { isLoading, data } = useQuery([KEY_USER_ACTIVITY, user.id], async () => await getActivity('user', user.id));
   // 데이터 구분 및 정렬
-  const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data]);
+  const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data, isLoading]);
 
   // 컴포넌트 반환
   return (

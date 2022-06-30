@@ -151,11 +151,10 @@ export const setDataByTableType = async (user: User, serviceId: string, type: st
   const response: Response = await fetch(url, request);
   // 데이터 변환
   const result = await extractData(response, mode);
-  console.log('result', result);
   // 에러 확인 및 로그 작성
   if (result) {
     // 서비스 로그
-    writeActivityLog(mode, type, serviceId, user.name);
+    writeActivityLog(mode, type, serviceId, user.userName);
     // 사용자 로그
     writeActivityLog(mode, type, user.id);
   }

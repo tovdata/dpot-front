@@ -55,9 +55,10 @@ export const StyledFullScreen = styled.div`
     position: relative;
     text-align: center;
     .icon {
-      margin-bottom: 64px;
+      position: relative;
     }
     .content {
+      margin-top: 64px;
       position: relative;
       h2 {
         color: #000000;

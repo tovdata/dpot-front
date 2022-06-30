@@ -92,6 +92,7 @@ export const createService = async (companyId: string, data: PLIPService): Promi
   try {
     // 요청 객체 생성
     const request: RequestDF = createRequest('POST', { companyId, ...data });
+    console.log(request)
     // API 호출
     const response: any = await fetch(`${SERVER_URL}service/new`, request);
     // 데이터 추출 및 반환
@@ -99,6 +100,24 @@ export const createService = async (companyId: string, data: PLIPService): Promi
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return { result: false };
+  }
+}
+/**
+ * [API Caller] 서비스 삭제
+ * @param serviceId 서비스 ID
+ * @returns 요청 결과
+ */
+export const deleteService = async (serviceId: string): Promise<boolean> => {
+  try {
+    // 요청 객체 생성
+    const request: RequestDF = createRequest('DELETE', {});
+    // API 호출
+    const response: any = await fetch(`${SERVER_URL}service/${serviceId}`, request);
+    // 결과 반환
+    return (await extractData(response, 'delete')).result;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return false;
   }
 }
 /**
@@ -136,7 +155,7 @@ export const updateService = async (serviceId: string, data: PLIPService): Promi
     // 파라미터 데이터 가공 (id 속성이 있을 경우 제거)
     if ('id' in copy) delete copy.id;
     // 요청 객체 생성
-    const request: RequestDF = createRequest('PUT', copy);
+    const request: RequestDF = createRequest('PATCH', copy);
     // API 호출
     const response: any = await fetch(`${SERVER_URL}service/${serviceId}`, request);
     // 데이터 추출 및 반환
@@ -146,22 +165,22 @@ export const updateService = async (serviceId: string, data: PLIPService): Promi
     return { result: false };
   }
 }
-/**
- * [Internal API Caller] 서비스를 회사 등록 (서비스 생성 과정에서 자동 호출)
- * @param companyId 회사 ID
- * @param serviceId 서비스 ID
- * @returns 요청 결과
- */
-const registerService = async (companyId: string, serviceId: string): Promise<boolean> => {
-  try {
-    // 요청 객체 생성
-    const request: RequestDF = createRequest('PUT', { serviceId });
-    // API 호출
-    const response: any = await fetch(`${SERVER_URL}company/${companyId}/registration`, request);
-    // 결과 반환
-    return (await extractData(response, 'register')).result;
-  } catch (err) {
-    console.error(`[API ERROR] ${err}`);
-    return false;
-  }
-}
+// /**
+//  * [Internal API Caller] 서비스를 회사 등록 (서비스 생성 과정에서 자동 호출)
+//  * @param companyId 회사 ID
+//  * @param serviceId 서비스 ID
+//  * @returns 요청 결과
+//  */
+// const registerService = async (companyId: string, serviceId: string): Promise<boolean> => {
+//   try {
+//     // 요청 객체 생성
+//     const request: RequestDF = createRequest('PUT', { serviceId });
+//     // API 호출
+//     const response: any = await fetch(`${SERVER_URL}company/${companyId}/registration`, request);
+//     // 결과 반환
+//     return (await extractData(response, 'register')).result;
+//   } catch (err) {
+//     console.error(`[API ERROR] ${err}`);
+//     return false;
+//   }
+// }

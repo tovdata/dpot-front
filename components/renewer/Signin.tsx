@@ -50,10 +50,10 @@ const SigninFooter: React.FC<any> = (): JSX.Element => {
 const SigninForm: React.FC<any> = (): JSX.Element => {
   // Form 객체
   const [form] = Form.useForm();
-  // 회사 정보 Seletor
-  const setCompany = useSetRecoilState(companySelector);
-  // 사용자 및 토큰 갱신을 위한 Setter
-  const setUser = useSetRecoilState(userSelector);
+  // 로컬 스토리지 내에 회사, 사용자 정보 Seletor
+  const setSessionCompany = useSetRecoilState(companySelector);
+  const setSessionUser = useSetRecoilState(userSelector);
+  // 토큰 갱신을 위한 Setter
   const setAccessToken = useSetRecoilState(accessTokenSelector);
 
   /** [Event handler] 로그인 */
@@ -65,7 +65,7 @@ const SigninForm: React.FC<any> = (): JSX.Element => {
       // 토큰에서 사용자 정보 추출
       const info: any = decode(response.data.IdToken);
       // 로컬 저장소에 사용자 설정
-      setUser({ id: info.sub, name: info.name });
+      setSessionUser({ id: info.sub, userName: info.name });
       // 액세스 토큰 저장
       setAccessToken(response.data.AccessToken);
 
@@ -73,12 +73,14 @@ const SigninForm: React.FC<any> = (): JSX.Element => {
       let user = await getUser(info.sub);
       if (user && user.affiliations && user.affiliations.length > 0) {
         // 회사 정보 조회 및 저장
-        const result: any = await getCompany(user.affiliations[0].id);
+        const company: any = await getCompany(user.affiliations[0].id);
         // 결과에 따른 처리
-        if (result.result) {
-          setCompany({ id: result.data.id, name: result.data.companyName, manager: result.data.manager });
+        if (company) {
+          setSessionCompany({ id: company.id, companyName: company.companyName, manager:company.manager });
+          Router.push('/company/services');
+        } else {
+          errorNotification('로그인 과정에서 문제가 발생하였습니다.');
         }
-        Router.push('/company/services');
       } else {
         Router.push('/company/join');
       }

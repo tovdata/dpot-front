@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import { Tabs } from "antd";
 import { TOVLayoutPadding, TOVPageLayout } from '@/components/common/Layout';
 import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from "@/components/PCTable";
-const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
+const PLIPSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PILPServiceSession), { ssr: false });
 // Style
 import styled from "styled-components";
 
@@ -14,7 +14,7 @@ const CustomTabPane = styled(Tabs.TabPane)`
 
 const Page = ({ expand, onExpand }: any) => {
   return (
-    <PILPSession>
+    <PLIPSession>
       <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/pc'>
           <TOVLayoutPadding style={{ paddingTop: 36 }}>
             <Tabs defaultActiveKey="1">
@@ -29,7 +29,7 @@ const Page = ({ expand, onExpand }: any) => {
             </Tabs>
           </TOVLayoutPadding>
         </TOVPageLayout>
-    </PILPSession>
+    </PLIPSession>
   );
 }
 

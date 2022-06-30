@@ -158,7 +158,7 @@ export const catchAPIRequestError = (response: any): boolean => {
     }
     // 에러 메시지 출력 및 결과 반환
     if (stmt) {
-      console.error('[Query Error]', stmt, response.message ? response.message : '');
+      console.error('[Query Error]', stmt, ':', response.message ? response.message : '');
       return true;
     } else {
       return false;

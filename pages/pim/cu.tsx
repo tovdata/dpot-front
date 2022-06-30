@@ -1,15 +1,16 @@
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 // Component
-import { TOVLayoutPadding, TOVPageLayout } from '@/components/common/Layout';
-import { FNITableForm, PITableForm } from '@/components/PITable';
+import { TOVLayoutPadding } from '@/components/common/Layout';
 import { PLIPPageLayout } from '@/components/renewer/Layout';
-const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
+const FNITableForm = dynamic(() => import('@/components/renewer/PI').then((module: any): any => module.FNITableForm), { ssr: false });
+const PITableForm = dynamic(() => import('@/components/renewer/PI').then((module: any): any => module.PITableForm), { ssr: false });
+const PLIPSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PILPServiceSession), { ssr: false });
 
 const Page: NextPage = ({ expand, onExpand }: any) => {
   // 컴포넌트 반환
   return (
-    <PILPSession>
+    <PLIPSession>
       <PLIPPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/cu'>
         <TOVLayoutPadding>
           <PITableForm />
@@ -22,7 +23,7 @@ const Page: NextPage = ({ expand, onExpand }: any) => {
           <FNITableForm />
         </TOVLayoutPadding> */}
       {/* </TOVPageLayout> */}
-    </PILPSession>
+    </PLIPSession>
   )
 }
 

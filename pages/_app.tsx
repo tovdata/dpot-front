@@ -1,9 +1,11 @@
 import type { AppProps } from 'next/app'
+import dynamic from 'next/dynamic';
 import React, { useCallback, useState } from 'react';
 import { RecoilRoot } from 'recoil';
 // Component
 import Head from 'next/head';
 import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
+const PILPUserSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PILPUserSession), { ssr: false });
 // Font
 import '../public/fonts/pretendard.css';
 // Style

@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useQuery } from 'react-query';
+import { useEffect, useMemo } from 'react';
+import { useQuery, useQueryClient } from 'react-query';
 import { useRecoilValue } from 'recoil';
 // Chart
 import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
@@ -18,27 +18,29 @@ import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader
 // Query
 import { getConsentList, getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/api';
 import { getUserActivityForWeek } from '@/models/queries/apis/activity';
+// Query key
+import { KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_CPI, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_PPI } from '@/models/queries/key';
 
 // Set chart
 ChartJS.register(ArcElement, Tooltip);
 
 /** [Component] 대시보드 */
 const Dashboard: React.FC<any> = (): JSX.Element => {
-  // 회사 및 서비스 정보 조회
-  const company = useRecoilValue(companySelector);
-  const service = useRecoilValue(serviceSelector);
-  const user = useRecoilValue(userSelector);
+  // 로컬 스토리지 내 회사 및 서비스 정보 조회
+  const sessionCompany = useRecoilValue(companySelector);
+  const sessionService = useRecoilValue(serviceSelector);
+  const sessionUser = useRecoilValue(userSelector);
   // 컴포넌트 반환
   return (
     <div style={{ backgroundColor: '#F0F5FF', height: '100%' }}>
       <TOVLayoutPadding>
         <StyledDashboardHeader>
-          <h2>{user.name} 님 안녕하세요 😊</h2>
-          <span className='company'>{service.name}</span>
+          <h2>{sessionUser.userName} 님 안녕하세요 😊</h2>
+          <span className='company'>{sessionService.serviceName}</span>
         </StyledDashboardHeader>
         <Row gutter={[24, 24]}>
           <Col span={14}>
-            <ChargerForCompany manager={company.manager} />
+            <ChargerForCompany manager={sessionCompany.manager} />
           </Col>
           <Col span={10}>
             <LastInformation />
@@ -46,13 +48,13 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
           <Col span={14}>
             <Row gutter={[16, 16]}>
               <Col span={8}>
-                <PIItems serviceId={service.id} />
+                <PIItems serviceId={sessionService.id} />
               </Col>
               <Col span={8}>
-                <NumberOfConsignmentCompanies serviceId={service.id} />
+                <NumberOfConsignmentCompanies serviceId={sessionService.id} />
               </Col>
               <Col span={8}>
-                <NumberOfProvisionCompanies serviceId={service.id} />
+                <NumberOfProvisionCompanies serviceId={sessionService.id} />
               </Col>
               <Col span={8}>
                 <DashboardItemCard>
@@ -60,12 +62,12 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
                 </DashboardItemCard>
               </Col>
               <Col span={16}>
-                <ConsentInformaiton serviceId={service.id} />
+                <ConsentInformaiton serviceId={sessionService.id} />
               </Col>
             </Row>
           </Col>
           <Col span={10}>
-            <MyActivieList userId={user.id} />
+            <MyActivieList userId={sessionUser.id} />
           </Col>
           <Col span={24}>
             <DashboardItemCard>
@@ -79,7 +81,7 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
 }
 
 /** [Internal Component] 대시보드 아이템 카드  */
-const DashboardItemCard: React.FC<any> = ({ children, cpo, loading }): JSX.Element => {
+const DashboardItemCard: React.FC<any> = ({ children, loading }): JSX.Element => {
   return (
     <StyledDashboardItemCard>
       <Spin spinning={loading ? true : false} size='large'>
@@ -154,7 +156,7 @@ const LastInformation: React.FC<any> = (): JSX.Element => {
 /** [Internal Component] 개인정보 수집 항목 차트 */
 const PIItems: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 개인정보 수집 항목 조회
-  const { isLoading, data } = useQuery("dashboard-items", async () => await getPIItemsByType(serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_ITEMS, serviceId], async () => await getPIItemsByType(serviceId));
   // Chart data
   const chartData: any = useMemo(() => ({
     labels: ['필수항목', '선택항목'],
@@ -184,7 +186,7 @@ const PIItems: React.FC<any> = ({ serviceId }): JSX.Element => {
 /** [Internal Component] 개인정보 위탁 업체 수 표시 */
 const NumberOfConsignmentCompanies: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 위탁 데이터 조회
-  const { isLoading, data } = useQuery("dashboard-cpi", async () => await getCPIDatas(serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_CPI, serviceId], async () => await getCPIDatas(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -201,7 +203,7 @@ const NumberOfConsignmentCompanies: React.FC<any> = ({ serviceId }): JSX.Element
 /** [Internal Component] 개인정보 제공 업체 수 표시 */
 const NumberOfProvisionCompanies: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 제공 데이터 조회
-  const { isLoading, data } = useQuery("dashboard-ppi", async () => await getPPIDatas(serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_PPI, serviceId], async () => await getPPIDatas(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -230,7 +232,7 @@ const PIPPInfomation: React.FC<any> = (): JSX.Element => {
 /** [Internal Component] 동의서 개수 표시 */
 const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 동의서 목록 조회
-  const { isLoading, data } = useQuery("dashboard-consent", async () => await getConsentList(serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_CONSENT, serviceId], async () => await getConsentList(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.length : 0, [data]);
   // 동의서 유형

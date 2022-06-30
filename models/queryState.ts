@@ -4,12 +4,12 @@ import { setDataSource } from "../utils/table";
 /**
  * [Function] API 요청에 따라 데이터를 업데이트하는 함수
  * @param queryClient QueryClient 객체
- * @param type 데이터 유형 [pi|fni|ppi|pfni|cpi|cfni|dpi]
+ * @param type queryKey
  * @param mutate 데이터 동기화를 위한 Mutation 객체
  * @param mode API 유형[add|create|delete|save|'url/add'|'url/delete'|'url/save']
  * @param record 수정 또는 추가된 데이터
  */
-export const setQueryData = (queryClient: QueryClient, type: string, mutate: UseMutateFunction<any, unknown, any, unknown>, mode: string, record: any) => {
+export const setQueryData = (queryClient: QueryClient, type: any, mutate: UseMutateFunction<any, unknown, any, unknown>, mode: string, record: any) => {
   if (mode === 'create') {
     queryClient.setQueryData(type, (oldData: any) => oldData ? setDataSource([...oldData, record]) : setDataSource([record]));
   } else if (mode === 'delete' && (new RegExp('^npc_').test(record.id))) {

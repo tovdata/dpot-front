@@ -1,26 +1,49 @@
 import Router from 'next/router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRecoilState, useRecoilValueLoadable } from 'recoil';
+import { useRecoilState, useRecoilValueLoadable, useResetRecoilState, useSetRecoilState } from 'recoil';
 // Component
 import Link from 'next/link';
 import { StyledPageContent, StyledPageHeader, StyledPageHeaderMenuItem, StyledPageHeaderNav, StyledPageSider, StyledPageSiderFooter } from '../styled/Layout';
 // State
-import { companySelector, serviceSelector } from '@/models/session';
+import { companySelector, defaultCompany, defaultService, defaultUser, serviceSelector, userSelector } from '@/models/session';
 import { Dropdown, Layout, Menu } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { TOVSideMenu } from '../common/SideMenu';
 import { expandSiderSelector } from '@/models/state';
+import PLIPSideMenu from './SideMenu';
+import { signout } from '@/models/queries/apis/signin-up';
+import { errorNotification, successNotification } from '../common/Notification';
 
 /** [Component] 페이지 레이아웃 (헤더) */
 export const PLIPPageHeader: React.FC<any> = (): JSX.Element => {
-  // 헤더 메뉴 아이템
-  const items: any[] = useMemo(() => [
-    { label: (<Link href='/my'>내 정보</Link>), key: 'info' },
-    { label: (<Link href='/signin'>로그아웃</Link>), key: 'signin' }
-  ], []);
+  // 로컬 스토리지에 저장된 모든 정보
+  const setSessionCompany = useSetRecoilState(companySelector);
+  const setSessionService = useSetRecoilState(serviceSelector);
+  const setSessionUser = useSetRecoilState(userSelector);
 
   /** [Event handler] 회사 관리로 이동 */
   const goManagement = useCallback(() => Router.push('/company/info'), []);
+  /** [Event handler] 로그아웃 */
+  const onSignout = useCallback(async () => {
+    const response = await signout();
+    if (response) {
+      successNotification('로그아웃 되었습니다.');
+      // Local storage 초기화
+      setSessionCompany(defaultCompany);
+      setSessionService(defaultService);
+      setSessionUser(defaultUser);
+      // 로그인 페이지로 이동
+      Router.push('/signin');
+    } else {
+      errorNotification('로그아웃에 실패하였습니다.');
+    }
+  }, []);
+
+  // 헤더 메뉴 아이템
+  const items: any[] = useMemo(() => [
+    { label: (<Link href='/my'>내 정보</Link>), key: 'info' },
+    { label: (<a onClick={onSignout}>로그아웃</a>), key: 'signin' }
+  ], []);
 
   // 컴포넌트 반환
   return (
@@ -69,7 +92,7 @@ export const PLIPPageSider: React.FC<any> = ({ expand, onExpand, scroll, selecte
   return (
     <StyledPageSider collapsed={!expand} collapsedWidth={88} scroll={scroll} width={246}>
       <div className='container'>
-        <TOVSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
+        <PLIPSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} />
         <StyledPageSiderFooter expand={expand.toString()}>
           <div className='menu'>
             <a className='pipp'>개인정보처리방침</a>

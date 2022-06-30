@@ -1,10 +1,12 @@
 
 import dynamic from 'next/dynamic';
-import { useCallback, useState } from 'react';
+import { ComponentType, useCallback, useState } from 'react';
 // Component
-import { TOVLayoutPadding, TOVPageLayout } from '../../components/common/Layout';
 import { DPITableForm, InformationForm } from '../../components/DPI';
-const PILPSession = dynamic(() => import('@/components/renewer/ServiceSession'), { ssr: false });
+// const DPIMain: ComponentType<{}> = dynamic(() => import('@/components/renewer/pages/DPI'), { ssr: false });
+const PLIPPageLayout: ComponentType<{expand: boolean, onExpand: any, selectedKey: string}> = dynamic(() => import('@/components/renewer/Layout').then((module: any): any => module.PLIPPageLayout), { ssr: false });
+const PLIPPagePadding: ComponentType<{}> = dynamic(() => import('@/components/styled/Layout').then((module: any): any => module.PLIPLayoutPadding));
+const PLIPSession: ComponentType<{}> = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PILPServiceSession), { ssr: false });
 // Data
 import { defaultDPIData } from '../../models/static/data';
 
@@ -21,17 +23,17 @@ const Page = ({ expand, onExpand }: any) => {
 
   // 컴포넌트 반환
   return (
-    <PILPSession>
-      <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/dest'>
-        <TOVLayoutPadding>
+    <PLIPSession>
+      <PLIPPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/dest'>
+        <PLIPPagePadding>
           {Object.keys(data).length !== 0 ? (
             <InformationForm data={data} onBack={onBack} />
           ) : (
             <DPITableForm onCreate={onCreate} onEdit={onEdit} />
           )}
-        </TOVLayoutPadding>
-      </TOVPageLayout>
-    </PILPSession>
+        </PLIPPagePadding>
+      </PLIPPageLayout>
+    </PLIPSession>
   )
 }
 

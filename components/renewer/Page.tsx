@@ -16,13 +16,19 @@ interface PLIPContainerLayout {
   icon: JSX.Element;
   isBack?: boolean;
   redirectPath?: string;
-  title: React.ReactNode;
+  title?: React.ReactNode;
 }
 
 /** [Component] 로딩 페이지 */
 export const PLIPAwaitingApprovalPage: React.FC<any> = (): JSX.Element => {
   return (
     <PLIPPageLayout icon={AwaitingApprovalIcon} title={<>회사 관리자의 승인을 기다리고 있어요.<br/>승인이 완료되면 알려주신 이메일로 연락드릴게요 👍</>} />
+  );
+}
+/** [Component] 심플 로딩 페이지 */
+export const PLIPSimpleLoadingPage: React.FC<any> = (): JSX.Element => {
+  return (
+    <PLIPPageLayout icon={SimpleLoadingIcon} />
   );
 }
 /** [Component] 로딩 페이지 */
@@ -85,15 +91,17 @@ const PLIPPageLayout: React.FC<PLIPContainerLayout> = ({ description, icon, isBa
     <StyledFullScreen>
       <div className='section'>
         <div className='icon'>{icon}</div>
-        <div className='content'>
-          <h2>{title}</h2>
-          {description ? (
-            <p>{description}</p>
-          ) : (<></>)}
-          {isBack ? (
-            <Button onClick={onRedirect} type='default'>메인 화면으로</Button>
-          ) : (<></>)}
-        </div>
+        {title || description ? (
+          <div className='content'>
+            <h2>{title}</h2>
+            {description ? (
+              <p>{description}</p>
+            ) : (<></>)}
+            {isBack ? (
+              <Button onClick={onRedirect} type='default'>메인 화면으로</Button>
+            ) : (<></>)}
+          </div>
+        ) : (<></>)}
       </div>
     </StyledFullScreen>
   )
@@ -114,6 +122,10 @@ const NotFoundIcon: JSX.Element = (
 /** [Internal Component] 서비스 준비 중 아이콘 */
 const PreparingIcon: JSX.Element = (
   <img src='/images/service_develop.svg' />
+);
+/** [Internal Component] 로딩 아이콘 */
+const SimpleLoadingIcon: JSX.Element = (
+  <Spin size='large' />
 );
 /** [Internal Component] 로딩 아이콘 */
 const LoadingIcon: JSX.Element = (

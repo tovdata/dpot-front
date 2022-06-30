@@ -71,6 +71,23 @@ export const signin = async (email: string, password: string): Promise<ResponseD
   }
 }
 /**
+ * [API Caller] 로그아웃
+ * @returns 요청 결과
+ */
+export const signout = async (): Promise<boolean> => {
+  try {
+    // 요청 객체 생성
+    const request: RequestDF = createRequest('POST', {});
+    // API 호출
+    const response: any = await fetch(`${SERVER_URL}auth/signout`, request);
+    // 데이터 추출 및 반환
+    return (await extractData(response, 'signout')).result;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return false;
+  }
+}
+/**
  * [API Caller] 회원가입 (For Cognito)
  * @param data 회원가입 데이터
  * @returns 요청 결과
@@ -80,7 +97,7 @@ export const signup = async (data: SignupProps): Promise<ResponseDF> => {
     // 요청 객체 생성
     const request: RequestDF = createRequest('POST', data);
     // API 호출
-    const response = await fetch(`${SERVER_URL}auth/signup`, request);
+    const response: any = await fetch(`${SERVER_URL}auth/signup`, request);
     // 데이터 추출 및 반환
     return await extractData(response);
   } catch (err) {

@@ -14,7 +14,7 @@ import { companySelector } from '@/models/session';
 import { useQuery, useQueryClient } from 'react-query';
 import { getUserList } from '@/models/queries/apis/user';
 // Query key
-const KEY_USERS = 'plip-users';
+import { KEY_USERS } from '@/models/queries/key';
 
 /** [Component] 회사 관리 페이지 */
 const ManageCompany: React.FC<any> = (): JSX.Element => {
@@ -46,7 +46,7 @@ const CompanyInfoSection: React.FC<any> = ({ company, setCompany }): JSX.Element
   // Form 객체 생성
   const [form] = Form.useForm();
   // 탭 변경에 따라 Form 내에 필드 초기화
-  useEffect(() => form.setFieldsValue({ name: company.name, url: company.url, position: company.manager.position, manager: company.manager.name, email: company.manager.email }), []);
+  useEffect(() => form.setFieldsValue({ name: company.companyName, url: company.url, position: company.manager.position, manager: company.manager.name, email: company.manager.email }), [company]);
 
   /** [Event handler] 변경한 회사 정보 저장 */
   const onSave = useCallback(() => {
@@ -95,7 +95,7 @@ const OrganizationInfoSection: React.FC<any> = ({ company }): JSX.Element => {
   // 회사에 소속된 사용자 조회
   const { isLoading, data } = useQuery(KEY_USERS, async () => await getUserList(company.id));
 
-  // 
+  // 쿼리 클라이언트
   const queryClient = useQueryClient();
   // 폼 객체 생성
   const [form] = Form.useForm();
@@ -110,7 +110,7 @@ const OrganizationInfoSection: React.FC<any> = ({ company }): JSX.Element => {
     setVisible(true);
   }, []);
   /** [Event handler] Drawer 닫기 */
-  const onClose = () => setVisible(false);
+  const onClose = useCallback(() => setVisible(false), []);
   /** [Event handler] 테이블 데이터 변경 저장 */
   const onSetTable = (record: any) => {
     queryClient.invalidateQueries(KEY_USERS);

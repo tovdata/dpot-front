@@ -25,7 +25,7 @@ const ManageUser: React.FC<any> = (): JSX.Element => {
 /** [Internal Component] 내 정보 관리 Section */
 const UserInfoSection: React.FC<any> = (): JSX.Element => {
   // 회사 정보 조회
-  const company = useRecoilValue(companySelector);
+  const sessionCompany = useRecoilValue(companySelector);
   // 사용자 정보 상태
   const [user, setUser] = useRecoilState(userSelector);
   // 사용자 조회
@@ -36,7 +36,7 @@ const UserInfoSection: React.FC<any> = (): JSX.Element => {
   // Form 객체 생성
   const [form] = Form.useForm();
   // 회사명 설정
-  useEffect(() => form.setFieldsValue({ ...form, company: company.name }), [company]);
+  useEffect(() => form.setFieldsValue({ ...form, company: sessionCompany.companyName }), [sessionCompany]);
   // 사용자 정보 설정
   useEffect(() => form.setFieldsValue({ name: data ? data.userName : '', contact: data ? data.contact : '' }), [isLoading]);
 
@@ -48,7 +48,7 @@ const UserInfoSection: React.FC<any> = (): JSX.Element => {
   const onSave = useCallback(async () => {
     const response = await updateUser(user.id, { ...data, userName: form.getFieldValue('name'), contact: form.getFieldValue('contact') });
     if (response) {
-      setUser({ id: user.id, name: form.getFieldValue('name') });
+      setUser({ id: user.id, userName: form.getFieldValue('name') });
       successNotification('변경된 사용자 정보가 저장되었습니다.');
     } else {
       errorNotification('사용자 정보 저장에 실패하였습니다.');

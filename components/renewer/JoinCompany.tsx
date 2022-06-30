@@ -18,8 +18,9 @@ import { Company } from '@/models/queries/type';
 
 /** [Component] 초기 회사 참여 (생성 또는 참여) */
 const JoinCompany: React.FC<any> = (): JSX.Element => {
-  // 회사 정보 조회
-  const company = useRecoilValue(companySelector);
+  // 로컬 스토리지 내 회사 정보 조회
+  const sessionCompany = useRecoilValue(companySelector);
+  const sessionUser = useRecoilValue(userSelector);
   // 회사 검색 여부
   const [search, setSearch] = useState<boolean|undefined>(undefined);
   /** [Event handler] 이전 단계로 이동 */
@@ -29,14 +30,14 @@ const JoinCompany: React.FC<any> = (): JSX.Element => {
 
   return (
     <>
-      {company && company.id !== '' ? (
+      {sessionCompany && sessionCompany.id !== '' ? (
         <PLIP401Page />
       ) : (
         <StyledPageBackground>
           {search === undefined ? (
-            <JoinCompanyType onChoice={onChoice} />
+            <JoinCompanyType onChoice={onChoice} userName={sessionUser.userName} />
           ) : (
-            <ChoiceCompanyForm onBack={onBack} search={search} />
+            <ChoiceCompanyForm onBack={onBack} search={search} userId={sessionUser.id} />
           )}
         </StyledPageBackground>
       )}
@@ -45,14 +46,13 @@ const JoinCompany: React.FC<any> = (): JSX.Element => {
 }
 
 /** [Internal Component] 초기 회사에 참여하기 위한 유형 선택 (생성 or 검색) */
-const JoinCompanyType: React.FC<any> = ({ onChoice }): JSX.Element => {
-  // 사용자 정보 조회
-  const user = useRecoilValue(userSelector);
+const JoinCompanyType: React.FC<any> = ({ onChoice, userName }): JSX.Element => {
+  
 
   // 컴포넌트 반환
   return (
     <StyledPageLayout>
-      <h2 className='title'>{user.name} 님 안녕하세요 😊</h2>
+      <h2 className='title'>{userName} 님 안녕하세요 😊</h2>
       <JoinCompanyTypeCard content='회사 구성원이 이미 서비스를 이용하고 있는 경우, 검색을 통해 회사를 찾아보세요!' icon={<SearchOutlined />} onChoice={() => onChoice(true)} subject='회사 찾기' />
       <JoinCompanyTypeCard content='Plip을 처음 이용하시는 경우, 회사를 먼저 생성해주세요!' icon={<PlusCircleOutlined />} onChoice={() => onChoice(false)} subject='회사 생성하기' />
     </StyledPageLayout>
@@ -71,16 +71,13 @@ const JoinCompanyTypeCard: React.FC<any> = ({ content, icon, onChoice, subject }
   );
 }
 /** [Intetnal Component] 회사 선택 폼 */
-const ChoiceCompanyForm: React.FC<any> = ({ onBack, search }): JSX.Element => {
+const ChoiceCompanyForm: React.FC<any> = ({ onBack, search, userId }): JSX.Element => {
   // 폼(Form) 객체
   const [form] = Form.useForm();
   // 검색 모달 상태
   const [visible, setVisible] = useState<boolean>(false);
   // 회사 정보
   const [companyId, setCompanyId] = useState<string>('');
-
-  // 사용자 정보 조회
-  const user = useRecoilValue(userSelector);
   // 회사 정보 저장을 위한 setter
   const setCompany = useSetRecoilState(companySelector);
 
@@ -121,7 +118,7 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search }): JSX.Element => {
       const response = await createCompany(company);
       if (response.result) {
         // 회사에 사용자를 등록
-        if (await joinCompany(response.data.id, user.id)) {
+        if (await joinCompany(response.data.id, userId)) {
           // 서비스 생성
           if (await createServiceInCompany(response.data.id, company.companyName)) {
             return createFinishModal('회사가 생성되었습니다 !', '플립(Plip)과 함께 개인정보를 관리해보아요 :)', () => onCreate({ id: response.data.id, name: company.companyName, manager: company.manager }), '시작하기');
