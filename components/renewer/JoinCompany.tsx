@@ -47,9 +47,6 @@ const JoinCompany: React.FC<any> = (): JSX.Element => {
 
 /** [Internal Component] 초기 회사에 참여하기 위한 유형 선택 (생성 or 검색) */
 const JoinCompanyType: React.FC<any> = ({ onChoice, userName }): JSX.Element => {
-  
-
-  // 컴포넌트 반환
   return (
     <StyledPageLayout>
       <h2 className='title'>{userName} 님 안녕하세요 😊</h2>

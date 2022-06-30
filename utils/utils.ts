@@ -2,6 +2,7 @@
 import { successNotification } from "@/components/common/Notification";
 // Moduel
 import moment from "moment";
+import { decode } from "jsonwebtoken";
 // Type
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_DPI, SERVICE_FNI, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from "@/models/queries/type";
 // Query
@@ -30,6 +31,23 @@ export const copyTextToClipboard = (url: string) => {
   }
 }
 
+/**
+ * [Function] 액세스 토큰 복호화
+ * @param token 토큰 값
+ * @returns 사용자 ID
+ */
+ export const decodeAccessToken = (token: string): string => {
+  // 토큰이 없을 경우, 
+  if (token === undefined || token === null || token === '') return '';
+  // 복호화
+  const decoded: any = decode(token);
+  // 추출된 데이터 처리
+  if (decoded !== undefined && decoded !== null && 'sub' in decoded) {
+    return decoded.sub;
+  } else {
+    return '';
+  }
+}
 /**
  * [Function] 활동 로그 기록
  * @param mode 로그 유형 [add | delete | update]

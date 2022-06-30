@@ -124,6 +124,12 @@ export const PLIPLayoutPadding = styled.div`
   padding: 74px;
   position: relative;
 `;
+/** [Styled Component] 페이지 컨텐츠 기본 패딩 */
+export const PLIPLayoutPaddingST = styled.div`
+  height: 100%;
+  padding: 42px 74px 74px 74px;
+  position: relative;
+`;
 /** [Styled Component] 페이지 컨텐츠 가로 기본 패딩 */
 export const PLIPLayoutHorizontalPadding = styled.div`
   height: 100%;

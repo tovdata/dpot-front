@@ -9,7 +9,10 @@ import { Company, createRequest, PLIPService, RequestDF, ResponseDF, SERVER_URL 
  */
 export const findCompanies = async (name: string): Promise<Company[]> => {
   try {
-    const response = await fetch(`${SERVER_URL}company/find?name=${encodeURIComponent(name)}`);
+    // 요청 객체 생성
+    const request: RequestDF = await createRequest('GET');
+    // API 호출
+    const response = await fetch(`${SERVER_URL}company/find?name=${encodeURIComponent(name)}`, request);
     // 응답 결과 추출
     const result = await extractData(response);
     // 결과 반환
@@ -29,7 +32,7 @@ export const findCompanies = async (name: string): Promise<Company[]> => {
 export const registerUser = async (companyId: string, userId: string, accessLevel: number = 0): Promise<boolean> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequest('PUT', { userId, accessLevel });
+    const request: RequestDF = await createRequest('PUT', { userId, accessLevel });
     // API 호출
     const response: any = await fetch(`${SERVER_URL}company/${companyId}/registration`, request);
     // 결과 반환
@@ -46,8 +49,10 @@ export const registerUser = async (companyId: string, userId: string, accessLeve
  */
 export const getCompany = async (companyId: string): Promise<Company|undefined> => {
   try {
+    // 요청 객체 생성
+    const request: RequestDF = await createRequest('GET');
     // API 호출
-    const response: any = await fetch(`${SERVER_URL}company/${companyId}`);
+    const response: any = await fetch(`${SERVER_URL}company/${companyId}`, request);
     // 데이터 추출
     const result = await extractData(response);
     // 결과 반환
@@ -72,7 +77,7 @@ export const setCompany = async (data: Company, id?: string): Promise<ResponseDF
     // 파라미터 데이터 가공 (id 속성이 있을 경우 제거)
     if ('id' in copy) delete copy.id;
     // 요청 객체 생성
-    const request: RequestDF = createRequest(id ? 'PUT' : 'POST', copy);
+    const request: RequestDF = await createRequest(id ? 'PUT' : 'POST', copy);
     // API 호출
     const response: any = await fetch(url, request);
     // 데이터 추출 및 반환
@@ -91,7 +96,7 @@ export const setCompany = async (data: Company, id?: string): Promise<ResponseDF
 export const createService = async (companyId: string, data: PLIPService): Promise<ResponseDF> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequest('POST', { companyId, ...data });
+    const request: RequestDF = await createRequest('POST', { companyId, ...data });
     console.log(request)
     // API 호출
     const response: any = await fetch(`${SERVER_URL}service/new`, request);
@@ -110,7 +115,7 @@ export const createService = async (companyId: string, data: PLIPService): Promi
 export const deleteService = async (serviceId: string): Promise<boolean> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequest('DELETE', {});
+    const request: RequestDF = await createRequest('DELETE', {});
     // API 호출
     const response: any = await fetch(`${SERVER_URL}service/${serviceId}`, request);
     // 결과 반환
@@ -127,8 +132,10 @@ export const deleteService = async (serviceId: string): Promise<boolean> => {
  */
 export const getServiceList = async (companyId: string): Promise<PLIPService[]> => {
   try {
+    // 요청 객체 생성
+    const request: RequestDF = await createRequest('GET');
     // API 요청
-    const response: any = await fetch(`${SERVER_URL}company/${companyId}/details`);
+    const response: any = await fetch(`${SERVER_URL}company/${companyId}/details`, request);
     // 응답 데이터 추출
     const result: ResponseDF = await extractData(response);
     // 데이터 가공 및 반환
@@ -155,7 +162,7 @@ export const updateService = async (serviceId: string, data: PLIPService): Promi
     // 파라미터 데이터 가공 (id 속성이 있을 경우 제거)
     if ('id' in copy) delete copy.id;
     // 요청 객체 생성
-    const request: RequestDF = createRequest('PATCH', copy);
+    const request: RequestDF = await createRequest('PATCH', copy);
     // API 호출
     const response: any = await fetch(`${SERVER_URL}service/${serviceId}`, request);
     // 데이터 추출 및 반환

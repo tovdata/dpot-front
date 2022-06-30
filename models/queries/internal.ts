@@ -1,5 +1,6 @@
 // Type
-import { RESPONSE_STATUS_ERROR, RESPONSE_STATUS_NOT_FOUND, RESPONSE_STATUS_REQUEST_ERROR, RESPONSE_STATUS_UNKNOWN_ERROR, SERVER_URL } from "./type";
+import { getAccessToken } from "../session";
+import { RESPONSE_STATUS_ERROR, RESPONSE_STATUS_NOT_AUTHORIZED, RESPONSE_STATUS_NOT_FOUND, RESPONSE_STATUS_REQUEST_ERROR, RESPONSE_STATUS_UNKNOWN_ERROR, SERVER_URL } from "./type";
 import { RequestDF, ResponseDF } from "./type";
 import { BooleanDF, MapDF, ListDF, NumberDF, StringDF } from './type';
 
@@ -50,7 +51,54 @@ export const createRequest = (serviceId: string, mode: string, data: any): Reque
   // Request 정의
   const request: RequestDF = {
     body: '',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: ''
+  };
+  // 요청 메서드 및 Body 정의
+  switch (mode) {
+    case 'add':
+      request.body = JSON.stringify({ serviceId, data: copy });
+      request.method = 'POST';
+      break;
+    case 'delete':
+      request.body = JSON.stringify({ serviceId });
+      request.method = 'DELETE';
+      break;
+    case 'save':
+      request.body = JSON.stringify({ createAt: Number(createAt), data: copy });
+      request.method = 'PUT';
+      break;
+  }
+  // 정의된 Request 반환
+  return request;
+}
+/**
+ * 요청을 위한 Request 객체 정의
+ * @param serviceId 현재 서비스 ID
+ * @param mode 요청을 위한 유형 [ add | delete | save ]
+ * @param data 요청에 필요한 데이터
+ * @returns 정의된 Request 객체
+ */
+ export const createRequestForData = async (serviceId: string, mode: string, data: any): Promise<RequestDF> => {
+  // 데이터 복사 (깊은 복사)
+  const copy: any = JSON.parse(JSON.stringify(data));
+  // Timestamp 추출
+  const createAt: number|undefined = data.createAt;
+  // id, key, unix 속성 삭제
+  delete copy.id;
+  delete copy.key;
+  delete copy.createAt;
+  // 액세스 토큰 추출
+  const accessToken: string = await getAccessToken();
+  // Request 정의
+  const request: RequestDF = {
+    body: '',
+    headers: {
+      'Authorizaition': accessToken,
+      'Content-Type': 'application/json'
+    },
     method: ''
   };
   // 요청 메서드 및 Body 정의
@@ -154,6 +202,8 @@ export const catchAPIRequestError = (response: any): boolean => {
         break;
       case RESPONSE_STATUS_NOT_FOUND:
         stmt = 'Not found';
+      case RESPONSE_STATUS_NOT_AUTHORIZED:
+        stmt = 'Not authorized';
         break;
     }
     // 에러 메시지 출력 및 결과 반환

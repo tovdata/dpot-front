@@ -1,6 +1,42 @@
 import { extractData } from '../internal';
-import { createRequest, PLIPUser, ResponseDF, SERVER_URL } from '../type';
+import { createRequest, createRequestNotAuth, PLIPUser, RequestDF, SERVER_URL } from '../type';
 
+/** [Interface] 사용자 약관 동의 데이터 */
+export interface AgreementProps {
+  esa1: boolean;
+  esa2: boolean;
+  ssa1: boolean;
+}
+
+/**
+ * [API Caller] 사용자 추가 (For Server)
+ * @param userId 사용자 ID (by Cognito)
+ * @param accessToken 액세스 토큰
+ * @param user 사용자 데이터
+ * @param agreement 약관 동의 내역
+ * @returns 요청 결과
+ */
+ export const addUser = async (userId: string, accessToken: string, user: PLIPUser, agreement: AgreementProps): Promise<boolean> => {
+  try {
+    // 요청 객체 생성
+    const request: RequestDF = {
+      credentials: 'include',
+      body: JSON.stringify({ ...user, ...agreement }),
+      headers: {
+        'Authorization': accessToken,
+        'Content-Type': 'application/json'
+      },
+      method: 'POST'
+    };
+    // API 호출
+    const response = await fetch(`${SERVER_URL}user/new/${userId}`, request);
+    // 데이터 추출 및 반환
+    return (await extractData(response)).result;
+  } catch (err) {
+    console.error(`[ERROR] ${err}`);
+    return false;
+  }
+}
 /**
  * [API Caller] 사용자 조회
  * @param userId 사용자 ID
@@ -8,8 +44,10 @@ import { createRequest, PLIPUser, ResponseDF, SERVER_URL } from '../type';
  */
 export const getUser = async (userId: string): Promise<PLIPUser|undefined> => {
   try {
+    // 요청 객체 생성
+    const request: RequestDF = await createRequest('GET');
     // API 호출
-    const response = await fetch(`${SERVER_URL}user/${userId}`);
+    const response = await fetch(`${SERVER_URL}user/${userId}`, request);
     // 데이터 추출
     const result = await extractData(response);
     // 데이터 반환
@@ -26,8 +64,10 @@ export const getUser = async (userId: string): Promise<PLIPUser|undefined> => {
  */
 export const getUserList = async (companyId: string): Promise<PLIPUser[]> => {
   try {
+    // 요청 객체 생성
+    const request: RequestDF = await createRequest('GET');
     // API 호출
-    const response = await fetch(`${SERVER_URL}company/${companyId}/details`);
+    const response = await fetch(`${SERVER_URL}company/${companyId}/details`, request);
     // 데이터 추출
     const result = await extractData(response);
     // 데이터 가공
@@ -54,7 +94,7 @@ export const updateUser = async (userId: string, data: PLIPUser): Promise<boolea
     // ID 속성이 있을 경우, 삭제
     if ('id' in copy) delete copy.id;
     // 요청 객체 생성
-    const request = createRequest('PUT', copy);
+    const request = await createRequest('PUT', copy);
     // API 호출
     const response = await fetch(`${SERVER_URL}user/${userId}`, request);
     // 데이터 추출 및 결과 반환

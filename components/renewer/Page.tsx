@@ -46,19 +46,19 @@ export const PLIPLoadingPage: React.FC<any> = (): JSX.Element => {
 /** [Component] 유효하지 않은 인증 (HTTP code 401)  */
 export const PLIP401Page: React.FC<PLIPPageProps> = ({ redirectPath }): JSX.Element => {
   return (
-    <PLIPPageLayout description='올바르지 않은 접근입니다.' icon={FrownIcon} isBack redirectPath={ redirectPath ? redirectPath : '/signin'} title='Unauthorized' />
+    <PLIPPageLayout description='로그인 후 다시 접속해 주세요.' icon={Icon401} isBack redirectPath={ redirectPath ? redirectPath : '/signin'} title='로그인이 필요한 페이지입니다' />
   );
 }
 /** [Component] 권한 없음 (HTTP code 403)  */
 export const PLIP403Page: React.FC<PLIPPageProps> = ({ redirectPath }): JSX.Element => {
   return (
-    <PLIPPageLayout description='해당 페이지에 대한 권한이 없습니다.' icon={FrownIcon} isBack redirectPath={ redirectPath ? redirectPath : '/company/services'} title='Forbidden' />
+    <PLIPPageLayout description='요청한 페이지에 접근할 수 있는 권한이 없습니다.' icon={Icon403} isBack redirectPath={ redirectPath ? redirectPath : '/company/services'} title='페이지 접근이 거부되었습니다' />
   );
 }
 /** [Component] 페이지 없음 (HTTP code 404) */
 export const PLIP404Page: React.FC<PLIPPageProps> = (): JSX.Element => {
   return (
-    <PLIPPageLayout description={<>주소가 잘못되었거나 더 이상 제공되지 않는 페이지 입니다.</>} icon={NotFoundIcon} isBack title={<>페이지를 찾을 수 없습니다</>} />
+    <PLIPPageLayout description={<>주소가 잘못되었거나 더 이상 제공되지 않는 페이지 입니다.</>} icon={Icon404} isBack title={<>페이지를 찾을 수 없습니다</>} />
   );
 }
 /** [Component] 서비스 준비 중 */
@@ -121,9 +121,17 @@ const AwaitingApprovalIcon: JSX.Element = (
 const FrownIcon: JSX.Element = (
   <FrownTwoTone style={{ fontSize: 68 }} twoToneColor='#FA8C16' />
 );
+/** [Internal Component] 401 아이콘 */
+const Icon401: JSX.Element = (
+  <img src='/images/401.svg' />
+);
+/** [Internal Component] 403 아이콘 */
+const Icon403: JSX.Element = (
+  <img src='/images/403.svg' />
+);
 /** [Internal Component] 404 아이콘 */
-const NotFoundIcon: JSX.Element = (
-  <img src='/images/notFound.svg' />
+const Icon404: JSX.Element = (
+  <img src='/images/404.svg' />
 );
 /** [Internal Component] 서비스 준비 중 아이콘 */
 const PreparingIcon: JSX.Element = (

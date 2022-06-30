@@ -1,6 +1,7 @@
 // Logging
 import { writeActivityLog } from "utils/utils";
 // Module
+import { createRequest as createRequestObj } from "../type";
 import { createRequest, extractData, processArrayResponse } from "../internal";
 // Type
 import { User } from "@/models/session";
@@ -13,8 +14,10 @@ import { RequestDF, SERVER_URL } from "../type";
  */
 export const getFNIDatas = async (serviceId: string): Promise<any[]> => {
   try {
+    // 요청 객체 생성
+    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/fnis`);
+    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/fnis`, request);
     // 응답 데이터 처리 및 반환
     return await processArrayResponse(response);
   } catch (err) {
@@ -29,8 +32,10 @@ export const getFNIDatas = async (serviceId: string): Promise<any[]> => {
  */
 export const getPIDatas = async (serviceId: string): Promise<any[]> => {
   try {
+    // 요청 객체 생성
+    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pis`);
+    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pis`, request);
     // 응답 데이터 처리 및 반환
     return await processArrayResponse(response);
   } catch (err) {
@@ -50,6 +55,7 @@ export const getPIDatas = async (serviceId: string): Promise<any[]> => {
 export const setDataByTableType = async (user: User, serviceId: string, type: string, mode: string, data: any): Promise<any> => {
   // URL 및 Request 정의
   const url: string = mode === 'add' ? `${SERVER_URL}${type}/new` : `${SERVER_URL}${type}/${data.id}`;
+  // 요청 객체 생성
   const request: RequestDF = createRequest(serviceId, mode, data);
   // API 요청
   const response: Response = await fetch(url, request);

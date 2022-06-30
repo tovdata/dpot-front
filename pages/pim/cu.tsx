@@ -1,30 +1,28 @@
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
+import { ComponentType } from 'react';
 // Component
-import { TOVLayoutPadding } from '@/components/common/Layout';
-import { PLIPPageLayout } from '@/components/renewer/Layout';
+import { PLIPPageLayoutProps } from '@/components/renewer/Layout';
 const FNITableForm = dynamic(() => import('@/components/renewer/PI').then((module: any): any => module.FNITableForm), { ssr: false });
 const PITableForm = dynamic(() => import('@/components/renewer/PI').then((module: any): any => module.PITableForm), { ssr: false });
-const PLIPSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PILPServiceSession), { ssr: false });
+const PLIPPageLayout: ComponentType<PLIPPageLayoutProps> = dynamic(() => import('@/components/renewer/Layout').then((mod: any): any => mod.PLIPPageLayout), { loading: () => (<></>), ssr: false });
+const PLIPLayoutPadding = dynamic(() => import('@/components/styled/Layout').then((mod: any): any => mod.PLIPLayoutPadding));
+const PLIPSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PLIPServiceSession), { loading: () => (<></>), ssr: false });
+const PLIPUserSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PLIPUserSession), { loading: () => (<></>), ssr: false });
 
-const Page: NextPage = ({ expand, onExpand }: any) => {
-  // 컴포넌트 반환
+const Page: NextPage = () => {
   return (
-    <PLIPSession>
-      <PLIPPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/cu'>
-        <TOVLayoutPadding>
-          <PITableForm />
-          <FNITableForm />
-        </TOVLayoutPadding>
-      </PLIPPageLayout>
-      {/* <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/pim/cu'> */}
-        {/* <TOVLayoutPadding>
-          <PITableForm />
-          <FNITableForm />
-        </TOVLayoutPadding> */}
-      {/* </TOVPageLayout> */}
-    </PLIPSession>
-  )
+    <PLIPUserSession>
+      <PLIPSession>
+        <PLIPPageLayout selectedKey='/pim/cu'>
+          <PLIPLayoutPadding>
+            <PITableForm />
+            <FNITableForm />
+          </PLIPLayoutPadding>
+        </PLIPPageLayout>
+      </PLIPSession>
+    </PLIPUserSession>
+  );
 }
 
 export default Page;

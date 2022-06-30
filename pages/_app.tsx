@@ -1,11 +1,9 @@
 import type { AppProps } from 'next/app'
-import dynamic from 'next/dynamic';
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { RecoilRoot } from 'recoil';
 // Component
 import Head from 'next/head';
 import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
-const PILPUserSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PILPUserSession), { ssr: false });
 // Font
 import '../public/fonts/pretendard.css';
 // Style
@@ -68,12 +66,6 @@ const queryClient = new QueryClient({
 });
 /** 공통으로 사용될 페이지 컴포넌트 */
 function MyApp({ Component, pageProps }: AppProps) {
-  // 사이드 메뉴 확장 상태 (Default: 확장)
-  const [expand, setExpand] = useState<boolean>(true);
-  /** [Event handler] 메뉴 확장/축소 이벤트 */
-  const onExpand = useCallback((): void => setExpand(!expand), [expand]);
-
-  // 컴포넌트 반환
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
@@ -86,7 +78,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             <meta charSet='utf-8' />
           </Head>
           <GlobalStyle />
-          <Component {...pageProps} expand={expand} onExpand={onExpand} />
+          <Component {...pageProps} />
         </RecoilRoot>
       </Hydrate>
     </QueryClientProvider>

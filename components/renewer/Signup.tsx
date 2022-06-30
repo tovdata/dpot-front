@@ -1,14 +1,15 @@
 import Router from 'next/router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 // Component
 import { Checkbox, Divider, Form, Input, Modal } from 'antd';
 import Link from 'next/link';
-import { StyledFinishButton, StyledSigninContainer, StyledSigninFooter } from '../styled/Signin';
-import { StyledAgreementForm, StyledAgreementItem, StyledSignupForm, StyledSignupHeader } from '../styled/Signup';
+import { StyledFinishButton, StyledSigninFooter } from '../styled/Signin';
+import { StyledAgreementForm, StyledAgreementItem, StyledSignupHeader } from '../styled/Signup';
 import { PLIPInputGroup } from './Input';
 import { warningNotification } from '../common/Notification';
 // Query
-import { addUser, checkDuplicate, signup, SignupProps } from '@/models/queries/apis/signin-up';
+import { checkDuplicate, signup, SignupProps } from '@/models/queries/apis/signin-up';
+import { addUser } from '@/models/queries/apis/user';
 
 /** [Interface] 약관 동의 항목에 대한 속성 */
 interface AgreementItemProps {
@@ -17,39 +18,28 @@ interface AgreementItemProps {
   name: string;
 }
 
-/** [Component] 회원가입 컴포넌트 */
-const PLIPSignup: React.FC<any> = (): JSX.Element => {
-  return (
-    <StyledSigninContainer>
-      <StyledSignupForm>
-        <SignupHeader />
-        <SignupForm />
-      </StyledSignupForm>
-    </StyledSigninContainer>
-  );
-}
+// /** [Component] 회원가입 컴포넌트 */
+// const PLIPSignup: React.FC<any> = (): JSX.Element => {
+//   return (
+//     <StyledSigninContainer>
+//       <StyledSignupForm>
+//         <SignupHeader />
+//         <SignupForm />
+//       </StyledSignupForm>
+//     </StyledSigninContainer>
+//   );
+// }
 
 /** [Internal Component] 회원가입 헤더 */
-const SignupHeader: React.FC<any> = (): JSX.Element => {
+export const SignupHeader: React.FC<any> = (): JSX.Element => {
   return (
     <StyledSignupHeader>
       <h2>회원가입</h2>
     </StyledSignupHeader>
   );
 }
-/** [Internal Component] 회원가입 폼 하단 */
-const SignupFooter: React.FC<any> = (): JSX.Element => {
-  return (
-    <StyledSigninFooter>
-      <p className='description'>이미 회원이신가요?</p>
-      <Link href='/signin'>
-        <label className='link'>로그인</label>
-      </Link>
-    </StyledSigninFooter>
-  );
-}
 /** [Internal Component] 회원가입 폼 */
-const SignupForm: React.FC<any> = (): JSX.Element => {
+export const SignupForm: React.FC<any> = (): JSX.Element => {
   // 회원가입 폼 객체 정의
   const [form] = Form.useForm();
   // 중복 확인 로딩
@@ -129,7 +119,7 @@ const SignupForm: React.FC<any> = (): JSX.Element => {
         // 결과 처리
         if (response.result) {
           // 사용자 약관 동의 내역 저장
-          const result = await addUser(response.data.UserSub, { userName: formData.name, email: formData.email, contact: formData.phone }, { esa1: formData.esa1, esa2: formData.esa2, ssa1: formData.ssa1 });
+          const result = await addUser(response.data.UserSub, '', { userName: formData.name, email: formData.email, contact: formData.phone }, { esa1: formData.esa1, esa2: formData.esa2, ssa1: formData.ssa1 });
           if (result) {
             createSuccessModal();
           } else {
@@ -200,6 +190,17 @@ const AgreementItem: React.FC<AgreementItemProps> = ({ content, linkText, name }
     </StyledAgreementItem>
   );
 }
+/** [Internal Component] 회원가입 폼 하단 */
+const SignupFooter: React.FC<any> = (): JSX.Element => {
+  return (
+    <StyledSigninFooter>
+      <p className='description'>이미 회원이신가요?</p>
+      <Link href='/signin'>
+        <label className='link'>로그인</label>
+      </Link>
+    </StyledSigninFooter>
+  );
+}
 
 /** [Internal Function] 에러 모달 생성 */
 const createErrorModal: any = () => Modal.error({
@@ -216,5 +217,3 @@ const createSuccessModal: any = () => Modal.success({
   title: '인증 이메일이 발송되었습니다.',
   onOk: () => Router.push('/signin')
 });
-
-export default PLIPSignup;

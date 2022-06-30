@@ -1,19 +1,26 @@
-import { NextPage } from "next";
-import dynamic from "next/dynamic";
+import { NextPage } from 'next';
+import dynamic from 'next/dynamic';
+import { ComponentType } from 'react';
 // Component
-import { TOVLayoutPadding, TOVPageLayout } from "@/components/common/Layout";
-import { ConsentMain } from "@/components/Consent";
-const PLIPSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PILPServiceSession), { ssr: false });
+import { PLIPPageLayoutProps } from '@/components/renewer/Layout';
+const PLIPPageLayout: ComponentType<PLIPPageLayoutProps> = dynamic(() => import('@/components/renewer/Layout').then((mod: any): any => mod.PLIPPageLayout), { loading: () => (<></>), ssr: false });
+const PLIPPagePadding = dynamic(() => import('@/components/styled/Layout').then((mod: any): any => mod.PLIPPagePadding));
+const PLIPSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PLIPServiceSession), { loading: () => (<></>), ssr: false });
+const PLIPUserSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PLIPUserSession), { loading: () => (<></>), ssr: false });
 
-const Page: NextPage = ({ expand, onExpand }: any) => {
+import { ConsentMain } from "@/components/Consent";
+
+const Page: NextPage = () => {
   return (
-    <PLIPSession>
-      <TOVPageLayout expand={expand} onExpand={onExpand} selectedKey='/doc/consent'>
-        <TOVLayoutPadding>
-          <ConsentMain />
-        </TOVLayoutPadding>
-      </TOVPageLayout>
-    </PLIPSession>
+    <PLIPUserSession>
+      <PLIPSession>
+        <PLIPPageLayout selectedKey='/doc/consent'>
+          <PLIPPagePadding>
+            <ConsentMain />
+          </PLIPPagePadding>
+        </PLIPPageLayout>
+      </PLIPSession>
+    </PLIPUserSession>
   );
 }
 

@@ -6,7 +6,7 @@ import { useSetRecoilState } from 'recoil';
 // Component
 import { Divider, Form, Input, Modal } from 'antd';
 import { errorNotification, successNotification, warningNotification } from '../common/Notification';
-import { StyledFinishButton, StyledResendMailModalContent, StyledSigninContainer, StyledSigninFooter, StyledSigninForm, StyledSigninHeader } from '../styled/Signin';
+import { StyledFinishButton, StyledResendMailModalContent, StyledSigninFooter, StyledSigninHeader } from '../styled/Signin';
 import { PLIPInputGroup } from './Input';
 // State
 import { accessTokenSelector, companySelector, userSelector } from '@/models/session';
@@ -15,39 +15,16 @@ import { getUser } from '@/models/queries/apis/user';
 import { resendAuthMail, signin } from '@/models/queries/apis/signin-up';
 import { getCompany } from '@/models/queries/apis/company';
 
-/** [Component] 로그인 컴포넌트 */
-const PLIPSignin: React.FC<any> = (): JSX.Element => {
-  return (
-    <StyledSigninContainer>
-      <StyledSigninForm>
-        <SigninHeader />
-        <SigninForm />
-      </StyledSigninForm>
-    </StyledSigninContainer>
-  );
-}
-
-/** [Internal Component] 로그인 헤더 */
-const SigninHeader: React.FC<any> = (): JSX.Element => {
+/** [Component] 로그인 헤더 */
+export const SigninHeader: React.FC<any> = (): JSX.Element => {
   return (
     <StyledSigninHeader>
       <h2>로그인</h2>
     </StyledSigninHeader>
   );
 }
-/** [Internal Component] 로그인 폼 하단 */
-const SigninFooter: React.FC<any> = (): JSX.Element => {
-  return (
-    <StyledSigninFooter>
-      <p className='description'>아직 계정이 없으신가요?</p>
-      <Link href='/signup'>
-        <label className='link'>회원가입</label>
-      </Link>
-    </StyledSigninFooter>
-  );
-}
-/** [Internal Component] 로그인 폼 */
-const SigninForm: React.FC<any> = (): JSX.Element => {
+/** [Component] 로그인 폼 */
+export const SigninForm: React.FC<any> = (): JSX.Element => {
   // Form 객체
   const [form] = Form.useForm();
   // 로컬 스토리지 내에 회사, 사용자 정보 Seletor
@@ -115,6 +92,17 @@ const SigninForm: React.FC<any> = (): JSX.Element => {
     </Form>
   );
 }
+/** [Internal Component] 로그인 폼 하단 */
+const SigninFooter: React.FC<any> = (): JSX.Element => {
+  return (
+    <StyledSigninFooter>
+      <p className='description'>아직 계정이 없으신가요?</p>
+      <Link href='/signup'>
+        <label className='link'>회원가입</label>
+      </Link>
+    </StyledSigninFooter>
+  );
+}
 /** [Internal Component] 메일 재전송 모달 내용 */
 const ResendMailModalContent: React.FC<any> = ({ email }): JSX.Element => {
   /** [Event handler] 메일 전송 */
@@ -135,4 +123,4 @@ const ResendMailModalContent: React.FC<any> = ({ email }): JSX.Element => {
   );
 }
 
-export default PLIPSignin;
+// export default PLIPSignin;

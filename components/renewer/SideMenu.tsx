@@ -1,31 +1,19 @@
 import Router from 'next/router';
 import { useCallback, useMemo } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
 // Component
 import { SideMenuLayout, StyledServiceName, StyledSideMenuProfile, StyledSideMenuProfileContent, StyledSideMenuProfileIcon, StyledSideMenuToggle } from '../styled/SideMenu';
-import { Dropdown, Menu } from 'antd';
+import { Menu } from 'antd';
 // Icon
-import { AiOutlineArrowLeft } from 'react-icons/ai';
+const AiOutlineArrowLeft = dynamic(() => import('react-icons/ai').then((mod: any): any => mod.AiOutlineArrowLeft));
+// import { AiOutlineArrowLeft } from 'react-icons/ai';
 import { IoBusinessOutline } from 'react-icons/io5';
 import { DashboardOutlined, DatabaseOutlined, FireOutlined, PartitionOutlined } from '@ant-design/icons';
 import { CheckCircleOutlined, PaperClipOutlined, SolutionOutlined, ToolOutlined } from '@ant-design/icons';
 import { AuditOutlined, HistoryOutlined } from '@ant-design/icons';
-// State
-import { Company, companySelector, Service, serviceSelector } from '@/models/session';
-import { useQuery, useQueryClient } from 'react-query';
-import { PLIPService, SERVICE_FNI, SERVICE_PI } from '@/models/queries/type';
-import { getServiceList } from '@/models/queries/apis/company';
-// Query key
-import { KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_CPI, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_PPI, KEY_SERVICES } from '@/models/queries/key';
+import dynamic from 'next/dynamic';
 
 /** [Component] 사이드 메뉴 */
-const PLIPSideMenu: React.FC<any> = ({ expand, onExpand, selectedKey }): JSX.Element => {
-  // 세션 내 회사 및 서비스 정보 조회
-  const sessionCompany = useRecoilValue<Company>(companySelector);
-  const [sessionService, setSessionService] = useRecoilState<Service>(serviceSelector);
-  // 회사 내 서비스 목록 조회
-  const { data: services } = useQuery([KEY_SERVICES, sessionCompany.id], async () => await getServiceList(sessionCompany.id));
-
+const PLIPSideMenu: React.FC<any> = ({ expand, onExpand, selectedKey, serviceName }): JSX.Element => {
   // 사이드 메뉴 아이템
   const items: any[] = useMemo(() => [
     { label: '대시보드', key: '/', icon: (<DashboardOutlined />) },
@@ -46,26 +34,8 @@ const PLIPSideMenu: React.FC<any> = ({ expand, onExpand, selectedKey }): JSX.Ele
       { label: '활동 내역', key: '/log/activity', icon: (<HistoryOutlined />) }
     ] }
   ], [expand]);
-  // 서비스 목록
-  const serviceList: any[] = useMemo(() => services ? services.map((service: PLIPService): any => ({
-    label: service.serviceName, key: `${service.serviceName}/${service.id}`
-  })) : [{ label: sessionService.serviceName, key: `${sessionService.serviceName}/${sessionService.id}` }], [services]);
-  // 쿼리 클라이언트
-  const queryClient = useQueryClient();
-  
-  /** [Event handler] 서비스 변경 */
-  const onChange = useCallback(({ key }) => {
-    const [serviceName, id]: string[] = key.split('/');
-    setSessionService({ id, serviceName });
-    // 대시보드 초기화
-    queryClient.invalidateQueries([KEY_DASHBOARD_ITEMS, id]);
-    queryClient.invalidateQueries([KEY_DASHBOARD_CPI, id]);
-    queryClient.invalidateQueries([KEY_DASHBOARD_PPI, id]);
-    queryClient.invalidateQueries([KEY_DASHBOARD_CONSENT, id]);
-    // 각종 테이블 초기화
-    queryClient.invalidateQueries([SERVICE_PI, id]);
-    queryClient.invalidateQueries([SERVICE_FNI, id]);
-  }, []);
+  /** [Event handler] 서비스 선택 */
+  const goServices = useCallback(() => Router.push('/company/services'), []);
   /** [Event handler] 메뉴 선택 */
   const onSelect = useCallback((value: any): Promise<boolean> => Router.push(value.key), []);
 
@@ -77,9 +47,7 @@ const PLIPSideMenu: React.FC<any> = ({ expand, onExpand, selectedKey }): JSX.Ele
           <IoBusinessOutline />
         </StyledSideMenuProfileIcon>
         <StyledSideMenuProfileContent open={expand}>
-          <Dropdown overlay={<Menu items={serviceList} onClick={onChange} />} trigger={['click']}>
-            <StyledServiceName>{sessionService.serviceName}</StyledServiceName>
-          </Dropdown>
+          <StyledServiceName onClick={goServices}>{serviceName}</StyledServiceName>
         </StyledSideMenuProfileContent>
         <StyledSideMenuToggle onClick={onExpand} open={expand}>
           <AiOutlineArrowLeft />

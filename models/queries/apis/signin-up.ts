@@ -1,5 +1,5 @@
 import { extractData } from '../internal';
-import { createRequest, PLIPUser, RequestDF, ResponseDF, SERVER_URL } from '../type';
+import { createRequest, createRequestNotAuth, RequestDF, ResponseDF, SERVER_URL } from '../type';
 
 /** [Interface] 회원가입에 필요한 데이터 */
 export interface SignupProps {
@@ -7,12 +7,6 @@ export interface SignupProps {
   password: string;
   name: string;
   phone_number: string;
-}
-/** [Interface] 사용자 약관 동의 데이터 */
-export interface AgreementProps {
-  esa1: boolean;
-  esa2: boolean;
-  ssa1: boolean;
 }
 
 /**
@@ -23,7 +17,7 @@ export interface AgreementProps {
 export const checkDuplicate = async (email: string): Promise<boolean> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequest('POST', { email });
+    const request: RequestDF = await createRequest('POST', { email });
     // API 호출
     const response = await fetch(`${SERVER_URL}auth/signup/availability`, request);
     // 결과 추출 및 반환
@@ -41,7 +35,7 @@ export const checkDuplicate = async (email: string): Promise<boolean> => {
 export const resendAuthMail = async (email: string): Promise<boolean> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequest('POST', { email });
+    const request: RequestDF = await createRequest('POST', { email });
     // API 호출
     const response = await fetch(`${SERVER_URL}auth/signup/resend`, request);
     // 결과 추출 및 반환
@@ -60,7 +54,7 @@ export const resendAuthMail = async (email: string): Promise<boolean> => {
 export const signin = async (email: string, password: string): Promise<ResponseDF> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequest('POST', { email, password });
+    const request: RequestDF = await createRequest('POST', { email, password });
     // API 호출
     const response: any = await fetch(`${SERVER_URL}auth/signin`, request);
     // 데이터 추출 및 반환
@@ -77,7 +71,7 @@ export const signin = async (email: string, password: string): Promise<ResponseD
 export const signout = async (): Promise<boolean> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequest('POST', {});
+    const request: RequestDF = await createRequest('POST', {});
     // API 호출
     const response: any = await fetch(`${SERVER_URL}auth/signout`, request);
     // 데이터 추출 및 반환
@@ -95,7 +89,7 @@ export const signout = async (): Promise<boolean> => {
 export const signup = async (data: SignupProps): Promise<ResponseDF> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequest('POST', data);
+    const request: RequestDF = createRequestNotAuth('POST', data);
     // API 호출
     const response: any = await fetch(`${SERVER_URL}auth/signup`, request);
     // 데이터 추출 및 반환
@@ -106,22 +100,22 @@ export const signup = async (data: SignupProps): Promise<ResponseDF> => {
   }
 }
 /**
- * [API Caller] 사용자 추가 (For Server)
- * @param userId 사용자 ID (by Cognito)
- * @param user 사용자 데이터
- * @param agreement 약관 동의 내역
- * @returns 요청 결과
+ * [API Caller] Access Token 갱신
+ * @param userId 사용자 ID
+ * @returns access token
  */
-export const addUser = async (userId: string, user: PLIPUser, agreement: AgreementProps): Promise<boolean> => {
+export const updateToken = async (userId: string): Promise<string> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequest('POST', { ...user, ...agreement });
+    const request: RequestDF = createRequestNotAuth('POST', { id: userId });
     // API 호출
-    const response = await fetch(`${SERVER_URL}user/new/${userId}`, request);
-    // 데이터 추출 및 반환
-    return (await extractData(response)).result;
+    const response: any = await fetch(`${SERVER_URL}auth/silentrefresh`, request);
+    // 데이터 추출
+    const result: any = await response.json();
+    // 데이터 반환
+    return ('AccessToken' in result) ? result.AccessToken : '';
   } catch (err) {
     console.error(`[ERROR] ${err}`);
-    return false;
+    return '';
   }
 }
