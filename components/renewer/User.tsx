@@ -29,7 +29,7 @@ const UserInfoSection: React.FC<any> = (): JSX.Element => {
   // 사용자 정보 상태
   const [user, setUser] = useRecoilState(userSelector);
   // 사용자 조회
-  const { isLoading, data } = useQuery(KEY_USER, async () => await getUser(user.id));
+  const { isLoading, data } = useQuery([KEY_USER, user.id], async () => await getUser(user.id));
 
   // 모달 Open 상태
   const [visible, setVisible] = useState<boolean>(false);

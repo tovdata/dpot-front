@@ -1,10 +1,12 @@
+import dynamic from 'next/dynamic';
 import Router from 'next/router';
+import { ComponentType, useCallback } from 'react';
 // Component
 import { Button, Spin } from 'antd';
+import Image from 'next/image';
 import { StyledContainer, StyledFullScreen } from '../styled/Page';
 // Icon
-import { FrownTwoTone, LoadingOutlined, WarningTwoTone } from '@ant-design/icons';
-import { useCallback } from 'react';
+const LoadingOutlined: ComponentType<{spin: boolean, style: React.CSSProperties}> = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.LoadingOutlined));
 
 /** [Interface] Properties for PLIPPage */
 interface PLIPPageProps {
@@ -23,6 +25,12 @@ interface PLIPContainerLayout {
 export const PLIPAwaitingApprovalPage: React.FC<any> = (): JSX.Element => {
   return (
     <PLIPPageLayout icon={AwaitingApprovalIcon} title={<>회사 관리자의 승인을 기다리고 있어요.<br/>승인이 완료되면 알려주신 이메일로 연락드릴게요 👍</>} />
+  );
+}
+/** [Component] 심플 로딩 컨테이너 */
+export const PLIPSimpleLoadingContainer: React.FC<any> = (): JSX.Element => {
+  return (
+    <PLIPContainerLayout icon={SimpleLoadingIcon} />
   );
 }
 /** [Component] 심플 로딩 페이지 */
@@ -115,27 +123,23 @@ const PLIPPageLayout: React.FC<PLIPContainerLayout> = ({ description, icon, isBa
 
 /** [Internal Component] 로딩 아이콘 */
 const AwaitingApprovalIcon: JSX.Element = (
-  <img src='/images/email.svg' />
-);
-/** [Internal Component] 표정(우울) 아이콘 */
-const FrownIcon: JSX.Element = (
-  <FrownTwoTone style={{ fontSize: 68 }} twoToneColor='#FA8C16' />
+  <Image src='/images/email.svg' />
 );
 /** [Internal Component] 401 아이콘 */
 const Icon401: JSX.Element = (
-  <img src='/images/401.svg' />
+  <Image src='/images/401.svg' />
 );
 /** [Internal Component] 403 아이콘 */
 const Icon403: JSX.Element = (
-  <img src='/images/403.svg' />
+  <Image src='/images/403.svg' />
 );
 /** [Internal Component] 404 아이콘 */
 const Icon404: JSX.Element = (
-  <img src='/images/404.svg' />
+  <Image src='/images/404.svg' />
 );
 /** [Internal Component] 서비스 준비 중 아이콘 */
 const PreparingIcon: JSX.Element = (
-  <img src='/images/service_develop.svg' />
+  <Image src='/images/service_develop.svg' />
 );
 /** [Internal Component] 로딩 아이콘 */
 const SimpleLoadingIcon: JSX.Element = (
@@ -144,8 +148,4 @@ const SimpleLoadingIcon: JSX.Element = (
 /** [Internal Component] 로딩 아이콘 */
 const LoadingIcon: JSX.Element = (
   <Spin indicator={<LoadingOutlined style={{ fontSize: 52 }} spin />} />
-);
-/** [Internal Component] 경고 아이콘 */
-const WarningIcon: JSX.Element = (
-  <WarningTwoTone style={{ fontSize: 68 }} twoToneColor='#FA8C16' />
 );

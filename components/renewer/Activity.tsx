@@ -9,7 +9,7 @@ import moment from 'moment';
 // State
 import { serviceSelector, userSelector } from '@/models/session';
 // Query
-import { getActivity } from '@/models/queries/api';
+import { getActivity } from '@/models/queries/apis/activity';
 import { BasicPageLoading } from '../common/Loading';
 // Query key
 import { KEY_SERVICE_ACTIVITY, KEY_USER_ACTIVITY } from '@/models/queries/key';

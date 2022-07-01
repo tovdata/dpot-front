@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useMemo } from 'react';
+import { useQuery } from 'react-query';
 import { useRecoilValue } from 'recoil';
 // Chart
 import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
@@ -19,7 +19,8 @@ import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader
 import { getConsentList, getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/api';
 import { getUserActivityForWeek } from '@/models/queries/apis/activity';
 // Query key
-import { KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_CPI, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_PPI } from '@/models/queries/key';
+import { KEY_COMPANY, KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_CPI, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_PPI } from '@/models/queries/key';
+import { getCompany } from '@/models/queries/apis/company';
 
 // Set chart
 ChartJS.register(ArcElement, Tooltip);
@@ -40,7 +41,7 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
         </StyledDashboardHeader>
         <Row gutter={[24, 24]}>
           <Col span={14}>
-            <ChargerForCompany manager={sessionCompany.manager} />
+            <ChargerForCompany companyId={sessionCompany.id} />
           </Col>
           <Col span={10}>
             <LastInformation />
@@ -103,40 +104,46 @@ const DashboardItemHeader: React.FC<any> = ({ extra, title }): JSX.Element => {
 }
 
 /** [Internal Component] 개인정보 보호책임자 */
-const ChargerForCompany: React.FC<any> = ({ manager }): JSX.Element => {
+const ChargerForCompany: React.FC<any> = ({ companyId }): JSX.Element => {
+  // 회사 정보 조회
+  const { isLoading, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(companyId));
+
+  // 컴포넌트 반환
   return (
-    <StyledDashboardItemCard>
-      <StyledDashboardItemContentForCPO>
-        <StyledManagerSection>
-          <StyledManagerSectionHeader>
-            <h4>우리 회사의 개인정보 보호책임자</h4>
-            <span className='icon'>👑</span>
-          </StyledManagerSectionHeader>
-          <Row gutter={16} style={{ marginBottom: 18 }}>
-            <Col span={8}>
-              <StyledDescriptionForm>
-                <label className='subject'>이름</label>
-                <label className='content'>{manager.name}</label>
-              </StyledDescriptionForm>
-            </Col>
-            <Col span={8}>
-              <StyledDescriptionForm>
-                <label className='subject'>직위/직책</label>
-                <label className='content'>{manager.position}</label>
-              </StyledDescriptionForm>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={16}>
-              <StyledDescriptionForm>
-                <label className='subject'>이메일</label>
-                <label className='content'>{manager.email}</label>
-              </StyledDescriptionForm>
-            </Col>
-          </Row>
-        </StyledManagerSection>
-      </StyledDashboardItemContentForCPO>
-    </StyledDashboardItemCard>
+    <Spin spinning={isLoading}>
+      <StyledDashboardItemCard>
+        <StyledDashboardItemContentForCPO>
+          <StyledManagerSection>
+            <StyledManagerSectionHeader>
+              <h4>우리 회사의 개인정보 보호책임자</h4>
+              <span className='icon'>👑</span>
+            </StyledManagerSectionHeader>
+            <Row gutter={16} style={{ marginBottom: 18 }}>
+              <Col span={8}>
+                <StyledDescriptionForm>
+                  <label className='subject'>이름</label>
+                  <label className='content'>{company ? company.manager.name : ''}</label>
+                </StyledDescriptionForm>
+              </Col>
+              <Col span={8}>
+                <StyledDescriptionForm>
+                  <label className='subject'>직위/직책</label>
+                  <label className='content'>{company ? company.manager.position : ''}</label>
+                </StyledDescriptionForm>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={16}>
+                <StyledDescriptionForm>
+                  <label className='subject'>이메일</label>
+                  <label className='content'>{company ? company.manager.email : ''}</label>
+                </StyledDescriptionForm>
+              </Col>
+            </Row>
+          </StyledManagerSection>
+        </StyledDashboardItemContentForCPO>
+      </StyledDashboardItemCard>
+    </Spin>
   );
 }
 /** [Internal Component] 최근 정보 수정일 */

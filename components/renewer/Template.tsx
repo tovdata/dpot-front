@@ -1,24 +1,11 @@
 // Component
-import { Col, Divider, Row, Table, Tabs } from 'antd';
-import { StyledDownloadButton, StyledDownloadIcon, StyledTabPane, StyledTabPaneHeader, StyledTabPaneTitle, StyledTemplateCard } from './styled/Template';
+import { Col, Divider, Row, Table } from 'antd';
+import { StyledDownloadButton, StyledDownloadIcon, StyledTabPane, StyledTabPaneHeader, StyledTabPaneTitle, StyledTemplateCard } from '@/components/styled/Template';
 // Module
 import moment from 'moment';
 
-/** [Component] 템플릿 메인 페이지 */
-export const TemplateMain: React.FC<any> = (): JSX.Element => {
-  return (
-    <Tabs>
-      <Tabs.TabPane key='template' tab='템플릿'>
-        <TemplateList />
-      </Tabs.TabPane>
-      <Tabs.TabPane key='guide' tab='가이드라인'>
-        <GuideLine />
-      </Tabs.TabPane>
-    </Tabs>
-  );
-}
 /** [Component] 템플릿 목록 페이지 */
-const TemplateList: React.FC<any> = (): JSX.Element => {
+export const TemplateList: React.FC<any> = (): JSX.Element => {
   return (
     <StyledTabPane>
       <StyledTabPaneHeader>
@@ -51,7 +38,7 @@ const TemplateList: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Component] 가이드라인 페이지 */
-const GuideLine: React.FC<any> = (): JSX.Element => {
+export const GuideLine: React.FC<any> = (): JSX.Element => {
   return (
     <StyledTabPane>
       <StyledTabPaneHeader>

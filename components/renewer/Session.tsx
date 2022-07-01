@@ -62,7 +62,6 @@ export const PLIPUserSession: React.FC<any> = ({ children }): JSX.Element => {
   const [component, setComponent] = useState<JSX.Element>(<></>);
   // 사용자 여부 확인에 따른 처리
   useEffect(() => {
-    console.log(accessToken);
     if (accessToken.state === 'hasValue') {
       if (decodeAccessToken(accessToken.contents) !== '') {
         setComponent(children);

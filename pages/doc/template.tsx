@@ -7,8 +7,7 @@ const PLIPPageLayout: ComponentType<PLIPPageLayoutProps> = dynamic(() => import(
 const PLIPPagePaddingST = dynamic(() => import('@/components/styled/Layout').then((mod: any): any => mod.PLIPPagePaddingST));
 const PLIPSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PLIPServiceSession), { loading: () => (<></>), ssr: false });
 const PLIPUserSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PLIPUserSession), { loading: () => (<></>), ssr: false });
-
-import { TemplateMain } from '@/components/Template';
+const TemplateMain = dynamic(() => import('@/components/renewer/pages/Template'), { loading: () => (<></>) });
 
 const Page: NextPage = () => {
   return (

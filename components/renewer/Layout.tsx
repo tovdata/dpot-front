@@ -1,15 +1,13 @@
 import Router from 'next/router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRecoilState, useRecoilValue, useRecoilValueLoadable, useResetRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 // Component
 import Link from 'next/link';
 import { StyledPageContent, StyledPageHeader, StyledPageHeaderMenuItem, StyledPageHeaderNav, StyledPageSider, StyledPageSiderFooter } from '../styled/Layout';
 // State
-import { accessTokenSelector, companySelector, defaultCompany, defaultService, defaultUser, expandSideSelector, serviceSelector, userSelector } from '@/models/session';
+import { accessTokenSelector, expandSideSelector, serviceSelector } from '@/models/session';
 import { Dropdown, Layout, Menu } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import { TOVSideMenu } from '../common/SideMenu';
-import { expandSiderSelector } from '@/models/state';
 import PLIPSideMenu from './SideMenu';
 import { signout } from '@/models/queries/apis/signin-up';
 import { errorNotification, successNotification } from '../common/Notification';
