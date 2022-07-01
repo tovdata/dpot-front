@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useRecoilState } from 'recoil';
 // Component
 import { Button, Divider, Drawer, Form, Input, Table, Tabs } from 'antd';
@@ -14,7 +14,7 @@ import moment from 'moment';
 import { companySelector } from '@/models/session';
 // Query
 import { getCompany } from '@/models/queries/apis/company';
-import { getUserList } from '@/models/queries/apis/user';
+import { getUserList, updateUser } from '@/models/queries/apis/user';
 // Query key
 import { KEY_COMPANY, KEY_USERS } from '@/models/queries/key';
 import { PLIPSimpleLoadingContainer } from './Page';
@@ -104,11 +104,15 @@ const OrganizationInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
   const { isLoading, data } = useQuery([KEY_USERS, companyId], async () => await getUserList(companyId));
 
   // 쿼리 클라이언트
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   // 폼 객체 생성
   const [form] = Form.useForm();
   // Drawer 열기/닫기 상태
   const [visible, setVisible] = useState<boolean>(false);
+  // 데이터 동기
+  // const { mutate } = useMutation(async ({ data }: any) => {
+  //   return await updateUser(data.id, data);
+  // });
 
   /** [Event handler] Drawer 열기 */
   const onOpen = useCallback((record: any) => {
@@ -121,7 +125,15 @@ const OrganizationInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
   const onClose = useCallback(() => setVisible(false), []);
   /** [Event handler] 테이블 데이터 변경 저장 */
   const onSetTable = (record: any) => {
-    queryClient.invalidateQueries([KEY_USERS, companyId]);
+    // mutate({ data: record }, {
+    //   onSuccess: async (response) => {
+    //     queryClient.setQueryData([KEY_USERS, companyId], (oldData: any) => {
+    //       const index: number = oldData.findIndex((elem: any): boolean => elem.id === record.id);
+    //       return index === oldData.length - 1 ? [...oldData.splice(0, index), record] : [...oldData.splice(0, index), record, ...oldData.splice(index + 1)];
+    //     });
+    //   },
+    //   onError: () => queryClient.invalidateQueries([KEY_USERS, companyId])
+    // });
     successNotification('변경사항이 저장되었습니다.');
     onClose();
   }
@@ -137,7 +149,7 @@ const OrganizationInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
         { title: '연락처', dataIndex: 'contact', key: 'contact' },
         { title: '가입일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => moment.unix(value / 1000).format('YYYY-MM-DD') },
         { title: '담당업무', dataIndex: 'task', key: 'task' },
-        { title: '', dataIndex: 'edit', key: 'edit', render: (_: any, record: any): JSX.Element => (<EditButton onOpen={() => onOpen(record)} />) },
+        { title: '', dataIndex: 'id', key: 'id', render: (_: any, record: any): JSX.Element => (<EditButton onOpen={() => onOpen(record)} />) },
       ]} loading={isLoading} dataSource={isLoading ? [] : data ? data.map((elem: any): any => ({ ...elem, key: elem.id })) : []} style={{ marginBottom: 48 }} />
       <StyledInviteForm>
         <p className='content'>아직 가입되어 있지 않은 담당자가 있다면?</p>
@@ -156,7 +168,7 @@ const EditButton: React.FC<any> = ({ onOpen }): JSX.Element => {
   );
 }
 /** [Internal Component] 조직 구성원 정보 수정을 위한 Drawer */
-const EditableDrawer: React.FC<any> = ({ form, index, onClose, onSetTable, visible }): JSX.Element => { 
+const EditableDrawer: React.FC<any> = ({ form, onClose, onSetTable, visible }): JSX.Element => {
   /** [Event handler] 데이터 저장 */
   const onSave = useCallback(() => onSetTable(form.getFieldsValue()), [form]);
 
@@ -164,6 +176,9 @@ const EditableDrawer: React.FC<any> = ({ form, index, onClose, onSetTable, visib
   return (
     <Drawer closable={false} extra={<DrawerExtra onClick={onClose} />} footer={<DrawerFooter onSave={onSave} />} onClose={onClose} title='조직 구성원 정보 수정하기' visible={visible}>
       <Form form={form}>
+        <Form.Item name='id' hidden>
+          <Input disabled />
+        </Form.Item>
         <PLIPInputGroup label='이름'>
           <Form.Item name='userName'>
             <Input disabled />

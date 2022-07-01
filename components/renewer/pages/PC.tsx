@@ -1,6 +1,6 @@
 // Component
-import { CustomTabPane } from '@/components/styled/PC';
 import { Tabs } from 'antd';
+import { CustomTabPane } from '@/components/styled/PC';
 import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from "@/components/PCTable";
 
 const PCMain: React.FC<any> = (): JSX.Element => {

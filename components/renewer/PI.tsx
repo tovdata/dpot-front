@@ -2,8 +2,9 @@ import { useCallback, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useRecoilValue } from "recoil"
 // Component
-import { warningNotification } from "../common/Notification";
-import { EditableTable, EditableTableForm } from "../common/Table";
+import { Button } from "antd";
+import { warningNotification } from "@/components/common/Notification";
+import { EditableTable, EditableTableForm } from "@/components/common/Table";
 // Header
 import { fniTableHeader, piTableHeader } from "@/models/static/header";
 // State
@@ -16,7 +17,6 @@ import { SelectOptionsByColumn } from "@/models/type";
 import { SERVICE_FNI, SERVICE_PI } from "@/models/queries/type";
 // Query
 import { getFNIDatas, getPIDatas, setDataByTableType } from "@/models/queries/apis/manage";
-import { Button } from "antd";
 
 /** [Component] 가명정보 수집 및 이용 테이블 */
 export const FNITable: React.FC<any> = ({ serviceId }): JSX.Element => {

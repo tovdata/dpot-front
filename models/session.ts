@@ -105,6 +105,29 @@ const localStorageEffects = (key: string) => ({ setSelf, onSet }: any): any => {
   }
 }
 /**
+ * [Internal Function] 세션 스토리지에 대한 데이터 동기 (조회/저장)
+ * @param key 데이터 키
+ * @returns 조회 시, 데이터 조회 결과
+ */
+ const sessionStorageEffects = (key: string) => ({ setSelf, onSet }: any): any => {
+  if (typeof window !== 'undefined') {
+    // Get
+    const value: string|null = window.sessionStorage.getItem(key);
+    if (value !== null) {
+      setSelf(JSON.parse(value));
+    }
+    // Set
+    onSet((newValue: any) => {
+      // ID 속성에 대한 값이 공백이 아닌 경우에는 Add/Update, 공백인 경우에는 Delete
+      if (newValue.id !== '') {
+        window.sessionStorage.setItem(key, JSON.stringify(newValue));
+      } else {
+        window.sessionStorage.removeItem(key);
+      }
+    });
+  }
+}
+/**
  * [Internal Function] 현재 시간 (Milliseconds)
  * @returns milliseconds
  */
@@ -117,17 +140,17 @@ const accessTokenAtom = atom<any>({
   key: `AccessTokenAtom${unixTimestamp()}`,
   default: undefined
 });
-/** [Atom] 사이드 메뉴 확장 여부  */
-const expandSideAtom = atom<boolean>({
-  key: `expandSideAtom${unixTimestamp()}`,
-  default: false,
-  effects: [localStorageEffects(KEY_SIDEMENU)],
-});
 /** [Atom] 회사 정보 */
 const companyAtom = atom<Company>({
   key: `companyAtom${unixTimestamp()}`,
   default: defaultCompany,
   effects: [localStorageEffects(KEY_COMPANY)],
+});
+/** [Atom] 사이드 메뉴 확장 여부  */
+const expandSideAtom = atom<boolean>({
+  key: `expandSideAtom${unixTimestamp()}`,
+  default: true,
+  effects: [sessionStorageEffects(KEY_SIDEMENU)],
 });
 /** [Atom] 서비스 정보 */
 const serviceAtom = atom<Service>({
@@ -142,24 +165,6 @@ const userAtom = atom<User>({
   effects: [localStorageEffects(KEY_USER)],
 });
 
-/** [Selector] 회사 정보 */
-export const companySelector = selector<Company>({
-  key: `companySelector${unixTimestamp()}`,
-  get: ({ get }: any) => get(companyAtom),
-  set: ({ set }: any, newValue: any) => set(companyAtom, newValue)
-});
-/** [Selector] 서비스 정보 */
-export const serviceSelector = selector<Service>({
-  key: `serviceSelector${unixTimestamp()}`,
-  get: ({ get }: any) => get(serviceAtom),
-  set: ({ set }: any, newValue: any) => set(serviceAtom, newValue)
-});
-/** [Selector] 사용자 정보 */
-export const userSelector = selector<User>({
-  key: `userSelector${unixTimestamp()}`,
-  get: ({ get }: any) => get(userAtom),
-  set: ({ set }: any, newValue: any) => set(userAtom, newValue)
-});
 /** [Selector] 액세스 토큰 정보  */
 export const accessTokenSelector = selector<string>({
   key: `AccessTokenSelector${unixTimestamp()}`,
@@ -176,9 +181,27 @@ export const accessTokenSelector = selector<string>({
     if (newValue === '') clearLocalStorage();
   }
 });
+/** [Selector] 회사 정보 */
+export const companySelector = selector<Company>({
+  key: `companySelector${unixTimestamp()}`,
+  get: ({ get }: any) => get(companyAtom),
+  set: ({ set }: any, newValue: any) => set(companyAtom, newValue)
+});
 /** [Selector] 사이드 메뉴 확장 정보 */
 export const expandSideSelector = selector<boolean>({
   key: `expandSideSelector${unixTimestamp()}`,
   get: ({ get }: any) => get(expandSideAtom),
   set: ({ set }: any, newValue: any) => set(expandSideAtom, newValue)
+});
+/** [Selector] 서비스 정보 */
+export const serviceSelector = selector<Service>({
+  key: `serviceSelector${unixTimestamp()}`,
+  get: ({ get }: any) => get(serviceAtom),
+  set: ({ set }: any, newValue: any) => set(serviceAtom, newValue)
+});
+/** [Selector] 사용자 정보 */
+export const userSelector = selector<User>({
+  key: `userSelector${unixTimestamp()}`,
+  get: ({ get }: any) => get(userAtom),
+  set: ({ set }: any, newValue: any) => set(userAtom, newValue)
 });

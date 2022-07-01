@@ -6,7 +6,7 @@ import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 // Component
 import { Col, Row, Spin, Tag } from 'antd';
-import { TOVLayoutPadding } from '../common/Layout';
+import { PLIPLayoutPadding } from '@/components/styled/Layout';
 import { PLIPActivityListForDashboard, sortByDatetime } from './Activity';
 // State
 import { companySelector, serviceSelector, userSelector } from '@/models/session';
@@ -34,7 +34,7 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
   // 컴포넌트 반환
   return (
     <div style={{ backgroundColor: '#F0F5FF', height: '100%' }}>
-      <TOVLayoutPadding>
+      <PLIPLayoutPadding>
         <StyledDashboardHeader>
           <h2>{sessionUser.userName} 님 안녕하세요 😊</h2>
           <span className='company'>{sessionService.serviceName}</span>
@@ -76,7 +76,7 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
             </DashboardItemCard>
           </Col>
         </Row>
-      </TOVLayoutPadding>
+      </PLIPLayoutPadding>
     </div>
   );
 }
@@ -110,8 +110,8 @@ const ChargerForCompany: React.FC<any> = ({ companyId }): JSX.Element => {
 
   // 컴포넌트 반환
   return (
-    <Spin spinning={isLoading}>
-      <StyledDashboardItemCard>
+    <StyledDashboardItemCard>
+      <Spin spinning={isLoading}>
         <StyledDashboardItemContentForCPO>
           <StyledManagerSection>
             <StyledManagerSectionHeader>
@@ -142,8 +142,8 @@ const ChargerForCompany: React.FC<any> = ({ companyId }): JSX.Element => {
             </Row>
           </StyledManagerSection>
         </StyledDashboardItemContentForCPO>
-      </StyledDashboardItemCard>
-    </Spin>
+      </Spin>
+    </StyledDashboardItemCard>
   );
 }
 /** [Internal Component] 최근 정보 수정일 */

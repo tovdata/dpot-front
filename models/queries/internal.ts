@@ -81,7 +81,7 @@ export const createRequest = (serviceId: string, mode: string, data: any): Reque
  * @param data 요청에 필요한 데이터
  * @returns 정의된 Request 객체
  */
- export const createRequestForData = async (serviceId: string, mode: string, data: any): Promise<RequestDF> => {
+ export const createRequestForManage = async (serviceId: string, mode: string, data: any): Promise<RequestDF> => {
   // 데이터 복사 (깊은 복사)
   const copy: any = JSON.parse(JSON.stringify(data));
   // Timestamp 추출

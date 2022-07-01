@@ -18,19 +18,7 @@ interface AgreementItemProps {
   name: string;
 }
 
-// /** [Component] 회원가입 컴포넌트 */
-// const PLIPSignup: React.FC<any> = (): JSX.Element => {
-//   return (
-//     <StyledSigninContainer>
-//       <StyledSignupForm>
-//         <SignupHeader />
-//         <SignupForm />
-//       </StyledSignupForm>
-//     </StyledSigninContainer>
-//   );
-// }
-
-/** [Internal Component] 회원가입 헤더 */
+/** [Component] 회원가입 헤더 */
 export const SignupHeader: React.FC<any> = (): JSX.Element => {
   return (
     <StyledSignupHeader>
@@ -38,7 +26,7 @@ export const SignupHeader: React.FC<any> = (): JSX.Element => {
     </StyledSignupHeader>
   );
 }
-/** [Internal Component] 회원가입 폼 */
+/** [Component] 회원가입 폼 */
 export const SignupForm: React.FC<any> = (): JSX.Element => {
   // 회원가입 폼 객체 정의
   const [form] = Form.useForm();
@@ -76,7 +64,7 @@ export const SignupForm: React.FC<any> = (): JSX.Element => {
       setLoading(false);
       return false;
     }
-  }, [form, loading, validate]);
+  }, [form]);
   /** [Event handler] 이메일 중복 확인 */
   const onDuplicate = useCallback((value: string): void => {
     // 로딩 상태 설정
@@ -93,7 +81,7 @@ export const SignupForm: React.FC<any> = (): JSX.Element => {
         setLoading(false);
       }, 600);
     }
-  }, []);
+  }, [onValidate]);
   /** [Event handler] 회원가입 */
   const onSignup = useCallback(async () => {
     if (validate.status === 'success') {
@@ -169,6 +157,7 @@ export const SignupForm: React.FC<any> = (): JSX.Element => {
     </Form>
   );
 }
+
 /** [Internal Component] 약관 동의 폼 */
 const Agreement: React.FC<any> = (): JSX.Element => {
   return (
