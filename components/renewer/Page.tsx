@@ -7,6 +7,12 @@ import Image from 'next/image';
 import { StyledContainer, StyledFullScreen } from '../styled/Page';
 // Icon
 const LoadingOutlined: ComponentType<{spin: boolean, style: React.CSSProperties}> = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.LoadingOutlined));
+// Images
+import Image401 from '@/public/images/401.png';
+import Image403 from '@/public/images/403.png';
+import Image404 from '@/public/images/404.png';
+import ImageEmail from '@/public/images/email.png';
+import ImageServiceDev from '@/public/images/service_develop.png';
 
 /** [Interface] Properties for PLIPPage */
 interface PLIPPageProps {
@@ -14,6 +20,7 @@ interface PLIPPageProps {
 }
 /** [Interface] Properties for PLIPContainerLayout */
 interface PLIPContainerLayout {
+  buttonText?: string;
   description?: React.ReactNode;
   icon: JSX.Element;
   isBack?: boolean;
@@ -24,7 +31,7 @@ interface PLIPContainerLayout {
 /** [Component] 로딩 페이지 */
 export const PLIPAwaitingApprovalPage: React.FC<any> = (): JSX.Element => {
   return (
-    <PLIPPageLayout icon={AwaitingApprovalIcon} title={<>회사 관리자의 승인을 기다리고 있어요.<br/>승인이 완료되면 알려주신 이메일로 연락드릴게요 👍</>} />
+    <PLIPPageLayout buttonText='로그아웃' icon={AwaitingApprovalIcon} isBack redirectPath='/signout' title={<>회사 관리자의 승인을 기다리고 있어요.<br/>승인이 완료되면 알려주신 이메일로 연락드릴게요 👍</>} />
   );
 }
 /** [Component] 심플 로딩 컨테이너 */
@@ -77,7 +84,7 @@ export const PLIPPreparing: React.FC<any> = (): JSX.Element => {
 }
 
 /** [Internal Component] 컨테이너 레이아웃 */
-const PLIPContainerLayout: React.FC<PLIPContainerLayout> = ({ description, icon, isBack, redirectPath, title }): JSX.Element => {
+const PLIPContainerLayout: React.FC<PLIPContainerLayout> = ({ buttonText, description, icon, isBack, redirectPath, title }): JSX.Element => {
   const onRedirect = useCallback(() => Router.push(redirectPath ? redirectPath : '/'), [redirectPath]);
   // 컴포넌트 반환
   return (
@@ -90,7 +97,7 @@ const PLIPContainerLayout: React.FC<PLIPContainerLayout> = ({ description, icon,
             <p>{description}</p>
           ) : (<></>)}
           {isBack ? (
-            <Button onClick={onRedirect} type='default'>메인 화면으로</Button>
+            <Button onClick={onRedirect} type='default'>{buttonText ? buttonText : '메인 화면으로'}</Button>
           ) : (<></>)}
         </div>
       </div>
@@ -98,7 +105,7 @@ const PLIPContainerLayout: React.FC<PLIPContainerLayout> = ({ description, icon,
   )
 }
 /** [Internal Component] 페이지 레이아웃 */
-const PLIPPageLayout: React.FC<PLIPContainerLayout> = ({ description, icon, isBack, redirectPath, title }): JSX.Element => {
+const PLIPPageLayout: React.FC<PLIPContainerLayout> = ({ buttonText, description, icon, isBack, redirectPath, title }): JSX.Element => {
   const onRedirect = useCallback(() => Router.push(redirectPath ? redirectPath : '/'), [redirectPath]);
   // 컴포넌트 반환
   return (
@@ -112,7 +119,7 @@ const PLIPPageLayout: React.FC<PLIPContainerLayout> = ({ description, icon, isBa
               <p>{description}</p>
             ) : (<></>)}
             {isBack ? (
-              <Button onClick={onRedirect} type='default'>메인 화면으로</Button>
+              <Button onClick={onRedirect} type='default'>{buttonText ? buttonText : '메인 화면으로'}</Button>
             ) : (<></>)}
           </div>
         ) : (<></>)}
@@ -123,23 +130,23 @@ const PLIPPageLayout: React.FC<PLIPContainerLayout> = ({ description, icon, isBa
 
 /** [Internal Component] 로딩 아이콘 */
 const AwaitingApprovalIcon: JSX.Element = (
-  <Image src='/images/email.svg' />
+  <Image src={ImageEmail} alt='Waiting' priority />
 );
 /** [Internal Component] 401 아이콘 */
 const Icon401: JSX.Element = (
-  <Image src='/images/401.svg' />
+  <Image src={Image401} alt='Unauthorization' priority />
 );
 /** [Internal Component] 403 아이콘 */
 const Icon403: JSX.Element = (
-  <Image src='/images/403.svg' />
+  <Image src={Image403} alt='Forbidden' priority />
 );
 /** [Internal Component] 404 아이콘 */
 const Icon404: JSX.Element = (
-  <Image src='/images/404.svg' />
+  <Image src={Image404} alt='Not found' priority />
 );
 /** [Internal Component] 서비스 준비 중 아이콘 */
 const PreparingIcon: JSX.Element = (
-  <Image src='/images/service_develop.svg' />
+  <Image src={ImageServiceDev} alt='Implementing' priority />
 );
 /** [Internal Component] 로딩 아이콘 */
 const SimpleLoadingIcon: JSX.Element = (

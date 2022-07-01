@@ -1,4 +1,4 @@
-import type { NextPage } from 'next'
+import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 // Component
 import { StyledSigninContainer } from '@/components/styled/Signin';

@@ -6,7 +6,7 @@ import { decode } from "jsonwebtoken";
 // Type
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_DPI, SERVICE_FNI, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from "@/models/queries/type";
 // Query
-import { setActivity } from "@/models/queries/api";
+import { setActivity } from "@/models/queries/apis/activity";
 
 export const blankCheck = (value: string): boolean => {
   const blankPattern: RegExp = /^\s+|\s+$/g;

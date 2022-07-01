@@ -17,7 +17,7 @@ module.exports = {
   trailingSlash: true,
   images: {
     loader: 'akamai',
-    path: '/'
+    path: 'http://localhost:3000/'
   },
   webpack(config) {
     config.module.rules.push({
@@ -26,4 +26,4 @@ module.exports = {
     });
     return config;
   }
-}
+};
