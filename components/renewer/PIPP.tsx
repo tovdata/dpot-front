@@ -1,9 +1,24 @@
 import dynamic from 'next/dynamic';
+import type { ComponentType } from 'react'; 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQueries, useQuery, useQueryClient } from 'react-query';
 // Component
-import { Button, Input, Modal, Table, Tag } from 'antd';
-import { StyledLinkButton, StyledPageHeader, StyledPIPPName } from '@/components/styled/PIPP';
+import { Button, Col, Input, Modal, Row, Table, Tag } from 'antd';
+import { PageHeaderContainStep } from '@/components/common/Header';
+import { successNotification, warningNotification } from '@/components/common/Notification';
 import { StyledTableForm, TableFormHeader } from '@/components/common/Table';
+import { StyledLinkButton, StyledPageHeader, StyledPIPPName } from '@/components/styled/PIPP';
+const CollapseForPIPP: ComponentType<any> = dynamic(() => import('@/components/pipp/Collapse').then((mod: any): any => mod.CollapseForPIPP));
+const ConfirmSection: ComponentType<any> = dynamic(() => import('@/components/pipp/ConfirmForm').then((mod: any): any => mod.ConfirmSection));
+const InputSection: ComponentType<any> = dynamic(() => import('@/components/pipp/EditForm').then((mod: any): any => mod.InputSection));
+const PLIPLoadingContainer = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIPLoadingContainer));
+const PreviewSection: ComponentType<any> = dynamic(() => import('@/components/pipp/EditForm').then((mod: any): any => mod.PreviewSection));
+import { DRModal } from '../pipp/Documentation';
+// Component (table)
+const FNITable: ComponentType<any> = dynamic(() => import('@/components/renewer/PI').then((mod: any): any => mod.FNITable), { ssr: false });
+const PITable: ComponentType<any> = dynamic(() => import('@/components/renewer/PI').then((mod: any): any => mod.PITable), { ssr: false });
+// Data
+import { defaultPIPPData } from '@/models/static/data';
 // Icon
 const CheckCircleOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.CheckCircleOutlined));
 const EditOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.EditOutlined));
@@ -14,27 +29,17 @@ const RedoOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): 
 // Module
 import { blankCheck, copyTextToClipboard } from 'utils/utils';
 import moment from 'moment';
+// Statement
+import { statementForPIPP as stmt } from '@/models/static/statement';
 // Type
 import { DocProgressStatus } from '@/models/type';
-
-import { statementForPIPP as stmt } from '@/models/static/statement';
-import { useRecoilValue } from 'recoil';
-import { companySelector } from '@/models/session';
-import { useQueries, useQuery } from 'react-query';
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PIPP, SERVICE_PPI } from '@/models/queries/type';
-import { getDatasByTableType } from '@/models/queries/api';
-import { successNotification, warningNotification } from '../common/Notification';
+// Query
+import { getCompany } from '@/models/queries/apis/company';
 import { getPIPPData, setPIPPData } from '@/models/queries/apis/pipp';
-import { PLIPLoadingContainer } from './Page';
-import { PageHeaderContainStep } from '../common/Header';
-import { CollapseForPIPP } from '../pipp/Collapse';
-import { CreatePIPP } from '../PIPP';
-import { ConfirmSection } from '../pipp/ConfirmForm';
-import { DRModal } from '../pipp/Documentation';
-import { PreviewSection } from '../pipp/EditForm';
-
-import { defaultPIPPData } from '@/models/static/data';
-
+import { getDatasByTableType } from '@/models/queries/api';
+// import { FNITable, PITable } from '../PITable';
+import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from '../PCTable';
 
 /** [Interface] PIPP process */
 interface PIPPProcess {
@@ -48,19 +53,25 @@ type ScrollPosition = 'start'|'end';
 /**
  * [Component] 개인정보 처리방침 생성 페이지
  */
-export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, progress, serviceId, status }: any): JSX.Element => {
-  // 로컬 스토리지 내 회사 정보 조회
-  const company = useRecoilValue(companySelector);
-
+export const CreatePIPPForm: React.FC<any> = ({ companyId, list, onBack, onUpdateStatus, progress, serviceId, status }: any): JSX.Element => {
   // 처리방침 생성 과정에서 사용될 데이터 구조
-  const [data, setData] = useState<any>({});
+  const [data, setData] = useState<any>(defaultPIPPData);
   // 초기 처리방침 데이터 설정
   useEffect(() => {
-    (async () => {
-      const defaultPIPPData = (await import('@/models/static/data')).defaultPIPPData;
-      setData({ ...defaultPIPPData, dInfo: { ...defaultPIPPData.dInfo, manager: { ...defaultPIPPData.dInfo.manager, charger: { name: company.manager.name, position: company.manager.position, contact: company.manager.email } } } });
-    })();
-  }, []);
+    if (progress === 'create') {
+      (async () => {
+        // 회사 정보 조회
+        const response = await getCompany(companyId);
+        // 개인정보 보호책임자 정의
+        let manager = { name: '', position: '', email: '' };
+        if (response && response.manager) {
+          manager = response.manager;
+        }
+        // 개인정보 처리방침 데이터 정의
+        setData({ ...data, dInfo: { ...data.dInfo, manager: { ...data.dInfo.manager, charger: { name: manager.name, position: manager.position, contact: manager.email } } } });
+      })();
+    }
+  }, [companyId, progress]);
   // 데이터 불러오기에 대한 상태
   const [loading, setLoading] = useState<boolean>(true);
   // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
@@ -71,8 +82,13 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
   useEffect(() => setLoading(isLoadingForData || results.some((result: any): boolean => result.isLoading)), [isLoadingForData, results]);
   // 임시 저장 데이터가 있을 경우, 데이터 갱신
   useEffect(() => {
-    if (progress === 'update' && !isLoadingForData && loadData !== undefined) {
-      setData({ ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi } })
+    if (data && progress === 'update' && !isLoadingForData && loadData !== undefined) {
+      // 개인정보 처리방침 데이터 정의
+      const combined: any = { ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi } };
+      // 개인정보 보호책임자 정의
+      combined.dInfo.manager = loadData.dInfo.manager ? { ...loadData.dInfo.manager, charger: data.dInfo.manager.charger } : { charger: data.dInfo.manager.charger };
+      // 설정
+      setData(combined);
     }
   }, [isLoadingForData, loadData, progress]);
 
@@ -112,7 +128,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
 
   // 요청으로 응답된 데이터 가공 및 처리
   useEffect(() => {
-    if (!loading) {
+    if (data && !loading) {
       if (!initQuery) {
         setInitQuery(true);
         // 가공을 위한 임시 데이터 셋 정의
@@ -154,6 +170,8 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
     }
   }, [initQuery, loading]);
 
+  useEffect(() => console.log('render', data), [data]);
+
   /** [Event handler] 모달 열기 */
   const onOpen = useCallback((): void => setVisible(true), []);
    /** [Event handler] 모달 닫기 */
@@ -162,7 +180,6 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
   const onRefresh = useCallback((): void => setInitQuery(false), []);
   /** [Event handler] 데이터 변경 이벤트 */
   const onChange = (step: string, value: any, category: string, property?: string, subProperty?: string): void => {
-    console.log('c', data.aInfo);
     if (property!== undefined && subProperty !== undefined) {
       setData({ ...data, [step]: { ...data[step], [category]: { ...data[step][category], [property]: { ...data[step][category][property], [subProperty]: value } } } });
     } else if (property !== undefined) {
@@ -171,9 +188,6 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
       setData({ ...data, [step]: { ...data[step], [category]: value } });
     }
   };
-
-  useEffect(() => console.log('change', data.aInfo), [data]);
-
   /** [Event handler] 포커스에 따라 스코롤 이동 이벤트 (Prview part) */
   const onFocus = useCallback((type: string, index: number, pos?: ScrollPosition) => { refs[type].current[index] ? refs[type].current[index].scrollIntoView((type === 'preview' && (index === 1 || index === 3 || index === 4 || index === 7)) ? { block: pos ? pos : 'start' } : { behavior: 'smooth' , block: pos ? pos : 'start' }) : undefined }, [refs]);
   /** [Event handler] 단계 이동 이벤트 */
@@ -307,17 +321,25 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
       ) : (
         <>
           <PageHeaderContainStep current={stepIndex} goTo='/doc/pipp' onBack={onBack} onMove={onMoveStep} onSave={onSave} title='개인정보 처리방침 만들기' steps={steps} />
-          {stepIndex === 0 ? (
+          {stepIndex === 0 ? data ? (
             <div style={{ marginBottom: '3rem' }}>
               <CollapseForPIPP data={data.aInfo} items={itemForPI} onChange={onChange} />
             </div>
-          ) : stepIndex === 1 ? (
-            <CreatePIPP data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTable={ref} />
+          ) : (
+            <PLIPLoadingContainer />
+          ) : stepIndex === 1 ? data ? (
+            <CreatePIPPSection data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTable={ref} serviceId={serviceId} />
+          ) : (
+            <PLIPLoadingContainer />
           ) : stepIndex === 2 ? (
             <ConfirmSection data={data.cInfo} onChange={onChange} prevList={list.filter((item: any): boolean => item.version !== 0)} sectionType='cInfo' />
           ) : (<></>)}
           <DRModal centered onCancel={onClose} onOk={() => onSave(false)} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
-            <PreviewSection data={data} preview={false} prevList={list.filter((item: any): boolean => item.version !== 0)} refTables={ref} stmt={stmt(data.dInfo.name)} />
+            {data ? (
+              <PreviewSection data={data} preview={false} prevList={list.filter((item: any): boolean => item.version !== 0)} refTables={ref} stmt={stmt(data.dInfo.name)} />
+            ) : (
+              <PLIPLoadingContainer />
+            )}
           </DRModal>
           <Modal centered footer={false} onCancel={() => {setVisible2(false); onBack()}} visible={visible2} width={420}>
             <div style={{ textAlign: 'center' }}>
@@ -355,9 +377,86 @@ export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
   );
 }
 
-/**
- * [Internal Component] 개인정보 처리방침 메인 페이지 Header (현재 문서 작성에 대한 상태에 따라 내용 변경)
- */
+/** [Internal Component] 개인정보 처리방침 생성 섹션 */
+const CreatePIPPSection: React.FC<any> = ({ onChange, data, onFocus, onRefresh, refElements, refTable, serviceId }): JSX.Element => {
+  // Query Client 생성
+  const queryClient = useQueryClient();
+  // 편집을 위한 모달 오픈 상태
+  const [open, setOpen] = useState<boolean>(false);
+  // 참조 테이블 유형
+  const [refType, setRefType] = useState<string>('');
+
+  /** [Event handler] 모달 열기 */
+  const onOpen = useCallback((type: string): void => {
+    setRefType(type);
+    setOpen(true);
+  }, []);
+  /** [Event handler] 모달 닫기 */
+  const onClose = useCallback((): void => {
+    setOpen(false);
+    queryClient.invalidateQueries(refType);
+    onRefresh();
+  }, [onRefresh, queryClient]);
+
+  // 컴포넌트 반환
+  return (
+    <>
+      <Row gutter={74} style={{ height: 'calc(100vh - 324px)' }}>
+        <Col span={12} style={{ height: '100%', overflowY: 'auto' }}>
+          <InputSection data={data.dInfo} onChange={onChange} onFocus={onFocus} onOpenModal={onOpen} refElements={refElements.input} refTables={refTable} sectionType='dInfo' />
+        </Col>
+        <Col span={12} style={{ borderLeft: '1px solid rgba(156, 156, 156, 0.3)', height: '100%', overflowY: 'auto' }}>
+          <PreviewSection data={data} preview={true} refElements={refElements.preview} refTables={refTable} stmt={stmt(data.dInfo.name)} />
+        </Col>
+      </Row>
+      <EditableModal onClose={onClose} serviceId={serviceId} type={refType} visible={open} />
+    </>
+  );
+}
+/** [Internal Component] 개인정보 관리 테이블에 대한 수정을 위한 모달 */
+ export const EditableModal: React.FC<any> = ({ onClose, serviceId, type, visible }: any): JSX.Element => {
+  // 팝업 제목, 내용에 대한 상태 정의
+  const [title, setTitle] = useState<string>('');
+  const [content, setContent] = useState<JSX.Element>(<></>);
+  // 유형에 따라 제목 및 내용 변경
+  useEffect(() => {
+    switch (type) {
+      case 'pi':
+        setTitle('개인정보 수집 및 이용');
+        setContent(<PITable serviceId={serviceId} />);
+        break;
+      case 'ppi':
+        setTitle('개인정보 제공');
+        setContent(<PPITableForm modal={true} />);
+        break;
+      case 'cpi':
+        setTitle('개인정보 위탁');
+        setContent(<CPITableForm modal={true} />);
+        break;
+      case 'fni':
+        setTitle('가명정보');
+        setContent(
+          <>
+            <h2 style={{ fontSize: 15, fontWeight: '500', marginBottom: 16 }}>가명정보 수집 및 이용</h2>
+            <FNITable modal={true} serviceId={serviceId} />
+            <div style={{ marginTop: 48 }}></div>
+            <PFNITableForm modal={true} style={{ marginBottom: 48 }} />
+            <CFNITableForm modal={true} style={{ marginBottom: 0 }} />
+          </>
+        );
+        break;
+      default:
+        setTitle('');
+        setContent(<></>);
+        break;
+    }
+  }, [type]);
+  // 컴포넌트 반환
+  return (
+    <Modal centered footer={false} maskClosable={false} onCancel={onClose} style={{ fontFamily: 'Pretendard' }} title={title} visible={visible} width='80%'>{content}</Modal>
+  );
+}
+/** [Internal Component] 개인정보 처리방침 메인 페이지 Header (현재 문서 작성에 대한 상태에 따라 내용 변경) */
 const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProcess): JSX.Element => {
   // 확인 모달 생성
   const confirm = () => Modal.confirm({

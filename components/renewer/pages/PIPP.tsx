@@ -3,13 +3,12 @@ import { ComponentType, useCallback, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import { useRecoilValue } from 'recoil';
 // Component
-// const CreatePIPPForm: ComponentType<any> = dynamic(() => import('@/components/PIPP').then((mod: any): any => mod.CreatePIPPForm), { loading: () => (<></>), ssr: false });
-import { CreatePIPPForm } from '@/components/PIPP';
+const CreatePIPPForm: ComponentType<any> = dynamic(() => import('@/components/renewer/PIPP').then((mod: any): any => mod.CreatePIPPForm), { loading: () => (<></>), ssr: false });
 const PIPPList: ComponentType<any> = dynamic(() => import('@/components/renewer/PIPP').then((mod: any): any => mod.PIPPList), { loading: () => (<></>) });
 const PLIPLayoutPadding = dynamic(() => import('@/components/styled/Layout').then((mod: any): any => mod.PLIPLayoutPadding), { loading: () => (<PLIPLoadingContainer />)});
 const PLIPLoadingContainer = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIPLoadingContainer), { loading: () => (<></>)});
 // State
-import { serviceSelector } from '@/models/session';
+import { companySelector, serviceSelector } from '@/models/session';
 // Type
 import { DocProgressStatus } from '@/models/type';
 // Query
@@ -20,7 +19,8 @@ const PIPP_LIST: string = 'pippList';
 const PIPP_STATUS: string = 'pippStatus';
 
 const PIPPMain: React.FC<any> = (): JSX.Element => {
-  // 로컬 스토리지 내 서비스 정보 조회
+  // 로컬 스토리지 내 회사 및 서비스 정보 조회
+  const sessionCompany = useRecoilValue(companySelector);
   const sessionService = useRecoilValue(serviceSelector);
   // 개인정보 처리방침 상태 조회
   const { isLoading: isLoadingForStatus, data: status } = useQuery([PIPP_STATUS, sessionService.id], async () => await getPIPPStatus(sessionService.id));
@@ -57,7 +57,7 @@ const PIPPMain: React.FC<any> = (): JSX.Element => {
           {progress === 'none' ? (
             <PIPPList list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.version - a.version) : []} onProcess={onProcess} status={status} />
           ) : (
-            <CreatePIPPForm list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.applyAt - a.applyAt) : []} onBack={onBack} onUpdateStatus={onUpdateStatus} progress={progress} serviceId={sessionService.id} status={status} />
+            <CreatePIPPForm companId={sessionCompany.id} list={isLoadingForList ? [] : list ? list.sort((a: any, b: any): number => b.applyAt - a.applyAt) : []} onBack={onBack} onUpdateStatus={onUpdateStatus} progress={progress} serviceId={sessionService.id} status={status} />
           )}
         </PLIPLayoutPadding>
       )}

@@ -71,39 +71,39 @@ export const CollapseForPIPP = ({ data, items, onChange }: any): JSX.Element => 
   }, []);
 
   /** [Event handler] 패널 사용 여부 */
-  const onUsage = (category: string, value: any) => onChange(THIS_STEP, value, category, 'usage');
+  const onUsage = useCallback((category: string, value: any) => onChange(THIS_STEP, value, category, 'usage'), [onChange]);
   /** [Event handler] (Cookie) 사용 목적 변경 */
-  const onChange1_1 = useCallback((value: string|string[]): void => onChange(THIS_STEP, value, 'cookie', 'purpose'), [onChange]);
+  const onChange1_1 = (value: string|string[]): void => onChange(THIS_STEP, value, 'cookie', 'purpose');
   /** [Event handler] (Cookie) 거부 시 불이익 변경 */
-  const onChange1_2 = useCallback((value: string|string[]): void => onChange(THIS_STEP, value, 'cookie', 'disadvantage'), [onChange]);
+  const onChange1_2 = (value: string|string[]): void => onChange(THIS_STEP, value, 'cookie', 'disadvantage');
   /** [Event handler] (Web log) 사용 목적 변경 */
-  const onChange2_1 = useCallback((value: string|string[]): void => onChange(THIS_STEP, value, 'webLog', 'purpose'), [onChange]);
+  const onChange2_1 = (value: string|string[]): void => onChange(THIS_STEP, value, 'webLog', 'purpose');
   /** [Event handler] (Web log) 거부 방법 변경 */
-  const onChange2_2 = useCallback((value: string|string[]): void => onChange(THIS_STEP, value, 'webLog', 'method'), [onChange]);
+  const onChange2_2 = (value: string|string[]): void => onChange(THIS_STEP, value, 'webLog', 'method');
   /** [Event handler] (Web log) 거부 시 불이익 변경 */
-  const onChange2_3 = useCallback((e: any): void => onChange(THIS_STEP, e.target.value, 'webLog', 'disadvantage'), [onChange]);
+  const onChange2_3 = (e: any): void => onChange(THIS_STEP, e.target.value, 'webLog', 'disadvantage');
   /** [Event handler] (Advertising) 행태 정보 항목 변경 */
-  const onChange3_1 = useCallback((value: string|string[]): void => onChange(THIS_STEP, value, 'advertising', 'items'), [onChange]);
+  const onChange3_1 = (value: string|string[]): void => onChange(THIS_STEP, value, 'advertising', 'items');
   /** [Event handler] (Advertising) 수집 방법 변경 */
-  const onChange3_2 = useCallback((e: any): void => onChange(THIS_STEP, e.target.value, 'advertising', 'method'), [onChange]);
+  const onChange3_2 = (e: any): void => onChange(THIS_STEP, e.target.value, 'advertising', 'method');
   /** [Event handler] (Advertising) 수집 목적 변경 */
-  const onChange3_3 = useCallback((e: any): void => onChange(THIS_STEP, e.target.value, 'advertising', 'purpose'), [onChange]);
+  const onChange3_3 = (e: any): void => onChange(THIS_STEP, e.target.value, 'advertising', 'purpose');
   /** [Event handler] (Advertising) 이용기간 및 처리 방법 변경 */
-  const onChange3_4 = useCallback((e: any): void => onChange(THIS_STEP, e.target.value, 'advertising', 'period'), [onChange]);
+  const onChange3_4 = (e: any): void => onChange(THIS_STEP, e.target.value, 'advertising', 'period');
   /** [Event handler] (Third party) 사업자명 변경 */
-  const onChange4_1 = useCallback((value: string|string[]): void => onChange(THIS_STEP, value, 'thirdParty', 'company'), [onChange]);
+  const onChange4_1 = (value: string|string[]): void => onChange(THIS_STEP, value, 'thirdParty', 'company');
   /** [Event handler] (Third party) 항목 변경 */
-  const onChange4_2 = useCallback((value: string|string[]): void => onChange(THIS_STEP, value, 'thirdParty', 'items'), [onChange]);
+  const onChange4_2 = (value: string|string[]): void => onChange(THIS_STEP, value, 'thirdParty', 'items');
   /** [Event handler] (Third party) 수집 방법 변경 */
-  const onChange4_3 = useCallback((e: any): void => onChange(THIS_STEP, e.target.value, 'thirdParty', 'method'), [onChange]);
+  const onChange4_3 = (e: any): void => onChange(THIS_STEP, e.target.value, 'thirdParty', 'method');
   /** [Event handler] (Third party) 보유 및 이용기간 변경 */
-  const onChange4_4 = useCallback((e: any): void => onChange(THIS_STEP, e.target.value, 'thirdParty', 'period'), [onChange]);
+  const onChange4_4 = (e: any): void => onChange(THIS_STEP, e.target.value, 'thirdParty', 'period');
   /** [Event handler] (Additional) 항목 변경 */
-  const onChange5_1 = useCallback((value: string|string[]): void => onChange(THIS_STEP, value, 'additional', 'items'), [onChange]);
+  const onChange5_1 = (value: string|string[]): void => onChange(THIS_STEP, value, 'additional', 'items');
   /** [Event handler] (Additional) 목적 변경 */
-  const onChange5_2 = useCallback((e: any): void => onChange(THIS_STEP, e.target.value, 'additional', 'purpose'), [onChange]);
+  const onChange5_2 = (e: any): void => onChange(THIS_STEP, e.target.value, 'additional', 'purpose');
   /** [Event handler] (Additional) 보유 및 이용기간 변경 */
-  const onChange5_3 = useCallback((e: any): void => onChange(THIS_STEP, e.target.value, 'additional', 'period'), [onChange]);
+  const onChange5_3 = (e: any): void => onChange(THIS_STEP, e.target.value, 'additional', 'period');
 
   // Return an element
   return (
@@ -166,7 +166,7 @@ const CDPCollapseHeader: React.FC<CDPCollapseHeaderProps> = ({ description, titl
 /** [Internal Component] Collapse panel (for create a document part) */
 const CDPCollapsePanel: React.FC<CDPCollapsePanelProps> = ({ children, header, id, onChange, status, ...props }): JSX.Element => {
   /** [Event handler] 패널 사용 여부 */
-  const onUsage = useCallback((e: any): void => onChange(id, e.target.value), [id]);
+  const onUsage = useCallback((e: any): void => onChange(id, e.target.value), [id, onChange]);
   // 라디오 그룹에서 사용할 옵션 생성
   const options: RadioOption[] = [{ label: '예', value: true }, { label: '아니오', value: false }];
   // 패널에 대한 헤더 도구 생성

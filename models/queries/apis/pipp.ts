@@ -15,7 +15,7 @@ export const getPIPPData = async (serviceId: string): Promise<any> => {
     // 응답 데이터 처리
     const result: any = await extractData(response);
     // 데이터 반환
-    return result.result ? result.data : undefined;
+    return result.result ? result.data ? result.data.data : undefined : undefined;
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return undefined;

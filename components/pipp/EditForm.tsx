@@ -1,5 +1,5 @@
 // Component
-import { Col, Button, Collapse, Input, Radio, Row, Space, Select, TreeSelect, Table, Menu, Dropdown } from 'antd';
+import { Col, Button, Collapse, Input, Radio, Row, Space, TreeSelect, Table } from 'antd';
 import { DIInputGroup, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject } from './Documentation';
 import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DRLabelingHeader, DRLabelingItem, DTCForm, DTCItem } from './Documentation';
 import { AddableTagSelect } from '../common/Select';
@@ -8,16 +8,9 @@ import { certificationForPIPP, methodOfConfirmConsentOfLegalRepresentative, peri
 import { YesOrNoRadioButton } from '../common/Radio';
 // Module
 import moment from 'moment';
-
-/**
- * [Internal Function] 공백 확인 함수 
- * @param value 공백 확인을 위한 문자열
- * @returns 결과 (공백이 있을 경우, true)
- */
-const blankCheck = (value: string): boolean => {
-  const blankPattern: RegExp = /^\s+|\s+$/g;
-  return value.trim().replace(blankPattern, '') === '';
-}
+import { blankCheck } from 'utils/utils';
+import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 /** [Interface] Properties for InputSection */
 interface InputSectionProps {
@@ -48,10 +41,29 @@ interface ReadableTableProps {
 
 /** [Component] 개인정보 처리방침 편집을 위한 Input section */
 export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFocus, onOpenModal, refElements, refTables, sectionType }: InputSectionProps): JSX.Element => {
-  // 예시 데이터 가공 (관계 법령에 따른 개인정보 보유 및 이용기간)
-  const exampleForPeriodPI: string[] = Object.keys(periodOfRetentionAndUseOfPersonalInformation).reduce((arr: any, law: string) => { arr.push(...periodOfRetentionAndUseOfPersonalInformation[law].map((item: string): string => `${law} : ${item}`)); return arr }, []);;
-  // 예시 데이터 가공 (법정대리인의 동의 확인 방법)
-  const exampleForMethodConsent: any[] = Object.keys(methodOfConfirmConsentOfLegalRepresentative).map((key: string): any => ({ title: key, value: methodOfConfirmConsentOfLegalRepresentative[key] })); 
+  // 예시 데이터 (관계 법령에 따른 개인정보 보유 및 이용기간)
+  const [examForPeriod, setExamForPeriod] = useState<string[]>([]);
+  // 예시 데이터 (법정대리인의 동의 확인 방법)
+  const [examForMethod, setExamForMethod] = useState<any[]>([]);
+
+  // 예시 데이터 가공
+  useEffect(() => {
+    (async () => {
+      const rawExamForPeriod = (await import('@/models/static/selectOption')).periodOfRetentionAndUseOfPersonalInformation;
+      const rawExamForMethod = (await import('@/models/static/selectOption')).methodOfConfirmConsentOfLegalRepresentative;
+      // 데이터 가공 및 설정 (관계 법령에 따른 개인정보 보유 및 이용기간)
+      setExamForPeriod(Object.keys(rawExamForPeriod).reduce((arr: any, law: string) => { arr.push(...rawExamForPeriod[law].map((item: string): string => `${law} : ${item}`)); return arr }, []));
+      // 데이터 가공 및 설정 (법정대리인의 동의 확인 방법)
+      setExamForMethod(Object.keys(rawExamForMethod).map((key: string): any => ({ title: key, value: rawExamForMethod[key] })));
+    })();
+  }, []);
+  // // 예시 데이터 가공 (관계 법령에 따른 개인정보 보유 및 이용기간)
+  // const exampleForPeriodPI: string[] = Object.keys(periodOfRetentionAndUseOfPersonalInformation).reduce((arr: any, law: string) => { arr.push(...periodOfRetentionAndUseOfPersonalInformation[law].map((item: string): string => `${law} : ${item}`)); return arr }, []);
+  // // 예시 데이터 가공 (법정대리인의 동의 확인 방법)
+  // const exampleForMethodConsent: any[] = Object.keys(methodOfConfirmConsentOfLegalRepresentative).map((key: string): any => ({ title: key, value: methodOfConfirmConsentOfLegalRepresentative[key] })); 
+
+  /** [Event handler] 변경 */
+  
   // 컴포넌트 반환
   return (
     <>
@@ -66,7 +78,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
         <DIRowHeader description='이 부분은 개인정보 처리방침에서 가장 중요한 내용입니다.\n각 업무 안에서 처리하는 목적을 모두 나열하고, 필수항목과 선택항목을 나누어 기재해야 합니다. 보유 및 이용기간은 업무별로 필요한 기간을 정하여 작성해주시면 됩니다.(항목들을 이용하는 기간 뿐만 아니라 저장·보관하는 기간이 모두 포함됩니다.)' required title='개인정보의 처리목적, 수집 항목, 보유 및 이용기간' tools={<Button onClick={(): void => { onOpenModal('pi'); onFocus('preview', 1); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>} />
         <DIRowContent>
           <DIRowSubject description='위에서 정한 기간과 별도로, 관련 법령에 따라 개인정보를 보유해야 하는 경우에는 해당되는 법령을 모두 기재해야 합니다. 아래 보기에서 선택하거나 형식에 맞춰 입력해주세요.' required title='관계 법령에 따른 개인정보의 보유 및 이용기간' />
-          <AddableTagSelect onChange={(value: string|string[]): void => onChange(sectionType, value, 'period')} onClick={() => onFocus('preview', 1, 'end')} options={exampleForPeriodPI} placeholder='법령명 : 조항(기간) 입력' value={data.period} />
+          <AddableTagSelect onChange={(value: string|string[]): void => onChange(sectionType, value, 'period')} onClick={() => onFocus('preview', 1, 'end')} options={examForPeriod} placeholder='법령명 : 조항(기간) 입력' value={data.period} />
         </DIRowContent>
       </DIRow>
       <DIRowDivider />
@@ -74,7 +86,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
         <Collapse activeKey={data.child.usage ? ['1'] : []} ghost>
           <Collapse.Panel header={<DIRowHeader description='만 14세 미만 아동의 개인정보를 처리하고 있다면 그에 관한 안내를 기재할 것을 권고하고 있습니다. 현재 법정대리인의 동의를 확인하기 위해 사용하는 방법을 아래에서 선택하면, 개인정보보호위원회에서 권장하는 안내 사항과 함께 입력됩니다.' required style={{ marginBottom: 0 }} title='만 14세 미만 아동의 개인정보를 처리하나요?' tools={<YesOrNoRadioButton onChange={(e: any): void => { onChange(sectionType, e.target.value, 'child', 'usage'); e.target.value ? onFocus('preview', 2) : undefined }} size='small' value={data.child.usage} />} />} key='1' showArrow={false}>
             <DIRowSubject required title='법정대리인의 동의 확인 방법' />
-            <TreeSelect showArrow={false} treeData={exampleForMethodConsent} treeCheckable={true} onChange={(value: string[]): void => onChange(sectionType, value, 'child', 'method')} onClick={() => onFocus('preview', 2)} placeholder='예시에서 선택' style={{ width: '100%' }} value={data.child.method} />
+            <TreeSelect showArrow={false} treeData={examForMethod} treeCheckable={true} onChange={(value: string[]): void => onChange(sectionType, value, 'child', 'method')} onClick={() => onFocus('preview', 2)} placeholder='예시에서 선택' style={{ width: '100%' }} value={data.child.method} />
           </Collapse.Panel>
         </Collapse>
       </DIRow>
@@ -219,22 +231,44 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
 }
 /** [Component] 개인정보 처리방침 편집을 위한 Preview section */
 export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, prevList, refElements, refTables, stmt }: PreviewSectionProps): JSX.Element => {
-  let webLogMethod: string[] = [...data.aInfo.webLog.method];
-  if (data.aInfo.webLog.method.includes('[웹 브라우저] (거부 방법 자동입력)')) {
-    webLogMethod = data.aInfo.webLog.method.filter((elem: string): boolean => elem !== '[웹 브라우저] (거부 방법 자동입력)');
-    webLogMethod.push('[Internet Explorer] 도구 → 인터넷 옵션 → 개인정보 → 설정 → 고급 → "쿠키의 차단" 선택', '[Microsoft Edge] 설정 → 개인정보, 검색 및 서비스 → 추적방지 → "추적방지 엄격" 선택, "Inprivate를 검색할 때 항상 엄격 추적 방지 사용", "추적 안함 요청보내기" 선택', '[Chrome] 설정 → 개인정보 및 보안 → 쿠키 및 기타 사이 데이터 → "쿠키 차단" 선택', '[Naver whale] 설정 → 개인정보 보호 → 쿠키 및 기타 사이트 데이터 → "타사 쿠키 차단" 선택', '[Firefox] 우클릭 → 페이지 정보 → 권한 → 쿠키 저장 → "기본 설정 이용" 해제, "차단" 선택');
-  }
-
-  const managerTableData: any[] = [];
-  if (!blankCheck(data.dInfo.manager.charger.name) || !blankCheck(data.dInfo.manager.charger.position) || !blankCheck(data.dInfo.manager.charger.contact)) {
-    managerTableData.push({ identity: '개인정보 보호책임자', charger: !blankCheck(data.dInfo.manager.charger.name) && !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`, `성명 : ${data.dInfo.manager.charger.name}`] : !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`] : !blankCheck(data.dInfo.manager.charger.name) ? [`성명 : ${data.dInfo.manager.charger.name}`] : [], contact: !blankCheck(data.dInfo.manager.charger.contact) ? data.dInfo.manager.charger.contact : '' });
-  }
-  if (!blankCheck(data.dInfo.manager.department.name) || !blankCheck(data.dInfo.manager.department.contact)) {
-    managerTableData.push({ identity: '개인정보 담당부서', charger: !blankCheck(data.dInfo.manager.department.name) ? [`부서명 : ${data.dInfo.manager.department.name}`] : [], contact: !blankCheck(data.dInfo.manager.department.contact) ? data.dInfo.manager.department.contact : '' });
-  }
-  if (!blankCheck(data.dInfo.manager.request.department) || !blankCheck(data.dInfo.manager.request.charger) || !blankCheck(data.dInfo.manager.request.contact)) {
-    managerTableData.push({ identity: '개인정보 열람청구', charger: !blankCheck(data.dInfo.manager.request.department) && !blankCheck(data.dInfo.manager.request.charger) ? [`부서명 : ${data.dInfo.manager.request.department}`, `담당자 성명 : ${data.dInfo.manager.request.charger}`] : !blankCheck(data.dInfo.manager.request.department) ? [`부서명 : ${data.dInfo.manager.request.department}`] : !blankCheck(data.dInfo.manager.request.charger) ? [`담당자 성명 : ${data.dInfo.manager.request.charger}`] : [], contact: !blankCheck(data.dInfo.manager.request.contact) ? data.dInfo.manager.request.contact : '' });
-  }
+  // 웹 로그 분석도구 사용 여부에 따른 문구
+  const webLogMethod: string[] = useMemo(() => {
+    let temp: string[] = [...data.aInfo.webLog.method];
+    if (temp.includes('[웹 브라우저] (거부 방법 자동입력)')) {
+      temp = temp.filter((elem: string): boolean => elem !== '[웹 브라우저] (거부 방법 자동입력)');
+      temp.push('[Internet Explorer] 도구 → 인터넷 옵션 → 개인정보 → 설정 → 고급 → "쿠키의 차단" 선택', '[Microsoft Edge] 설정 → 개인정보, 검색 및 서비스 → 추적방지 → "추적방지 엄격" 선택, "Inprivate를 검색할 때 항상 엄격 추적 방지 사용", "추적 안함 요청보내기" 선택', '[Chrome] 설정 → 개인정보 및 보안 → 쿠키 및 기타 사이 데이터 → "쿠키 차단" 선택', '[Naver whale] 설정 → 개인정보 보호 → 쿠키 및 기타 사이트 데이터 → "타사 쿠키 차단" 선택', '[Firefox] 우클릭 → 페이지 정보 → 권한 → 쿠키 저장 → "기본 설정 이용" 해제, "차단" 선택');
+    }
+    return temp;
+  }, [data.aInfo.webLog.method]);
+  // let webLogMethod: string[] = [...data.aInfo.webLog.method];
+  // if (data.aInfo.webLog.method.includes('[웹 브라우저] (거부 방법 자동입력)')) {
+  //   webLogMethod = data.aInfo.webLog.method.filter((elem: string): boolean => elem !== '[웹 브라우저] (거부 방법 자동입력)');
+  //   webLogMethod.push('[Internet Explorer] 도구 → 인터넷 옵션 → 개인정보 → 설정 → 고급 → "쿠키의 차단" 선택', '[Microsoft Edge] 설정 → 개인정보, 검색 및 서비스 → 추적방지 → "추적방지 엄격" 선택, "Inprivate를 검색할 때 항상 엄격 추적 방지 사용", "추적 안함 요청보내기" 선택', '[Chrome] 설정 → 개인정보 및 보안 → 쿠키 및 기타 사이 데이터 → "쿠키 차단" 선택', '[Naver whale] 설정 → 개인정보 보호 → 쿠키 및 기타 사이트 데이터 → "타사 쿠키 차단" 선택', '[Firefox] 우클릭 → 페이지 정보 → 권한 → 쿠키 저장 → "기본 설정 이용" 해제, "차단" 선택');
+  // }
+  // 개인정보 보호책임자 테이블 데이터
+  const managerTableData: any[] = useMemo(() => {
+    const temp: any[] = [];
+    if (!blankCheck(data.dInfo.manager.charger.name) || !blankCheck(data.dInfo.manager.charger.position) || !blankCheck(data.dInfo.manager.charger.contact)) {
+      temp.push({ identity: '개인정보 보호책임자', charger: !blankCheck(data.dInfo.manager.charger.name) && !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`, `성명 : ${data.dInfo.manager.charger.name}`] : !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`] : !blankCheck(data.dInfo.manager.charger.name) ? [`성명 : ${data.dInfo.manager.charger.name}`] : [], contact: !blankCheck(data.dInfo.manager.charger.contact) ? data.dInfo.manager.charger.contact : '' });
+    }
+    if (!blankCheck(data.dInfo.manager.department.name) || !blankCheck(data.dInfo.manager.department.contact)) {
+      temp.push({ identity: '개인정보 담당부서', charger: !blankCheck(data.dInfo.manager.department.name) ? [`부서명 : ${data.dInfo.manager.department.name}`] : [], contact: !blankCheck(data.dInfo.manager.department.contact) ? data.dInfo.manager.department.contact : '' });
+    }
+    if (!blankCheck(data.dInfo.manager.request.department) || !blankCheck(data.dInfo.manager.request.charger) || !blankCheck(data.dInfo.manager.request.contact)) {
+      temp.push({ identity: '개인정보 열람청구', charger: !blankCheck(data.dInfo.manager.request.department) && !blankCheck(data.dInfo.manager.request.charger) ? [`부서명 : ${data.dInfo.manager.request.department}`, `담당자 성명 : ${data.dInfo.manager.request.charger}`] : !blankCheck(data.dInfo.manager.request.department) ? [`부서명 : ${data.dInfo.manager.request.department}`] : !blankCheck(data.dInfo.manager.request.charger) ? [`담당자 성명 : ${data.dInfo.manager.request.charger}`] : [], contact: !blankCheck(data.dInfo.manager.request.contact) ? data.dInfo.manager.request.contact : '' });
+    }
+    return temp;
+  }, [data.dInfo.manager]);
+  
+  // if (!blankCheck(data.dInfo.manager.charger.name) || !blankCheck(data.dInfo.manager.charger.position) || !blankCheck(data.dInfo.manager.charger.contact)) {
+  //   managerTableData.push({ identity: '개인정보 보호책임자', charger: !blankCheck(data.dInfo.manager.charger.name) && !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`, `성명 : ${data.dInfo.manager.charger.name}`] : !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`] : !blankCheck(data.dInfo.manager.charger.name) ? [`성명 : ${data.dInfo.manager.charger.name}`] : [], contact: !blankCheck(data.dInfo.manager.charger.contact) ? data.dInfo.manager.charger.contact : '' });
+  // }
+  // if (!blankCheck(data.dInfo.manager.department.name) || !blankCheck(data.dInfo.manager.department.contact)) {
+  //   managerTableData.push({ identity: '개인정보 담당부서', charger: !blankCheck(data.dInfo.manager.department.name) ? [`부서명 : ${data.dInfo.manager.department.name}`] : [], contact: !blankCheck(data.dInfo.manager.department.contact) ? data.dInfo.manager.department.contact : '' });
+  // }
+  // if (!blankCheck(data.dInfo.manager.request.department) || !blankCheck(data.dInfo.manager.request.charger) || !blankCheck(data.dInfo.manager.request.contact)) {
+  //   managerTableData.push({ identity: '개인정보 열람청구', charger: !blankCheck(data.dInfo.manager.request.department) && !blankCheck(data.dInfo.manager.request.charger) ? [`부서명 : ${data.dInfo.manager.request.department}`, `담당자 성명 : ${data.dInfo.manager.request.charger}`] : !blankCheck(data.dInfo.manager.request.department) ? [`부서명 : ${data.dInfo.manager.request.department}`] : !blankCheck(data.dInfo.manager.request.charger) ? [`담당자 성명 : ${data.dInfo.manager.request.charger}`] : [], contact: !blankCheck(data.dInfo.manager.request.contact) ? data.dInfo.manager.request.contact : '' });
+  // }
   // 개인정보 수집 및 이용 데이터 및 라벨링을 위한 데이터 가공 (개인정보 수집 항목)
   const itemForPI: string[] = [];
   const pi: any[] = refTables.pi ? refTables.pi.map((row: any): void => {
@@ -259,28 +293,50 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
     return edited;
   }) : [];
   // 이전 개인정보 처리방침 목록
-  let prevPIPPList: any[] = [];
-  // 라벨링을 위한 데이터들
-  let provision: string[] = [];
-  let consignment: string[] = [];
-  const purposeForPI: string[] = [];
-  const periodForPI: string[] = [];
-  if (!preview) {
-    // 라벨링을 위한 데이터 가공 (개인정보 처리목적)
-    refTables.pi ? refTables.pi.forEach((row: any): void => row.purpose.forEach((item: string): number => !purposeForPI.includes(item) ? purposeForPI.push(item) : 0)) : undefined;
-    // 라벨링을 위한 데이터 가공 (개인정보 보유기간)
-    refTables.pi ? refTables.pi.forEach((row: any): void => row.period.forEach((item: string): number => !periodForPI.includes(item) ? periodForPI.push(item) : 0)) : undefined;
-    // 라벨링을 위한 데이터 가공 (개인정보의 제공)
-    provision = refTables.ppi ? refTables.ppi.map((row: any): string => row.recipient) : [];
-    // 라벨링을 위한 데이터 가공 (처리 위탁)
-    consignment = refTables.cpi ? refTables.cpi.map((row: any): string => row.subject) : [];
-    // 이전 개인정보 처리방침 목록 생성
-    if (data.cInfo.previous.usage) {
-      prevPIPPList.push({ label: '이전 개인정보 처리방침', value: `https://${data.cInfo.previous.url}` });
+  let prevPIPPList: any[] = useMemo(() => {
+    const temp: any[] = [];
+    if (!preview && data.cInfo.previous.usage) {
+      temp.push({ label: '이전 개인정보 처리방침', value: `https://${data.cInfo.previous.url}` });
     }
-  }
+    if (prevList) {
+      temp.unshift(...prevList.map((item: any): any => ({ label: moment.unix(item.applyAt).format('YYYY-MM-DD'), value: item.url })));
+    }
+    return temp;
+  }, [data.cInfo.previous]);
+  // 라벨링을 위한 데이터 (제3자 제공)
+  let provision: string[] = useMemo(() => !preview ? refTables.ppi ? refTables.ppi.map((row: any): string => row.recipient) : [] : [], [refTables.ppi]);
+  // 라벨링을 위한 데이터 (위탁)
+  let consignment: string[] = useMemo(() => !preview ? refTables.cpi ? refTables.cpi.map((row: any): string => row.subject) : [] : [], [refTables.cpi]);
+  // 라벨링을 위한 데이터 (수집 및 이용 목적)
+  const purposeForPI: string[] = useMemo(() =>!preview ? refTables.pi ? refTables.pi.reduce((acc: any, row: any): void => {
+    for (const elem of row.purpose) {
+      if (!acc.includes(elem)) acc.push(elem);
+    }
+    return acc;
+  }, []) : [] : [], [refTables.pi]);
+  // 라벨링을 위한 데이터 (수집 및 이용기간)
+  const periodForPI: string[] = useMemo(() =>!preview ? refTables.pi ? refTables.pi.reduce((acc: any, row: any): void => {
+    for (const elem of row.period) {
+      if (!acc.includes(elem)) acc.push(elem);
+    }
+    return acc;
+  }, []) : [] : [], [refTables.pi]);
+  // if (!preview) {
+    // 라벨링을 위한 데이터 가공 (개인정보 처리목적)
+    // refTables.pi ? refTables.pi.forEach((row: any): void => row.purpose.forEach((item: string): number => !purposeForPI.includes(item) ? purposeForPI.push(item) : 0)) : undefined;
+    // 라벨링을 위한 데이터 가공 (개인정보 보유기간)
+    // refTables.pi ? refTables.pi.forEach((row: any): void => row.period.forEach((item: string): number => !periodForPI.includes(item) ? periodForPI.push(item) : 0)) : undefined;
+    // 라벨링을 위한 데이터 가공 (개인정보의 제공)
+    // provision = ;
+    // 라벨링을 위한 데이터 가공 (처리 위탁)
+    // consignment = refTables.cpi ? refTables.cpi.map((row: any): string => row.subject) : [];
+    // 이전 개인정보 처리방침 목록 생성
+    // if (data.cInfo.previous.usage) {
+    //   prevPIPPList.push({ label: '이전 개인정보 처리방침', value: `https://${data.cInfo.previous.url}` });
+    // }
+  // }
   // 이전 개인정보 처리방침 리스트 추가
-  prevList ? prevPIPPList.unshift(...prevList.map((item: any): any => ({ label: moment.unix(item.applyAt).format('YYYY-MM-DD'), value: item.url }))) : undefined;
+  // prevList ? prevPIPPList.unshift(...prevList.map((item: any): any => ({ label: moment.unix(item.applyAt).format('YYYY-MM-DD'), value: item.url }))) : undefined;
 
   // 컴포넌트 반환
   return (
