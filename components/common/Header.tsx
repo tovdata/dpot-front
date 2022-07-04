@@ -1,59 +1,11 @@
 import styled from 'styled-components';
 import { useRouter, NextRouter } from 'next/router';
 // Component
-import { Button, Col, Modal, PageHeader, Row, Steps, Tag } from 'antd';
+import { Button, Col, Modal, Row, Steps } from 'antd';
 // Icon
-import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons'
-import { AiOutlineBell, AiOutlineLogout } from 'react-icons/ai';
+import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { VscChevronLeft } from 'react-icons/vsc';
 
-// Styled element (HeaderNav)
-const StyledHeaderNav = styled.div`
-  align-items: center;
-  background-color: #ffffff;
-  box-shadow: inset 0px -1px 0px #f0f0f0;
-  display: flex;
-  height: 3.5rem;
-  justify-content: space-between;
-  padding: 0 1.875rem;
-  position: relative;
-  user-select: none;
-  width: 100vw;
-  z-index: 99;
-`;
-// Styled element (HeaderLogo)
-const StyledHeaderLogo = styled.div`
-  background-color: #C4C4C4;
-  border-radius: 0.25rem;
-  height: 1.5rem;
-  width: 5rem;
-`;
-// Styled element (HeaderTool)
-const StyledHeaderTool = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: end;
-  position: relative;
-`;
-// Styled element (HeaderToolItem)
-const StyledHeaderToolItem = styled.span`
-  align-items: center;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  margin-right: 0.875rem;
-  height: 1.5rem;
-  width: 1.5rem;
-  transition: background-color 0.25s;
-  &:last-child {
-    margin-right: 0;
-  }
-  &:active,
-  &:hover {
-    background-color: #1890FF16;
-  }
-`;
 // Styled component (pageHeader)
 const StyledPageHeader = styled.div`
   margin-bottom: 2rem;
@@ -91,34 +43,32 @@ const StyledPageTitle = styled.h2`
 `;
 
 /** [Interface] Properties for page header */
-interface PageHeaderProps {
+interface TOVPageTitleProps {
   title: string;
+  style?: React.CSSProperties;
 }
 /** [Interface] Properties for page header contain step */
-interface PageHeaderContainStepProps extends PageHeaderProps {
+interface PageHeaderContainStepProps extends TOVPageTitleProps {
   current: number;
+  canTemporarySave?: boolean;
   goTo?: string;
   onBack?: () => void;
   onMove: (type: string) => void;
+  onSave: (temp?: boolean) => void;
   steps: string[];
 }
 
-/** [Component] Main header */
-export const Header = (): JSX.Element => {
+/** [Component] 페이지 제목 */
+export const TOVPageTitle: React.FC<TOVPageTitleProps> = ({ title, style }): JSX.Element => {
   return (
-    <StyledHeaderNav>
-      <StyledHeaderLogo />
-      <StyledHeaderTool>
-        <StyledHeaderToolItem><AiOutlineBell /></StyledHeaderToolItem>
-        <StyledHeaderToolItem><AiOutlineLogout /></StyledHeaderToolItem>
-      </StyledHeaderTool>
-    </StyledHeaderNav>
-  )
+    <h2 style={{ color: '#000000D9', fontSize: 20, fontWeight: '600', lineHeight: '28px', ... style }}>{title}</h2>
+  );
 }
+
 /** [Component] Page header contain step */
-export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, title, steps }: PageHeaderContainStepProps): JSX.Element => {
+export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, onSave, title, steps, canTemporarySave = true }: PageHeaderContainStepProps): JSX.Element => {
   // Get a router
-  const router: NextRouter = useRouter(); 
+  const router: NextRouter = useRouter();
   // Create a step item
   const items: JSX.Element[] = steps.map((item: string, index: number): JSX.Element => current === index ? (<Steps.Step key={index} status='process' title={item} />) : current < index ? (<Steps.Step key={index} status='wait' title={item} />) : (<Steps.Step key={index} status='finish' title={item} />));
   // Create an event handler (onBackRoute)
@@ -158,25 +108,10 @@ export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, title, st
       <StyledPageHeaderExtra>
         {current > 0 ? <Button type='default' onClick={() => onMove('prev')}>이전</Button> : <span></span>}
         <div>
-          <Button type='default'>임시저장</Button>
+          {canTemporarySave && <Button onClick={() => onSave(true)} type='default'>임시저장</Button>}
           {current < steps.length - 1 ? <Button type='primary' onClick={() => onMove('next')} style={{ marginLeft: 16 }}>다음</Button> : <Button onClick={() => onMove('complete')} style={{ marginLeft: 16 }} type='primary'>완료</Button>}
         </div>
       </StyledPageHeaderExtra>
     </StyledPageHeader>
-  );
-}
-/**
- * [Component] Page header to check a document processing
- */
-export const DocumentProcessingStatusHeader: React.FC<any> = ({ description, onClick, status, style, title }: any): JSX.Element => {
-  // 상태 관련 엘리먼트 생성
-  const statusElement: JSX.Element = (status !== undefined ? status === 'processing' ? <Tag color='geekblue'>Processing</Tag> : <Tag color='green'>Completed</Tag> : <Tag color='default'>Not found</Tag>);
-  // Extra 관련 엘리먼트 생성
-  const extraElement: JSX.Element[] = [(<Button icon={<PlusOutlined />} key={1} onClick={onClick} type='primary'>문서 만들기</Button>)];
-  // 생성된 엘리먼트 반환
-  return (
-    <PageHeader extra={extraElement} style={{ paddingLeft: 0, paddingRight: 0, userSelect: 'none', ...style }} tags={statusElement} title={title}>
-      {description ? <p style={{ color: '#8B8B8B', fontSize: 14 }}>{description}</p> : undefined}
-    </PageHeader>
   );
 }

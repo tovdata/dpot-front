@@ -1,18 +1,23 @@
 /** @type {import('next').NextConfig} */
+// const withBundleAnalyzer = require('@next/bundle-analyzer')({
+//   enabled: process.env.ANALYZE === 'true',
+// });
+// module.exports = withBundleAnalyzer({});
 
 module.exports = {
-  reactStrictMode: true,
+  // reactStrictMode: true,
   async rewrites() {
     return [
       {
         source: '/server/:path*',
-        destination: 'https://dpot-dev.tovdata.com:8081/api/:path*',
+        destination: 'https://api-dev.plip.kr:8081/api/:path*',
       },
     ];
   },
+  trailingSlash: true,
   images: {
     loader: 'akamai',
-    path: '/'
+    path: 'https://dev.plip.kr:3000/'
   },
   webpack(config) {
     config.module.rules.push({
@@ -21,4 +26,4 @@ module.exports = {
     });
     return config;
   }
-}
+};

@@ -1,18 +1,19 @@
 import type { AppProps } from 'next/app'
+import React from 'react';
+import { RecoilRoot } from 'recoil';
 // Component
-import Layout from '../components/common/Layout';
+import Head from 'next/head';
+import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
 // Font
 import '../public/fonts/pretendard.css';
 // Style
 import { createGlobalStyle } from 'styled-components';
 import 'antd/dist/antd.css';
-import '../styles/globals.css'
-import React from 'react';
-import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
 
 const GlobalStyle = createGlobalStyle`
   body {
     font-family: Pretendard;
+    box-sizing: border-box;
   }
   body * {
     font-family: Pretendard !important;
@@ -37,9 +38,25 @@ const GlobalStyle = createGlobalStyle`
     padding-bottom: 8px;
     padding-top: 8px;
   }
+  .ant-form-item-with-help .ant-form-item-explain {
+    color: #8C8C8C;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-bottom: 0;
+    margin-top: 4px;
+    min-height: auto;
+  }
+  .ant-form-item-extra {
+    color: #8C8C8C;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-bottom: 0;
+    min-height: auto;
+  }
 `;
 
-// const queryClient = new QueryClient();
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -47,17 +64,25 @@ const queryClient = new QueryClient({
     },
   },
 });
+/** 공통으로 사용될 페이지 컴포넌트 */
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
-        <GlobalStyle />
-        <Layout>
+        <RecoilRoot>
+          <Head>
+            <title>Plip</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
+            <meta name='keyword' content='Privacy, privacy, privacy information, documentation, policy' />
+            <meta name='author' content='TOVDATA' />
+            <meta charSet='utf-8' />
+          </Head>
+          <GlobalStyle />
           <Component {...pageProps} />
-        </Layout>
+        </RecoilRoot>
       </Hydrate>
     </QueryClientProvider>
-  )
+  );
 }
 
 export default MyApp

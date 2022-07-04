@@ -3,13 +3,12 @@ import styled, { css } from 'styled-components';
 // Component
 import { Col, Divider, Modal, Row, Tooltip } from 'antd';
 // Icon
-import IconPIItem from '../../public/images/piItem.svg';
-import IconPIPurpose from '../../public/images/piPurpose.svg';
-import IconPIPeriod from '../../public/images/period.svg';
-import IconProvision from '../../public/images/provision.svg';
-import IconConsignment from '../../public/images/consignment.svg';
-import IconComplaint from '../../public/images/complaint.svg';
-
+import IconPIItem from '../../public/images/pipp/pi.svg';
+import IconPIPurpose from '../../public/images/pipp/purpose.svg';
+import IconPIPeriod from '../../public/images/pipp/period.svg';
+import IconProvision from '../../public/images/pipp/provision.svg';
+import IconConsignment from '../../public/images/pipp/consignment.svg';
+import IconComplaint from '../../public/images/pipp/complaint.svg';
 /**
  * 컴포넌트들의 Props 형식
  */
@@ -20,19 +19,19 @@ interface ViewProps {
 }
 /** [Interface] Properties for DDRow or DIRow */
 interface RowProps {
-  children?: JSX.Element|JSX.Element[];
+  children?: JSX.Element | JSX.Element[];
   self?: any;
   style?: React.CSSProperties;
 }
 /** [Interface] Properties for DIInputGroup */
 interface DIInputGroupProps {
-  children?: JSX.Element|JSX.Element[];
+  children?: JSX.Element | JSX.Element[];
   label?: string;
   style?: React.CSSProperties;
 }
 /** [Interface] Properties for DIRowContent */
 interface DIRowContentProps {
-  children?: JSX.Element|JSX.Element[];
+  children?: JSX.Element | JSX.Element[];
 }
 /** [Interface] Properties for DIRowDivider */
 interface DIRowDividerProps {
@@ -44,7 +43,7 @@ interface DIRowHeaderProps {
   required?: boolean;
   style?: React.CSSProperties,
   title: string,
-  tools?: JSX.Element|JSX.Element[];
+  tools?: JSX.Element | JSX.Element[];
 }
 /** [Interface] Properties for DDRowContent */
 interface DDRowContentProps extends ViewProps {
@@ -73,7 +72,7 @@ interface DRLabelingItemProps extends ViewProps {
 }
 /** [Interface] Properties for DTCForm */
 interface DTCFormProps extends ViewProps {
-  children?: JSX.Element|JSX.Element[];
+  children?: JSX.Element | JSX.Element[];
 }
 /** [Interface] Properties for DTCItem */
 interface DTCItemProps extends ViewProps {
@@ -107,9 +106,9 @@ const StyledDIRow = styled.div`
     margin-bottom: 0;
   }
 `;
-export const DIRow: React.FC<RowProps> = ({ children, self }: RowProps): JSX.Element => {
+export const DIRow: React.FC<RowProps> = ({ children, self, style }: RowProps): JSX.Element => {
   return (
-    <StyledDIRow ref={self}>
+    <StyledDIRow ref={self} style={style}>
       {children}
     </StyledDIRow>
   )
@@ -130,7 +129,7 @@ export const DIRowDivider: React.FC<DIRowDividerProps> = ({ marginH }: DIRowDivi
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row header */
 export const DIRowHeader: React.FC<DIRowHeaderProps> = ({ description, required, style, title, tools }: DIRowHeaderProps): JSX.Element => {
   // Description style
-  const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 12, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
+  const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 13, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
   // Return an element
   return (
     <div style={{ marginBottom: 8, width: '100%', ...style }}>
@@ -154,7 +153,7 @@ export const DIRowHeader: React.FC<DIRowHeaderProps> = ({ description, required,
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row subject */
 export const DIRowSubject: React.FC<DIRowHeaderProps> = ({ description, required, style, title, tools }: DIRowHeaderProps): JSX.Element => {
   // Description style
-  const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 12, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
+  const dStyle: React.CSSProperties = { color: 'rgba(0, 0, 0, 0.45)', fontSize: 13, fontWeight: 400, lineHeight: '20px', marginBottom: 0 };
   // Return an element
   return (
     <div style={{ marginBottom: 8, width: '100%', ...style }}>
@@ -192,9 +191,9 @@ export const DDRow: React.FC<RowProps> = ({ children, self }: RowProps): JSX.Ele
 export const DDRowContent: React.FC<DDRowContentProps> = ({ items, links, preview, style }: DDRowContentProps): JSX.Element => {
   return items ? (
     <div style={{ marginBottom: 8, ...style }}>
-      {items.map((item: string|JSX.Element, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>
+      {items.map((item: string | JSX.Element, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>
         {item}
-        {links && links[index] ? (
+        {links && links[index] && links[index] !== '' ? (
           <a target='_blank' href={links[index]} style={{ marginLeft: 6, textDecoration: 'underline' }} rel='noreferrer'>보기</a>
         ) : (<></>)}
       </p>))}
@@ -213,7 +212,7 @@ export const DDRowHeader: React.FC<DDRowHeaderProps> = ({ preview, self, title }
 export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, links, preview, style }: DDRowItemListProps): JSX.Element => {
   // 목록 레벨에 따른 스타일 정의
   let styleByType: React.CSSProperties;
-  switch(level) {
+  switch (level) {
     case 1:
       styleByType = { marginBottom: 0, paddingLeft: 19 };
       break;
@@ -227,7 +226,7 @@ export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, link
       {items.map((item: string, index: number): JSX.Element => (
         <li key={index} style={{ fontSize: 14 }}>
           {item}
-          {links && links[index] ? (
+          {links && links[index] && links[index] !== '' ? (
             <a target='_blank' href={links[index]} style={{ marginLeft: 6, textDecoration: 'underline' }} rel='noreferrer'>보기</a>
           ) : (<></>)}
         </li>
@@ -235,8 +234,15 @@ export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, link
     </ul>
   ) : (<></>);
 }
-export const DDRowTableForm = styled.div`
-  margin-bottom: 8px;
+/** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 테이블 폼 */
+export const DDRowTableForm: React.FC<any> = ({ children, preview }): JSX.Element => {
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <StyledDDRowTableForm preview={preview}>{children}</StyledDDRowTableForm>
+    </div>
+  );
+}
+const StyledDDRowTableForm = styled.div<{ preview?: boolean }>`
   table .ant-table-thead > tr > th {
     font-size: 13px;
     font-weight: 400;
@@ -252,6 +258,11 @@ export const DDRowTableForm = styled.div`
     margin: 0;
     padding: 0;
   }
+  ${(props: any) => props.preview && css`
+    table .ant-table-body > tr > td {
+      font-size: 12px
+    }
+  `}
 `;
 
 /** 
@@ -273,12 +284,6 @@ export const DRLabelingHeader: React.FC<DRLabelingHeaderProps> = ({ description,
     </div>
   );
 }
-export const DRLabelingContent = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 56px;
-`;
 /** [Component] 개인정보 처리방침 최종 검토 폼 Labeling item */
 export const DRLabelingItem: React.FC<DRLabelingItemProps> = ({ tooltip, type }: DRLabelingItemProps): JSX.Element => {
   const size: number = 96;
@@ -315,25 +320,13 @@ export const DRLabelingItem: React.FC<DRLabelingItemProps> = ({ tooltip, type }:
   // Return an element
   return (
     <span style={{ cursor: 'pointer', marginLeft: 20, marginRight: 20, position: 'relative', userSelect: 'none' }}>
-      {tooltip ? (
-        <>
-          {labeling.icon ? (
-          <Tooltip placement='bottom' title={tooltip ? tooltip : ''}>
-            <span style={{ alignItems: 'center', display: 'flex', height: size, justifyContent: 'center', width: size }}>
-              {labeling.icon}
-            </span>
-          </Tooltip>
-        ) : (<></>)}
-        </>
-      ) : (
-        <>
-          {labeling.icon ? (
-          <span style={{ alignItems: 'center', display: 'flex', height: size, justifyContent: 'center', width: size }}>
+      <>
+        {labeling.icon ? (
+          <span style={{ alignItems: 'center', display: 'flex', height: size, justifyContent: 'center', width: size }} title={tooltip ? tooltip : ''}>
             {labeling.icon}
           </span>
         ) : (<></>)}
-        </>
-      )}
+      </>
       {labeling.label ? (
         <p style={{ color: '#000000', fontSize: 13, fontWeight: '400', lineHeight: '22px', marginBottom: 0, textAlign: 'center' }}>{labeling.label}</p>
       ) : (<></>)}

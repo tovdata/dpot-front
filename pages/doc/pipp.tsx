@@ -1,32 +1,23 @@
-import { useState } from 'react';
+import type { NextPage } from 'next';
+import dynamic from 'next/dynamic';
+import { ComponentType } from 'react';
 // Component
-import { CreatePIPPForm, PIPPMain } from '../../components/PIPP';
+import { PLIPPageLayoutProps } from '@/components/renewer/Layout';
+const PIPPMain = dynamic(() => import('@/components/renewer/pages/PIPP'), { loading: () => (<></>), ssr: false });
+const PLIPPageLayout: ComponentType<PLIPPageLayoutProps> = dynamic(() => import('@/components/renewer/Layout').then((mod: any): any => mod.PLIPPageLayout), { loading: () => (<></>), ssr: false });
+const PLIPSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PLIPServiceSession), { loading: () => (<></>), ssr: false });
+const PLIPUserSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PLIPUserSession), { loading: () => (<></>), ssr: false });
 
-/** [Interface] Document info */
-interface DocumentInfo {
-  uuid: string;
-  status: string;
-}
-
-const Page = () => {
-  // Set a default state
-  const defaultDoc: DocumentInfo = { uuid: '', status: '' };
-  // Set a state
-  const [doc, setDoc] = useState<DocumentInfo>(defaultDoc);
-
-  // Create a event handler (onSelectDoc / contain a create)
-  const onCreate = (value: DocumentInfo) => setDoc(value);
-  // Create a event handler (onBack)
-  const onBack = () => setDoc({ uuid: '', status: '' });
-
+const Page: NextPage = () => {
+  // 컴포넌트 반환
   return (
-    <>
-      {doc.uuid === '' ? (
-        <PIPPMain onCreate={onCreate} />
-      ) : (
-        <CreatePIPPForm onBack={onBack} />
-      )}
-    </>
+    <PLIPUserSession>
+      <PLIPSession>
+        <PLIPPageLayout selectedKey='/doc/pipp'>
+          <PIPPMain />
+        </PLIPPageLayout>
+      </PLIPSession>
+    </PLIPUserSession>
   );
 }
 

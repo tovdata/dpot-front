@@ -1,22 +1,7 @@
 import { atom, selector } from 'recoil';
 // Data
 import { infoFromSubjectInCPI, personalInfoSelectOptions } from './static/selectOption';
-import { personalInfo } from './temporary';
 
-/**
- * [Internal Function] 테이블 데이터을 대상으로 행단위 key 데이터를 추가하는 함수
- * @param dataSource 테이블 데이터 소스
- * @returns key 데이터가 추가된 테이블 데이터 소스
- */
-const setDataSource = (dataSource: any): any[] => {
-  return dataSource.map((item: any): any => { return { ...item, key: item.uuid } });
-}
-
-/** [Atom] Personal information data */
-const PersonalInfoAtom = atom<any[]>({
-  key: 'PersonalInfoAtom',
-  default: setDataSource(personalInfo)
-});
 /** [Atom] Personal information select options */
 const PersonalInfoSelectOptionsAtom = atom<any>({
   key: 'PersonalInfoSelectOptionsAtom',
@@ -26,26 +11,37 @@ const PersonalInfoSelectOptionsAtom = atom<any>({
 const DefaultCPIAtom = atom<any>({
   key: 'DefaultCPIAtom',
   default: infoFromSubjectInCPI
-})
-
-/** [Selector] Personal information selector for reference */
-export const GetPersonalInfoSelector = selector<any[]>({
-  key: 'GetPersonalInfoSelector',
-  get: ({ get }) => get(PersonalInfoAtom)
 });
+/** [Atom] 사이드 메뉴 확장 여부 */
+const expandSider = atom<boolean>({
+  key: 'expandSider',
+  default: false
+});
+/** [Atom] 사이드 메뉴 아이템 */
+const activeKey = atom<string>({
+  key: 'activeKey',
+  default: '/'
+});
+
 /** [Selector] Personal information select options selector for reference */
 export const GetPersonalInfoSelectOptionsSelector = selector<any[]>({
   key: 'GetPersonalInfoSelectOptionsSelector',
   get: ({ get }) => get(PersonalInfoSelectOptionsAtom)
 });
-/** [Selector] Personal information selector for update */
-export const UpdatePersonalInfoSelector = selector<any[]>({
-  key: 'UpdatePersonalInfoSelector',
-  get: ({ get }) => get(PersonalInfoAtom),
-  set: ({ set }, value) => set(PersonalInfoAtom, value)
-});
 /** [Selector]  */
 export const GetCPIDefaultSelector = selector<any[]>({
   key: 'GetCPIDefaultSelector',
   get: ({ get }) => get(DefaultCPIAtom)
-})
+});
+/** [Selector] 사이드 메뉴 확장 여부 */
+export const expandSiderSelector = selector<boolean>({
+  key: 'expandSiderSelector',
+  get: ({ get }) => get(expandSider),
+  set: ({ set }, newValue) => set(expandSider, newValue)
+});
+/** [Selector] 사이드 메뉴 아이템 */
+export const activeKeySelector = selector<string>({
+  key: 'activeKeySelector',
+  get: ({ get }) => get(activeKey),
+  set: ({ set }, newValue) => set(activeKey, newValue)
+});

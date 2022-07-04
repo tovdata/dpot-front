@@ -1,36 +1,37 @@
-import { useState } from 'react';
 // Component
-import { Input } from 'antd';
+import { Popover } from 'antd';
+// Icon
+import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
-/** Interface (Props) */
-interface EditableInputProps {
-  content: string;
-  onChange: (e: any) => void;
-}
-interface SearchableInputProps {
-  content: string;
-  onSearch: (value: string, e: any) => void;
+/** [Interface] Properties for TOVInputGroup */
+interface TOVInputGroupProps {
+  children?: JSX.Element | JSX.Element[];
+  label?: string;
+  required?: boolean;
+  style?: React.CSSProperties;
+  tooltip?: string;
 }
 
-// Component (editable input)
-export const EditableInput = ({ content, onChange }: EditableInputProps): JSX.Element => {
-  // Set a local state
-  const [value, setValue] = useState<string>(content);
-  // Create an event handler (onChange)
-  const onNewChange = (e: any): void => { setValue(e.target.value); onChange(e.target.value) }
-  // Return an element
-  return (<Input onChange={onNewChange} type='text' value={value} style={{ width: '100%' }} />);
-}
-// Component (searchable input)
-export const SearchableInput = ({ content, onSearch }: SearchableInputProps): JSX.Element => {
-  // Set a local state
-  const [value, setValue] = useState<string>(content); 
-  // Create an event handler (onChange)
-  const onChange = (e: any): void => setValue(e.target.value);
-  // Return an elemtn
+/** [Component] 기본적인 Input group */
+export const TOVInputGroup: React.FC<TOVInputGroupProps> = ({ children, label, required, style, tooltip }): JSX.Element => {
   return (
-    <Input.Group>
-      <Input.Search allowClear onChange={onChange} onSearch={onSearch} style={{ width: '100%' }} value={value} />
-    </Input.Group>
-  )
+    <div style={{ marginBottom: 16, ...style }}>
+      {label ? (
+        <div style={{ alignItems: 'center', display: 'flex', fontSize: 14, fontWeight: '600', lineHeight: '22px', marginBottom: 6, userSelect: 'none' }}>
+          <label style={{ color: '#000000', margin: 0 }}>{label}</label>
+          {tooltip ? (
+            <Popover content={tooltip}>
+              <span style={{ alignItems: 'center', cursor: 'pointer', display: 'flex', marginLeft: 6 }}>
+                <AiOutlineQuestionCircle />
+              </span>
+            </Popover>
+          ) : (<></>)}
+          {required ? (
+            <label style={{ color: '#FF4D4F', marginLeft: 6 }}>*</label>
+          ) : (<></>)}
+        </div>
+      ) : (<></>)}
+      {children}
+    </div>
+  );
 }

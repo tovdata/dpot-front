@@ -1,27 +1,25 @@
-import { Tabs } from "antd";
-import styled from "styled-components";
-import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from "../../components/PCTable";
+import dynamic from 'next/dynamic';
+import { ComponentType } from 'react';
+// Component
+import { PLIPPageLayoutProps } from '@/components/renewer/Layout';
+const PCMain = dynamic(() => import('@/components/renewer/pages/PC'), { loading: () => (<></>), ssr: false });
+const PLIPPageLayout: ComponentType<PLIPPageLayoutProps> = dynamic(() => import('@/components/renewer/Layout').then((mod: any): any => mod.PLIPPageLayout), { loading: () => (<></>), ssr: false });
+const PLIPLayoutPaddingST = dynamic(() => import('@/components/styled/Layout').then((mod: any): any => mod.PLIPLayoutPaddingST));
+const PLIPSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PLIPServiceSession), { loading: () => (<></>), ssr: false });
+const PLIPUserSession = dynamic(() => import('@/components/renewer/Session').then((module: any): any => module.PLIPUserSession), { loading: () => (<></>), ssr: false });
 
-const { TabPane } = Tabs;
-
-const CustomTabPane = styled(TabPane)`
-  margin-top: 2rem;
-`;
 const Page = () => {
   return (
-    <>
-      <Tabs defaultActiveKey="1" style={{ marginTop: -28 }}>
-        <CustomTabPane tab="제공" key="1">
-          <PPITableForm />
-          <PFNITableForm />
-        </CustomTabPane>
-        <CustomTabPane tab="위탁" key="2">
-          <CPITableForm />
-          <CFNITableForm />
-        </CustomTabPane>
-      </Tabs>
-    </>
-  )
+    <PLIPUserSession>
+      <PLIPSession>
+        <PLIPPageLayout selectedKey='/pim/pc'>
+          <PLIPLayoutPaddingST>
+            <PCMain />
+          </PLIPLayoutPaddingST>
+        </PLIPPageLayout>
+      </PLIPSession>
+    </PLIPUserSession>
+  );
 }
 
 export default Page;
