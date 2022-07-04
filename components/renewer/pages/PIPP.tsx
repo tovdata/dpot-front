@@ -3,7 +3,8 @@ import { ComponentType, useCallback, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import { useRecoilValue } from 'recoil';
 // Component
-const CreatePIPPForm: ComponentType<any> = dynamic(() => import('@/components/renewer/PIPP').then((mod: any): any => mod.CreatePIPPForm), { loading: () => (<></>), ssr: false });
+// const CreatePIPPForm: ComponentType<any> = dynamic(() => import('@/components/PIPP').then((mod: any): any => mod.CreatePIPPForm), { loading: () => (<></>), ssr: false });
+import { CreatePIPPForm } from '@/components/PIPP';
 const PIPPList: ComponentType<any> = dynamic(() => import('@/components/renewer/PIPP').then((mod: any): any => mod.PIPPList), { loading: () => (<></>) });
 const PLIPLayoutPadding = dynamic(() => import('@/components/styled/Layout').then((mod: any): any => mod.PLIPLayoutPadding), { loading: () => (<PLIPLoadingContainer />)});
 const PLIPLoadingContainer = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIPLoadingContainer), { loading: () => (<></>)});

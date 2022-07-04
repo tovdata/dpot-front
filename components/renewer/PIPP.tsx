@@ -5,6 +5,7 @@ import { Button, Input, Modal, Table, Tag } from 'antd';
 import { StyledLinkButton, StyledPageHeader, StyledPIPPName } from '@/components/styled/PIPP';
 import { StyledTableForm, TableFormHeader } from '@/components/common/Table';
 // Icon
+const CheckCircleOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.CheckCircleOutlined));
 const EditOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.EditOutlined));
 const FiEdit = dynamic(() => import('react-icons/fi').then((mod: any): any => mod.FiEdit));
 const LinkOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.LinkOutlined));
@@ -31,7 +32,8 @@ import { CreatePIPP } from '../PIPP';
 import { ConfirmSection } from '../pipp/ConfirmForm';
 import { DRModal } from '../pipp/Documentation';
 import { PreviewSection } from '../pipp/EditForm';
-import { CheckCircleOutlined } from '@ant-design/icons';
+
+import { defaultPIPPData } from '@/models/static/data';
 
 
 /** [Interface] PIPP process */
@@ -68,7 +70,11 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
   // 로딩 데이터 Hook
   useEffect(() => setLoading(isLoadingForData || results.some((result: any): boolean => result.isLoading)), [isLoadingForData, results]);
   // 임시 저장 데이터가 있을 경우, 데이터 갱신
-  useEffect(() => (progress === 'update' && !isLoadingForData && loadData !== undefined) ? setData({ ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi } }) : undefined, [isLoadingForData, loadData, progress]);
+  useEffect(() => {
+    if (progress === 'update' && !isLoadingForData && loadData !== undefined) {
+      setData({ ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi } })
+    }
+  }, [isLoadingForData, loadData, progress]);
 
   // 단계에 대한 Title
   const steps: string[] = ['입력사항 확인', '처리방침 편집', '최종 확인'];
@@ -146,7 +152,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
         setData({ ...data, dInfo: { ...tempData } });
       }
     }
-  }, [data, loading]);
+  }, [initQuery, loading]);
 
   /** [Event handler] 모달 열기 */
   const onOpen = useCallback((): void => setVisible(true), []);
@@ -155,7 +161,8 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
   /** [Query handler] API를 요청하여 데이터를 갱신하기 위해 호출되는 함수 */
   const onRefresh = useCallback((): void => setInitQuery(false), []);
   /** [Event handler] 데이터 변경 이벤트 */
-  const onChange = useCallback((step: string, value: any, category: string, property?: string, subProperty?: string): void => {
+  const onChange = (step: string, value: any, category: string, property?: string, subProperty?: string): void => {
+    console.log('c', data.aInfo);
     if (property!== undefined && subProperty !== undefined) {
       setData({ ...data, [step]: { ...data[step], [category]: { ...data[step][category], [property]: { ...data[step][category][property], [subProperty]: value } } } });
     } else if (property !== undefined) {
@@ -163,7 +170,10 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
     } else {
       setData({ ...data, [step]: { ...data[step], [category]: value } });
     }
-  }, [data]);
+  };
+
+  useEffect(() => console.log('change', data.aInfo), [data]);
+
   /** [Event handler] 포커스에 따라 스코롤 이동 이벤트 (Prview part) */
   const onFocus = useCallback((type: string, index: number, pos?: ScrollPosition) => { refs[type].current[index] ? refs[type].current[index].scrollIntoView((type === 'preview' && (index === 1 || index === 3 || index === 4 || index === 7)) ? { block: pos ? pos : 'start' } : { behavior: 'smooth' , block: pos ? pos : 'start' }) : undefined }, [refs]);
   /** [Event handler] 단계 이동 이벤트 */
@@ -276,7 +286,7 @@ export const CreatePIPPForm: React.FC<any> = ({ list, onBack, onUpdateStatus, pr
     } else {
       temp ? warningNotification('임시 저장 실패') : warningNotification('최종 저장 실패');
     }
-  }, []);
+  }, [data, serviceId]);
 
   // 개인정보 수집 및 이용 데이터 및 라벨링을 위한 데이터 가공 (개인정보 수집 항목)
   const itemForPI: string[] = [];

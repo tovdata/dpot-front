@@ -111,7 +111,7 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
   /** [Event handler] 서비스 생성 */
   const onSave = useCallback(() => form.validateFields().then(async (values: any): Promise<void> => {
     const isCreate: boolean = serviceId === '' ? true : false;
-    const response = isCreate ? await createService(companyId, values) : await updateService(serviceId, values);
+    const response = isCreate ? await createService(companyId, values) : await updateService(companyId, serviceId, values);
     if (response.result) {
       successNotification(serviceId === '' ? '서비스를 생성하였습니다.' : '서비스를 변경하였습니다.');
       // 폼 필드 초기화

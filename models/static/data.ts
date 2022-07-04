@@ -3,13 +3,13 @@ export const defaultPIPPData: any = {
     cookie: {
       purpose: [],
       disadvantage: [],
-      usage: undefined
+      usage: false
     },
     webLog: {
       purpose: [],
       method: [],
       disadvantage: '서비스 이용에 불이익은 없습니다. 다만, 서비스 개선을 위한 통계 분석에 영향을 미칠 수 있습니다.',
-      usage: undefined
+      usage: false
     },
     advertising: {
       items: [],

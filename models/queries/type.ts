@@ -107,6 +107,7 @@ export interface Manager {
 }
 /** [Interface] 서비스 */
 export interface PLIPService {
+  companyId?: string;
   createAt?: number;
   id?: string;
   serviceName: string;

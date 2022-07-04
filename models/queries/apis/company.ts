@@ -151,16 +151,19 @@ export const getServiceList = async (companyId: string): Promise<PLIPService[]> 
 }
 /**
  * [API Caller] 서비스 수정
+ * @param companyId 회사 ID
  * @param serviceId 서비스 ID
  * @param data 서비스 데이터
  * @returns 요청 결과
  */
-export const updateService = async (serviceId: string, data: PLIPService): Promise<ResponseDF> => {
+export const updateService = async (companyId: string, serviceId: string, data: PLIPService): Promise<ResponseDF> => {
   try {
     // 데이터 복사
     const copy: PLIPService = JSON.parse(JSON.stringify(data));
     // 파라미터 데이터 가공 (id 속성이 있을 경우 제거)
     if ('id' in copy) delete copy.id;
+    // 회사 ID 추가
+    copy.companyId = companyId;
     // 요청 객체 생성
     const request: RequestDF = await createRequest('PATCH', copy);
     // API 호출

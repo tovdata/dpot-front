@@ -17,6 +17,7 @@ import { SelectOptionsByColumn } from "@/models/type";
 import { SERVICE_FNI, SERVICE_PI } from "@/models/queries/type";
 // Query
 import { getFNIDatas, getPIDatas, setDataByTableType } from "@/models/queries/apis/manage";
+import { useEffect } from "react";
 
 /** [Component] 가명정보 수집 및 이용 테이블 */
 export const FNITable: React.FC<any> = ({ serviceId }): JSX.Element => {
@@ -53,7 +54,7 @@ export const FNITable: React.FC<any> = ({ serviceId }): JSX.Element => {
   }, [serviceId]);
 
   // 컴포넌트 반환
-  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} headers={fniTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={isLoadingForPI ? [] : PIData} tableName={SERVICE_FNI} />);
+  return (<EditableTable dataSource={data ? data : []} defaultSelectOptions={defaultSelectOptions} headers={fniTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={isLoadingForPI ? [] : PIData} tableName={SERVICE_FNI} />);
 }
 /** [Component] 가명정보 수집 및 이용 테이블 폼 */
 export const FNITableForm: React.FC<any> = (): JSX.Element => {
@@ -88,9 +89,9 @@ export const PITable: React.FC<any> = ({ serviceId }): JSX.Element => {
   const { mutate } = useMutation((value: any) => setDataByTableType(user, serviceId, SERVICE_PI, value.mode, value.data));
 
   /** [Event handler] 행 추가 */
-  const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'create', record), [serviceId]);
+  const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'create', record), [mutate, serviceId]);
   /** [Event handler] 행 삭제 */
-  const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'delete', record), [serviceId]);
+  const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'delete', record), [mutate, serviceId]);
   /** [Event handler] 행 저장 */
   const onSave = useCallback((record: any): boolean => {
     if (record.essentialItems.length === 0 && record.selectionItems.length === 0) {
@@ -103,10 +104,10 @@ export const PITable: React.FC<any> = ({ serviceId }): JSX.Element => {
       setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'save', record);
       return true;
     }
-  }, [serviceId]);
+  }, [mutate, serviceId]);
 
   // Return an element
-  return (<EditableTable dataSource={isLoading ? [] : data ? data as any[] : []} defaultSelectOptions={defaultSelectOptions} headers={piTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={ref} tableName='pi' />);
+  return (<EditableTable dataSource={data ? data : []} defaultSelectOptions={defaultSelectOptions} headers={piTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={ref} tableName={SERVICE_PI} />);
 }
 /** [Component] 개인정보 수집 및 이용 테이블 폼 */
 export const PITableForm: React.FC<any> = (): JSX.Element => {

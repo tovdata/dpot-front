@@ -96,7 +96,7 @@ export const createRequest = (serviceId: string, mode: string, data: any): Reque
   const request: RequestDF = {
     body: '',
     headers: {
-      'Authorizaition': accessToken,
+      'Authorization': accessToken,
       'Content-Type': 'application/json'
     },
     method: ''

@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
 import { TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography, Button } from 'antd';
@@ -183,15 +183,22 @@ export const BasicTable = ({ dataSource, headers, pagination }: TableProps): JSX
  * [Component] Editable table
  */
 export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoading, onAdd, onDelete, onSave, pagination, refData, tableName }: EditableTableProps): JSX.Element => {
-  // Set a default focus and default record for columns in row
-  const defaultFocusState: any = {};
-  const defaultRecord: any = {};
-  // Extract a focus state and record by header key
-  Object.keys(headers).forEach((key: string): void => {
-    defaultFocusState[key] = false;
-    const type: string = headers[key].display;
-    defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'itemA' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
-  });
+  // 포커즈 및 기본 레코드 값 정의
+  const defaultFocusState: any = useMemo(() => Object.keys(headers).reduce((acc: any, key: string): any => { acc[key] = false; return acc }, {}), [headers]);
+  const defaultRecord: any = useMemo(() => {
+    return Object.keys(headers).reduce((acc: any, key: string): any => {
+      const type: string = headers[key].display;
+      acc[key] = type === 'checkbox' ? false : (type === 'item' || type === 'itemA' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
+      return acc;
+    }, {});
+  }, [headers]);
+  
+  // // Extract a focus state and record by header key
+  // Object.keys(headers).forEach((key: string): void => {
+  //   defaultFocusState[key] = false;
+  //   const type: string = headers[key].display;
+  //   defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'itemA' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
+  // });
 
   // Set a ref
   const newProjectCnt: MutableRefObject<number> = useRef(0);
@@ -200,16 +207,14 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
   const [focus, setFocus] = useState<any>(defaultFocusState);
   const [selectOptions, setSelectOptions] = useState<SelectOptionsByColumn>(resetSelectOptions(dataSource, headers, tableName, refData, defaultSelectOptions));
 
-  /**
-   * [Event Handler] Create a row
-   */
-  const onCreate = (): void => {
-    // Set a key
+  /** [Event handler] 업무 생성 */
+  const onCreate = useCallback((): void => {
+    // 새로운 Key 생성
     const key: string = `npc_${newProjectCnt.current++}`;
-    // Create a new row
+    // 빈 레코드 값 생성
     const record: any = { ...defaultRecord, id: key, key: key };
 
-    // Check a editing status
+    // 기존에 편집 중인 데이터가 있는지 확인
     if (row.id !== undefined) {
       warningNotification('작성 중인 내용을 먼저 저장해주세요.');
     } else {
@@ -218,15 +223,9 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
       // Update a state
       setRow(record);
     }
-  }
-  /**
-   * [Event Handler] Change a row
-   * @param key column key
-   * @param item column value
-   * @param required required
-   * @param type column type
-   */
-  const onChange = (key: string, item: any, required: boolean, type?: string): void => {
+  }, [dataSource, defaultRecord, newProjectCnt, row]);
+  /** [Event handler] 변경 */
+  const onChange = useCallback((key: string, item: any, required: boolean, type?: string): void => {
     if (type && type === 'item') {
       const newItem: string[] = (item as string[]).map((value: string): string => {
         if (RegExp('^주민.*번호$').test(value)) {
@@ -258,39 +257,38 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
     }
     // Update the select options
     changeSelectOptions(key, onUpdateSelectOptions, refData, tableName, item, row);
-  }
-  /**
-   * [Event Handler] 취소 이벤트
-   * @param record 현재 행(Row)에 대한 데이터
-   */
-  const onRollback = (record: any): void => {
+  }, [dataSource, refData, row, tableName]);
+  /** [Event handler] 포커즈 초기화 */
+  const clearFocus = useCallback((): void => {
+    setFocus(defaultFocusState);
+  }, [defaultFocusState]);
+  /** [Event Handler] 취소 이벤트 */
+  const onRollback = useCallback((record: any): void => {
     if ((new RegExp('^npc_')).test(record.id)) {
       onDelete(record);
     }
-  }
-  /**
-   * [Event Handler] Set a edit state
-   * @param record selected row
-   */
-  const onEdit = (record: any): void => {
+  }, []);
+  /** [Event Handler] 편집 */
+  const onEdit = useCallback((record: any): void => {
     clearFocus();
     (row.id && record.id && row.id !== record.id) ? warningNotification('작성 중인 내용을 먼저 저장해주세요.') : setRow(record);
     // Update the select options
     changeSelectOptions('subject', onUpdateSelectOptions, refData, tableName, record.subject);
-  }
+  }, [dataSource, refData, row, tableName]);
+
   /**
    * [Event Handler] Update to select options
    * @param value updated select options
    */
   const onUpdateSelectOptions = (value: any): void => {
     if (tableName === 'pi') {
-      value['items'] = value.items ? extractProcessingItems(dataSource).filter((item: string): boolean => !value.items.includes(item)).concat(value.items) : extractProcessingItems(dataSource);
+      value['items'] = dataSource.length > 0 ? value.items ? extractProcessingItems(dataSource).filter((item: string): boolean => !value.items.includes(item)).concat(value.items) : extractProcessingItems(dataSource) : [];
       if (value['period'].length === 0) value['period'] = defaultSelectOptions['period'];
       setSelectOptions({ ...selectOptions, ...value });
     } else {
       setSelectOptions({ ...selectOptions, ...value });
     }
-  }
+  };
 
   /**
    * UseEffect
@@ -301,7 +299,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
    * [Inner Function] Check a required for column in row (using state)
    * @returns check result
    */
-  const checkRequiredForRow = (): boolean => {
+  const checkRequiredForRow = useCallback((): boolean => {
     const state: any = {};
     // Check a required
     const result: boolean[] = Object.keys(headers).map((key: string): boolean => {
@@ -315,13 +313,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
     setFocus(state);
     // Return
     return !result.includes(true);
-  }
-  /**
-   * [Inner Function] Clear a state for focus
-   */
-  const clearFocus = (): void => {
-    setFocus(defaultFocusState);
-  }
+  }, [headers, row]);
   /**
    * [Inner Function] Create the columns
    * @param headers header data
@@ -338,34 +330,34 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
       column.render = (item: any, record: any, index: number): JSX.Element => {
         switch (header.display) {
           case 'checkbox':
-            if (row.id === record.id) {
+            if (('id' in row) && row.id === record.id) {
               return (<Checkbox checked={row[key]} onChange={(e: any): void => onChange(key, e.target.checked, header.required)} />);
             } else {
               return (<Checkbox checked={item} disabled />);
             }
           case 'item':
-            if (row.id === record.id) {
+            if (('id' in row) && row.id === record.id) {
               return (<TagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return item && item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
           case 'itemA':
-            if (row.id === record.id) {
+            if (('id' in row) && row.id === record.id) {
               // Extract a options
-              const options: string[] = (key === 'essentialItems' || key === 'selectionItems') ? selectOptions['items']?.filter((item: string): boolean => key === 'essentialItems' ? !row['selectionItems'].includes(item) : !row['essentialItems'].includes(item)) : selectOptions[key] ? selectOptions[key] : [];
+              const options: string[] = (key === 'essentialItems' || key === 'selectionItems') ? selectOptions['items']?.filter((item: string): boolean => key === 'essentialItems' ? ('selectionItems' in row) ? !row['selectionItems'].includes(item) : false : ('essentialItems' in row) ? !row['essentialItems'].includes(item) : false) : selectOptions[key] ? selectOptions[key] : [];
               // Return an element
               return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={options} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return item && item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
           case 'list':
-            if (row.id === record.id) {
+            if (('id' in row) && row.id === record.id) {
               return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required)} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return (<TableContentForList items={item} key={index} />);
             }
           case 'period':
-            if (row.id === record.id) {
+            if (('id' in row) && row.id === record.id) {
               return (
                 <>
                   <Space size={[6, 6]} style={{ marginBottom: '10px' }} wrap>
@@ -378,19 +370,19 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
               return (<TableContentForList items={item} key={index} />);
             }
           case 'select':
-            if (row.id === record.id) {
+            if (('id' in row) && row.id === record.id) {
               return (<SingleSelect error={focus[key]} onChange={(item: string | string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return (<>{item}</>);
             }
           case 'selectA':
-            if (row.id === record.id) {
+            if (('id' in row) && row.id === record.id) {
               return (<AddableSelect error={focus[key]} onChange={(item: string | string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return (<>{item}</>);
             }
           default:
-            if (row.id === record.id) {
+            if (('id' in row) && row.id === record.id) {
               return (<Input key={index} onChange={(e: any): void => onChange(key, e.target.value, header.required)} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} status={focus[key] ? 'error' : undefined} />);
             } else {
               return (<>{item}</>);
