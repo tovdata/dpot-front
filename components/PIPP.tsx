@@ -1,41 +1,41 @@
 import React, { useRef } from 'react';
-import { useEffect, useState } from 'react';
-// Component
-import { Button, Col, Input, Modal, Popover, Result, Row, Table, Tag } from 'antd';
-import { PageHeaderContainStep } from './common/Header';
-import { StyledTableForm, TableFormHeader } from './common/Table';
-import { CollapseForPIPP } from './pipp/Collapse';
-import { successNotification, warningNotification } from './common/Notification';
-// Data
-import { statementForPIPP as stmt } from '../models/static/statement';
-import { defaultPIPPData } from '../models/static/data';
-// Icon
-import { CheckCircleOutlined, EditOutlined, LinkOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons';
-import { FiEdit } from 'react-icons/fi';
-// Modulex
-import moment from 'moment';
-import { FNITable, PITable } from './PITable';
-import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from './PCTable';
-import { useQueries, useQuery, useQueryClient } from 'react-query';
-// Type
-import { DocProgressStatus } from '../models/type';
-import { InputSection, PreviewSection } from './pipp/EditForm';
-import { useRecoilValue } from 'recoil';
-import { companySelector } from '@/models/session';
-import { getPIPPData, setPIPPData } from '@/models/queries/apis/pipp';
-import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PIPP, SERVICE_PPI } from '@/models/queries/type';
-import { blankCheck, copyTextToClipboard } from 'utils/utils';
-import { BasicPageLoading } from './common/Loading';
-import { ConfirmSection } from './pipp/ConfirmForm';
-import { DRModal } from './pipp/Documentation';
-import { getDatasByTableType } from '@/models/queries/apis/manage';
+// import { useEffect, useState } from 'react';
+// // Component
+// import { Button, Col, Input, Modal, Popover, Result, Row, Table, Tag } from 'antd';
+// import { PageHeaderContainStep } from './common/Header';
+// import { StyledTableForm, TableFormHeader } from './common/Table';
+// import { CollapseForPIPP } from './pipp/Collapse';
+// import { successNotification, warningNotification } from './common/Notification';
+// // Data
+// import { statementForPIPP as stmt } from '../models/static/statement';
+// import { defaultPIPPData } from '../models/static/data';
+// // Icon
+// import { CheckCircleOutlined, EditOutlined, LinkOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons';
+// import { FiEdit } from 'react-icons/fi';
+// // Modulex
+// import moment from 'moment';
+// import { FNITable, PITable } from './PITable';
+// import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from './PCTable';
+// import { useQueries, useQuery, useQueryClient } from 'react-query';
+// // Type
+// import { DocProgressStatus } from '../models/type';
+// import { InputSection, PreviewSection } from './pipp/EditForm';
+// import { useRecoilValue } from 'recoil';
+// import { companySelector } from '@/models/session';
+// import { getPIPPData, setPIPPData } from '@/models/queries/apis/pipp';
+// import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PIPP, SERVICE_PPI } from '@/models/queries/type';
+// import { blankCheck, copyTextToClipboard } from 'utils/utils';
+// import { BasicPageLoading } from './common/Loading';
+// import { ConfirmSection } from './pipp/ConfirmForm';
+// import { DRModal } from './pipp/Documentation';
+// import { getDatasByTableType } from '@/models/queries/apis/manage';
 
-/** [Interface] PIPP process */
-interface PIPPProcess {
-  list?: any[];
-  onProcess: (process: DocProgressStatus) => void;
-  status?: string;
-}
+// /** [Interface] PIPP process */
+// interface PIPPProcess {
+//   list?: any[];
+//   onProcess: (process: DocProgressStatus) => void;
+//   status?: string;
+// }
 
 // export const PIPPMain: React.FC<any> = (): JSX.Element => {
 //   // 현재 서비스 조회

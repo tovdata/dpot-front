@@ -48,6 +48,17 @@ export const StyledEmptyForDashboard = styled.div`
 /** [Styled Component] 목록 (대시보드) */
 export const StyledList = styled.div`
   height: 100%;
+  max-height: 340px;
+  overflow-x: hidden;
+  overflow-y: overlay;
+  &::-webkit-scrollbar {
+    background-color: transparent;
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(12, 12, 12, 0.24);
+    border-radius: 6px;
+  }
 `;
 /** [Styled Component] 타임라인 행 */
 export const StyledTimelineRow = styled(Row)`

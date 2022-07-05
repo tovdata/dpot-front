@@ -17,7 +17,7 @@ module.exports = {
   trailingSlash: true,
   images: {
     loader: 'akamai',
-    path: 'https://dev.plip.kr:3000/'
+    path: 'https://dev.plip.kr'
   },
   webpack(config) {
     config.module.rules.push({

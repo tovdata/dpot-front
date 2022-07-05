@@ -13,13 +13,13 @@ import styled from 'styled-components';
 
 
 // // 페이지 레이아웃 스타일
-export const PageLayout = styled.div`
-  align-items: center;
-  display: flex;
-  height: 100vh;
-  justify-content: center;
-  width: 100vw;
-`;
+// export const PageLayout = styled.div`
+//   align-items: center;
+//   display: flex;
+//   height: 100vh;
+//   justify-content: center;
+//   width: 100vw;
+// `;
 // export const StyledDescription = styled.p`
 //   color: #8C8C8C;
 //   font-size: 12px;

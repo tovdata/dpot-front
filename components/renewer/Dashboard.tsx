@@ -47,7 +47,7 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
             <LastInformation />
           </Col>
           <Col span={14}>
-            <Row gutter={[16, 16]}>
+            <Row gutter={[16, 16]} style={{ height: '100%' }}>
               <Col span={8}>
                 <PIItems serviceId={sessionService.id} />
               </Col>

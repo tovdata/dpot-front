@@ -18,7 +18,7 @@ import { GetCPIDefaultSelector } from '@/models/state';
 import { serviceSelector, userSelector } from '@/models/session';
 // Query
 import { setQueryData } from '@/models/queryState';
-import { getCFNIDatas, getCPIDatas, getFNIDatas, getPFNIDatas, getPIDatas, getPPIDatas, setDataByTableType } from '@/models/queries/api';
+import { getCFNIDatas, getCPIDatas, getFNIDatas, getPFNIDatas, getPIDatas, getPPIDatas, setDataByTableType } from '@/models/queries/apis/manage';
 
 /** [Interface] Properties for LinkButton */
 interface LinkButtonProps {
