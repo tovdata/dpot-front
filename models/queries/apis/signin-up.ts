@@ -1,5 +1,8 @@
-import { extractData } from '../internal';
-import { createRequest, createRequestNotAuth, RequestDF, ResponseDF, SERVER_URL } from '../type';
+
+import { RequestDF, ResponseDF, SERVER_URL } from '../type';
+// Module
+import { decode } from 'jsonwebtoken';
+import { createRequest, extractData } from '@/models/queries/internal';
 
 /** [Interface] 회원가입에 필요한 데이터 */
 export interface SignupProps {
@@ -17,7 +20,7 @@ export interface SignupProps {
 export const checkDuplicate = async (email: string): Promise<boolean> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('POST', { email });
+    const request: RequestDF = createRequest('POST', undefined, { email });
     // API 호출
     const response = await fetch(`${SERVER_URL}auth/signup/availability`, request);
     // 결과 추출 및 반환
@@ -35,7 +38,7 @@ export const checkDuplicate = async (email: string): Promise<boolean> => {
 export const resendAuthMail = async (email: string): Promise<boolean> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('POST', { email });
+    const request: RequestDF = createRequest('POST', undefined, { email });
     // API 호출
     const response = await fetch(`${SERVER_URL}auth/signup/resend`, request);
     // 결과 추출 및 반환
@@ -54,11 +57,18 @@ export const resendAuthMail = async (email: string): Promise<boolean> => {
 export const signin = async (email: string, password: string): Promise<ResponseDF> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('POST', { email, password });
+    const request: RequestDF = createRequest('POST', undefined, { email, password });
     // API 호출
-    const response: any = await fetch(`${SERVER_URL}auth/signin`, request);
-    // 데이터 추출 및 반환
-    return await extractData(response);
+    const response: Response = await fetch(`${SERVER_URL}auth/signin`, request);
+    // 데이터 추출
+    const result: ResponseDF = await extractData(response);
+    // 사용자 ID 추출
+    if (result.result) {
+      const extracted: any = decode(result.data.AccessToken);
+      return extracted ? { result: true, data: { accessToken: result.data.AccessToken, userId: extracted.sub } } : { result: false };
+    } else {
+      return result;
+    }
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return { result: false };
@@ -68,10 +78,10 @@ export const signin = async (email: string, password: string): Promise<ResponseD
  * [API Caller] 로그아웃
  * @returns 요청 결과
  */
-export const signout = async (): Promise<boolean> => {
+export const signout = async (token: string): Promise<boolean> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('POST', {});
+    const request: RequestDF = createRequest('POST', token);
     // API 호출
     const response: any = await fetch(`${SERVER_URL}auth/signout`, request);
     // 데이터 추출 및 반환
@@ -89,7 +99,7 @@ export const signout = async (): Promise<boolean> => {
 export const signup = async (data: SignupProps): Promise<ResponseDF> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequestNotAuth('POST', data);
+    const request: RequestDF = createRequest('POST', undefined, data);
     // API 호출
     const response: any = await fetch(`${SERVER_URL}auth/signup`, request);
     // 데이터 추출 및 반환
@@ -107,13 +117,13 @@ export const signup = async (data: SignupProps): Promise<ResponseDF> => {
 export const updateToken = async (userId: string): Promise<string> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = createRequestNotAuth('POST', { id: userId });
+    const request: RequestDF = createRequest('POST', undefined, { id: userId });
     // API 호출
     const response: any = await fetch(`${SERVER_URL}auth/silentrefresh`, request);
     // 데이터 추출
-    const result: any = await response.json();
+    const result: any = await extractData(response);
     // 데이터 반환
-    return ('AccessToken' in result) ? result.AccessToken : '';
+    return result.result && result.data ? result.data.AccessToken : '';
   } catch (err) {
     console.error(`[ERROR] ${err}`);
     return '';

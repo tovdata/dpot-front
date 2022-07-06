@@ -7,7 +7,7 @@ import { errorNotification, successNotification } from '../common/Notification';
 import { StyledUserForm, StyledUserFormHeader, StyledWithdrawal } from '../styled/User';
 import { PLIPSimpleLoadingContainer } from './Page';
 // State
-import { companySelector, userSelector } from '@/models/session';
+import { companySelector, userSelector } from '@/models/session_old';
 // Query
 import { getUser, updateUser } from '@/models/queries/apis/user';
 import { PLIPInputGroup } from './Input';

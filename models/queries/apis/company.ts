@@ -1,16 +1,17 @@
-import { extractData } from '../internal';
+import { createRequest, extractData } from '@/models/queries/internal';
 // Type
-import { Company, createRequest, PLIPService, RequestDF, ResponseDF, SERVER_URL } from '../type';
+import { Company, PLIPService, RequestDF, ResponseDF, SERVER_URL } from '../type';
 
 /**
  * [API Caller] 회사 검색
+ * @param token 액세스 토큰
  * @param name 검색할 이름
  * @returns 검색 결과
  */
-export const findCompanies = async (name: string): Promise<Company[]> => {
+export const findCompanies = async (token: string, name: string): Promise<Company[]> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('GET');
+    const request: RequestDF = createRequest('GET', token);
     // API 호출
     const response = await fetch(`${SERVER_URL}company/find?name=${encodeURIComponent(name)}`, request);
     // 응답 결과 추출
@@ -24,15 +25,16 @@ export const findCompanies = async (name: string): Promise<Company[]> => {
 }
 /**
  * [API Caller] 사용자를 회사에 등록
+ * @param token 액세스 토큰
  * @param companyId 회사 ID
  * @param userId 사용자 ID
  * @param accessLevel 등급
  * @returns 요청 결과
  */
-export const registerUser = async (companyId: string, userId: string, accessLevel: number = 0): Promise<boolean> => {
+export const registerUser = async (token: string, companyId: string, userId: string, accessLevel: number = 0): Promise<boolean> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('PUT', { userId, accessLevel });
+    const request: RequestDF = createRequest('PUT', token, { userId, accessLevel });
     // API 호출
     const response: any = await fetch(`${SERVER_URL}company/${companyId}/registration`, request);
     // 결과 반환
@@ -44,13 +46,14 @@ export const registerUser = async (companyId: string, userId: string, accessLeve
 }
 /**
  * [API Caller] 회사 정보 조회
+ * @param token 액세스 토큰
  * @param companyId 회사 ID
  * @returns 조회 결과
  */
-export const getCompany = async (companyId: string): Promise<Company|undefined> => {
+export const getCompany = async (token: string, companyId: string): Promise<Company | undefined> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('GET');
+    const request: RequestDF = createRequest('GET', token);
     // API 호출
     const response: any = await fetch(`${SERVER_URL}company/${companyId}`, request);
     // 데이터 추출
@@ -64,11 +67,12 @@ export const getCompany = async (companyId: string): Promise<Company|undefined> 
 }
 /**
  * [API Caller] 회사 생성/수정
+ * @param token 액세스 토큰
  * @param data 회사 데이터
  * @param id 회사 ID
  * @returns 요청 결과
  */
-export const setCompany = async (data: Company, id?: string): Promise<ResponseDF> => {
+export const setCompany = async (token: string, data: Company, id?: string): Promise<ResponseDF> => {
   try {
     // URL 정의
     const url: string = id ? `${SERVER_URL}company/${id}` : `${SERVER_URL}company/new`;
@@ -77,7 +81,7 @@ export const setCompany = async (data: Company, id?: string): Promise<ResponseDF
     // 파라미터 데이터 가공 (id 속성이 있을 경우 제거)
     if ('id' in copy) delete copy.id;
     // 요청 객체 생성
-    const request: RequestDF = await createRequest(id ? 'PUT' : 'POST', copy);
+    const request: RequestDF = createRequest(id ? 'PUT' : 'POST', token, copy);
     // API 호출
     const response: any = await fetch(url, request);
     // 데이터 추출 및 반환
@@ -89,15 +93,15 @@ export const setCompany = async (data: Company, id?: string): Promise<ResponseDF
 }
 /**
  * [API Caller] 서비스 생성
+ * @param token 액세스 토큰
  * @param companyId 회사 ID
  * @param data 서비스 데이터
  * @returns 요청 결과
  */
-export const createService = async (companyId: string, data: PLIPService): Promise<ResponseDF> => {
+export const createService = async (token: string, companyId: string, data: PLIPService): Promise<ResponseDF> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('POST', { companyId, ...data });
-    console.log(request)
+    const request: RequestDF = createRequest('POST', token, { companyId, ...data });
     // API 호출
     const response: any = await fetch(`${SERVER_URL}service/new`, request);
     // 데이터 추출 및 반환
@@ -109,15 +113,16 @@ export const createService = async (companyId: string, data: PLIPService): Promi
 }
 /**
  * [API Caller] 서비스 삭제
+ * @param token 액세스 토큰
  * @param serviceId 서비스 ID
  * @returns 요청 결과
  */
-export const deleteService = async (serviceId: string): Promise<boolean> => {
+export const deleteService = async (token: string, serviceId: string): Promise<boolean> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('DELETE', {});
+    const request: RequestDF = createRequest('DELETE', token);
     // API 호출
-    const response: any = await fetch(`${SERVER_URL}service/${serviceId}`, request);
+    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}`, request);
     // 결과 반환
     return (await extractData(response, 'delete')).result;
   } catch (err) {
@@ -126,16 +131,38 @@ export const deleteService = async (serviceId: string): Promise<boolean> => {
   }
 }
 /**
+ * [API Caller] 서비스 조회
+ * @param token 액세스 토큰
+ * @param serviceId 서비스 ID
+ * @returns 조회 결과
+ */
+export const getService = async (token: string, serviceId: string): Promise<PLIPService | undefined> => {
+  try {
+    // 요청 객체 생성
+    const request: RequestDF = createRequest('GET', token);
+    // API 호출
+    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}`, request);
+    // 데이터 추출
+    const result: ResponseDF = await extractData(response);
+    // 결과 반환
+    return result.result && result.data ? result.data : undefined;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return undefined;
+  }
+}
+/**
  * [API Caller] 회사 내 서비스 목록 조회
+ * @param token 액세스 토큰
  * @param companyId 회사 ID
  * @returns 조회 결과
  */
-export const getServiceList = async (companyId: string): Promise<PLIPService[]> => {
+export const getServices = async (token: string, companyId: string): Promise<PLIPService[]> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('GET');
+    const request: RequestDF = createRequest('GET', token);
     // API 요청
-    const response: any = await fetch(`${SERVER_URL}company/${companyId}/details`, request);
+    const response: Response = await fetch(`${SERVER_URL}company/${companyId}/details`, request);
     // 응답 데이터 추출
     const result: ResponseDF = await extractData(response);
     // 데이터 가공 및 반환
@@ -150,13 +177,35 @@ export const getServiceList = async (companyId: string): Promise<PLIPService[]> 
   }
 }
 /**
+ * [API Caller] 서비스 내 마지막 수정일 조회
+ * @param token 액세스 토큰
+ * @param serviceId 서비스 ID
+ * @returns 조회 결과
+ */
+export const getServiceModifiedTime = async (token: string, serviceId: string): Promise<any> => {
+  try {
+    // 요청 객체 생성
+    const request: RequestDF = createRequest('GET', token);
+    // API 호출
+    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/modifiedtime`, request);
+    // 데이터 추출
+    const result: ResponseDF = await extractData(response);
+    // 데이터 가공 및 추출
+    return result.result ? result.data : undefined;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return undefined
+  }
+}
+/**
  * [API Caller] 서비스 수정
+ * @param token 액세스 토큰
  * @param companyId 회사 ID
  * @param serviceId 서비스 ID
  * @param data 서비스 데이터
  * @returns 요청 결과
  */
-export const updateService = async (companyId: string, serviceId: string, data: PLIPService): Promise<ResponseDF> => {
+export const updateService = async (token: string, companyId: string, serviceId: string, data: PLIPService): Promise<ResponseDF> => {
   try {
     // 데이터 복사
     const copy: PLIPService = JSON.parse(JSON.stringify(data));
@@ -165,7 +214,7 @@ export const updateService = async (companyId: string, serviceId: string, data: 
     // 회사 ID 추가
     copy.companyId = companyId;
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('PATCH', copy);
+    const request: RequestDF = await createRequest('PATCH', token, copy);
     // API 호출
     const response: any = await fetch(`${SERVER_URL}service/${serviceId}`, request);
     // 데이터 추출 및 반환

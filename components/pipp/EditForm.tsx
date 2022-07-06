@@ -1,16 +1,13 @@
+import { useEffect, useMemo, useState } from 'react';
 // Component
 import { Col, Button, Collapse, Input, Radio, Row, Space, TreeSelect, Table } from 'antd';
 import { DIInputGroup, DIRow, DIRowContent, DIRowDivider, DIRowHeader, DIRowSubject } from './Documentation';
 import { DDRow, DDRowContent, DDRowHeader, DDRowItemList, DDRowTableForm, DRLabelingHeader, DRLabelingItem, DTCForm, DTCItem } from './Documentation';
 import { AddableTagSelect } from '../common/Select';
-// Data
-import { certificationForPIPP, methodOfConfirmConsentOfLegalRepresentative, periodOfRetentionAndUseOfPersonalInformation } from '../../models/static/selectOption';
 import { YesOrNoRadioButton } from '../common/Radio';
-// Module
+// Util
 import moment from 'moment';
 import { blankCheck } from 'utils/utils';
-import { useEffect, useState } from 'react';
-import { useMemo } from 'react';
 
 /** [Interface] Properties for InputSection */
 interface InputSectionProps {
@@ -45,16 +42,21 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
   const [examForPeriod, setExamForPeriod] = useState<string[]>([]);
   // 예시 데이터 (법정대리인의 동의 확인 방법)
   const [examForMethod, setExamForMethod] = useState<any[]>([]);
+  // 예시 데이터 (개인정보의 안정성 확보조치)
+  const [examForCert, setExamForCert] = useState<string[]>([]);
 
   // 예시 데이터 가공
   useEffect(() => {
     (async () => {
       const rawExamForPeriod = (await import('@/models/static/selectOption')).periodOfRetentionAndUseOfPersonalInformation;
       const rawExamForMethod = (await import('@/models/static/selectOption')).methodOfConfirmConsentOfLegalRepresentative;
+      const rawExamForCert = (await import('@/models/static/selectOption')).certificationForPIPP;
       // 데이터 가공 및 설정 (관계 법령에 따른 개인정보 보유 및 이용기간)
       setExamForPeriod(Object.keys(rawExamForPeriod).reduce((arr: any, law: string) => { arr.push(...rawExamForPeriod[law].map((item: string): string => `${law} : ${item}`)); return arr }, []));
       // 데이터 가공 및 설정 (법정대리인의 동의 확인 방법)
       setExamForMethod(Object.keys(rawExamForMethod).map((key: string): any => ({ title: key, value: rawExamForMethod[key] })));
+      // 데이터 가공 및 설정  (개인정보의 안정성 확보조치)
+      setExamForCert(rawExamForCert);
     })();
   }, []);
   // // 예시 데이터 가공 (관계 법령에 따른 개인정보 보유 및 이용기간)
@@ -138,7 +140,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
                 <Input onChange={(e: any): void => onChange(sectionType, e.target.value, 'safety', 'activity')} placeholder='개인정보보호 관련 SNS 운영, 투명성 보고서 발간, 자율규제단체 활동 등' value={data.safety.activity} />
               </DIInputGroup>
               <DIInputGroup label='국내외 개인정보보호 인증 획득'>
-                <AddableTagSelect onChange={(value: string|string[]): void => onChange(sectionType, value, 'safety', 'certification')} options={certificationForPIPP} placeholder='선택 및 직접입력' value={data.safety.certification} />
+                <AddableTagSelect onChange={(value: string|string[]): void => onChange(sectionType, value, 'safety', 'certification')} options={examForCert} placeholder='선택 및 직접입력' value={data.safety.certification} />
               </DIInputGroup>
             </Collapse.Panel>
           </Collapse>
@@ -259,6 +261,8 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
     }
     return temp;
   }, [data.dInfo.manager]);
+
+  console.log(data.dInfo.manager);
   
   // if (!blankCheck(data.dInfo.manager.charger.name) || !blankCheck(data.dInfo.manager.charger.position) || !blankCheck(data.dInfo.manager.charger.contact)) {
   //   managerTableData.push({ identity: '개인정보 보호책임자', charger: !blankCheck(data.dInfo.manager.charger.name) && !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`, `성명 : ${data.dInfo.manager.charger.name}`] : !blankCheck(data.dInfo.manager.charger.position) ? [`직책 : ${data.dInfo.manager.charger.position}`] : !blankCheck(data.dInfo.manager.charger.name) ? [`성명 : ${data.dInfo.manager.charger.name}`] : [], contact: !blankCheck(data.dInfo.manager.charger.contact) ? data.dInfo.manager.charger.contact : '' });

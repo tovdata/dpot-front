@@ -50,12 +50,13 @@ export const copyTextToClipboard = (url: string) => {
 }
 /**
  * [Function] 활동 로그 기록
+ * @param token 액세스 토큰
  * @param mode 로그 유형 [add | delete | update]
  * @param path 활동 위치 (path)
  * @param id 대상 ID
  * @param user 사용자 이름
  */
-export const writeActivityLog = (mode: string, path: string, id: string, user?: string) => {
+export const writeActivityLog = (token: string, mode: string, path: string, id: string, user?: string) => {
   if (typeof window !== 'undefined') {
     // 로그 대상 정의
     const target: string = user ? 'service' : 'user';
@@ -65,17 +66,41 @@ export const writeActivityLog = (mode: string, path: string, id: string, user?: 
     if (pathStr !== '') {
       switch (mode) {
         case 'add':
-          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 추가하였습니다.` : `${pathStr}를 추가하였습니다.`);
+          setActivity(token, target, id, user ? `${user} 님이 ${pathStr}를 추가하였습니다.` : `${pathStr}를 추가하였습니다.`);
           break;
         case 'delete':
-          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 삭제하였습니다.` : `${pathStr}를 삭제하였습니다.`);
+          setActivity(token, target, id, user ? `${user} 님이 ${pathStr}를 삭제하였습니다.` : `${pathStr}를 삭제하였습니다.`);
           break;
         case 'save':
         case 'update':
-          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 수정하였습니다.` : `${pathStr}를 수정하였습니다.`);
+          setActivity(token, target, id, user ? `${user} 님이 ${pathStr}를 수정하였습니다.` : `${pathStr}를 수정하였습니다.`);
           break;
       }
     }
+  }
+}
+/**
+ * [Function] 날짜 변환
+ * @param timestamp unix timestamp
+ * @returns 변환된 날짜 (YYYY-MM-DD)
+ */
+export const transformToDate = (timestamp: number): string => {
+  if (Math.floor(timestamp / 1000000000000) > 0) {
+    return moment.unix(timestamp / 1000).format('YYYY-MM-DD');
+  } else {
+    return moment.unix(timestamp).format('YYYY-MM-DD');
+  }
+}
+/**
+ * [Function] 날짜 변환
+ * @param timestamp unix timestamp
+ * @returns 변환된 날짜 (YYYY-MM-DD HH:mm)
+ */
+export const transformToDatetime = (timestamp: number): string => {
+  if (Math.floor(timestamp / 1000000000000) > 0) {
+    return moment.unix(timestamp / 1000).format('YYYY-MM-DD HH:mm');
+  } else {
+    return moment.unix(timestamp).format('YYYY-MM-DD HH:mm');
   }
 }
 /**

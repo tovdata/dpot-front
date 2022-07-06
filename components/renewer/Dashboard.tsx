@@ -7,55 +7,59 @@ import { Doughnut } from 'react-chartjs-2';
 // Component
 import { Col, Row, Spin, Tag } from 'antd';
 import { PLIPLayoutPadding } from '@/components/styled/Layout';
-import { PLIPActivityListForDashboard, sortByDatetime } from './Activity';
+import { PLIPActivityListForDashboard, sortByDatetime } from '@/components/renewer/Activity';
 // State
-import { companySelector, serviceSelector, userSelector } from '@/models/session';
+import { accessTokenSelector, sessionSelector } from '@/models/session';
 // Styled
-import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader, StyledDashboardItemContentForCPO } from '../styled/Dashboard';
-import { StyledTag, StyledTagList } from '../styled/Dashboard';
-import { StyledLatestInfoRow } from '../styled/Dashboard';
-import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader } from '../styled/Dashboard';
+import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader, StyledDashboardItemContentForCPO } from '@/components/styled/Dashboard';
+import { StyledTag, StyledTagList } from '@/components/styled/Dashboard';
+import { StyledLatestInfoRow } from '@/components/styled/Dashboard';
+import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader } from '@/components/styled/Dashboard';
 // Query
-import { getConsentList, getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/api';
+import { getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/apis/manage';
 import { getUserActivityForWeek } from '@/models/queries/apis/activity';
+import { getCompany, getService, getServiceModifiedTime } from '@/models/queries/apis/company';
+import { getConsentList } from '@/models/queries/apis/consent';
+import { getUser } from '@/models/queries/apis/user';
 // Query key
-import { KEY_COMPANY, KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_CPI, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_PPI } from '@/models/queries/key';
-import { getCompany } from '@/models/queries/apis/company';
+import { KEY_COMPANY, KEY_DASHBOARD_ACTIVITY, KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_CPI, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_LAST_MODIFY, KEY_DASHBOARD_PPI, KEY_SERVICE, KEY_USER } from '@/models/queries/key';
+// Util
+import { decodeAccessToken, transformToDate } from 'utils/utils';
 
 // Set chart
 ChartJS.register(ArcElement, Tooltip);
 
 /** [Component] 대시보드 */
 const Dashboard: React.FC<any> = (): JSX.Element => {
-  // 로컬 스토리지 내 회사 및 서비스 정보 조회
-  const sessionCompany = useRecoilValue(companySelector);
-  const sessionService = useRecoilValue(serviceSelector);
-  const sessionUser = useRecoilValue(userSelector);
+  // 액세스 토큰 조회
+  const accessToken: string = useRecoilValue(accessTokenSelector);
+  // 세션 조회
+  const session = useRecoilValue(sessionSelector);
+  // 사용자 ID 조회
+  const userId: string = decodeAccessToken(accessToken);
+
   // 컴포넌트 반환
   return (
     <div style={{ backgroundColor: '#F0F5FF', height: '100%' }}>
       <PLIPLayoutPadding>
-        <StyledDashboardHeader>
-          <h2>{sessionUser.userName} 님 안녕하세요 😊</h2>
-          <span className='company'>{sessionService.serviceName}</span>
-        </StyledDashboardHeader>
+        <DashboardHeader accessToken={accessToken} serviceId={session.serviceId} userId={userId} />
         <Row gutter={[24, 24]}>
           <Col span={14}>
-            <ChargerForCompany companyId={sessionCompany.id} />
+            <ChargerForCompany accessToken={accessToken} companyId={session.companyId} />
           </Col>
           <Col span={10}>
-            <LastInformation />
+            <LastInformation accessToken={accessToken} serviceId={session.serviceId} />
           </Col>
           <Col span={14}>
             <Row gutter={[16, 16]} style={{ height: '100%' }}>
               <Col span={8}>
-                <PIItems serviceId={sessionService.id} />
+                <PIItems accessToken={accessToken} serviceId={session.serviceId} />
               </Col>
               <Col span={8}>
-                <NumberOfConsignmentCompanies serviceId={sessionService.id} />
+                <NumberOfConsignmentCompanies accessToken={accessToken} serviceId={session.serviceId} />
               </Col>
               <Col span={8}>
-                <NumberOfProvisionCompanies serviceId={sessionService.id} />
+                <NumberOfProvisionCompanies accessToken={accessToken} serviceId={session.serviceId} />
               </Col>
               <Col span={8}>
                 <DashboardItemCard>
@@ -63,12 +67,12 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
                 </DashboardItemCard>
               </Col>
               <Col span={16}>
-                <ConsentInformaiton serviceId={sessionService.id} />
+                <ConsentInformaiton accessToken={accessToken} serviceId={session.serviceId} />
               </Col>
             </Row>
           </Col>
           <Col span={10}>
-            <MyActivieList userId={sessionUser.id} />
+            <MyActivieList accessToken={accessToken} userId={userId} />
           </Col>
           <Col span={24}>
             <DashboardItemCard>
@@ -81,6 +85,19 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
   );
 }
 
+const DashboardHeader: React.FC<any> = ({ accessToken, serviceId, userId }) => {
+  // 사용자 정보 조회
+  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  // 서비스 조회
+  const { data: service } = useQuery([KEY_SERVICE, serviceId], async () => await getService(accessToken, serviceId));
+
+  return (
+    <StyledDashboardHeader>
+      <h2>{user ? `${user.userName} 님 안녕하세요 😊` : ''}</h2>
+      <span className='company'>{service ? service.serviceName : ''}</span>
+    </StyledDashboardHeader>
+  );
+}
 /** [Internal Component] 대시보드 아이템 카드  */
 const DashboardItemCard: React.FC<any> = ({ children, loading }): JSX.Element => {
   return (
@@ -104,9 +121,9 @@ const DashboardItemHeader: React.FC<any> = ({ extra, title }): JSX.Element => {
 }
 
 /** [Internal Component] 개인정보 보호책임자 */
-const ChargerForCompany: React.FC<any> = ({ companyId }): JSX.Element => {
+const ChargerForCompany: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
   // 회사 정보 조회
-  const { isLoading, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(companyId));
+  const { isLoading, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(accessToken, companyId));
 
   // 컴포넌트 반환
   return (
@@ -147,23 +164,34 @@ const ChargerForCompany: React.FC<any> = ({ companyId }): JSX.Element => {
   );
 }
 /** [Internal Component] 최근 정보 수정일 */
-const LastInformation: React.FC<any> = (): JSX.Element => {
+const LastInformation: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
+  // 최종 수정일 조회
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_LAST_MODIFY, serviceId], async () => await getServiceModifiedTime(accessToken, serviceId));
+  // 동의서에 대한 최종 수정일
+  const forConsent = useMemo(() => data && data.consent ? transformToDate(data.consent) : '', [data]);
+  // 개인정보 처리방침에 대한 최종 수정일
+  const forPIPP = useMemo(() => data && data.pipp ? transformToDate(data.pipp) : '', [data]);
+  // 개인정보 수집 및 이용에 대한 최종 수정일
+  const forPI = useMemo(() => data && data.pi_fni ? transformToDate(data.pi_fni) : '', [data]);
+  // 개인정보 제공 및 위탁에 대한 최종 수정일
+  const forPC = useMemo(() => data && data.ppi_cpi_pfni_cfni ? transformToDate(data.ppi_cpi_pfni_cfni) : '', [data]);
+
   return (
-    <DashboardItemCard>
+    <DashboardItemCard loading={isLoading}>
       <DashboardItemHeader title='최근 정보 수정일' />
       <div>
-        <LastInformationRow date='2022-06-08' subject='동의서' user='김토브' />
-        <LastInformationRow date='2022-06-08' subject='개인정보 처리방침' user='김토브' />
-        <LastInformationRow date='2022-06-08' subject='개인정보 수집・이용 현황' user='김토브' />
-        <LastInformationRow date='2022-06-08' subject='개인정보 제공・위탁 현황' user='김토브' />
+        <LastInformationRow date={forConsent} subject='동의서' user='김토브' />
+        <LastInformationRow date={forPIPP} subject='개인정보 처리방침' user='김토브' />
+        <LastInformationRow date={forPI} subject='개인정보 수집・이용 현황' user='김토브' />
+        <LastInformationRow date={forPC} subject='개인정보 제공・위탁 현황' user='김토브' />
       </div>
     </DashboardItemCard>
   );
 }
 /** [Internal Component] 개인정보 수집 항목 차트 */
-const PIItems: React.FC<any> = ({ serviceId }): JSX.Element => {
+const PIItems: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   // 개인정보 수집 항목 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_ITEMS, serviceId], async () => await getPIItemsByType(serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_ITEMS, serviceId], async () => await getPIItemsByType(accessToken, serviceId));
   // Chart data
   const chartData: any = useMemo(() => ({
     labels: ['필수항목', '선택항목'],
@@ -191,9 +219,9 @@ const PIItems: React.FC<any> = ({ serviceId }): JSX.Element => {
   );
 }
 /** [Internal Component] 개인정보 위탁 업체 수 표시 */
-const NumberOfConsignmentCompanies: React.FC<any> = ({ serviceId }): JSX.Element => {
+const NumberOfConsignmentCompanies: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   // 위탁 데이터 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_CPI, serviceId], async () => await getCPIDatas(serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_CPI, serviceId], async () => await getCPIDatas(accessToken, serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -208,9 +236,9 @@ const NumberOfConsignmentCompanies: React.FC<any> = ({ serviceId }): JSX.Element
   );
 }
 /** [Internal Component] 개인정보 제공 업체 수 표시 */
-const NumberOfProvisionCompanies: React.FC<any> = ({ serviceId }): JSX.Element => {
+const NumberOfProvisionCompanies: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   // 제공 데이터 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_PPI, serviceId], async () => await getPPIDatas(serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_PPI, serviceId], async () => await getPPIDatas(accessToken, serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -237,9 +265,9 @@ const PIPPInfomation: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Internal Component] 동의서 개수 표시 */
-const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
+const ConsentInformaiton: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   // 동의서 목록 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_CONSENT, serviceId], async () => await getConsentList(serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_CONSENT, serviceId], async () => await getConsentList(accessToken, serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.length : 0, [data]);
   // 동의서 유형
@@ -283,9 +311,9 @@ const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
   );
 }
 /** [Internal Component] 나의 활동 내역 */
-const MyActivieList: React.FC<any> = ({ userId }): JSX.Element => {
+const MyActivieList: React.FC<any> = ({ accessToken, userId }): JSX.Element => {
   // 사용자 활동 내역 조회
-  const { isLoading, data } = useQuery("dashboard-activity", async () => await getUserActivityForWeek(userId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_ACTIVITY, userId], async () => await getUserActivityForWeek(accessToken, userId));
   // 데이터 구분 및 정렬
   const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data]);
 

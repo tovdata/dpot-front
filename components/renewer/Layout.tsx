@@ -1,16 +1,19 @@
 import Router from 'next/router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 // Component
 import Link from 'next/link';
 import { StyledPageContent, StyledPageHeader, StyledPageHeaderMenuItem, StyledPageHeaderNav, StyledPageSider, StyledPageSiderFooter } from '../styled/Layout';
 // State
-import { accessTokenSelector, expandSideSelector, serviceSelector } from '@/models/session';
+import { accessTokenSelector, expandSideSelector, sessionSelector } from '@/models/session';
 import { Dropdown, Layout, Menu } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import PLIPSideMenu from './SideMenu';
 import { signout } from '@/models/queries/apis/signin-up';
 import { errorNotification, successNotification } from '../common/Notification';
+import { useQuery } from 'react-query';
+import { KEY_SERVICE } from '@/models/queries/key';
+import { getService } from '@/models/queries/apis/company';
 
 export interface PLIPPageLayoutProps {
   children?: JSX.Element | JSX.Element[];
@@ -19,14 +22,14 @@ export interface PLIPPageLayoutProps {
 
 /** [Component] 페이지 레이아웃 (헤더) */
 export const PLIPPageHeader: React.FC<any> = (): JSX.Element => {
-  // 로컬 스토리지에 저장된 모든 정보
-  const setAccessToken = useSetRecoilState(accessTokenSelector);
+  // 액세스 토큰
+  const [accessToken, setAccessToken] = useRecoilState(accessTokenSelector);
 
   /** [Event handler] 회사 관리로 이동 */
   const goManagement = useCallback(() => Router.push('/company/info'), []);
   /** [Event handler] 로그아웃 */
   const onSignout = useCallback(async () => {
-    const response = await signout();
+    const response = await signout(accessToken);
     if (response) {
       // Local storage 초기화
       setAccessToken('');
@@ -93,14 +96,18 @@ export const PLIPPageLayout: React.FC<any> = ({ children, selectedKey }): JSX.El
 }
 /** [Component] 페이지 레이아웃 (사이드) */
 export const PLIPPageSider: React.FC<any> = ({ expand, onExpand, scroll, selectedKey }): JSX.Element => {
-  // 로컬 스토리지 내 서비스 정보 및 메뉴 확장 여부 조회
-  const sessionService = useRecoilValue(serviceSelector);
+  // 액세스 토큰
+  const accessToken = useRecoilValue(accessTokenSelector);
+  // 세션 조회
+  const session = useRecoilValue(sessionSelector);
+  // 서비스 조회
+  const { data: service } = useQuery([KEY_SERVICE, session.serviceId], async () => await getService(accessToken, session.serviceId));
 
   // 컴포넌트 반환
   return (
     <StyledPageSider collapsed={!expand} collapsedWidth={88} scroll={scroll} width={246}>
       <div className='container'>
-        <PLIPSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} serviceName={sessionService.serviceName} />
+        <PLIPSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} serviceName={service ? service.serviceName : ''} />
         <StyledPageSiderFooter expand={expand.toString()}>
           <div className='menu'>
             <a className='pipp'>개인정보처리방침</a>

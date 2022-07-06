@@ -17,7 +17,7 @@ import { AddEpiDataComponent, ConfirmCheckListComponent, DisadvantageComponent, 
 import { ConfirmPage } from "./consent/Documentation";
 import { ConsentEPITable, ConsentListTable } from "./consent/Table";
 import { copyTextToClipboard, unixTimeToTimeStamp } from "utils/utils";
-import { companySelector, serviceSelector, userSelector } from "@/models/session";
+import { companySelector, serviceSelector, userSelector } from "@/models/session_old";
 import { useRecoilValue, useRecoilValueLoadable } from "recoil";
 import Router from "next/router";
 // Styled component(Card Container)

@@ -3,7 +3,7 @@ import Router from 'next/router';
 import { useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
 // State
-import { accessTokenSelector } from '@/models/session';
+import { accessTokenSelector } from '@/models/session_old';
 // Query
 import { signout } from '@/models/queries/apis/signin-up';
 

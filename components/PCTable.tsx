@@ -15,7 +15,7 @@ import { LinkOutlined } from '@ant-design/icons';
 import { SelectOptionsByColumn } from '@/models/type';
 // Status
 import { GetCPIDefaultSelector } from '@/models/state';
-import { serviceSelector, userSelector } from '@/models/session';
+import { serviceSelector, userSelector } from '@/models/session_old';
 // Query
 import { setQueryData } from '@/models/queryState';
 import { getCFNIDatas, getCPIDatas, getFNIDatas, getPFNIDatas, getPIDatas, getPPIDatas, setDataByTableType } from '@/models/queries/apis/manage';

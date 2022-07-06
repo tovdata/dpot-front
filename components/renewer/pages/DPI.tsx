@@ -8,7 +8,7 @@ const InformationForm: ComponentType<InformationFormProps> = dynamic(() => impor
 // Type
 import { DPITableFormProps, InformationFormProps } from '@/components/renewer/DPI';
 // State
-import { companySelector, serviceSelector, userSelector } from '@/models/session';
+import { companySelector, serviceSelector, userSelector } from '@/models/session_old';
 
 /** [Component] 파기 메인 */
 const DPIMain: React.FC<any> = (): JSX.Element => {

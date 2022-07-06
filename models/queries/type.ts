@@ -1,4 +1,4 @@
-import { getAccessToken } from "../session";
+import { getAccessToken } from "../session_old";
 
 /** 기본 Backend Server URL*/
 export const SERVER_URL = 'https://api-dev.plip.kr:8081/api/';
@@ -59,15 +59,12 @@ export interface RequestDF {
  * @param data 요청 데이터
  * @returns 요청 객체
  */
-export const createRequest = async (method: string, data?: any): Promise<RequestDF> => {
-  // 액세스 토큰 추출
-  const accessToken: string = await getAccessToken();
+export const createRequest = async (token: string, method: string, data?: any): Promise<RequestDF> => {
   // 요청 객체 반환
   return {
     credentials: 'include',
     body: method === 'GET' ? undefined : data ? JSON.stringify(data) : undefined,
     headers: {
-      'Authorization': accessToken,
       'Content-Type': 'application/json'
     },
     method: method

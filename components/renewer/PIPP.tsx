@@ -26,9 +26,6 @@ const FiEdit = dynamic(() => import('react-icons/fi').then((mod: any): any => mo
 const LinkOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.LinkOutlined));
 const PlusOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.PlusOutlined));
 const RedoOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.RedoOutlined));
-// Module
-import { blankCheck, copyTextToClipboard } from 'utils/utils';
-import moment from 'moment';
 // Statement
 import { statementForPIPP as stmt } from '@/models/static/statement';
 // Type
@@ -37,9 +34,13 @@ import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SER
 // Query
 import { getCompany } from '@/models/queries/apis/company';
 import { getPIPPData, setPIPPData } from '@/models/queries/apis/pipp';
-import { getDatasByTableType } from '@/models/queries/api';
-// import { FNITable, PITable } from '../PITable';
+import { getDatasByTableType } from '@/models/queries/apis/manage';
+// Util
+import { blankCheck, copyTextToClipboard } from 'utils/utils';
+import moment from 'moment';
+
 import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from '../PCTable';
+
 
 /** [Interface] PIPP process */
 interface PIPPProcess {
@@ -53,15 +54,15 @@ type ScrollPosition = 'start'|'end';
 /**
  * [Component] 개인정보 처리방침 생성 페이지
  */
-export const CreatePIPPForm: React.FC<any> = ({ companyId, list, onBack, onUpdateStatus, progress, serviceId, status }: any): JSX.Element => {
+export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, onBack, onUpdateStatus, progress, serviceId, status }: any): JSX.Element => {
   // 처리방침 생성 과정에서 사용될 데이터 구조
   const [data, setData] = useState<any>(defaultPIPPData);
   // 초기 처리방침 데이터 설정
   useEffect(() => {
-    if (progress === 'create') {
+    // if (progress === 'create') {
       (async () => {
         // 회사 정보 조회
-        const response = await getCompany(companyId);
+        const response = await getCompany(accessToken, companyId);
         // 개인정보 보호책임자 정의
         let manager = { name: '', position: '', email: '' };
         if (response && response.manager) {
@@ -70,14 +71,14 @@ export const CreatePIPPForm: React.FC<any> = ({ companyId, list, onBack, onUpdat
         // 개인정보 처리방침 데이터 정의
         setData({ ...data, dInfo: { ...data.dInfo, manager: { ...data.dInfo.manager, charger: { name: manager.name, position: manager.position, contact: manager.email } } } });
       })();
-    }
+    // }
   }, [companyId, progress]);
   // 데이터 불러오기에 대한 상태
   const [loading, setLoading] = useState<boolean>(true);
   // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
-  const { isLoading: isLoadingForData, data: loadData } = useQuery([SERVICE_PIPP, serviceId], async () => await getPIPPData(serviceId));
+  const { isLoading: isLoadingForData, data: loadData } = useQuery([SERVICE_PIPP, serviceId], async () => await getPIPPData(accessToken, serviceId));
   // 테이블 데이터 쿼리 (API 호출)
-  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getDatasByTableType(serviceId, type) })));
+  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getDatasByTableType(accessToken, serviceId, type) })));
   // 로딩 데이터 Hook
   useEffect(() => setLoading(isLoadingForData || results.some((result: any): boolean => result.isLoading)), [isLoadingForData, results]);
   // 임시 저장 데이터가 있을 경우, 데이터 갱신
@@ -169,8 +170,6 @@ export const CreatePIPPForm: React.FC<any> = ({ companyId, list, onBack, onUpdat
       }
     }
   }, [initQuery, loading]);
-
-  useEffect(() => console.log('render', data), [data]);
 
   /** [Event handler] 모달 열기 */
   const onOpen = useCallback((): void => setVisible(true), []);
@@ -288,7 +287,7 @@ export const CreatePIPPForm: React.FC<any> = ({ companyId, list, onBack, onUpdat
     // 처리 상태 정의
     const apiStatus: string = status === 'none' ? 'create' : temp ? 'update' : 'publish';
     // API 호출
-    const response = await setPIPPData(serviceId, data, apiStatus, apiStatus ? document.getElementById('report')?.outerHTML : undefined);
+    const response = await setPIPPData(accessToken, serviceId, data, apiStatus, apiStatus ? document.getElementById('report')?.outerHTML : undefined);
     if (response.result) {
       if (temp) {
         successNotification('임시 저장 완료');
@@ -328,7 +327,7 @@ export const CreatePIPPForm: React.FC<any> = ({ companyId, list, onBack, onUpdat
           ) : (
             <PLIPLoadingContainer />
           ) : stepIndex === 1 ? data ? (
-            <CreatePIPPSection data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTable={ref} serviceId={serviceId} />
+            <CreatePIPPSection accessToken={accessToken} data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTable={ref} serviceId={serviceId} />
           ) : (
             <PLIPLoadingContainer />
           ) : stepIndex === 2 ? (
@@ -378,7 +377,7 @@ export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
 }
 
 /** [Internal Component] 개인정보 처리방침 생성 섹션 */
-const CreatePIPPSection: React.FC<any> = ({ onChange, data, onFocus, onRefresh, refElements, refTable, serviceId }): JSX.Element => {
+const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus, onRefresh, refElements, refTable, serviceId }): JSX.Element => {
   // Query Client 생성
   const queryClient = useQueryClient();
   // 편집을 위한 모달 오픈 상태
@@ -409,12 +408,12 @@ const CreatePIPPSection: React.FC<any> = ({ onChange, data, onFocus, onRefresh, 
           <PreviewSection data={data} preview={true} refElements={refElements.preview} refTables={refTable} stmt={stmt(data.dInfo.name)} />
         </Col>
       </Row>
-      <EditableModal onClose={onClose} serviceId={serviceId} type={refType} visible={open} />
+      <EditableModal accessToken={accessToken} onClose={onClose} serviceId={serviceId} type={refType} visible={open} />
     </>
   );
 }
 /** [Internal Component] 개인정보 관리 테이블에 대한 수정을 위한 모달 */
- export const EditableModal: React.FC<any> = ({ onClose, serviceId, type, visible }: any): JSX.Element => {
+ export const EditableModal: React.FC<any> = ({ accessToken, onClose, serviceId, type, visible }: any): JSX.Element => {
   // 팝업 제목, 내용에 대한 상태 정의
   const [title, setTitle] = useState<string>('');
   const [content, setContent] = useState<JSX.Element>(<></>);
@@ -423,25 +422,25 @@ const CreatePIPPSection: React.FC<any> = ({ onChange, data, onFocus, onRefresh, 
     switch (type) {
       case 'pi':
         setTitle('개인정보 수집 및 이용');
-        setContent(<PITable serviceId={serviceId} />);
+        setContent(<PITable accessToken={accessToken} serviceId={serviceId} />);
         break;
       case 'ppi':
         setTitle('개인정보 제공');
-        setContent(<PPITableForm modal={true} />);
+        setContent(<PPITableForm accessToken={accessToken} modal={true} />);
         break;
       case 'cpi':
         setTitle('개인정보 위탁');
-        setContent(<CPITableForm modal={true} />);
+        setContent(<CPITableForm accessToken={accessToken} modal={true} />);
         break;
       case 'fni':
         setTitle('가명정보');
         setContent(
           <>
             <h2 style={{ fontSize: 15, fontWeight: '500', marginBottom: 16 }}>가명정보 수집 및 이용</h2>
-            <FNITable modal={true} serviceId={serviceId} />
+            <FNITable accessToken={accessToken} modal={true} serviceId={serviceId} />
             <div style={{ marginTop: 48 }}></div>
-            <PFNITableForm modal={true} style={{ marginBottom: 48 }} />
-            <CFNITableForm modal={true} style={{ marginBottom: 0 }} />
+            <PFNITableForm accessToken={accessToken} modal={true} style={{ marginBottom: 48 }} />
+            <CFNITableForm accessToken={accessToken} modal={true} style={{ marginBottom: 0 }} />
           </>
         );
         break;

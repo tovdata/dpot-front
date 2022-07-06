@@ -15,7 +15,7 @@ import { VscChevronLeft } from 'react-icons/vsc';
 import { blankCheck } from '../../utils/utils';
 import moment from 'moment';
 // State
-import { Company, User } from '@/models/session';
+import { Company, User } from '@/models/session_old';
 // Query
 import { getDPIDatas, getPIItems, setDataByTableType } from '@/models/queries/api';
 // Query key

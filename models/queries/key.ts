@@ -3,6 +3,8 @@ export const KEY_DASHBOARD_PPI: string = 'plip-dashboard-ppi';
 export const KEY_DASHBOARD_CPI: string = 'plip-dashboard-cpi';
 export const KEY_DASHBOARD_PIPP: string = 'plip-dashboard-pipp';
 export const KEY_DASHBOARD_CONSENT: string = 'plip-dashboard-consent';
+export const KEY_DASHBOARD_ACTIVITY: string = 'plip-dashboard-activity';
+export const KEY_DASHBOARD_LAST_MODIFY: string = 'plip-dashboard-last-modify';
 
 export const KEY_COMPANY: string = 'plip-company';
 export const KEY_SERVICE: string = 'plip-service';

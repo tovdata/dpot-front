@@ -6,19 +6,19 @@ import { useRecoilValueLoadable } from 'recoil';
 const PLIP401Page = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIP401Page));
 const PLIP403Page = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIP403Page));
 // State
-import { accessTokenSelector, companySelector, serviceSelector } from '@/models/session';
-import { decodeAccessToken } from 'utils/utils';
+import { accessTokenSelector, sessionSelector } from '@/models/session';
 
 /** [Component] 미사용자 확인 섹션 */
 export const PILPOtherSession: React.FC<any> = ({ children }): JSX.Element => {
   // access token 조회
-  const accessToken = useRecoilValueLoadable(accessTokenSelector);
+  const { contents, state } = useRecoilValueLoadable(accessTokenSelector);
+
   // 자식 컴포넌트
   const [component, setComponent] = useState<JSX.Element>(<></>);
   // 사용자 여부 확인에 따른 처리
   useEffect(() => {
-    if (accessToken.state === 'hasValue') {
-      if (decodeAccessToken(accessToken.contents) === '') {
+    if (state === 'hasValue') {
+      if (contents === '') {
         setComponent(children);
       } else {
         Router.push('/company/services');
@@ -26,22 +26,21 @@ export const PILPOtherSession: React.FC<any> = ({ children }): JSX.Element => {
     } else {
       setComponent(<></>);
     }
-  }, [accessToken]);
+  }, [contents, state]);
 
   // 컴포넌트 반환
   return (component);
 }
 /** [Component] 현재 회사 및 서비스 확인 섹션 */
 export const PLIPServiceSession: React.FC<any> = ({ children }): JSX.Element => {
-  // 회사 및 서비스 정보 조회
-  const sessionCompany = useRecoilValueLoadable(companySelector);
-  const sessionService = useRecoilValueLoadable(serviceSelector);
+  // 세션 조회
+  const { contents, state } = useRecoilValueLoadable(sessionSelector);
   // 자식 컴포넌트
   const [component, setComponent] = useState<JSX.Element>(<></>);
   // 사용자 여부 확인에 따른 처리
   useEffect(() => {
-    if (sessionCompany.state === 'hasValue' && sessionService.state === 'hasValue') {
-      if (sessionCompany.contents.id === '' || sessionService.contents.id === '') {
+    if (state === 'hasValue') {
+      if (contents.companyId === '' || contents.serviceId === '') {
         setComponent(<PLIP403Page />);
       } else {
         setComponent(children);
@@ -49,7 +48,7 @@ export const PLIPServiceSession: React.FC<any> = ({ children }): JSX.Element => 
     } else {
       setComponent(<></>);
     }
-  }, [sessionCompany, sessionService]);
+  }, [contents, state]);
 
   // 컴포넌트 반환
   return (component);
@@ -57,13 +56,13 @@ export const PLIPServiceSession: React.FC<any> = ({ children }): JSX.Element => 
 /** [Component] 사용자 확인 섹션 */
 export const PLIPUserSession: React.FC<any> = ({ children }): JSX.Element => {
   // access token 조회
-  const accessToken = useRecoilValueLoadable(accessTokenSelector);
+  const { contents, state } = useRecoilValueLoadable(accessTokenSelector);
   // 자식 컴포넌트
   const [component, setComponent] = useState<JSX.Element>(<></>);
   // 사용자 여부 확인에 따른 처리
   useEffect(() => {
-    if (accessToken.state === 'hasValue') {
-      if (decodeAccessToken(accessToken.contents) !== '') {
+    if (state === 'hasValue') {
+      if (contents !== '') {
         setComponent(children);
       } else {
         setComponent(<PLIP401Page />);
@@ -71,7 +70,7 @@ export const PLIPUserSession: React.FC<any> = ({ children }): JSX.Element => {
     } else {
       setComponent(<></>);
     }
-  }, [accessToken]);
+  }, [state, contents]);
 
   // 컴포넌트 반환
   return (component);

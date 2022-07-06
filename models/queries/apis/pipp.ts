@@ -1,15 +1,17 @@
-import { extractData } from "../internal";
-import { createRequest, RequestDF, ResponseDF, SERVER_URL } from "../type";
+import { createRequest, extractData } from '@/models/queries/internal';
+// Type
+import { RequestDF, ResponseDF, SERVER_URL } from '@/models/queries/type';
 
 /**
  * [API Caller] 개인정보 처리방침 임시 저장 데이터 불러오기
+ * @param token 액세스 토큰
  * @param serviceId 서비스 ID
  * @returns 조회 결과
  */
-export const getPIPPData = async (serviceId: string): Promise<any> => {
+export const getPIPPData = async (token: string, serviceId: string): Promise<any> => {
   try {
       // 요청 객체 생성
-    const request: RequestDF = await createRequest('GET');
+    const request: RequestDF = createRequest('GET', token);
     // API 호출
     const response: Response = await fetch(`${SERVER_URL}pipp/${serviceId}`, request);
     // 응답 데이터 처리
@@ -23,13 +25,14 @@ export const getPIPPData = async (serviceId: string): Promise<any> => {
 }
 /**
  * [API Caller] 개인정보 처리방침 목록
+ * @param token 액세스 토큰
  * @param serviceId 서비스 ID
  * @returns 조회 결과
  */
-export const getPIPPList = async (serviceId: string): Promise<any[]> => {
+export const getPIPPList = async (token: string, serviceId: string): Promise<any[]> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('GET');
+    const request: RequestDF = createRequest('GET', token);
     // API 호출
     const response: Response = await fetch(`${SERVER_URL}pipp/${serviceId}/publishedlist`, request);
     // 데이터 추출
@@ -51,13 +54,14 @@ export const getPIPPList = async (serviceId: string): Promise<any[]> => {
 }
 /**
  * [API Caller] 개인정보 처리방침 진행 상태
+ * @param token 액세스 토큰
  * @param serviceId 서비스 ID
  * @returns 조회 결과
  */
-export const getPIPPStatus = async (serviceId: string): Promise<string> => {
+export const getPIPPStatus = async (token: string, serviceId: string): Promise<string> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('GET');
+    const request: RequestDF = createRequest('GET', token);
     // API 호출
     const response: Response = await fetch(`${SERVER_URL}pipp/${serviceId}`, request);
     // 데이터 추출
@@ -75,13 +79,14 @@ export const getPIPPStatus = async (serviceId: string): Promise<string> => {
 }
 /**
  * [API Caller] 개인정보 처리방침에 대한 데이터 저장하기
+ * @param token 액세스 토큰
  * @param serviceId 현재 서비스 ID
  * @param data 임시 저장을 위한 데이터
  * @param status 데이터 저장 상태 (생성 완료일 경우, status = 'publish')
  * @param html 최종 문서 HTML 코드
  * @returns API로부터 응답받은 데이터
  */
-export const setPIPPData = async (serviceId: string, data: any, status: string, html?: string): Promise<any> => {
+export const setPIPPData = async (token: string, serviceId: string, data: any, status: string, html?: string): Promise<any> => {
   try {
     // 초기 저장인지 아닌지를 확인하여 API 호출을 위한 URL 정의
     const url: string = status === 'create' ? `${SERVER_URL}pipp/new` : `${SERVER_URL}pipp/${serviceId}`;
@@ -96,7 +101,7 @@ export const setPIPPData = async (serviceId: string, data: any, status: string, 
       html: status === 'publish' ? html : undefined
     };
     // 요청 객체 생성
-    const request: RequestDF = await createRequest(status === 'create' ? 'POST' : 'PUT', body);
+    const request: RequestDF = createRequest(status === 'create' ? 'POST' : 'PUT', token, body);
     // 응답 데이터 반환
     const response: Response = await fetch(url, request);
     // 결과 

@@ -11,7 +11,7 @@ import { CloseOutlined, EditOutlined } from '@ant-design/icons';
 // Module
 import moment from 'moment';
 // State
-import { companySelector } from '@/models/session';
+import { companySelector } from '@/models/session_old';
 // Query
 import { getCompany } from '@/models/queries/apis/company';
 import { getUserList, updateUser } from '@/models/queries/apis/user';

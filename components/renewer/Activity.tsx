@@ -7,7 +7,7 @@ import { StyledDate, StyledDateForDashboard, StyledEmpty, StyledEmptyForDashboar
 // Module
 import moment from 'moment';
 // State
-import { serviceSelector, userSelector } from '@/models/session';
+import { serviceSelector, userSelector } from '@/models/session_old';
 // Query
 import { getActivity } from '@/models/queries/apis/activity';
 import { BasicPageLoading } from '../common/Loading';

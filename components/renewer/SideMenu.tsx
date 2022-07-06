@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic';
 import Router from 'next/router';
 import { useCallback, useMemo } from 'react';
 // Component
@@ -5,12 +6,17 @@ import { SideMenuLayout, StyledServiceName, StyledSideMenuProfile, StyledSideMen
 import { Menu } from 'antd';
 // Icon
 const AiOutlineArrowLeft = dynamic(() => import('react-icons/ai').then((mod: any): any => mod.AiOutlineArrowLeft));
-// import { AiOutlineArrowLeft } from 'react-icons/ai';
-import { IoBusinessOutline } from 'react-icons/io5';
-import { DashboardOutlined, DatabaseOutlined, FireOutlined, PartitionOutlined } from '@ant-design/icons';
-import { CheckCircleOutlined, PaperClipOutlined, SolutionOutlined, ToolOutlined } from '@ant-design/icons';
-import { AuditOutlined, HistoryOutlined } from '@ant-design/icons';
-import dynamic from 'next/dynamic';
+const IoBusinessOutline = dynamic(() => import('react-icons/io5').then((mod: any): any => mod.IoBusinessOutline));
+const DashboardOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.DashboardOutlined));
+const DatabaseOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.DatabaseOutlined));
+const FireOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.FireOutlined));
+const PartitionOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.PartitionOutlined));
+const CheckCircleOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.CheckCircleOutlined));
+const PaperClipOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.PaperClipOutlined));
+const SolutionOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.SolutionOutlined));
+const ToolOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.ToolOutlined));
+const AuditOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.AuditOutlined));
+const HistoryOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.HistoryOutlined));
 
 /** [Component] 사이드 메뉴 */
 const PLIPSideMenu: React.FC<any> = ({ expand, onExpand, selectedKey, serviceName }): JSX.Element => {

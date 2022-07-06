@@ -1,7 +1,7 @@
 import Router from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 // Component
 import { StyledPageBackground, StyledPageLayout } from '@/components/styled/JoinCompany';
 import { StyledAddButton, StyledServiceCard } from '../styled/ChoiceService';
@@ -12,18 +12,22 @@ import { PLIPInputGroup } from './Input';
 import { IoAddOutline, IoBusinessSharp, IoDesktopOutline, IoPhonePortraitOutline, IoSettingsOutline } from 'react-icons/io5';
 import { Button, Checkbox, Col, Form, Input, Modal, Popconfirm, Row } from 'antd';
 // State
-import { defaultService, serviceSelector, userSelector } from '@/models/session';
-import { createService, deleteService, getServiceList, updateService } from '@/models/queries/apis/company';
+import { accessTokenSelector, sessionSelector } from '@/models/session';
+import { createService, deleteService, getServices, updateService } from '@/models/queries/apis/company';
 // Query
 import { getUser } from '@/models/queries/apis/user';
 // Query key
 import { KEY_SERVICES, KEY_USER } from '@/models/queries/key';
+// Util
+import { decodeAccessToken } from 'utils/utils';
 
 const ChoiceService: React.FC<any> = (): JSX.Element => {
-  // 로컬 스토리지 내 사용자 정보 조회
-  const sessionUser = useRecoilValue(userSelector);
+  // 액세스 토큰 조회
+  const accessToken: string = useRecoilValue(accessTokenSelector);
+  // 사용자 ID 추출
+  const userId: string = decodeAccessToken(accessToken);
   // 사용자 정보 조회 (API)
-  const { isLoading, data: user } = useQuery([KEY_USER, sessionUser.id], async () => await getUser(sessionUser.id));
+  const { isLoading, data: user } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
   // 표시될 컴포넌트
   const [component, setComponent] = useState<JSX.Element>(<PLIPSimpleLoadingPage />);
 
@@ -40,7 +44,7 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
             <StyledPageBackground>
               <StyledPageLayout>
                 <h2 className='title'>{user.userName} 님 안녕하세요 😊</h2>
-                <ServiceCardList companyId={user.affiliations[0].id} />
+                <ServiceCardList accessToken={accessToken} companyId={user.affiliations[0].id} />
               </StyledPageLayout>
             </StyledPageBackground>
           );
@@ -56,11 +60,11 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
 }
 
 /** [Internal Component] 서비스 카드 목록 */
-const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
+const ServiceCardList: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
   // 로컬 스토리지 내 서비스 정보
-  const [sessionService, setSessionService] = useRecoilState(serviceSelector);
+  const [session, setSession] = useRecoilState(sessionSelector);
   // 서비스 목록 조회
-  const { isLoading, data: services } = useQuery([KEY_SERVICES, companyId], async () => await getServiceList(companyId));
+  const { isLoading, data: services } = useQuery([KEY_SERVICES, companyId], async () => await getServices(accessToken, companyId));
   // Query client
   const queryClient = useQueryClient();
 
@@ -75,12 +79,12 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
   const onClose = useCallback(() => setVisible(false), []);
   /** [Event handler] 서비스 삭제 */
   const onDelete = useCallback(async () => {
-    const response = await deleteService(serviceId);
+    const response = await deleteService(accessToken, serviceId);
     if (response) {
       successNotification('서비스를 삭제하였습니다.');
       // 로컬 스토리지에 저장된 서비스와 같을 경우, 삭제
-      if (sessionService.id === serviceId) {
-        setSessionService(defaultService);
+      if (session.serviceId && session.serviceId === serviceId) {
+        setSession({ companyId: companyId, serviceId: '' });
       }
       // 모달 종료
       setVisible(false);
@@ -111,7 +115,7 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
   /** [Event handler] 서비스 생성 */
   const onSave = useCallback(() => form.validateFields().then(async (values: any): Promise<void> => {
     const isCreate: boolean = serviceId === '' ? true : false;
-    const response = isCreate ? await createService(companyId, values) : await updateService(companyId, serviceId, values);
+    const response = isCreate ? await createService(accessToken, companyId, values) : await updateService(accessToken, companyId, serviceId, values);
     if (response.result) {
       successNotification(serviceId === '' ? '서비스를 생성하였습니다.' : '서비스를 변경하였습니다.');
       // 폼 필드 초기화
@@ -152,10 +156,10 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
 /** [Internal Component] 서비스 카드 */
 const ServiceCard: React.FC<any> = ({ onEditService, service }): JSX.Element => {
   // 로컬 스토리지 내 서비스 정보
-  const setSessionService = useSetRecoilState(serviceSelector);
+  const [session, setSession] = useRecoilState(sessionSelector);
   /** [Event handler] 서비스 선택 */
   const onSelect = useCallback(() => {
-    setSessionService({ ...service, name: service.serviceName });
+    setSession({ companyId: session.companyId, serviceId: service.id });
     // 이동
     Router.push('/');
   }, [service]);

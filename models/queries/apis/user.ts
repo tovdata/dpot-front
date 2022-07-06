@@ -1,5 +1,5 @@
-import { extractData } from '../internal';
-import { createRequest, createRequestNotAuth, PLIPUser, RequestDF, SERVER_URL } from '../type';
+import { createRequest, extractData } from '@/models/queries/internal';
+import { createRequestNotAuth, PLIPUser, RequestDF, SERVER_URL } from '../type';
 
 /** [Interface] 사용자 약관 동의 데이터 */
 export interface AgreementProps {
@@ -39,13 +39,14 @@ export interface AgreementProps {
 }
 /**
  * [API Caller] 사용자 조회
+ * @param token 액세스 토큰
  * @param userId 사용자 ID
  * @returns 조회 결과
  */
-export const getUser = async (userId: string): Promise<PLIPUser|undefined> => {
+export const getUser = async (token: string, userId: string): Promise<PLIPUser|undefined> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('GET');
+    const request: RequestDF = createRequest('GET', token);
     // API 호출
     const response = await fetch(`${SERVER_URL}user/${userId}`, request);
     // 데이터 추출
