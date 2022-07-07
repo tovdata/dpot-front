@@ -127,14 +127,14 @@ interface SelectPIProps {
   type: number,
   originData: any,
   data: any,
-  setData: (data: any) => void
+  onSave: (data: any) => void
 }
-export const SelectPIComponent = ({ type, originData, data, setData }: SelectPIProps): JSX.Element => {
+export const SelectPIComponent = ({ type, originData, data, onSave }: SelectPIProps): JSX.Element => {
   return (
     <CSRow>
       <DIRowHeader title='동의를 받고자 하는 목적과 항목을 선택해주세요.' description={staticConsentData('')[type].pData?.description} />
       <DIRowContent>
-        <ConsentEditPITable orignData={originData} data={data} setData={setData} headers={consentEditHeader} />
+        <ConsentEditPITable originData={originData} data={data} onSave={onSave} headers={consentEditHeader} />
       </DIRowContent>
     </CSRow>
   )

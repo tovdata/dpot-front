@@ -51,14 +51,14 @@ export const getConsentList = async (token: string, serviceId: string): Promise<
  * @param html 동의서 문서
  * @returns 요청 결과
  */
-export const setConsent = async (token: string, serviceId: string, data: any, html?: string): Promise<boolean> => {
+export const setConsent = async (token: string, serviceId: string, data: any, html?: string): Promise<any> => {
   try {
     // 요청 객체 생성
     const request: RequestDF = createRequest('POST', token, { serviceId: serviceId, data: data, htmlBody: html });
     // API 호출
     const response: Response = await fetch(`${SERVER_URL}consent/publish`, request);
     // 결과 반환
-    return (await extractData(response)).result;
+    return await extractData(response);
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return false;

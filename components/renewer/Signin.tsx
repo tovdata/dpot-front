@@ -32,8 +32,6 @@ export const SigninForm: React.FC<any> = (): JSX.Element => {
   // 토큰 갱신을 위한 Setter
   const setAccessToken = useSetRecoilState(accessTokenSelector);
 
-  console.log('뭐하세요?')
-
   /** [Event handler] 로그인 */
   const onSignin = useCallback(async () => {
     // API 호출
@@ -54,7 +52,7 @@ export const SigninForm: React.FC<any> = (): JSX.Element => {
         const company: any = await getCompany(accessToken, user.affiliations[0].id);
         // 결과에 따른 처리
         if (company) {
-          setSession({ companyId: company.id });
+          setSession({ companyId: company.id, serviceId: '' });
           Router.push('/company/services');
         } else {
           errorNotification('로그인 과정에서 문제가 발생하였습니다.');
