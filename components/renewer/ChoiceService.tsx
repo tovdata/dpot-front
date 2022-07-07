@@ -117,7 +117,7 @@ const ServiceCardList: React.FC<any> = ({ accessToken, companyId }): JSX.Element
     const isCreate: boolean = serviceId === '' ? true : false;
     const response = isCreate ? await createService(accessToken, companyId, values) : await updateService(accessToken, companyId, serviceId, values);
     if (response.result) {
-      successNotification(serviceId === '' ? '서비스를 생성하였습니다.' : '서비스를 변경하였습니다.');
+      successNotification(isCreate ? '서비스를 생성하였습니다.' : '서비스를 변경하였습니다.');
       // 폼 필드 초기화
       form.resetFields();
       // 모달 종료
@@ -125,7 +125,7 @@ const ServiceCardList: React.FC<any> = ({ accessToken, companyId }): JSX.Element
       // 서비스 목록 갱신
       queryClient.setQueryData([KEY_SERVICES, companyId], (oldData: any) => {
         if (isCreate) {
-          return [...oldData, values];
+          return [...oldData, { ...values, id: response.data.id }];
         } else {
           // 배열 내에 기존 서비스 인덱스 추출
           const index: number = oldData.findIndex((service: any): boolean => service.id === serviceId);
@@ -134,7 +134,7 @@ const ServiceCardList: React.FC<any> = ({ accessToken, companyId }): JSX.Element
         }
       });
     } else {
-      errorNotification(serviceId === '' ? '서비스 생성 과정에서 문제가 발생하였습니다.' : '서비스 변경 과정에서 문제가 발생하였습니다.');
+      errorNotification(isCreate ? '서비스 생성 과정에서 문제가 발생하였습니다.' : '서비스 변경 과정에서 문제가 발생하였습니다.');
     }
   }).catch((err: any): void => {}), [companyId, form, serviceId]);
 

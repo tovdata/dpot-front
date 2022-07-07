@@ -60,13 +60,14 @@ export const getUser = async (token: string, userId: string): Promise<PLIPUser|u
 }
 /**
  * [API Caller] 회사에 소속된 사용자 목록
+ * @param token 액세스 토큰
  * @param companyId 회사 ID
  * @returns 조회 결과
  */
-export const getUserList = async (companyId: string): Promise<PLIPUser[]> => {
+export const getUsers = async (token: string, companyId: string): Promise<PLIPUser[]> => {
   try {
     // 요청 객체 생성
-    const request: RequestDF = await createRequest('GET');
+    const request: RequestDF = createRequest('GET', token);
     // API 호출
     const response = await fetch(`${SERVER_URL}company/${companyId}/details`, request);
     // 데이터 추출
@@ -84,18 +85,19 @@ export const getUserList = async (companyId: string): Promise<PLIPUser[]> => {
 }
 /**
  * [API Caller] 사용자 정보 갱신
+ * @param token 액세스 토큰
  * @param userId 사용자 ID
  * @param data 사용자 정보
  * @returns 요청 결과
  */
-export const updateUser = async (userId: string, data: PLIPUser): Promise<boolean> => {
+export const updateUser = async (token: string, userId: string, data: PLIPUser): Promise<boolean> => {
   try {
     // 데이터 복사
     const copy: PLIPUser = JSON.parse(JSON.stringify(data));
     // ID 속성이 있을 경우, 삭제
     if ('id' in copy) delete copy.id;
     // 요청 객체 생성
-    const request = await createRequest('PUT', copy);
+    const request = createRequest('PUT', token, copy);
     // API 호출
     const response = await fetch(`${SERVER_URL}user/${userId}`, request);
     // 데이터 추출 및 결과 반환

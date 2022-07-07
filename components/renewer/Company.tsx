@@ -1,28 +1,30 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 // Component
 import { Button, Divider, Drawer, Form, Input, Table, Tabs } from 'antd';
 import { StyledDrawerFooter, StyledPageLayout, StyledTabSection, StyledSaveButton, StyledDrawerExtra, StyledEditButton, StyledInviteForm, StyledTableForm } from '../styled/Company';
-import { successNotification } from '../common/Notification';
+import { errorNotification, successNotification } from '../common/Notification';
 import { PLIPInputGroup } from './Input';
 // Icon
 import { CloseOutlined, EditOutlined } from '@ant-design/icons';
-// Module
-import moment from 'moment';
-// State
-import { companySelector } from '@/models/session_old';
 // Query
-import { getCompany } from '@/models/queries/apis/company';
-import { getUserList, updateUser } from '@/models/queries/apis/user';
+import { getCompany, setCompany } from '@/models/queries/apis/company';
+import { getUsers, updateUser } from '@/models/queries/apis/user';
 // Query key
 import { KEY_COMPANY, KEY_USERS } from '@/models/queries/key';
 import { PLIPSimpleLoadingContainer } from './Page';
+// State
+import { accessTokenSelector, sessionSelector } from '@/models/session';
+// Util
+import moment from 'moment';
 
 /** [Component] 회사 관리 페이지 */
 const ManageCompany: React.FC<any> = (): JSX.Element => {
-  // 회사 정보
-  const [company, setCompany] = useRecoilState(companySelector);
+  // 액세스 토큰 조회
+  const accessToken: string = useRecoilValue(accessTokenSelector);
+  // 세션 조회
+  const session = useRecoilValue(sessionSelector);
 
   // 컴포넌트 반환
   return (
@@ -31,12 +33,12 @@ const ManageCompany: React.FC<any> = (): JSX.Element => {
         <Tabs centered defaultActiveKey='company'>
           <Tabs.TabPane key='company' tab='회사 정보'>
             <StyledTabSection>
-              <CompanyInfoSection companyId={company.id} setCompany={setCompany} />
+              <CompanyInfoSection accessToken={accessToken} companyId={session.companyId} />
             </StyledTabSection>
           </Tabs.TabPane>
           <Tabs.TabPane key='organization' tab='개인정보 보호조직'>
             <StyledTabSection>
-              <OrganizationInfoSection companyId={company.id} />
+              <OrganizationInfoSection accessToken={accessToken} companyId={session.companyId} />
             </StyledTabSection>
           </Tabs.TabPane>
         </Tabs>
@@ -45,9 +47,9 @@ const ManageCompany: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Internal Component] 회사 정보 관리 Section */
-const CompanyInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
+const CompanyInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
   // 회사 정보 조회
-  const { isLoading, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(companyId));
+  const { isLoading, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(accessToken, companyId));
 
   // Form 객체 생성
   const [form] = Form.useForm();
@@ -57,10 +59,28 @@ const CompanyInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
   // 탭 변경에 따라 Form 내에 필드 초기화
   useEffect(() => company ? form.setFieldsValue({ name: company.companyName, url: company.url, position: company.manager.position, manager: company.manager.name, email: company.manager.email }) : undefined, [company]);
   /** [Event handler] 변경한 회사 정보 저장 */
-  const onSave = useCallback(() => {
-    queryClient.setQueryData([KEY_COMPANY, companyId], { id: companyId, name: form.getFieldValue('name'), url: form.getFieldValue('url'), manager: { name: form.getFieldValue('manager'), position: form.getFieldValue('position'), email: form.getFieldValue('email') } });
-    successNotification('변경사항이 저장되었습니다.');
-  }, [form, queryClient]);
+  const onSave = useCallback(async () => {
+    // 변경된 데이터
+    const updated: any = {
+      id: companyId,
+      name: form.getFieldValue('name'),
+      url: form.getFieldValue('url'),
+      manager: {
+        name: form.getFieldValue('manager'),
+        position: form.getFieldValue('position'),
+        email: form.getFieldValue('email')
+      }
+    };
+    // API 호출
+    const response = await setCompany(accessToken, updated, companyId);
+    // 결과 처리
+    if (response.result) {
+      queryClient.invalidateQueries([KEY_COMPANY, companyId]);
+      successNotification('변경사항이 저장되었습니다.');
+    } else {
+      errorNotification('변경사항 저장에 실패하였습니다.');
+    }
+  }, [company, form, queryClient]);
 
   // 컴포넌트 반환
   return (
@@ -99,9 +119,9 @@ const CompanyInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
   );
 }
 /** [Internal Component] 조직 정보 관리 Section */
-const OrganizationInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
+const OrganizationInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
   // 회사에 소속된 사용자 조회
-  const { isLoading, data } = useQuery([KEY_USERS, companyId], async () => await getUserList(companyId));
+  const { isLoading, data } = useQuery([KEY_USERS, companyId], async () => await getUsers(accessToken, companyId));
 
   // 쿼리 클라이언트
   // const queryClient = useQueryClient();

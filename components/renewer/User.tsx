@@ -11,33 +11,42 @@ import { companySelector, userSelector } from '@/models/session_old';
 // Query
 import { getUser, updateUser } from '@/models/queries/apis/user';
 import { PLIPInputGroup } from './Input';
+import { accessTokenSelector, sessionSelector } from '@/models/session';
+import { decodeAccessToken } from 'utils/utils';
+import { KEY_COMPANY } from '@/models/queries/key';
+import { getCompany } from '@/models/queries/apis/company';
 // Query key
 const KEY_USER = 'plip-user';
 
 /** [Component] 내 정보 관리 */
 const ManageUser: React.FC<any> = (): JSX.Element => {
+  // 액세스 토큰 조회
+  const accessToken: string = useRecoilValue(accessTokenSelector);
+  // 세션 조회
+  const session = useRecoilValue(sessionSelector);
+
   return (
     <StyledUserForm>
-      <UserInfoSection />
+      <UserInfoSection accessToken={accessToken} companyId={session.companyId} />
     </StyledUserForm>
   );
 }
 
 /** [Internal Component] 내 정보 관리 Section */
-const UserInfoSection: React.FC<any> = (): JSX.Element => {
-  // 회사 정보 조회
-  const sessionCompany = useRecoilValue(companySelector);
-  // 사용자 정보 상태
-  const [user, setUser] = useRecoilState(userSelector);
+const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
+  // 사용자 ID 추출
+  const userId: string = decodeAccessToken(accessToken);
   // 사용자 조회
-  const { isLoading, data } = useQuery([KEY_USER, user.id], async () => await getUser(user.id));
+  const { isLoading, data } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  // 회사 정보 조회
+  const { data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(accessToken, companyId));
 
   // 모달 Open 상태
   const [visible, setVisible] = useState<boolean>(false);
   // Form 객체 생성
   const [form] = Form.useForm();
   // 회사명 설정
-  useEffect(() => form.setFieldsValue({ ...form, company: sessionCompany.companyName }), [form, sessionCompany]);
+  useEffect(() => form.setFieldsValue({ ...form, company: company ? company.companyName : '' }), [form, company]);
   // 사용자 정보 설정
   useEffect(() => form.setFieldsValue({ name: data ? data.userName : '', contact: data ? data.contact : '' }), [data, form]);
 
@@ -47,14 +56,13 @@ const UserInfoSection: React.FC<any> = (): JSX.Element => {
   const onCancel = useCallback(() => setVisible(false), []);
   /** [Event handler] 변경한 회사 정보 저장 */
   const onSave = useCallback(async () => {
-    const response = await updateUser(user.id, { ...data, userName: form.getFieldValue('name'), contact: form.getFieldValue('contact') });
+    const response = await updateUser(accessToken, userId, { ...data, userName: form.getFieldValue('name'), contact: form.getFieldValue('contact') });
     if (response) {
-      setUser({ id: user.id, userName: form.getFieldValue('name') });
       successNotification('변경된 사용자 정보가 저장되었습니다.');
     } else {
       errorNotification('사용자 정보 저장에 실패하였습니다.');
     }
-  }, [data, form, setUser, user]);
+  }, [accessToken, data, form, userId]);
   // 비밀번호 확인 함수
   const confirmPassword = ({ getFieldValue }: any) => ({ validator(_: any, value: string) {
     return !value || getFieldValue('password') === value ? Promise.resolve() : Promise.reject(new Error('비밀번호가 일치하지 않습니다.'));
