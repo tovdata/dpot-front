@@ -230,7 +230,6 @@ export const setDataByTableType = async (token: string, user: any, serviceId: st
   const url: string = mode === 'add' ? `${SERVER_URL}${type}/new` : `${SERVER_URL}${type}/${data.id}`;
   // 요청 객체 생성
   const request: RequestDF = await createRequestForManage(serviceId, user.id, mode, token, data);
-  console.log(request);
   // API 요청
   const response: Response = await fetch(url, request);
   // 데이터 변환

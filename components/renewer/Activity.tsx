@@ -1,106 +1,60 @@
+import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
 import { useQuery } from 'react-query';
-import { useRecoilValue } from 'recoil';
 // Component
-import { Col, Tabs, Timeline } from 'antd';
-import { StyledDate, StyledDateForDashboard, StyledEmpty, StyledEmptyForDashboard, StyledList, StyledRow, StyledTabSection, StyledTimelineRow, StyledTimelineRowForDashboard } from '../styled/Activity';
-// Module
-import moment from 'moment';
-// State
-import { serviceSelector, userSelector } from '@/models/session_old';
+import { Col, Timeline } from 'antd';
+import { StyledDate, StyledDateForDashboard, StyledEmpty, StyledEmptyForDashboard, StyledList, StyledRow, StyledTimelineRow, StyledTimelineRowForDashboard } from '@/components/styled/Activity';
+const PLIPLoadingContainer = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIPLoadingContainer));
 // Query
 import { getActivity } from '@/models/queries/apis/activity';
-import { BasicPageLoading } from '../common/Loading';
 // Query key
 import { KEY_SERVICE_ACTIVITY, KEY_USER_ACTIVITY } from '@/models/queries/key';
+// Util
+import moment from 'moment';
+import { decodeAccessToken } from 'utils/utils';
 
-/** [Component] 활동 내역 메인 컴포넌트 */
-const ActivityMain: React.FC<any> = (): JSX.Element => {
-  return (
-    <Tabs defaultActiveKey='my'>
-      <Tabs.TabPane key='my' tab='나의 활동 내역'>
-        <StyledTabSection>
-          <UserActivity />
-        </StyledTabSection>
-      </Tabs.TabPane>
-      <Tabs.TabPane key='total' tab='전체 활동 내역'>
-        <StyledTabSection>
-          <ServiceActivity />
-        </StyledTabSection>
-      </Tabs.TabPane>
-    </Tabs>
-  );
-}
-/** [Internal Component] 서비스 활동 내역 */
-const ServiceActivity: React.FC<any> = (): JSX.Element => {
-  // 서비스 정보 조회
-  const service = useRecoilValue(serviceSelector);
+/** [Component] 서비스 활동 내역 */
+export const ServiceActivity: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   // 서비스 활동 내역 조회
-  const { isLoading, data } = useQuery([KEY_SERVICE_ACTIVITY, service.id], async () => await getActivity('service', service.id));
+  const { isLoading, data } = useQuery([KEY_SERVICE_ACTIVITY, serviceId], async () => await getActivity(accessToken, 'service', serviceId));
   // 데이터 구분 및 정렬
-  const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data, isLoading]);
+  const sorted: any = useMemo(() => data ? sortByDatetime(data) : {}, [data]);
 
   // 컴포넌트 반환
   return (
     <>
       {isLoading ? (
-        <BasicPageLoading />
+        <PLIPLoadingContainer />
       ) : (
         <PLIPActivityList data={sorted} />
       )}
     </>
   )
 }
-/** [Internal Component] 사용자 활동 내역 */
-const UserActivity: React.FC<any> = (): JSX.Element => {
-  // 사용자 정보 조회
-  const user = useRecoilValue(userSelector);
+/** [Component] 사용자 활동 내역 */
+export const UserActivity: React.FC<any> = ({ accessToken }): JSX.Element => {
+  // 사용자 ID 추출
+  const userId: string = decodeAccessToken(accessToken);
   // 사용자 활동 내역 조회
-  const { isLoading, data } = useQuery([KEY_USER_ACTIVITY, user.id], async () => await getActivity('user', user.id));
+  const { isLoading, data } = useQuery([KEY_USER_ACTIVITY, userId], async () => await getActivity(accessToken, 'user', userId));
   // 데이터 구분 및 정렬
-  const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data, isLoading]);
+  const sorted: any = useMemo(() => data ? sortByDatetime(data) : {}, [data]);
 
   // 컴포넌트 반환
   return (
     <>
       {isLoading ? (
-        <BasicPageLoading />
+        <PLIPLoadingContainer />
       ) : (
         <PLIPActivityList data={sorted} />
       )}
     </>
   )
 }
-/** [Internal Component] 활동 내역 목록 */
-const PLIPActivityList: React.FC<any> = ({ data }): JSX.Element => {
-  // 타임라인 아이템 생성
-  const items: JSX.Element[] = Object.keys(data).map((date: string): JSX.Element => (
-    <Timeline.Item key={date}>
-      <StyledDate>{date}</StyledDate>
-      {data[date].map((item: any): JSX.Element => (
-        <StyledTimelineRow key={item.date} gutter={20}>
-          <Col className='time'>{moment.unix(item.date / 1000).format('HH:mm')}</Col>
-          <Col className='content' flex={1}>{item.content}</Col>
-        </StyledTimelineRow>
-      ))}
-    </Timeline.Item>
-  ));
-
-  // 컴포넌트 반환
-  return (
-    <>
-      {items.length > 0 ? (
-        <Timeline>{items}</Timeline>
-      ) : (
-        <StyledEmpty>활동 내역이 없습니다.</StyledEmpty>
-      )}
-    </>
-  );
-}
-/** [Internal Component] 활동 내역 목록 (대시보드) */
+/** [Component] 활동 내역 목록 (대시보드) */
 export const PLIPActivityListForDashboard: React.FC<any> = ({ data }): JSX.Element => {
   // 타임라인 아이템 생성
-  const items: JSX.Element[] = Object.keys(data).map((date: string): JSX.Element => (
+  const items: JSX.Element[] = useMemo(() => Object.keys(data).map((date: string): JSX.Element => (
     <StyledRow key={date}>
       <StyledDateForDashboard>{date}</StyledDateForDashboard>
       {data[date].map((item: any): JSX.Element => (
@@ -110,7 +64,7 @@ export const PLIPActivityListForDashboard: React.FC<any> = ({ data }): JSX.Eleme
         </StyledTimelineRowForDashboard>
       ))}
     </StyledRow>
-  ));
+  )), [data]);
 
   // 컴포넌트 반환
   return (
@@ -119,6 +73,33 @@ export const PLIPActivityListForDashboard: React.FC<any> = ({ data }): JSX.Eleme
         <StyledList>{items}</StyledList>
       ) : (
         <StyledEmptyForDashboard>활동 내역이 없습니다.</StyledEmptyForDashboard>
+      )}
+    </>
+  );
+}
+
+/** [Internal Component] 활동 내역 목록 */
+const PLIPActivityList: React.FC<any> = ({ data }): JSX.Element => {
+  // 타임라인 아이템 생성
+  const items: JSX.Element[] = useMemo(() => Object.keys(data).map((date: string): JSX.Element => (
+    <Timeline.Item key={date}>
+      <StyledDate>{date}</StyledDate>
+      {data[date].map((item: any): JSX.Element => (
+        <StyledTimelineRow key={item.date} gutter={20}>
+          <Col className='time'>{moment.unix(item.date / 1000).format('HH:mm')}</Col>
+          <Col className='content' flex={1}>{item.content}</Col>
+        </StyledTimelineRow>
+      ))}
+    </Timeline.Item>
+  )), [data]);
+
+  // 컴포넌트 반환
+  return (
+    <>
+      {items.length > 0 ? (
+        <Timeline>{items}</Timeline>
+      ) : (
+        <StyledEmpty>활동 내역이 없습니다.</StyledEmpty>
       )}
     </>
   );
@@ -147,5 +128,3 @@ export const sortByDatetime = (source?: any[]): any => {
     return {};
   }
 }
-
-export default ActivityMain;

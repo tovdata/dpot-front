@@ -114,7 +114,7 @@ export const extractData = async (response: Response, mode?: string): Promise<Re
   if (mode === undefined || mode === 'add') {
     return !('data' in json) ? { result: false } : { result: true, data: json.data };
   } else {
-    return { result: true };
+    return { result: true, data: json.data };
   }
 }
 /**

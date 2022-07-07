@@ -15,8 +15,12 @@ const PLIPLoadingContainer = dynamic(() => import('@/components/renewer/Page').t
 const PreviewSection: ComponentType<any> = dynamic(() => import('@/components/pipp/EditForm').then((mod: any): any => mod.PreviewSection));
 import { DRModal } from '../pipp/Documentation';
 // Component (table)
-const FNITable: ComponentType<any> = dynamic(() => import('@/components/renewer/PI').then((mod: any): any => mod.FNITable), { ssr: false });
-const PITable: ComponentType<any> = dynamic(() => import('@/components/renewer/PI').then((mod: any): any => mod.PITable), { ssr: false });
+const FNITable: ComponentType<any> = dynamic(() => import('@/components/renewer/PI').then((mod: any): any => mod.FNITable), { loading: () => (<></>) });
+const PITable: ComponentType<any> = dynamic(() => import('@/components/renewer/PI').then((mod: any): any => mod.PITable), { loading: () => (<></>) });
+const CFNITableForm: ComponentType<any> = dynamic(() => import('@/components/renewer/PC').then((mod: any): any => mod.CFNITableForm), { loading: () => (<></>) });
+const CPITableForm: ComponentType<any> = dynamic(() => import('@/components/renewer/PC').then((mod: any): any => mod.CPITableForm), { loading: () => (<></>) });
+const PFNITableForm: ComponentType<any> = dynamic(() => import('@/components/renewer/PC').then((mod: any): any => mod.PFNITableForm), { loading: () => (<></>) });
+const PPITableForm: ComponentType<any> = dynamic(() => import('@/components/renewer/PC').then((mod: any): any => mod.PPITableForm), { loading: () => (<></>) });
 // Data
 import { defaultPIPPData } from '@/models/static/data';
 // Icon
@@ -38,9 +42,6 @@ import { getDatasByTableType } from '@/models/queries/apis/manage';
 // Util
 import { blankCheck, copyTextToClipboard } from 'utils/utils';
 import moment from 'moment';
-
-import { CFNITableForm, CPITableForm, PFNITableForm, PPITableForm } from '../PCTable';
-
 
 /** [Interface] PIPP process */
 interface PIPPProcess {
@@ -426,11 +427,11 @@ const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus
         break;
       case 'ppi':
         setTitle('개인정보 제공');
-        setContent(<PPITableForm accessToken={accessToken} modal={true} />);
+        setContent(<PPITableForm accessToken={accessToken} modal={true} serviceId={serviceId} />);
         break;
       case 'cpi':
         setTitle('개인정보 위탁');
-        setContent(<CPITableForm accessToken={accessToken} modal={true} />);
+        setContent(<CPITableForm accessToken={accessToken} modal={true} serviceId={serviceId} />);
         break;
       case 'fni':
         setTitle('가명정보');
@@ -439,8 +440,8 @@ const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus
             <h2 style={{ fontSize: 15, fontWeight: '500', marginBottom: 16 }}>가명정보 수집 및 이용</h2>
             <FNITable accessToken={accessToken} modal={true} serviceId={serviceId} />
             <div style={{ marginTop: 48 }}></div>
-            <PFNITableForm accessToken={accessToken} modal={true} style={{ marginBottom: 48 }} />
-            <CFNITableForm accessToken={accessToken} modal={true} style={{ marginBottom: 0 }} />
+            <PFNITableForm accessToken={accessToken} modal={true} serviceId={serviceId} style={{ marginBottom: 48 }} />
+            <CFNITableForm accessToken={accessToken} modal={true} serviceId={serviceId} style={{ marginBottom: 0 }} />
           </>
         );
         break;

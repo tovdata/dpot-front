@@ -2,20 +2,20 @@ import dynamic from 'next/dynamic';
 import { ComponentType, useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 // Component
-// const DPITableForm: ComponentType<DPITableFormProps> = dynamic(() => import('@/components/renewer/DPI').then((mod: any): any => mod.DPITableForm));
-import { DPITableForm } from '@/components/renewer/DPI';
+const DPITableForm: ComponentType<DPITableFormProps> = dynamic(() => import('@/components/renewer/DPI').then((mod: any): any => mod.DPITableForm));
+// import { DPITableForm } from '@/components/renewer/DPI';
 const InformationForm: ComponentType<InformationFormProps> = dynamic(() => import('@/components/renewer/DPI').then((mod: any): any => mod.InformationForm));
 // Type
 import { DPITableFormProps, InformationFormProps } from '@/components/renewer/DPI';
 // State
-import { companySelector, serviceSelector, userSelector } from '@/models/session_old';
+import { accessTokenSelector, sessionSelector } from '@/models/session';
 
 /** [Component] 파기 메인 */
 const DPIMain: React.FC<any> = (): JSX.Element => {
-  // 로컬 스토리지 내 데이터 조회
-  const sessionCompany = useRecoilValue(companySelector);
-  const sessionService = useRecoilValue(serviceSelector);
-  const sessionUser = useRecoilValue(userSelector);
+  // 액세스 토큰
+  const accessToken = useRecoilValue(accessTokenSelector);
+  // 세션 조회
+  const session = useRecoilValue(sessionSelector);
   // 파기 데이터 상태
   const [data, setData] = useState<any>({});
 
@@ -32,9 +32,9 @@ const DPIMain: React.FC<any> = (): JSX.Element => {
   return (
     <>
       {Object.keys(data).length !== 0 ? (
-        <InformationForm company={sessionCompany} data={data} onBack={onBack} serviceId={sessionService.id} user={sessionUser} />
+        <InformationForm accessToken={accessToken} companyId={session.companyId} data={data} onBack={onBack} serviceId={session.serviceId} />
       ) : (
-        <DPITableForm onCreate={onCreate} onEdit={onEdit} serviceId={sessionService.id} />
+        <DPITableForm accessToken={accessToken} onCreate={onCreate} onEdit={onEdit} serviceId={session.serviceId} />
       )}
     </>
   );
