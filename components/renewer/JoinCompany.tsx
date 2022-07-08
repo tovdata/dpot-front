@@ -29,7 +29,7 @@ const JoinCompany: React.FC<any> = (): JSX.Element => {
   // 사용자 ID 추출
   const userId: string = decodeAccessToken(accessToken);
   // 사용자 조회
-  const { isLoading, data: user } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  const { isLoading, data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
 
   // 회사 검색 여부
   const [search, setSearch] = useState<boolean|undefined>(undefined);
@@ -38,8 +38,6 @@ const JoinCompany: React.FC<any> = (): JSX.Element => {
   /** [Event handler] 회사 참여를 위한 유형 선택 */
   const onChoice = useCallback((search: boolean) => setSearch(search), []);
   
-  useEffect(() => console.log(user), [isLoading, user]);
-
   // 컴포넌트 반환
   return (
     <>
@@ -129,12 +127,12 @@ const ChoiceCompanyForm: React.FC<any> = ({ accessToken, onBack, search, userId 
         }
       };
       // 회사 생성 API 호출
-      const response = await createCompany(accessToken, company);
+      const response = await createCompany(company);
       if (response.result) {
         // 회사에 사용자를 등록
-        if (await joinCompany(accessToken, response.data.id, userId)) {
+        if (await joinCompany(response.data.id, userId)) {
           // 서비스 생성
-          if (await createServiceInCompany(accessToken, response.data.id, company.companyName)) {
+          if (await createServiceInCompany(response.data.id, company.companyName)) {
             return createFinishModal('회사가 생성되었습니다 !', '플립(Plip)과 함께 개인정보를 관리해보아요 :)', () => onCreate(response.data.id), '시작하기');
           }
         }
@@ -189,7 +187,7 @@ const SearchCompanyModal: React.FC<any> = ({ accessToken, onChoice, onClose, vis
   const [list, setList] = useState<any[]>([]);
 
   /** [Event handler] 회사 검색 */
-  const onSearch = useCallback(async (value: string) => setList(await findCompanies(accessToken, value.trim())), []);
+  const onSearch = useCallback(async (value: string) => setList(await findCompanies(value.trim())), []);
 
   // 컴포넌트 반환
   return (
@@ -228,31 +226,28 @@ const createFinishModal = (title: string, content: string, onOk: () => void, okT
 });
 /**
  * [Internal Function] 회사 생성 함수
- * @param token 액세스 토큰
  * @param company 회사 데이터
  * @returns 생성 결과
  */
-const createCompany = async (token: string, company: any): Promise<any> => {
-  return await setCompany(token, company);
+const createCompany = async (company: any): Promise<any> => {
+  return await setCompany(company);
 }
 /**
  * [Internal Function] 서비스 생성 함수
- * @param token 액세스 토큰
  * @param companyName 회사 이름
  * @returns 생성 결과
  */
-const createServiceInCompany = async (token: string, companyId: string, companyName: string): Promise<boolean> => {
-  return (await createService(token, companyId, { serviceName: companyName, types: ['default'] })).result;
+const createServiceInCompany = async (companyId: string, companyName: string): Promise<boolean> => {
+  return (await createService(companyId, { serviceName: companyName, types: ['default'] })).result;
 };
 /**
  * [Internal Function] 사용자를 회사에 등록하는 함수
- * @param token 액세스 토큰
  * @param companyId 회사 ID
  * @param userId 사용자 ID
  * @returns 처리 결과
  */
-const joinCompany = async (token: string, companyId: string, userId: string): Promise<boolean> => {
-  return await registerUser(token, companyId, userId, 4);
+const joinCompany = async (companyId: string, userId: string): Promise<boolean> => {
+  return await registerUser(companyId, userId, 4);
 };
 
 export default JoinCompany;

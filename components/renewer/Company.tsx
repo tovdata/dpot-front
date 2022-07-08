@@ -10,7 +10,7 @@ import { PLIPInputGroup } from './Input';
 import { CloseOutlined, EditOutlined } from '@ant-design/icons';
 // Query
 import { getCompany, setCompany } from '@/models/queries/apis/company';
-import { getUsers, updateUser } from '@/models/queries/apis/user';
+import { getUsers } from '@/models/queries/apis/user';
 // Query key
 import { KEY_COMPANY, KEY_USERS } from '@/models/queries/key';
 import { PLIPSimpleLoadingContainer } from './Page';
@@ -49,7 +49,7 @@ const ManageCompany: React.FC<any> = (): JSX.Element => {
 /** [Internal Component] 회사 정보 관리 Section */
 const CompanyInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
   // 회사 정보 조회
-  const { isLoading, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(accessToken, companyId));
+  const { isLoading, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(companyId));
 
   // Form 객체 생성
   const [form] = Form.useForm();
@@ -121,7 +121,7 @@ const CompanyInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Elem
 /** [Internal Component] 조직 정보 관리 Section */
 const OrganizationInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
   // 회사에 소속된 사용자 조회
-  const { isLoading, data } = useQuery([KEY_USERS, companyId], async () => await getUsers(accessToken, companyId));
+  const { isLoading, data } = useQuery([KEY_USERS, companyId], async () => await getUsers(companyId));
 
   // 쿼리 클라이언트
   // const queryClient = useQueryClient();

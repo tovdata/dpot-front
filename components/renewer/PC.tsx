@@ -59,7 +59,7 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   // 사용자 ID 추출
   const userId: string = useMemo(() => decodeAccessToken(accessToken), [accessToken]);
   // 사용자 조회
-  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
 
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = useMemo(() => ({
@@ -67,12 +67,12 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   }), []);
 
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery([SERVICE_PPI, serviceId], async () => await getPPIDatas(accessToken, serviceId));
+  const { isLoading, data } = useQuery([SERVICE_PPI, serviceId], async () => await getPPIDatas(serviceId));
   // Get a state (for select options)
-  const { isLoading: loadingPI, data: pi } = useQuery([SERVICE_PI, serviceId], async () => await getPIDatas(accessToken, serviceId));
+  const { isLoading: loadingPI, data: pi } = useQuery([SERVICE_PI, serviceId], async () => await getPIDatas(serviceId));
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((value: any) => setDataByTableType(accessToken, { id: userId, userName: user?.userName }, serviceId, SERVICE_PPI, value.mode, value.data));
+  const { mutate } = useMutation((value: any) => setDataByTableType({ id: userId, userName: user?.userName }, serviceId, SERVICE_PPI, value.mode, value.data));
   // Set a URL modal open state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // Set a url value
@@ -132,7 +132,7 @@ export const PFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
   // 사용자 ID 추출
   const userId: string = useMemo(() => decodeAccessToken(accessToken), [accessToken]);
   // 사용자 조회
-  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
 
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = useMemo(() => ({
@@ -140,12 +140,12 @@ export const PFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
   }), []);
 
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery([SERVICE_PFNI, serviceId], async () => await getPFNIDatas(accessToken, serviceId));
+  const { isLoading, data } = useQuery([SERVICE_PFNI, serviceId], async () => await getPFNIDatas(serviceId));
   // Get a state (for select options)
-  const { isLoading: loadingFNI, data: fni } = useQuery([SERVICE_FNI, serviceId], async () => await getFNIDatas(accessToken, serviceId));
+  const { isLoading: loadingFNI, data: fni } = useQuery([SERVICE_FNI, serviceId], async () => await getFNIDatas(serviceId));
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((value: any) => setDataByTableType(accessToken, { id: userId, userName: user?.userName }, serviceId, SERVICE_PFNI, value.mode, value.data));
+  const { mutate } = useMutation((value: any) => setDataByTableType({ id: userId, userName: user?.userName }, serviceId, SERVICE_PFNI, value.mode, value.data));
   // Set a URL modal open state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // Set a url value
@@ -203,7 +203,7 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   // 사용자 ID 추출
   const userId: string = useMemo(() => decodeAccessToken(accessToken), [accessToken]);
   // 사용자 조회
-  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
 
   // 기본적인 셀렉트 옵션 데이터 (정적)
   const defaultSelectOptions: SelectOptionsByColumn = useMemo(() => ({
@@ -211,8 +211,8 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   }), []);
 
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery([SERVICE_CPI, serviceId], async () => await getCPIDatas(accessToken, serviceId));
-  const { isLoading: loadingPI, data: pi } = useQuery([SERVICE_PI, serviceId], async () => await getPIDatas(accessToken, serviceId));
+  const { isLoading, data } = useQuery([SERVICE_CPI, serviceId], async () => await getCPIDatas(serviceId));
+  const { isLoading: loadingPI, data: pi } = useQuery([SERVICE_PI, serviceId], async () => await getPIDatas(serviceId));
   // Get a state (for select options)
   const ref: any = {
     [SERVICE_PI]: loadingPI ? [] : pi,
@@ -220,7 +220,7 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   }
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((value: any) => setDataByTableType(accessToken, { id: userId, userName: user?.userName }, serviceId, SERVICE_CPI, value.mode, value.data));
+  const { mutate } = useMutation((value: any) => setDataByTableType({ id: userId, userName: user?.userName }, serviceId, SERVICE_CPI, value.mode, value.data));
   // Set a URL modal open state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // Set a url value
@@ -281,15 +281,15 @@ export const CFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
   // 사용자 ID 추출
   const userId: string = useMemo(() => decodeAccessToken(accessToken), [accessToken]);
   // 사용자 조회
-  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
 
   // 서버로부터 데이블 데이터 가져오기
-  const { isLoading, data } = useQuery([SERVICE_CFNI, serviceId], async () => await getCFNIDatas(accessToken, serviceId));
+  const { isLoading, data } = useQuery([SERVICE_CFNI, serviceId], async () => await getCFNIDatas(serviceId));
   // Get a state (for select options)
-  const { isLoading: loadingFNI, data: fni } = useQuery([SERVICE_FNI, serviceId], async () => await getFNIDatas(accessToken, serviceId));
+  const { isLoading: loadingFNI, data: fni } = useQuery([SERVICE_FNI, serviceId], async () => await getFNIDatas(serviceId));
   // 데이터 동기를 위한 객체 생성
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((value: any) => setDataByTableType(accessToken, { id: userId, userName: user?.userName }, serviceId, SERVICE_CFNI, value.mode, value.data));
+  const { mutate } = useMutation((value: any) => setDataByTableType({ id: userId, userName: user?.userName }, serviceId, SERVICE_CFNI, value.mode, value.data));
   // Set a URL modal open state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // Set a url value

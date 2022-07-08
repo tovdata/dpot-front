@@ -60,14 +60,14 @@ const ConsentMain: React.FC<any> = (): JSX.Element => {
   // 사용자 ID 추출
   const userId: string = useMemo(() => decodeAccessToken(accessToken), [accessToken]);
   // 사용자 조회
-  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
   // 사용자 조회
-  const { data: company } = useQuery([KEY_COMPANY, session.companyId], async () => await getCompany(accessToken, session.companyId));
+  const { data: company } = useQuery([KEY_COMPANY, session.companyId], async () => await getCompany(session.companyId));
   // 동의서 목록 조회
-  const { data: consentList } = useQuery([SERVICE_CONSENT, session.serviceId], async () => await getConsentList(accessToken, session.serviceId));
+  const { data: consentList } = useQuery([SERVICE_CONSENT, session.serviceId], async () => await getConsentList(session.serviceId));
   // 개인정보 수집 및 이용, 제공 데이터 조회
-  const { data: pi } = useQuery([SERVICE_PI, session.serviceId], async () => await getPIDatas(accessToken, session.serviceId));
-  const { data: ppi } = useQuery([SERVICE_PPI, session.serviceId], async () => await getPPIDatas(accessToken, session.serviceId));
+  const { data: pi } = useQuery([SERVICE_PI, session.serviceId], async () => await getPIDatas(session.serviceId));
+  const { data: ppi } = useQuery([SERVICE_PPI, session.serviceId], async () => await getPPIDatas(session.serviceId));
 
   /** [Event handler] 동의서 유형 변경 */
   const onChangeType = useCallback((type: number) => setType(type), []);
@@ -90,7 +90,7 @@ const ConsentMain: React.FC<any> = (): JSX.Element => {
       copy.type = DOC_TYPE[data.type];
       copy.creater = user?.userName;
       // 동의서 저장 API 호출
-      const response = await setConsent(accessToken, session.serviceId, copy, document.getElementById('report')?.outerHTML);
+      const response = await setConsent(session.serviceId, copy, document.getElementById('report')?.outerHTML);
       // 응답 처리
       if (response.result) {
         queryClient.invalidateQueries([SERVICE_CONSENT, session.serviceId]);
@@ -112,7 +112,7 @@ const ConsentMain: React.FC<any> = (): JSX.Element => {
     cancelText:'취소',
     onOk: async () => {
       try {
-        await deleteConsent(accessToken, session.serviceId, consentId);
+        await deleteConsent(session.serviceId, consentId);
         queryClient.invalidateQueries([SERVICE_CONSENT, session.serviceId]);
       } catch (err) {
         console.log(`[HANDLER ERROR] ${err}`);

@@ -68,7 +68,7 @@ export const ConsentEPITable = ({ accessToken, description, header, data, onSave
   // [State] Exception Personal Information
   const [epiData, setEpiData] = useState(data || []);
   // Get a state (for select options) 개인정보 수집 및 이용 정보
-  const { isLoading: piLoading, data: piData } = useQuery([SERVICE_PI, servieId], async () => await getPIDatas(accessToken, servieId));
+  const { isLoading: piLoading, data: piData } = useQuery([SERVICE_PI, servieId], async () => await getPIDatas(servieId));
 
   // [Event handler] 행(Row) 추가 이벤트
   const onAdd = useCallback((record: any): void => setEpiData([...epiData, record]), [epiData]);

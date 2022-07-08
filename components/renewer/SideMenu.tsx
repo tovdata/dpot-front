@@ -2,8 +2,8 @@ import dynamic from 'next/dynamic';
 import Router from 'next/router';
 import { useCallback, useMemo } from 'react';
 // Component
-import { SideMenuLayout, StyledServiceName, StyledSideMenuProfile, StyledSideMenuProfileContent, StyledSideMenuProfileIcon, StyledSideMenuToggle } from '../styled/SideMenu';
 import { Menu } from 'antd';
+import { SideMenuLayout, StyledServiceName, StyledSideMenuProfile, StyledSideMenuProfileContent, StyledSideMenuProfileIcon, StyledSideMenuToggle } from '@/components/styled/SideMenu';
 // Icon
 const AiOutlineArrowLeft = dynamic(() => import('react-icons/ai').then((mod: any): any => mod.AiOutlineArrowLeft));
 const IoBusinessOutline = dynamic(() => import('react-icons/io5').then((mod: any): any => mod.IoBusinessOutline));

@@ -46,10 +46,10 @@ export const SigninForm: React.FC<any> = (): JSX.Element => {
       setAccessToken(accessToken);
 
       // 회사 등록 여부 확인 및 라우팅
-      let user = await getUser(accessToken, userId);
+      let user = await getUser(userId);
       if (user && user.affiliations && user.affiliations.length > 0) {
         // 회사 정보 조회 및 저장
-        const company: any = await getCompany(accessToken, user.affiliations[0].id);
+        const company: any = await getCompany(user.affiliations[0].id);
         // 결과에 따른 처리
         if (company) {
           setSession({ companyId: company.id, serviceId: '' });

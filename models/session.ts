@@ -4,7 +4,9 @@ const KEY_SESSION = 'plip-session';
 const KEY_SIDEMENU = 'plip-sm';
 const KEY_USER = 'plip-user';
 // Module
-import { updateToken } from '@/models/queries/apis/signin-up';
+import { getAccessToken, removeAccessToken, setAccessToken } from '@/models/cookies';
+import { getUserId, removeUserId, setUserId } from '@/models/cookies';
+import { updateToken } from '@/models/queries/core';
 
 /** [Interface] 회사 및 서비스 세션 구조 */
 export interface Session {
@@ -24,24 +26,46 @@ const clearLocalStorage = (): void => {
  * [Function] 액세스 토큰 불러오기
  * @returns 액세스 토큰
  */
-export const getAccessToken = async (): Promise<string> => {
-  if (typeof window !== 'undefined') {
-    const userId = window.localStorage.getItem(KEY_USER);
-    if (userId !== null) {
-      return await updateToken(userId.replace(/"/g, ''));
-    } else {
-      return '';
-    }
-  } else {
-    return '';
-  }
-}
+// export const getAccessToken = async (): Promise<string> => {
+//   if (typeof window !== 'undefined') {
+//     const userId = window.localStorage.getItem(KEY_USER);
+//     if (userId !== null) {
+//       return await updateToken(userId.replace(/"/g, ''));
+//     } else {
+//       return '';
+//     }
+//   } else {
+//     return '';
+//   }
+// }
 /**
  * [Internal Function] 현재 시간 (Milliseconds)
  * @returns milliseconds
  */
 const getUnixTimestamp = (): number => {
   return Math.floor(new Date().getTime() / 1000);
+}
+/**
+ * [Internal Function] 액세스 토큰 대한 데이터 동기 (조회/저장)
+ * @returns 조회 시, 데이터 조회 결과
+ */
+const tokenEffects = () => ({ setSelf, onSet }: any): any => {
+  // Get
+  const value: string | undefined = getAccessToken();
+  if (value) setSelf(value);
+  // Set
+  onSet((newValue: any) => newValue !== '' ? setAccessToken(newValue) : removeAccessToken());
+}
+/**
+ * [Internal Function] 사용자 ID 대한 데이터 동기 (조회/저장)
+ * @returns 조회 시, 데이터 조회 결과
+ */
+const userIdEffects = () => ({ setSelf, onSet }: any): any => {
+  // Get
+  const value: string | undefined = getUserId();
+  if (value) setSelf(value);
+  // Set
+  onSet((newValue: any) => newValue !== '' ? setUserId(newValue) : removeUserId());
 }
 /**
  * [Internal Function] 로컬 스토리지에 대한 데이터 동기 (조회/저장)
@@ -96,7 +120,8 @@ const sessionStorageEffects = (key: string) => ({ setSelf, onSet }: any): any =>
 /** [Atom] 액세스 토큰 정보  */
 const accessTokenAtom = atom<any>({
   key: `AccessTokenAtom_${getUnixTimestamp()}`,
-  default: undefined
+  default: '',
+  effects: [tokenEffects()]
 });
 /** [Atom] 사이드 메뉴 확장 여부  */
 const expandSideAtom = atom<boolean>({
@@ -114,7 +139,7 @@ const sessionAtom = atom<Session>({
 const userIdAtom = atom<string>({
   key: `userIdAtom_${getUnixTimestamp()}`,
   default: '',
-  effects: [localStorageEffects(KEY_USER)]
+  effects: [userIdEffects()]
 });
 
 /** [Selector] 액세스 토큰  */
@@ -125,7 +150,7 @@ export const accessTokenSelector = selector<string>({
     const token = get(accessTokenAtom);
     if (token) return token;
     // 토큰 값이 없을 경우, 리프레시 토큰을 이용하여 액세스 토큰 생성
-    return await getAccessToken();
+    return await updateToken();
   },
   set: ({ set }: any, newValue: any) => {
     set(accessTokenAtom, newValue);

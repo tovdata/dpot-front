@@ -87,9 +87,9 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
 
 const DashboardHeader: React.FC<any> = ({ accessToken, serviceId, userId }) => {
   // 사용자 정보 조회
-  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
   // 서비스 조회
-  const { data: service } = useQuery([KEY_SERVICE, serviceId], async () => await getService(accessToken, serviceId));
+  const { data: service } = useQuery([KEY_SERVICE, serviceId], async () => await getService(serviceId));
 
   return (
     <StyledDashboardHeader>
@@ -123,7 +123,7 @@ const DashboardItemHeader: React.FC<any> = ({ extra, title }): JSX.Element => {
 /** [Internal Component] 개인정보 보호책임자 */
 const ChargerForCompany: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
   // 회사 정보 조회
-  const { isLoading, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(accessToken, companyId));
+  const { isLoading, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(companyId));
 
   // 컴포넌트 반환
   return (
@@ -166,7 +166,7 @@ const ChargerForCompany: React.FC<any> = ({ accessToken, companyId }): JSX.Eleme
 /** [Internal Component] 최근 정보 수정일 */
 const LastInformation: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   // 최종 수정일 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_LAST_MODIFY, serviceId], async () => await getServiceModifiedTime(accessToken, serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_LAST_MODIFY, serviceId], async () => await getServiceModifiedTime(serviceId));
   // 동의서에 대한 최종 수정일
   const modifyDateForConsent = useMemo(() => data && data.consent.modifiedAt !== 0 ? transformToDate(data.consent.modifiedAt) : '', [data]);
   // 동의서에 대한 최종 수정자
@@ -184,16 +184,14 @@ const LastInformation: React.FC<any> = ({ accessToken, serviceId }): JSX.Element
   // 개인정보 수집 및 이용에 대한 최종 수정자
   const userForPC = useMemo(() => data ? data.ppi_cpi_pfni_cfni.user : '', [data]);
 
-  console.log(data.pi_fni)
-
   return (
     <DashboardItemCard loading={isLoading}>
       <DashboardItemHeader title='최근 정보 수정일' />
       <div>
-        <LastInformationRow date={modifyDateForConsent} subject='동의서' user='김토브' />
-        <LastInformationRow date={modifyDateForPIPP} subject='개인정보 처리방침' user='김토브' />
-        <LastInformationRow date={modifyDateForPI} subject='개인정보 수집・이용 현황' user='김토브' />
-        <LastInformationRow date={modifyDateForPC} subject='개인정보 제공・위탁 현황' user='김토브' />
+        <LastInformationRow date={modifyDateForConsent} subject='동의서' user={userForContsent} />
+        <LastInformationRow date={modifyDateForPIPP} subject='개인정보 처리방침' user={userForPIPP} />
+        <LastInformationRow date={modifyDateForPI} subject='개인정보 수집・이용 현황' user={userForPI} />
+        <LastInformationRow date={modifyDateForPC} subject='개인정보 제공・위탁 현황' user={userForPC} />
       </div>
     </DashboardItemCard>
   );
@@ -201,7 +199,7 @@ const LastInformation: React.FC<any> = ({ accessToken, serviceId }): JSX.Element
 /** [Internal Component] 개인정보 수집 항목 차트 */
 const PIItems: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   // 개인정보 수집 항목 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_ITEMS, serviceId], async () => await getPIItemsByType(accessToken, serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_ITEMS, serviceId], async () => await getPIItemsByType(serviceId));
   // Chart data
   const chartData: any = useMemo(() => ({
     labels: ['필수항목', '선택항목'],
@@ -231,7 +229,7 @@ const PIItems: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
 /** [Internal Component] 개인정보 위탁 업체 수 표시 */
 const NumberOfConsignmentCompanies: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   // 위탁 데이터 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_CPI, serviceId], async () => await getCPIDatas(accessToken, serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_CPI, serviceId], async () => await getCPIDatas(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -248,7 +246,7 @@ const NumberOfConsignmentCompanies: React.FC<any> = ({ accessToken, serviceId })
 /** [Internal Component] 개인정보 제공 업체 수 표시 */
 const NumberOfProvisionCompanies: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   // 제공 데이터 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_PPI, serviceId], async () => await getPPIDatas(accessToken, serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_PPI, serviceId], async () => await getPPIDatas(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -277,7 +275,7 @@ const PIPPInfomation: React.FC<any> = (): JSX.Element => {
 /** [Internal Component] 동의서 개수 표시 */
 const ConsentInformaiton: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   // 동의서 목록 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_CONSENT, serviceId], async () => await getConsentList(accessToken, serviceId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_CONSENT, serviceId], async () => await getConsentList(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.length : 0, [data]);
   // 동의서 유형
@@ -321,9 +319,9 @@ const ConsentInformaiton: React.FC<any> = ({ accessToken, serviceId }): JSX.Elem
   );
 }
 /** [Internal Component] 나의 활동 내역 */
-const MyActivieList: React.FC<any> = ({ accessToken, userId }): JSX.Element => {
+const MyActivieList: React.FC<any> = ({ userId }): JSX.Element => {
   // 사용자 활동 내역 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_ACTIVITY, userId], async () => await getUserActivityForWeek(accessToken, userId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_ACTIVITY, userId], async () => await getUserActivityForWeek(userId));
   // 데이터 구분 및 정렬
   const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data]);
 

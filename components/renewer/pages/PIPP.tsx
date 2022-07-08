@@ -24,9 +24,9 @@ const PIPPMain: React.FC<any> = (): JSX.Element => {
   // 세션 조회
   const session= useRecoilValue(sessionSelector);
   // 개인정보 처리방침 상태 조회
-  const { isLoading: isLoadingForStatus, data: status } = useQuery([PIPP_STATUS, session.serviceId], async () => await getPIPPStatus(accessToken, session.serviceId));
+  const { isLoading: isLoadingForStatus, data: status } = useQuery([PIPP_STATUS, session.serviceId], async () => await getPIPPStatus(session.serviceId));
   // 생성된 개인정보 처리방침 목록 조회 API
-  const { isLoading: isLoadingForList, data: list } = useQuery([PIPP_LIST, session.serviceId], async () => await getPIPPList(accessToken, session.serviceId));
+  const { isLoading: isLoadingForList, data: list } = useQuery([PIPP_LIST, session.serviceId], async () => await getPIPPList(session.serviceId));
 
   // 현재 페이지 상태
   const [progress, setProgress] = useState<string>('none');

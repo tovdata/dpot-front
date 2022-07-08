@@ -101,7 +101,7 @@ export const PLIPPageSider: React.FC<any> = ({ expand, onExpand, scroll, selecte
   // 세션 조회
   const session = useRecoilValue(sessionSelector);
   // 서비스 조회
-  const { data: service } = useQuery([KEY_SERVICE, session.serviceId], async () => await getService(accessToken, session.serviceId));
+  const { data: service } = useQuery([KEY_SERVICE, session.serviceId], async () => await getService(session.serviceId));
 
   // 컴포넌트 반환
   return (

@@ -50,13 +50,12 @@ export const copyTextToClipboard = (url: string) => {
 }
 /**
  * [Function] 활동 로그 기록
- * @param token 액세스 토큰
  * @param mode 로그 유형 [add | delete | update]
  * @param path 활동 위치 (path)
  * @param id 대상 ID
  * @param user 사용자 이름
  */
-export const writeActivityLog = (token: string, mode: string, path: string, id: string, user?: string) => {
+export const writeActivityLog = (mode: string, path: string, id: string, user?: string) => {
   if (typeof window !== 'undefined') {
     // 로그 대상 정의
     const target: string = user ? 'service' : 'user';
@@ -66,14 +65,14 @@ export const writeActivityLog = (token: string, mode: string, path: string, id: 
     if (pathStr !== '') {
       switch (mode) {
         case 'add':
-          setActivity(token, target, id, user ? `${user} 님이 ${pathStr}를 추가하였습니다.` : `${pathStr}를 추가하였습니다.`);
+          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 추가하였습니다.` : `${pathStr}를 추가하였습니다.`);
           break;
         case 'delete':
-          setActivity(token, target, id, user ? `${user} 님이 ${pathStr}를 삭제하였습니다.` : `${pathStr}를 삭제하였습니다.`);
+          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 삭제하였습니다.` : `${pathStr}를 삭제하였습니다.`);
           break;
         case 'save':
         case 'update':
-          setActivity(token, target, id, user ? `${user} 님이 ${pathStr}를 수정하였습니다.` : `${pathStr}를 수정하였습니다.`);
+          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 수정하였습니다.` : `${pathStr}를 수정하였습니다.`);
           break;
       }
     }

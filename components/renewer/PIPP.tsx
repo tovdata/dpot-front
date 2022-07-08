@@ -40,7 +40,7 @@ import { getCompany } from '@/models/queries/apis/company';
 import { getPIPPData, setPIPPData } from '@/models/queries/apis/pipp';
 import { getDatasByTableType } from '@/models/queries/apis/manage';
 // Util
-import { blankCheck, copyTextToClipboard } from 'utils/utils';
+import { blankCheck, copyTextToClipboard, decodeAccessToken } from 'utils/utils';
 import moment from 'moment';
 
 /** [Interface] PIPP process */
@@ -56,6 +56,9 @@ type ScrollPosition = 'start'|'end';
  * [Component] 개인정보 처리방침 생성 페이지
  */
 export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, onBack, onUpdateStatus, progress, serviceId, status }: any): JSX.Element => {
+  // 사용자 ID 추출
+  const userId: string = decodeAccessToken(accessToken);
+
   // 처리방침 생성 과정에서 사용될 데이터 구조
   const [data, setData] = useState<any>(defaultPIPPData);
   // // 초기 처리방침 데이터 설정
@@ -78,16 +81,16 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
   // 데이터 불러오기에 대한 상태
   const [loading, setLoading] = useState<boolean>(true);
   // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
-  const { isLoading: isLoadingForData, data: loadData } = useQuery([SERVICE_PIPP, serviceId], async () => await getPIPPData(accessToken, serviceId));
+  const { isLoading: isLoadingForData, data: loadData } = useQuery([SERVICE_PIPP, serviceId], async () => await getPIPPData(serviceId));
   // 테이블 데이터 쿼리 (API 호출)
-  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: [type, serviceId], queryFn: async () => await getDatasByTableType(accessToken, serviceId, type) })));
+  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: [type, serviceId], queryFn: async () => await getDatasByTableType(serviceId, type) })));
   // 로딩 데이터 Hook
   useEffect(() => setLoading(isLoadingForData || results.some((result: any): boolean => result.isLoading)), [isLoadingForData, results]);
   // 데이터 갱신
   useEffect(() => {
     (async () => {
       // 회사 정보 조회
-      const response = await getCompany(accessToken, companyId);
+      const response = await getCompany(companyId);
       // 개인정보 보호책임자 정의
       let charger = { name: '', position: '', contact: '' };
       if (response && response.manager) {
@@ -300,7 +303,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
     // 처리 상태 정의
     const apiStatus: string = status === 'none' ? 'create' : temp ? 'update' : 'publish';
     // API 호출
-    const response = await setPIPPData(accessToken, serviceId, data, apiStatus, apiStatus ? document.getElementById('report')?.outerHTML : undefined);
+    const response = await setPIPPData(serviceId, userId, data, apiStatus, apiStatus ? document.getElementById('report')?.outerHTML : undefined);
     if (response.result) {
       if (temp) {
         successNotification('임시 저장 완료');

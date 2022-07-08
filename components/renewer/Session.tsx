@@ -18,7 +18,7 @@ export const PILPOtherSession: React.FC<any> = ({ children }): JSX.Element => {
   // 사용자 여부 확인에 따른 처리
   useEffect(() => {
     if (state === 'hasValue') {
-      if (contents === '') {
+      if (contents === undefined || contents === '') {
         setComponent(children);
       } else {
         Router.push('/company/services');
@@ -62,7 +62,7 @@ export const PLIPUserSession: React.FC<any> = ({ children }): JSX.Element => {
   // 사용자 여부 확인에 따른 처리
   useEffect(() => {
     if (state === 'hasValue') {
-      if (contents !== '') {
+      if (contents !== undefined && contents !== '') {
         setComponent(children);
       } else {
         setComponent(<PLIP401Page />);

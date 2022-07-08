@@ -37,9 +37,9 @@ const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element
   // 사용자 ID 추출
   const userId: string = decodeAccessToken(accessToken);
   // 사용자 조회
-  const { isLoading, data } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  const { isLoading, data } = useQuery([KEY_USER, userId], async () => await getUser(userId));
   // 회사 정보 조회
-  const { data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(accessToken, companyId));
+  const { data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(companyId));
 
   // 모달 Open 상태
   const [visible, setVisible] = useState<boolean>(false);
@@ -56,7 +56,7 @@ const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element
   const onCancel = useCallback(() => setVisible(false), []);
   /** [Event handler] 변경한 회사 정보 저장 */
   const onSave = useCallback(async () => {
-    const response = await updateUser(accessToken, userId, { ...data, userName: form.getFieldValue('name'), contact: form.getFieldValue('contact') });
+    const response = await updateUser(userId, { ...data, userName: form.getFieldValue('name'), contact: form.getFieldValue('contact') });
     if (response) {
       successNotification('변경된 사용자 정보가 저장되었습니다.');
     } else {

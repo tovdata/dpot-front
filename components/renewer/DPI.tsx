@@ -88,11 +88,11 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
   // 사용자 ID 추출
   const userId: string = useMemo(() => decodeAccessToken(accessToken), [accessToken]);
   // 개인정보 수집 및 이용으로부터 항목 조회 (서버 API)
-  const { isLoading: loadingItems, data: items } = useQuery(['piItems', serviceId], async () => await getPIItems(accessToken, serviceId));
+  const { isLoading: loadingItems, data: items } = useQuery(['piItems', serviceId], async () => await getPIItems(serviceId));
   // 사용자 조회
-  const { isLoading: loadingUser, data: user } = useQuery([KEY_USER, userId], async () => await getUser(accessToken, userId));
+  const { isLoading: loadingUser, data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
   // 회사 조회
-  const { isLoading: loadingCompany, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(accessToken, companyId));
+  const { isLoading: loadingCompany, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(companyId));
 
   // 데이터 상태 관리
   const [temp, setTemp] = useState<any>(data);
@@ -111,7 +111,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
   /** [Event handler] 삭제 이벤트 */
   const onDelete = useCallback(async (id: string) => {
     if (user) {
-      await setDataByTableType(accessToken, { id: userId, userName: user.userName }, serviceId, SERVICE_DPI, 'delete', { id: id });
+      await setDataByTableType({ id: userId, userName: user.userName }, serviceId, SERVICE_DPI, 'delete', { id: id });
       // 데이터 갱신
       queryClient.invalidateQueries([SERVICE_DPI, serviceId]);
       // 목록으로 이동
@@ -146,7 +146,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
       warningNotification('담당자를 입력해주세요.');
       refs.current[4].focus();
     } else if (user) {
-      const response: any = await setDataByTableType(accessToken, { id: userId, userName: user.userName }, serviceId, SERVICE_DPI, checkNew() ? 'add' : 'save', temp);
+      const response: any = await setDataByTableType({ id: userId, userName: user.userName }, serviceId, SERVICE_DPI, checkNew() ? 'add' : 'save', temp);
       // 응답에 따른 처리
       if (response && 'id' in response) {
         temp.id = response.id;
@@ -191,7 +191,7 @@ const DescriptionLabel: React.FC<DescriptionLabelProps> = ({ content, required }
 /** [Internal Component] 개인정보 파기 테이블 */
 const DPITable: React.FC<DPITableProps> = ({ accessToken, onEdit, serviceId }): JSX.Element => {
   // 파기 데이터 조회
-  const { isLoading, data } = useQuery([SERVICE_DPI, serviceId], async () => await getDPIDatas(accessToken, serviceId));
+  const { isLoading, data } = useQuery([SERVICE_DPI, serviceId], async () => await getDPIDatas(serviceId));
 
   // 컴포넌트 반환
   return (

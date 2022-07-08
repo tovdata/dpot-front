@@ -14,9 +14,9 @@ import moment from 'moment';
 import { decodeAccessToken } from 'utils/utils';
 
 /** [Component] 서비스 활동 내역 */
-export const ServiceActivity: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
+export const ServiceActivity: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 서비스 활동 내역 조회
-  const { isLoading, data } = useQuery([KEY_SERVICE_ACTIVITY, serviceId], async () => await getActivity(accessToken, 'service', serviceId));
+  const { isLoading, data } = useQuery([KEY_SERVICE_ACTIVITY, serviceId], async () => await getActivity('service', serviceId));
   // 데이터 구분 및 정렬
   const sorted: any = useMemo(() => data ? sortByDatetime(data) : {}, [data]);
 
@@ -36,7 +36,7 @@ export const UserActivity: React.FC<any> = ({ accessToken }): JSX.Element => {
   // 사용자 ID 추출
   const userId: string = decodeAccessToken(accessToken);
   // 사용자 활동 내역 조회
-  const { isLoading, data } = useQuery([KEY_USER_ACTIVITY, userId], async () => await getActivity(accessToken, 'user', userId));
+  const { isLoading, data } = useQuery([KEY_USER_ACTIVITY, userId], async () => await getActivity('user', userId));
   // 데이터 구분 및 정렬
   const sorted: any = useMemo(() => data ? sortByDatetime(data) : {}, [data]);
 
