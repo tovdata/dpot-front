@@ -168,22 +168,32 @@ const LastInformation: React.FC<any> = ({ accessToken, serviceId }): JSX.Element
   // 최종 수정일 조회
   const { isLoading, data } = useQuery([KEY_DASHBOARD_LAST_MODIFY, serviceId], async () => await getServiceModifiedTime(accessToken, serviceId));
   // 동의서에 대한 최종 수정일
-  const forConsent = useMemo(() => data && data.consent ? transformToDate(data.consent) : '', [data]);
+  const modifyDateForConsent = useMemo(() => data && data.consent.modifiedAt !== 0 ? transformToDate(data.consent.modifiedAt) : '', [data]);
+  // 동의서에 대한 최종 수정자
+  const userForContsent = useMemo(() => data ? data.consent.user : '', [data]);
   // 개인정보 처리방침에 대한 최종 수정일
-  const forPIPP = useMemo(() => data && data.pipp ? transformToDate(data.pipp) : '', [data]);
+  const modifyDateForPIPP = useMemo(() => data && data.pipp.modifiedAt !== 0 ? transformToDate(data.pipp.modifiedAt) : '', [data]);
+  // 개인정보 처리방침에 대한 최종 수정자
+  const userForPIPP = useMemo(() => data ? data.pipp.user : '', [data]);
   // 개인정보 수집 및 이용에 대한 최종 수정일
-  const forPI = useMemo(() => data && data.pi_fni ? transformToDate(data.pi_fni) : '', [data]);
+  const modifyDateForPI = useMemo(() => data && data.pi_fni.modifiedAt !== 0 ? transformToDate(data.pi_fni.modifiedAt) : '', [data]);
+  // 개인정보 수집 및 이용에 대한 최종 수정자
+  const userForPI = useMemo(() => data ? data.pi_fni.user : '', [data]);
   // 개인정보 제공 및 위탁에 대한 최종 수정일
-  const forPC = useMemo(() => data && data.ppi_cpi_pfni_cfni ? transformToDate(data.ppi_cpi_pfni_cfni) : '', [data]);
+  const modifyDateForPC = useMemo(() => data && data.ppi_cpi_pfni_cfni.modifiedAt !== 0 ? transformToDate(data.ppi_cpi_pfni_cfni.modifiedAt) : '', [data]);
+  // 개인정보 수집 및 이용에 대한 최종 수정자
+  const userForPC = useMemo(() => data ? data.ppi_cpi_pfni_cfni.user : '', [data]);
+
+  console.log(data.pi_fni)
 
   return (
     <DashboardItemCard loading={isLoading}>
       <DashboardItemHeader title='최근 정보 수정일' />
       <div>
-        <LastInformationRow date={forConsent} subject='동의서' user='김토브' />
-        <LastInformationRow date={forPIPP} subject='개인정보 처리방침' user='김토브' />
-        <LastInformationRow date={forPI} subject='개인정보 수집・이용 현황' user='김토브' />
-        <LastInformationRow date={forPC} subject='개인정보 제공・위탁 현황' user='김토브' />
+        <LastInformationRow date={modifyDateForConsent} subject='동의서' user='김토브' />
+        <LastInformationRow date={modifyDateForPIPP} subject='개인정보 처리방침' user='김토브' />
+        <LastInformationRow date={modifyDateForPI} subject='개인정보 수집・이용 현황' user='김토브' />
+        <LastInformationRow date={modifyDateForPC} subject='개인정보 제공・위탁 현황' user='김토브' />
       </div>
     </DashboardItemCard>
   );

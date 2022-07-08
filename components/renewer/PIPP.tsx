@@ -58,41 +58,52 @@ type ScrollPosition = 'start'|'end';
 export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, onBack, onUpdateStatus, progress, serviceId, status }: any): JSX.Element => {
   // 처리방침 생성 과정에서 사용될 데이터 구조
   const [data, setData] = useState<any>(defaultPIPPData);
-  // 초기 처리방침 데이터 설정
-  useEffect(() => {
-    // if (progress === 'create') {
-      (async () => {
-        // 회사 정보 조회
-        const response = await getCompany(accessToken, companyId);
-        // 개인정보 보호책임자 정의
-        let manager = { name: '', position: '', email: '' };
-        if (response && response.manager) {
-          manager = response.manager;
-        }
-        // 개인정보 처리방침 데이터 정의
-        setData({ ...data, dInfo: { ...data.dInfo, manager: { ...data.dInfo.manager, charger: { name: manager.name, position: manager.position, contact: manager.email } } } });
-      })();
-    // }
-  }, [companyId, progress]);
+  // // 초기 처리방침 데이터 설정
+  // useEffect(() => {
+  //   console.log('render1', data.aInfo);
+  //   // if (progress === 'create') {
+  //     (async () => {
+  //       // 회사 정보 조회
+  //       const response = await getCompany(accessToken, companyId);
+  //       // 개인정보 보호책임자 정의
+  //       let manager = { name: '', position: '', email: '' };
+  //       if (response && response.manager) {
+  //         manager = response.manager;
+  //       }
+  //       // 개인정보 처리방침 데이터 정의
+  //       setData({ ...data, dInfo: { ...data.dInfo, manager: { ...data.dInfo.manager, charger: { name: manager.name, position: manager.position, contact: manager.email } } } });
+  //     })();
+  //   // }
+  // }, [companyId, progress, serviceId]);
   // 데이터 불러오기에 대한 상태
   const [loading, setLoading] = useState<boolean>(true);
   // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
   const { isLoading: isLoadingForData, data: loadData } = useQuery([SERVICE_PIPP, serviceId], async () => await getPIPPData(accessToken, serviceId));
   // 테이블 데이터 쿼리 (API 호출)
-  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: type, queryFn: async () => await getDatasByTableType(accessToken, serviceId, type) })));
+  const results = useQueries(SERVICE_LIST.map((type: string): any => ({ queryKey: [type, serviceId], queryFn: async () => await getDatasByTableType(accessToken, serviceId, type) })));
   // 로딩 데이터 Hook
   useEffect(() => setLoading(isLoadingForData || results.some((result: any): boolean => result.isLoading)), [isLoadingForData, results]);
-  // 임시 저장 데이터가 있을 경우, 데이터 갱신
+  // 데이터 갱신
   useEffect(() => {
-    if (data && progress === 'update' && !isLoadingForData && loadData !== undefined) {
-      // 개인정보 처리방침 데이터 정의
-      const combined: any = { ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi } };
+    (async () => {
+      // 회사 정보 조회
+      const response = await getCompany(accessToken, companyId);
       // 개인정보 보호책임자 정의
-      combined.dInfo.manager = loadData.dInfo.manager ? { ...loadData.dInfo.manager, charger: data.dInfo.manager.charger } : { charger: data.dInfo.manager.charger };
-      // 설정
-      setData(combined);
-    }
-  }, [isLoadingForData, loadData, progress]);
+      let charger = { name: '', position: '', contact: '' };
+      if (response && response.manager) {
+        charger = { name: response.manager.name, position: response.manager.position, contact: response.manager.email };
+      }
+
+      // 임시 저장 데이터 처리
+      if (progress === 'update' && loadData) {
+        setData({ ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi, manager: { ...loadData.dInfo.manager, charger: charger } } });
+      } else {
+        setData({ ...data, dInfo: { ...data.dInfo, manager: { ...data.dInfo.manager, charger: charger } } });
+      }
+    })();
+  }, [companyId, loadData, progress]);
+
+  // useEffect(() => console.log('data', data), [data]);
 
   // 단계에 대한 Title
   const steps: string[] = ['입력사항 확인', '처리방침 편집', '최종 확인'];
@@ -130,7 +141,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
 
   // 요청으로 응답된 데이터 가공 및 처리
   useEffect(() => {
-    if (data && !loading) {
+    if (!loading) {
       if (!initQuery) {
         setInitQuery(true);
         // 가공을 위한 임시 데이터 셋 정의
@@ -159,6 +170,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
                 }
               });
               if (!isUrl) {
+                if (tempData[type] === undefined) tempData[type] = {};
                 tempData[type].url = undefined;
               }
             }
@@ -394,9 +406,9 @@ const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus
   /** [Event handler] 모달 닫기 */
   const onClose = useCallback((): void => {
     setOpen(false);
-    queryClient.invalidateQueries(refType);
+    queryClient.invalidateQueries([refType, serviceId]);
     onRefresh();
-  }, [onRefresh, queryClient]);
+  }, [onRefresh, queryClient, refType, serviceId]);
 
   // 컴포넌트 반환
   return (

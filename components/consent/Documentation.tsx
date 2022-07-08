@@ -1,8 +1,8 @@
 import { staticConsentData } from "@/models/static/data";
-// import { consentEPIHeader, consentPPIHeader, historyHeader } from '@/components/consent/Header';
+import { consentEPIHeader, consentPPIHeader, historyHeader } from '@/components/consent/Header';
 import { ConfirmItemComponent } from "./Atom";
 import { ConsentTable } from "./Table";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export const ConfirmPage: React.FC<any> = ({ type, consentData, companyName }): JSX.Element => {
   // 키워드
@@ -15,8 +15,8 @@ export const ConfirmPage: React.FC<any> = ({ type, consentData, companyName }): 
   /** [Event handler] 고정 텍스트 */
   const fixedText = useCallback((text: string, important: boolean, index: number): JSX.Element => (<span key={index} style={important ? { fontWeight: 'bold', textDecoration: 'underline' } : {}}>{text}</span>), []);
   /** [Event handler] */
-  const getHistoryHeader = useCallback(async () => {
-    let header = (await import('@/components/consent/Header')).historyHeader;
+  const getHistoryHeader = useCallback(() => {
+    let header = JSON.parse(JSON.stringify(historyHeader));
     switch (type) {
       case 1:
       case 2:
@@ -26,16 +26,16 @@ export const ConfirmPage: React.FC<any> = ({ type, consentData, companyName }): 
         header.purpose.display = "listB";
         break;
       case 4:
-        header = (await import('@/components/consent/Header')).consentPPIHeader;
+        header = consentPPIHeader;
         break;
       default:
         break;
     }
     return header;
-  }, []);
+  }, [type]);
   /** [Event handler] */
   const otherNoticeHeader = useCallback(async () => {
-    const header = (await import('@/components/consent/Header')).consentEPIHeader;
+    const header = consentEPIHeader;
     if (type !== 4) {
       header.purpose.name = `${keyword} 수집·이용 목적`;
       header.items.name = `${keyword} 항목`;

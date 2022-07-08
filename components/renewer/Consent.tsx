@@ -130,7 +130,8 @@ export const EnterInformationPage: React.FC<any> = ({ accessToken, consentData, 
   // 가공된 데이터 (PI)
   const dataSource = useMemo(() => filteredData(pi, ids, type), [ids, pi, type]);
   // 데이터
-  const [data, setData] = useState(consentData.pData || dataSource);
+  // const [data, setData] = useState(consentData.pData || dataSource);
+  const [data, setData] = useState(dataSource);
   // 모달 상태
   const [visible, setVisible] = useState<boolean>(false);
   // 가공된 데이터

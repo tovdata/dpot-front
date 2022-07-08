@@ -276,6 +276,8 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
     changeSelectOptions('subject', onUpdateSelectOptions, refData, tableName, record.subject);
   }, [dataSource, refData, row, tableName]);
 
+  useEffect(() => console.log('row', row), [row]);
+
   /**
    * [Event Handler] Update to select options
    * @param value updated select options

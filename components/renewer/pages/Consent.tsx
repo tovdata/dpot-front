@@ -29,6 +29,7 @@ import { accessTokenSelector, sessionSelector } from '@/models/session';
 // Util
 import { decodeAccessToken } from 'utils/utils';
 import { filteredNotUniqueData, hasURL, nullCheckForNextStep } from 'utils/consent';
+import { PLIP404Page } from '../Page';
 
 const ConsentMain: React.FC<any> = (): JSX.Element => {
   // 액세스 토큰 조회
@@ -45,8 +46,6 @@ const ConsentMain: React.FC<any> = (): JSX.Element => {
    * 4 : 제 3자 제공 동의서
    */
   const DOC_TYPE: string[] = useMemo(() => ['pi', 'si', 'uii', 'mai', 'tpp'], []);
-  // 메인 컴포넌트
-  const [component, setComponent] = useState<any>(<></>); 
   // 유형 상태
   const [type, setType] = useState<number>(0);
   // 단계 상태
@@ -74,8 +73,10 @@ const ConsentMain: React.FC<any> = (): JSX.Element => {
   const onChangeType = useCallback((type: number) => setType(type), []);
   /** [Event handler] 데이터 저장 */
   const onSave = useCallback((value: any) => setData({ ...data, ...value }), [data]);
+  // useEffect(() => console.log(data), [data]);
   /** [Event handler] 단계 이동 */
   const onMoveStep = useCallback((index: number) => {
+    console.log('step', index, type, data);
     if (nullCheckForNextStep(type, data, index)) return;
     // 제일 첫 페이지로 돌아올 경우 작성하던 데이터 리셋
     if (index === -1) setData(defaultConsentData);
@@ -132,30 +133,26 @@ const ConsentMain: React.FC<any> = (): JSX.Element => {
     if (type === 4 && (ppi?.length === 0 || hasURL(ppi))) return true;
     return false;
   }, [pi, ppi]);
-  
-  // 단계에 따라 자식 컴포넌트 정의
-  useEffect(() => {
-    switch (stepIndex) {
-      case -1:
-        setComponent(<ConsentHome data={consentList ? consentList : []} onChangeType={onChangeType} onEmptyCheck={onEmptyCheck} onMoveStep={onMoveStep} onRemove={onRemove} />);
-        break;
-      case 0:
-        type === 4 ? setComponent(<InputInformationPage accessToken={accessToken} data={data} onSave={onSave} ppi={ppi} serviceId={session.serviceId} type={type} />) : setComponent( <JobSelectionPage type={type} data={data} onSave={onSave} pi={pi} />);
-        break;
-      case 1:
-        // 제3자 제공 동의서 여부에 따라
-        type === 4 ? setComponent(<ConfirmPage type={type} consentData={data} companyName={company ? company.companyName : ''} />) : setComponent(<EnterInformationPage accessToken={accessToken} consentData={data} ids={data.subjects} onSave={onSave} pi={pi} serviceId={session.serviceId} type={type}/>);
-        break;
-      case 2:
-        setComponent(<ConfirmPage type={type} consentData={data} companyName={company ? company.companyName : ''} />);
-        break;
-    }
-  }, [stepIndex]);
 
+  // 컴포넌틑 반환
   return (
     <>
       <StepInfoHeader steps={steps} type={type} stepIndex={stepIndex} onMoveStep={onMoveStep} onFinish={onFinish} />
-      {component}
+      {stepIndex === -1 ? (
+        <ConsentHome data={consentList ? consentList : []} onChangeType={onChangeType} onEmptyCheck={onEmptyCheck} onMoveStep={onMoveStep} onRemove={onRemove} />
+      ) : stepIndex === 0 ? type === 4 ? (
+        <InputInformationPage accessToken={accessToken} data={data} onSave={onSave} ppi={ppi} serviceId={session.serviceId} type={type} />
+      ) : (
+        <JobSelectionPage type={type} data={data} onSave={onSave} pi={pi} />
+      ) : stepIndex === 1 ? type === 4 ? (
+        <ConfirmPage type={type} consentData={data} companyName={company ? company.companyName : ''} />
+      ) : (
+        <EnterInformationPage accessToken={accessToken} consentData={data} ids={data.subjects} onSave={onSave} pi={pi} serviceId={session.serviceId} type={type}/>
+      ) : stepIndex === 2 ? (
+        <ConfirmPage type={type} consentData={data} companyName={company ? company.companyName : ''} />
+      ) : (
+        <PLIP404Page />
+      )}
     </>
   )
 }

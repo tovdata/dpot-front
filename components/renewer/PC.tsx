@@ -41,13 +41,13 @@ import { decodeAccessToken } from 'utils/utils';
  * [Handler] URL 정보를 저장하는 Handler
  * @param {string} newUrl 새로 입력 받은 URL
  * @param {any} url 기존의 URL 정보
- * @param {string} serviceType 서비스 타입
+ * @param {any} serviceType 서비스 타입
  * @param {QueryClient} queryClient query client
  * @param {UseMutateFunction<any, unknown, any, unknown>} mutate mutate
  * @returns 결과 데이터
  */
-const onURLSaveHandler = (newUrl: string, url: any, serviceType :string, queryClient: QueryClient, mutate: UseMutateFunction<any, unknown, any, unknown>) => {
-  let newURL = { ...url };
+const onURLSaveHandler = (newUrl: string, url: any, serviceType: any, queryClient: QueryClient, mutate: UseMutateFunction<any, unknown, any, unknown>) => {
+  const newURL = { ...url };
   const mode = url.id ? (newUrl==='' ? 'url/delete' : 'url/save') : 'url/add';
   newURL.url = newUrl;
   setQueryData(queryClient, serviceType, mutate, mode, newURL);
@@ -84,11 +84,13 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
     if (_url && _url.length > 0) setUrl(_url[0]);
   }, [data]);
 
-  // [Event handler] 행(Row) 추가 이벤트
+  /** [Event handler] 행(Row) 추가 이벤트 */
   const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PPI, serviceId], mutate, 'create', record), [mutate, serviceId, queryClient]);
-  // [Event handler] 행(Row) 삭제 이벤트
+  /** [Event handler] 모달 닫기 */
+  const onClose = useCallback(() => setIsModalOpen(false), []);
+  /** [Event handler] 행(Row) 삭제 이벤트 */
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PPI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
-  // [Event handler] 행(Row) 저장 이벤트
+  /** [Event handler] 행(Row) 저장 이벤트 */
   const onSave = useCallback((record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
       setQueryData(queryClient, [SERVICE_PPI, serviceId], mutate, 'add', record);
@@ -101,7 +103,10 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
       }
       return true;
     }
-  }, [mutate, serviceId, queryClient]);
+  }, [mutate, queryClient, serviceId]);
+  /** [Event handler] URL 저장 */
+  const onSaveUrl = useCallback((newUrl: string): void => onURLSaveHandler(newUrl, url, [SERVICE_PPI, serviceId], queryClient, mutate), [mutate, queryClient, serviceId, url]);
+
   // 헤더에 들어갈 버튼 정의
   const tools: JSX.Element = useMemo(() => (
     <div>
@@ -111,15 +116,14 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   ), [url]);
   // URL 정보를 제외한 PIM List
   const PIMList: any[] = useMemo(() => data ? data.filter((item:any) => item.url === undefined): [], [data]);
-  // 개인정보 제공 테이블
-  const PPITable = <EditableExpandTable dataSource={isLoading ? [] : PIMList} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={ppiTableHeader} innerHeaders={eppiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={loadingPI ? [] : pi} tableName={SERVICE_PPI} />
+
   // 컴포넌트 반환
   return (
     <EditableTableForm description='‘개인정보 제3자 제공’이란, 제3자의 목적을 위해 개인정보를 외부에 제공하는 것을 말해요.\n각 제공 건에 대해 아래의 내용을 입력해주세요. 국외로 제공되는 경우에는 ‘국외 여부’에 체크한 뒤 추가 정보도 입력해야 해요.\n제3자 제공내역이 정리된 별도의 페이지가 있다면, 우측에 ‘링크(URL)’ 버튼을 클릭하여 연결시킬 수 있어요.' modal={modal} title='개인정보 제3자 제공' tools={tools}>
       {isModalOpen ? (
-        <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={() => { setIsModalOpen(false) }} onSave={(newURL:string) => onURLSaveHandler(newURL, url, SERVICE_PPI, queryClient, mutate)} />
+        <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={onClose} onSave={onSaveUrl} />
       ) : (<></>)}
-      {PPITable}
+      <EditableExpandTable dataSource={isLoading ? [] : PIMList} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={ppiTableHeader} innerHeaders={eppiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={loadingPI ? [] : pi} tableName={SERVICE_PPI} />
     </EditableTableForm>
   );
 }
@@ -155,6 +159,8 @@ export const PFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
 
   // [Event handler] 행(Row) 추가 이벤트
   const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PFNI, serviceId], mutate, 'create', record), [mutate, serviceId, queryClient]);
+  /** [Event handler] 모달 닫기 */
+  const onClose = useCallback(() => setIsModalOpen(false), []);
   // [Event handler] 행(Row) 삭제 이벤트
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PFNI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
   // [Event handler] 행(Row) 저장 이벤트
@@ -171,6 +177,9 @@ export const PFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
       return true;
     }
   }, [mutate, serviceId, queryClient]);
+  /** [Event handler] URL 저장 */
+  const onSaveUrl = useCallback((newUrl: string): void => onURLSaveHandler(newUrl, url, [SERVICE_PFNI, serviceId], queryClient, mutate), [mutate, queryClient, serviceId, url]);
+
   // 헤더에 들어갈 버튼 정의
   const tools: JSX.Element = useMemo(() => (
     <LinkButton onClick={() => setIsModalOpen(true)} url={url.url} />
@@ -183,7 +192,7 @@ export const PFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
   return (
     <EditableTableForm modal={modal} style={style} title='가명정보 제3자 제공' tools={tools}>
       {isModalOpen ? (
-        <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={() => { setIsModalOpen(false) }} onSave={(newURL:string) => onURLSaveHandler(newURL, url, SERVICE_PFNI, queryClient, mutate)} />
+        <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={onClose} onSave={onSaveUrl} />
       ) : (<></>)}
       {PFNITable}
     </EditableTableForm>
@@ -225,6 +234,8 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
 
   // [Event handler] 행(Row) 추가 이벤트
   const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_CPI, serviceId], mutate, 'create', record), [mutate, serviceId, queryClient]);
+  /** [Event handler] 모달 닫기 */
+  const onClose = useCallback(() => setIsModalOpen(false), []);
   // [Event handler] 행(Row) 삭제 이벤트
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_CPI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
   // [Event handler] 행(Row) 저장 이벤트
@@ -241,6 +252,9 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
       return true;
     }
   }, [mutate, serviceId, queryClient]);
+  /** [Event handler] URL 저장 */
+  const onSaveUrl = useCallback((newUrl: string): void => onURLSaveHandler(newUrl, url, [SERVICE_CPI, serviceId], queryClient, mutate), [mutate, queryClient, serviceId, url]);
+
   // 헤더에 들어갈 버튼 정의
   const tools: JSX.Element = useMemo(() => (
     <div>
@@ -256,7 +270,7 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   return (
     <EditableTableForm description='‘개인정보 위탁’이란 개인정보 처리 업무의 일부를 다른 업체에 맡겨 처리하는 것을 말합니다(콜센터, A/S센터, 클라우드 등).\n각 위탁 건에 대해 아래의 내용을 입력해주세요. 국외로 제공되는 경우에는 ‘국외 여부’에 체크한 뒤 추가 정보도 입력해야 해요.\n위탁 내역이 정리된 별도의 페이지가 있다면, 우측에 ‘링크(URL)’ 버튼을 클릭하여 연결시킬 수 있어요.' modal={modal} title='개인정보 위탁' tools={tools}>
       {isModalOpen ? (
-        <ModalToInputURL discription='위탁 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={() => { setIsModalOpen(false) }} onSave={(newURL:string) => onURLSaveHandler(newURL, url, SERVICE_CPI, queryClient, mutate)} />
+        <ModalToInputURL discription='위탁 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={onClose} onSave={onSaveUrl} />
       ) : (<></>)}
       {CPITable}
     </EditableTableForm>
@@ -289,6 +303,8 @@ export const CFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
 
   // [Event handler] 행(Row) 추가 이벤트
   const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_CFNI, serviceId], mutate, 'create', record), [mutate, serviceId, queryClient]);
+  /** [Event handler] 모달 닫기 */
+  const onClose = useCallback(() => setIsModalOpen(false), []);
   // [Event handler] 행(Row) 삭제 이벤트
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_CFNI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
   // [Event handler] 행(Row) 저장 이벤트
@@ -305,6 +321,9 @@ export const CFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
       return true;
     }
   }, [mutate, serviceId, queryClient]);
+  /** [Event handler] URL 저장 */
+  const onSaveUrl = useCallback((newUrl: string): void => onURLSaveHandler(newUrl, url, [SERVICE_CFNI, serviceId], queryClient, mutate), [mutate, queryClient, serviceId, url]);
+
   // 헤더에 들어갈 버튼 정의
   const tools: JSX.Element = useMemo(() => (
     <div>
@@ -319,7 +338,7 @@ export const CFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
   return (
     <EditableTableForm modal={modal} style={style} title='가명정보 위탁' tools={tools}>
       {isModalOpen ? (
-        <ModalToInputURL discription='위탁 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={() => { setIsModalOpen(false) }} onSave={(newURL:string) => onURLSaveHandler(newURL, url, SERVICE_CFNI, queryClient, mutate)} />
+        <ModalToInputURL discription='위탁 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={onClose} onSave={onSaveUrl} />
       ) : (<></>)}
       {CFNITable}
     </EditableTableForm>

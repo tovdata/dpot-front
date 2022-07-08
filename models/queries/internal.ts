@@ -76,18 +76,20 @@ export const createRequest = (method: string, token?: string, data?: any): Reque
     },
     method: ''
   };
+  // 기본 데이터 형식
+  const basis: any = { serviceId, userId };
   // 요청 메서드 및 Body 정의
   switch (mode) {
     case 'add':
-      request.body = JSON.stringify({ serviceId, userId, data: copy });
+      request.body = JSON.stringify({ ...basis, data: copy });
       request.method = 'POST';
       break;
     case 'delete':
-      request.body = JSON.stringify({ serviceId, userId });
+      request.body = JSON.stringify({ ...basis });
       request.method = 'DELETE';
       break;
     case 'save':
-      request.body = JSON.stringify({ serviceId, userId, createAt: Number(createAt), data: copy });
+      request.body = JSON.stringify({ ...basis, createAt: Number(createAt), data: copy });
       request.method = 'PUT';
       break;
   }
