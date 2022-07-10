@@ -46,7 +46,7 @@ export const sendRequest = async (path: string, method: string, data?: any, isPu
     const response: any = await api(path, method, token, data);
     // 에러 검증
     if (!validateResponse(response)) {
-      if (response.message && response.message.include('UserNotConfirmedException')) {
+      if (response.message && response.message.includes('UserNotConfirmedException')) {
         return { result: false, data: { noConfirm: true } };
       } else {
         return { result: false };

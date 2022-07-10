@@ -22,7 +22,7 @@ export interface AgreementProps {
     // 요청 데이터 정의
     const data: any = { ...user, agreement };
     // API 호출
-    const response: ResponseDF = await sendRequest(`/user/new/${userId}`, 'POST', data);
+    const response: ResponseDF = await sendRequest(`/user/new/${userId}`, 'POST', data, true);
     // 결과 반환
     return response.result;
   } catch (err) {

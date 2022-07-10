@@ -76,10 +76,10 @@ export const signin = async (email: string, password: string): Promise<ResponseD
  * [API Caller] 로그아웃
  * @returns 요청 결과
  */
-export const signout = async (token: string): Promise<boolean> => {
+export const signout = async (): Promise<boolean> => {
   try {
     // API 호출
-    const response: ResponseDF = await sendRequest('/auth/signout', 'POST', token);
+    const response: ResponseDF = await sendRequest('/auth/signout', 'POST');
     // 결과 반환
     return response.result;
   } catch (err) {

@@ -1,16 +1,21 @@
+import dynamic from 'next/dynamic';
 import Router from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
+import type { ComponentType } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import { useRecoilState, useRecoilValue } from 'recoil';
 // Component
+import { Button, Checkbox, Col, Form, Input, Modal, Popconfirm, Row } from 'antd';
 import { StyledPageBackground, StyledPageLayout } from '@/components/styled/JoinCompany';
 import { StyledAddButton, StyledServiceCard } from '../styled/ChoiceService';
-import { PLIP401Page, PLIP403Page, PLIPAwaitingApprovalPage, PLIPSimpleLoadingPage } from './Page';
 import { errorNotification, successNotification } from '../common/Notification';
 import { PLIPInputGroup } from './Input';
+const PLIP401Page: ComponentType<any> = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIP401Page));
+const PLIP403Page: ComponentType<any> = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIP403Page));
+const PLIPAwaitingApprovalPage = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIPAwaitingApprovalPage));
+const PLIPSimpleLoadingPage = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIPSimpleLoadingPage));
 // Icon
 import { IoAddOutline, IoBusinessSharp, IoDesktopOutline, IoPhonePortraitOutline, IoSettingsOutline } from 'react-icons/io5';
-import { Button, Checkbox, Col, Form, Input, Modal, Popconfirm, Row } from 'antd';
 // State
 import { accessTokenSelector, sessionSelector } from '@/models/session';
 import { createService, deleteService, getServices, updateService } from '@/models/queries/apis/company';
@@ -44,7 +49,7 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
             <StyledPageBackground>
               <StyledPageLayout>
                 <h2 className='title'>{user.userName} 님 안녕하세요 😊</h2>
-                <ServiceCardList accessToken={accessToken} companyId={user.affiliations[0].id} />
+                <ServiceCardList companyId={user.affiliations[0].id} />
               </StyledPageLayout>
             </StyledPageBackground>
           );
@@ -60,7 +65,7 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
 }
 
 /** [Internal Component] 서비스 카드 목록 */
-const ServiceCardList: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
+const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
   // 로컬 스토리지 내 서비스 정보
   const [session, setSession] = useRecoilState(sessionSelector);
   // 서비스 목록 조회
@@ -81,6 +86,9 @@ const ServiceCardList: React.FC<any> = ({ accessToken, companyId }): JSX.Element
   const onDelete = useCallback(async () => {
     const response = await deleteService(serviceId);
     if (response) {
+      // 쿼리 초기화
+      queryClient.invalidateQueries([KEY_SERVICES, companyId]);
+      // 알림
       successNotification('서비스를 삭제하였습니다.');
       // 로컬 스토리지에 저장된 서비스와 같을 경우, 삭제
       if (session.serviceId && session.serviceId === serviceId) {
@@ -88,8 +96,6 @@ const ServiceCardList: React.FC<any> = ({ accessToken, companyId }): JSX.Element
       }
       // 모달 종료
       setVisible(false);
-      // 쿼리 초기화
-      queryClient.invalidateQueries([KEY_SERVICES, companyId]);
     } else {
       errorNotification('서비스를 삭제하는 과정에서 오류가 발생하였습니다.');
     }

@@ -1,6 +1,6 @@
 import Router from 'next/router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 // Component
 import Link from 'next/link';
 import { StyledPageContent, StyledPageHeader, StyledPageHeaderMenuItem, StyledPageHeaderNav, StyledPageSider, StyledPageSiderFooter } from '../styled/Layout';
@@ -23,13 +23,13 @@ export interface PLIPPageLayoutProps {
 /** [Component] 페이지 레이아웃 (헤더) */
 export const PLIPPageHeader: React.FC<any> = (): JSX.Element => {
   // 액세스 토큰
-  const [accessToken, setAccessToken] = useRecoilState(accessTokenSelector);
+  const setAccessToken = useSetRecoilState(accessTokenSelector);
 
   /** [Event handler] 회사 관리로 이동 */
   const goManagement = useCallback(() => Router.push('/company/info'), []);
   /** [Event handler] 로그아웃 */
   const onSignout = useCallback(async () => {
-    const response = await signout(accessToken);
+    const response = await signout();
     if (response) {
       // Local storage 초기화
       setAccessToken('');
@@ -96,8 +96,6 @@ export const PLIPPageLayout: React.FC<any> = ({ children, selectedKey }): JSX.El
 }
 /** [Component] 페이지 레이아웃 (사이드) */
 export const PLIPPageSider: React.FC<any> = ({ expand, onExpand, scroll, selectedKey }): JSX.Element => {
-  // 액세스 토큰
-  const accessToken = useRecoilValue(accessTokenSelector);
   // 세션 조회
   const session = useRecoilValue(sessionSelector);
   // 서비스 조회

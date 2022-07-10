@@ -99,14 +99,13 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
 
       // 임시 저장 데이터 처리
       if (progress === 'update' && loadData) {
+        console.log('1', data.dInfo);
         setData({ ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi, manager: { ...loadData.dInfo.manager, charger: charger } } });
       } else {
         setData({ ...data, dInfo: { ...data.dInfo, manager: { ...data.dInfo.manager, charger: charger } } });
       }
     })();
   }, [companyId, loadData, progress]);
-
-  // useEffect(() => console.log('data', data), [data]);
 
   // 단계에 대한 Title
   const steps: string[] = ['입력사항 확인', '처리방침 편집', '최종 확인'];
@@ -121,6 +120,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
     pfni: [],
     cfni: []
   });
+  const [rels, setRels] = useState<any>({});
   // Focus에 따른 스크롤 이동을 위한 엘리멘트 참조 객체
   const refs: any = {
     input: useRef([]),
@@ -181,6 +181,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
         });
         // 참조 데이터 갱신
         setRef(tempRef);
+        console.log(tempData);
         // 상태 데이터 갱신
         setData({ ...data, dInfo: { ...tempData } });
       }

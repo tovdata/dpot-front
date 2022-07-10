@@ -1,5 +1,6 @@
+import dynamic from 'next/dynamic';
 import Router from 'next/router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useQuery } from 'react-query';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 // Component
@@ -8,7 +9,8 @@ import { StyledJoinCompanyTypeCard, StyledPageBackground, StyledPageLayout } fro
 import { StyledChoiceCompanyForm, StyledCompanyList, StyledCompanyItem } from '../styled/JoinCompany';
 import { PLIPInputGroup } from './Input';
 import { errorNotification } from '../common/Notification';
-import { PLIP401Page, PLIP403Page } from '@/components/renewer/Page';
+const PLIP401Page = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIP401Page));
+const PLIP403Page = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIP403Page));
 // Icon
 import { PlusCircleOutlined, SearchOutlined } from '@ant-design/icons';
 // State
@@ -52,7 +54,7 @@ const JoinCompany: React.FC<any> = (): JSX.Element => {
           {search === undefined ? (
             <JoinCompanyType onChoice={onChoice} userName={user.userName} />
           ) : (
-            <ChoiceCompanyForm accessToken={accessToken} onBack={onBack} search={search} userId={userId} />
+            <ChoiceCompanyForm onBack={onBack} search={search} userId={userId} />
           )}
         </StyledPageBackground>
       )}
@@ -83,7 +85,7 @@ const JoinCompanyTypeCard: React.FC<any> = ({ content, icon, onChoice, subject }
   );
 }
 /** [Intetnal Component] 회사 선택 폼 */
-const ChoiceCompanyForm: React.FC<any> = ({ accessToken, onBack, search, userId }): JSX.Element => {
+const ChoiceCompanyForm: React.FC<any> = ({ onBack, search, userId }): JSX.Element => {
   // 폼(Form) 객체
   const [form] = Form.useForm();
   // 검색 모달 상태
@@ -177,12 +179,12 @@ const ChoiceCompanyForm: React.FC<any> = ({ accessToken, onBack, search, userId 
           <Button onClick={onBack} type='default'>이전</Button>
         </div>
       </Form>
-      <SearchCompanyModal accessToken={accessToken} onChoice={onChoice} onClose={onClose} visible={visible} />
+      <SearchCompanyModal onChoice={onChoice} onClose={onClose} visible={visible} />
     </StyledChoiceCompanyForm>
   );
 }
 /** [Internal Component] 회사 검색 모달 */
-const SearchCompanyModal: React.FC<any> = ({ accessToken, onChoice, onClose, visible }): JSX.Element => {
+const SearchCompanyModal: React.FC<any> = ({ onChoice, onClose, visible }): JSX.Element => {
   // 회사 목록
   const [list, setList] = useState<any[]>([]);
 

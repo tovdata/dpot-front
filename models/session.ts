@@ -3,7 +3,7 @@ import { atom, selector } from 'recoil';
 const KEY_SESSION = 'plip-session';
 const KEY_SIDEMENU = 'plip-sm';
 const KEY_USER = 'plip-user';
-// Module
+// Util
 import { getAccessToken, removeAccessToken, setAccessToken } from '@/models/cookies';
 import { getUserId, removeUserId, setUserId } from '@/models/cookies';
 import { updateToken } from '@/models/queries/core';
@@ -23,22 +23,6 @@ const clearLocalStorage = (): void => {
   }
 }
 /**
- * [Function] 액세스 토큰 불러오기
- * @returns 액세스 토큰
- */
-// export const getAccessToken = async (): Promise<string> => {
-//   if (typeof window !== 'undefined') {
-//     const userId = window.localStorage.getItem(KEY_USER);
-//     if (userId !== null) {
-//       return await updateToken(userId.replace(/"/g, ''));
-//     } else {
-//       return '';
-//     }
-//   } else {
-//     return '';
-//   }
-// }
-/**
  * [Internal Function] 현재 시간 (Milliseconds)
  * @returns milliseconds
  */
@@ -54,7 +38,14 @@ const tokenEffects = () => ({ setSelf, onSet }: any): any => {
   const value: string | undefined = getAccessToken();
   if (value) setSelf(value);
   // Set
-  onSet((newValue: any) => newValue !== '' ? setAccessToken(newValue) : removeAccessToken());
+  onSet((newValue: any) => {
+    if (newValue !== '') {
+      setAccessToken(newValue)
+    } else {
+      removeAccessToken();
+      removeUserId();
+    }
+  });
 }
 /**
  * [Internal Function] 사용자 ID 대한 데이터 동기 (조회/저장)

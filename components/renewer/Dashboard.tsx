@@ -22,9 +22,10 @@ import { getCompany, getService, getServiceModifiedTime } from '@/models/queries
 import { getConsentList } from '@/models/queries/apis/consent';
 import { getUser } from '@/models/queries/apis/user';
 // Query key
-import { KEY_COMPANY, KEY_DASHBOARD_ACTIVITY, KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_CPI, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_LAST_MODIFY, KEY_DASHBOARD_PPI, KEY_SERVICE, KEY_USER } from '@/models/queries/key';
+import { KEY_COMPANY, KEY_DASHBOARD_ACTIVITY, KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_CPI, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_LAST_MODIFY, KEY_DASHBOARD_NEWS, KEY_DASHBOARD_PPI, KEY_SERVICE, KEY_USER } from '@/models/queries/key';
 // Util
 import { decodeAccessToken, transformToDate } from 'utils/utils';
+import { getNews } from '@/models/queries/apis/etc';
 
 // Set chart
 ChartJS.register(ArcElement, Tooltip);
@@ -42,24 +43,24 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
   return (
     <div style={{ backgroundColor: '#F0F5FF', height: '100%' }}>
       <PLIPLayoutPadding>
-        <DashboardHeader accessToken={accessToken} serviceId={session.serviceId} userId={userId} />
+        <DashboardHeader serviceId={session.serviceId} userId={userId} />
         <Row gutter={[24, 24]}>
           <Col span={14}>
-            <ChargerForCompany accessToken={accessToken} companyId={session.companyId} />
+            <ChargerForCompany companyId={session.companyId} />
           </Col>
           <Col span={10}>
-            <LastInformation accessToken={accessToken} serviceId={session.serviceId} />
+            <LastInformation serviceId={session.serviceId} />
           </Col>
           <Col span={14}>
             <Row gutter={[16, 16]} style={{ height: '100%' }}>
               <Col span={8}>
-                <PIItems accessToken={accessToken} serviceId={session.serviceId} />
+                <PIItems serviceId={session.serviceId} />
               </Col>
               <Col span={8}>
-                <NumberOfConsignmentCompanies accessToken={accessToken} serviceId={session.serviceId} />
+                <NumberOfConsignmentCompanies serviceId={session.serviceId} />
               </Col>
               <Col span={8}>
-                <NumberOfProvisionCompanies accessToken={accessToken} serviceId={session.serviceId} />
+                <NumberOfProvisionCompanies serviceId={session.serviceId} />
               </Col>
               <Col span={8}>
                 <DashboardItemCard>
@@ -67,17 +68,15 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
                 </DashboardItemCard>
               </Col>
               <Col span={16}>
-                <ConsentInformaiton accessToken={accessToken} serviceId={session.serviceId} />
+                <ConsentInformaiton serviceId={session.serviceId} />
               </Col>
             </Row>
           </Col>
           <Col span={10}>
-            <MyActivieList accessToken={accessToken} userId={userId} />
+            <MyActivieList userId={userId} />
           </Col>
           <Col span={24}>
-            <DashboardItemCard>
-              <PINews />
-            </DashboardItemCard>
+            <PINews />
           </Col>
         </Row>
       </PLIPLayoutPadding>
@@ -121,7 +120,7 @@ const DashboardItemHeader: React.FC<any> = ({ extra, title }): JSX.Element => {
 }
 
 /** [Internal Component] 개인정보 보호책임자 */
-const ChargerForCompany: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
+const ChargerForCompany: React.FC<any> = ({ companyId }): JSX.Element => {
   // 회사 정보 조회
   const { isLoading, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(companyId));
 
@@ -164,7 +163,7 @@ const ChargerForCompany: React.FC<any> = ({ accessToken, companyId }): JSX.Eleme
   );
 }
 /** [Internal Component] 최근 정보 수정일 */
-const LastInformation: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
+const LastInformation: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 최종 수정일 조회
   const { isLoading, data } = useQuery([KEY_DASHBOARD_LAST_MODIFY, serviceId], async () => await getServiceModifiedTime(serviceId));
   // 동의서에 대한 최종 수정일
@@ -374,22 +373,25 @@ const ViewAll: React.FC<any> = ({ href }): JSX.Element => {
 }
 /** [Internal Component] 뉴스 목록 컴포넌트 */
 const NewItems: React.FC<any> = (): JSX.Element => {
+  // 뉴스 조회
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_NEWS, 0], async () => await getNews());
+  // 아이템 생성
+  const items: JSX.Element[] = useMemo(() => data ? data.map((item: any): any => (<NewsItem date={transformToDate(item.regAt)} key={item.id} sources={item.source} subject={item.title} type={item.category} url={item.url} />)) : [], [data]);
+
+  // 컴포넌트 반환
   return (
-    <div>
-      <NewsItem date='2022-05-29' sources='개인정보보호위원회' subject='2021년 법령해석 심의 의결 결정문 모음집' type='정부자료' />
-      <NewsItem date='2022-05-29' sources='한겨례' subject='“쇼핑몰 장바구니 속 운동화, 페이스북이 어떻게 알았지?”' type='업계동향' />
-      <NewsItem date='2022-05-29' sources='개인정보보호위원회' subject='2021년 법령해석 심의 의결 결정문 모음집' type='정부자료' />
-      <NewsItem date='2022-05-29' sources='개인정보보호위원회' style={{ marginBottom: 0 }} subject='2021년 법령해석 심의 의결 결정문 모음집' type='정부자료' />
-    </div>
+    <DashboardItemCard loading={isLoading}>
+      <div>{items}</div>
+    </DashboardItemCard>
   );
 }
 /** [Internal Component] 뉴스 Row 컴포넌트 */
-const NewsItem: React.FC<any> = ({ date, sources, style, subject, type }): JSX.Element => {
+const NewsItem: React.FC<any> = ({ date, sources, style, subject, type, url }): JSX.Element => {
   return (
-    <div style={{ alignItems: 'center', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', marginBottom: 10, ...style }}>
+    <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 10, userSelect: 'none', ...style }}>
       <div style={{ alignItems: 'center', display: 'flex'}}>
         <Tag style={{ marginRight: 8, userSelect: 'none' }}>{type}</Tag>
-        <span style={{ color: '#11142D', fontSize: 14, fontWeight: '600', lineHeight: '22px' }}>{subject}</span>
+        <a style={{ color: '#11142D', cursor: 'pointer', fontSize: 14, fontWeight: '600', lineHeight: '22px' }} href={url} rel='referrer' target='_blank'>{subject}</a>
       </div>
       <div style={{  alignItems: 'center', display: 'flex', justifyContent: 'space-between', minWidth: 200 }}>
         <span style={{ color: '#8C8C8C', fontSize: 12, fontWeight: '400', lineHeight: '20px'  }}>{date}</span>

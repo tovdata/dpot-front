@@ -4,81 +4,6 @@ import { sendRequest } from '@/models/queries/core';
 import type { Company, PLIPService, ResponseDF } from '@/models/queries/type';
 
 /**
- * [API Caller] 회사 검색
- * @param name 검색할 이름
- * @returns 검색 결과
- */
-export const findCompanies = async (name: string): Promise<Company[]> => {
-  try {
-    // API 호출
-    const response: ResponseDF = await sendRequest(`/company/find?name=${encodeURIComponent(name)}`, 'GET');
-    // 결과 반환
-    return response.result && response.data && response.data.list ? response.data.list : [];
-  } catch (err) {
-    console.error(`[API ERROR] ${err}`);
-    return [];
-  }
-}
-/**
- * [API Caller] 사용자를 회사에 등록
- * @param companyId 회사 ID
- * @param userId 사용자 ID
- * @param accessLevel 등급
- * @returns 요청 결과
- */
-export const registerUser = async (companyId: string, userId: string, accessLevel: number = 0): Promise<boolean> => {
-  try {
-    // API 호출
-    const response: ResponseDF = await sendRequest(`/company/${companyId}/registration`, 'PUT', { userId, accessLevel });
-    // 결과 반환
-    return response.result;
-  } catch (err) {
-    console.error(`[API ERROR] ${err}`);
-    return false;
-  }
-}
-/**
- * [API Caller] 회사 정보 조회
- * @param companyId 회사 ID
- * @returns 조회 결과
- */
-export const getCompany = async (companyId: string): Promise<Company | undefined> => {
-  try {
-    // API 요청
-    const response: ResponseDF = await sendRequest(`/company/${companyId}`, 'GET');
-    // 결과 반환
-    return response.result && response.data ? response.data : undefined;
-  } catch (err) {
-    console.error(`[API ERROR] ${err}`);
-    return undefined;
-  }
-}
-/**
- * [API Caller] 회사 생성/수정
- * @param data 회사 데이터
- * @param id 회사 ID
- * @returns 요청 결과
- */
-export const setCompany = async (data: Company, id?: string): Promise<ResponseDF> => {
-  try {
-    // 경로 정의
-    const path: string = id ? `/company/${id}` : `/company/new`;
-    // 메서드 정의
-    const method: string = id ? 'PUT' : 'POST';
-    // 데이터 복사
-    const copy: Company = JSON.parse(JSON.stringify(data));
-    // 파라미터 데이터 가공 (id 속성이 있을 경우 제거)
-    if ('id' in copy) delete copy.id;
-    // API 호출
-    const response: ResponseDF = await sendRequest(path, method, copy);
-    // 결과 반환
-    return response;
-  } catch (err) {
-    console.error(`[API ERROR] ${err}`);
-    return { result: false };
-  }
-}
-/**
  * [API Caller] 서비스 생성
  * @param companyId 회사 ID
  * @param data 서비스 데이터
@@ -103,12 +28,44 @@ export const createService = async (companyId: string, data: PLIPService): Promi
 export const deleteService = async (serviceId: string): Promise<boolean> => {
   try {
     // API 호출
-    const response: ResponseDF = await sendRequest(`service/${serviceId}`, 'DELETE');
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}`, 'DELETE');
     // 결과 반환
     return response.result;
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return false;
+  }
+}
+/**
+ * [API Caller] 회사 검색
+ * @param name 검색할 이름
+ * @returns 검색 결과
+ */
+export const findCompanies = async (name: string): Promise<Company[]> => {
+  try {
+    // API 호출
+    const response: ResponseDF = await sendRequest(`/company/find?name=${encodeURIComponent(name)}`, 'GET');
+    // 결과 반환
+    return response.result && response.data && response.data.list ? response.data.list : [];
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return [];
+  }
+}
+/**
+ * [API Caller] 회사 정보 조회
+ * @param companyId 회사 ID
+ * @returns 조회 결과
+ */
+export const getCompany = async (companyId: string): Promise<Company | undefined> => {
+  try {
+    // API 요청
+    const response: ResponseDF = await sendRequest(`/company/${companyId}`, 'GET');
+    // 결과 반환
+    return response.result && response.data ? response.data : undefined;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return undefined;
   }
 }
 /**
@@ -164,6 +121,68 @@ export const getServiceModifiedTime = async (serviceId: string): Promise<any> =>
   }
 }
 /**
+ * [API Caller] 사용자를 회사에 등록
+ * @param companyId 회사 ID
+ * @param userId 사용자 ID
+ * @param accessLevel 등급
+ * @returns 요청 결과
+ */
+export const registerUser = async (companyId: string, userId: string, accessLevel: number = 0): Promise<boolean> => {
+  try {
+    // API 호출
+    const response: ResponseDF = await sendRequest(`/company/${companyId}/registration`, 'PUT', { userId, accessLevel });
+    // 결과 반환
+    return response.result;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return false;
+  }
+}
+/**
+ * [API Caller] 회사 생성/수정
+ * @param data 회사 데이터
+ * @param id 회사 ID
+ * @returns 요청 결과
+ */
+export const setCompany = async (data: Company, id?: string): Promise<ResponseDF> => {
+  try {
+    // 경로 정의
+    const path: string = id ? `/company/${id}` : `/company/new`;
+    // 메서드 정의
+    const method: string = id ? 'PUT' : 'POST';
+    // 데이터 복사
+    const copy: Company = JSON.parse(JSON.stringify(data));
+    // 파라미터 데이터 가공 (id 속성이 있을 경우 제거)
+    if ('id' in copy) delete copy.id;
+    // API 호출
+    const response: ResponseDF = await sendRequest(path, method, copy);
+    // 결과 반환
+    return response;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return { result: false };
+  }
+}
+/**
+ * [API Caller] 회사 수정
+ * @param companyId 회사 ID
+ * @param data 회사 데이터
+ * @returns 요청 결과
+ */
+export const updateCompany = async (companyId: string, data: Company): Promise<ResponseDF> => {
+  try {
+    // ID 추출 및 제거
+    delete data.id;
+    // API 호출
+    const response: ResponseDF = await sendRequest(`/company/${companyId}`, 'PUT', data);
+    // 결과 반환
+    return response;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return { result: false };
+  }
+}
+/**
  * [API Caller] 서비스 수정
  * @param companyId 회사 ID
  * @param serviceId 서비스 ID
@@ -187,22 +206,3 @@ export const updateService = async (companyId: string, serviceId: string, data: 
     return { result: false };
   }
 }
-// /**
-//  * [Internal API Caller] 서비스를 회사 등록 (서비스 생성 과정에서 자동 호출)
-//  * @param companyId 회사 ID
-//  * @param serviceId 서비스 ID
-//  * @returns 요청 결과
-//  */
-// const registerService = async (companyId: string, serviceId: string): Promise<boolean> => {
-//   try {
-//     // 요청 객체 생성
-//     const request: RequestDF = createRequest('PUT', { serviceId });
-//     // API 호출
-//     const response: any = await fetch(`${SERVER_URL}company/${companyId}/registration`, request);
-//     // 결과 반환
-//     return (await extractData(response, 'register')).result;
-//   } catch (err) {
-//     console.error(`[API ERROR] ${err}`);
-//     return false;
-//   }
-// }
