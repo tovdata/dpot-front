@@ -103,6 +103,19 @@ export const transformToDatetime = (timestamp: number): string => {
   }
 }
 /**
+ * [Function]
+ * @param date 날짜 형식 문자열 (YYYY-MM-DD)
+ * @returns unix timestamp
+ */
+export const transformToUnix = (date: string): number => {
+  try {
+    return moment(date, 'YYYY-MM-DD').unix();
+  } catch (err) {
+    console.error('[I_FUNC ERROR] 형식 변경 에러 (날짜형식이 맞지 않습니다.)');
+    return 0;
+  }
+}
+/**
  * [Internal Function] 활동 내역을 위한 UI상 위치 반환
  * @param path 활동 내역 기준 (표, 서비스 등)
  * @returns UI상 위치 데이터

@@ -54,7 +54,7 @@ export const getUser = async (userId: string): Promise<PLIPUser|undefined> => {
 export const getUsers = async (companyId: string): Promise<PLIPUser[]> => {
   try {
     // API 호출
-    const response: ResponseDF = await sendRequest(`company/${companyId}/details`, 'GET');
+    const response: ResponseDF = await sendRequest(`/company/${companyId}/details`, 'GET');
     // 데이터 가공
     if (response.result && response.data && response.data.employees) {
       return response.data.employees.map((elem: any): PLIPUser => ({ id: elem.id, contact: elem.contact, createAt: elem.createAt, department: elem.department, email: elem.email, position: elem.position, task: elem.task, userName: elem.userName }));
@@ -64,6 +64,26 @@ export const getUsers = async (companyId: string): Promise<PLIPUser[]> => {
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return [];
+  }
+}
+/**
+ * [API Caller] 비밀번호 변경
+ * @param userName 사용자 이름
+ * @param prevPassword 이전 비밀번호
+ * @param newPassword 새로운 비밀번호
+ * @returns 요청 결과
+ */
+export const updatePassword = async (userName: string, prevPassword: string, newPassword: string): Promise<boolean> => {
+  try {
+    // Body
+    const body = { username: userName, prevpassword: prevPassword, newpassword: newPassword };
+    // API 호출
+    const response: ResponseDF = await sendRequest(`/auth/password`, 'POST', body);
+    // 결과 반환
+    return response.result;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return false;
   }
 }
 /**
@@ -78,8 +98,9 @@ export const updateUser = async (userId: string, data: PLIPUser): Promise<boolea
     const copy: PLIPUser = JSON.parse(JSON.stringify(data));
     // ID 속성이 있을 경우, 삭제
     if ('id' in copy) delete copy.id;
+    if ('createAt' in copy) delete copy.createAt;
     // API 호출
-    const response: ResponseDF = await sendRequest(`/user/${userId}`, 'PUT', copy);
+    const response: ResponseDF = await sendRequest(`/user/${userId}`, 'PATCH', copy);
     // 결과 반환
     return response.result;
   } catch (err) {

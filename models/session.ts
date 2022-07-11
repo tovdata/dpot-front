@@ -76,7 +76,7 @@ const localStorageEffects = (key: string) => ({ setSelf, onSet }: any): any => {
     // Set
     onSet((newValue: any) => {
       // ID 속성에 대한 값이 공백이 아닌 경우에는 Add/Update, 공백인 경우에는 Delete
-      if (newValue.id !== '') {
+      if (newValue.companyId !== '') {
         window.localStorage.setItem(key, JSON.stringify(newValue));
       } else {
         window.localStorage.removeItem(key);

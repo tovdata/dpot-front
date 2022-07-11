@@ -189,7 +189,7 @@ const DescriptionLabel: React.FC<DescriptionLabelProps> = ({ content, required }
   );
 }
 /** [Internal Component] 개인정보 파기 테이블 */
-const DPITable: React.FC<DPITableProps> = ({ accessToken, onEdit, serviceId }): JSX.Element => {
+const DPITable: React.FC<DPITableProps> = ({ onEdit, serviceId }): JSX.Element => {
   // 파기 데이터 조회
   const { isLoading, data } = useQuery([SERVICE_DPI, serviceId], async () => await getDPIDatas(serviceId));
 

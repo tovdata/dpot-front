@@ -142,7 +142,7 @@ export const getPIDatas = async (serviceId: string): Promise<any[]> => {
 export const getPIItems = async (serviceId: string): Promise<any[]> => {
   try {
     // API 호출
-    const response: ResponseDF = await sendRequest(`/service/${serviceId}/cfni`, 'GET');
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}/pi/allitems`, 'GET');
     // 결과 반환
     return response.result && response.data && response.data.allItems ? response.data.allItems.sort() : [];
   } catch (err) {

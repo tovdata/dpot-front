@@ -9,15 +9,15 @@ import { PLIPInputGroup } from './Input';
 // Icon
 import { CloseOutlined, EditOutlined } from '@ant-design/icons';
 // Query
-import { getCompany, setCompany, updateCompany } from '@/models/queries/apis/company';
-import { getUsers } from '@/models/queries/apis/user';
+import { deregisterUser, getCompany, updateCompany } from '@/models/queries/apis/company';
+import { getUsers, updateUser } from '@/models/queries/apis/user';
 // Query key
 import { KEY_COMPANY, KEY_USERS } from '@/models/queries/key';
 import { PLIPSimpleLoadingContainer } from './Page';
 // State
-import { accessTokenSelector, sessionSelector } from '@/models/session';
+import { sessionSelector } from '@/models/session';
 // Util
-import moment from 'moment';
+import { transformToDate, transformToUnix } from 'utils/utils';
 
 /** [Component] 회사 관리 페이지 */
 const ManageCompany: React.FC<any> = (): JSX.Element => {
@@ -60,7 +60,6 @@ const CompanyInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
   const onSave = useCallback(async () => {
     // 변경된 데이터
     const updated: any = {
-      name: form.getFieldValue('name'),
       url: form.getFieldValue('url'),
       manager: {
         name: form.getFieldValue('manager'),
@@ -68,16 +67,15 @@ const CompanyInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
         email: form.getFieldValue('email')
       }
     };
-    warningNotification('구현 중 입니다ㅠ');
     // API 호출
-    // const response = await updateCompany(companyId, updated);
-    // // 결과 처리
-    // if (response.result) {
-    //   queryClient.invalidateQueries([KEY_COMPANY, companyId]);
-    //   successNotification('변경사항이 저장되었습니다.');
-    // } else {
-    //   errorNotification('변경사항 저장에 실패하였습니다.');
-    // }
+    const response = await updateCompany(companyId, updated);
+    // 결과 처리
+    if (response.result) {
+      queryClient.invalidateQueries([KEY_COMPANY, companyId]);
+      successNotification('변경사항이 저장되었습니다.');
+    } else {
+      errorNotification('변경사항 저장에 실패하였습니다.');
+    }
   }, [company, form, queryClient]);
 
   // 컴포넌트 반환
@@ -117,25 +115,25 @@ const CompanyInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
   );
 }
 /** [Internal Component] 조직 정보 관리 Section */
-const OrganizationInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element => {
+const OrganizationInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
   // 회사에 소속된 사용자 조회
-  const { isLoading, data } = useQuery([KEY_USERS, companyId], async () => await getUsers(companyId));
+  const { isLoading, data: users } = useQuery([KEY_USERS, companyId], async () => await getUsers(companyId));
 
   // 쿼리 클라이언트
-  // const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   // 폼 객체 생성
   const [form] = Form.useForm();
   // Drawer 열기/닫기 상태
   const [visible, setVisible] = useState<boolean>(false);
   // 데이터 동기
-  // const { mutate } = useMutation(async ({ data }: any) => {
-  //   return await updateUser(data.id, data);
-  // });
+  const { mutate } = useMutation(async ({ data }: any) => {
+    return await updateUser(data.id, data);
+  });
 
   /** [Event handler] Drawer 열기 */
   const onOpen = useCallback((record: any) => {
     // 폼 데이터 설정
-    form.setFieldsValue({ ...record, createAt: moment.unix(record.createAt / 1000).format('YYYY-MM-DD') });
+    form.setFieldsValue({ ...record, createAt: transformToDate(record.createAt) });
     // 모달 열기
     setVisible(true);
   }, []);
@@ -143,16 +141,25 @@ const OrganizationInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX
   const onClose = useCallback(() => setVisible(false), []);
   /** [Event handler] 테이블 데이터 변경 저장 */
   const onSetTable = (record: any) => {
-    // mutate({ data: record }, {
-    //   onSuccess: async (response) => {
-    //     queryClient.setQueryData([KEY_USERS, companyId], (oldData: any) => {
-    //       const index: number = oldData.findIndex((elem: any): boolean => elem.id === record.id);
-    //       return index === oldData.length - 1 ? [...oldData.splice(0, index), record] : [...oldData.splice(0, index), record, ...oldData.splice(index + 1)];
-    //     });
-    //   },
-    //   onError: () => queryClient.invalidateQueries([KEY_USERS, companyId])
-    // });
-    successNotification('변경사항이 저장되었습니다.');
+    mutate({ data: record }, {
+      onSuccess: async (response) => {
+        if (response) {
+          queryClient.setQueryData([KEY_USERS, companyId], (oldData: any) => {
+            const index: number = oldData.findIndex((elem: any): boolean => elem.id === record.id);
+            // 생성일 형식 변경
+            record.createAt = transformToUnix(record.createAt);
+            // 목록 업데이트
+            return index === oldData.length - 1 ? [...oldData.splice(0, index), record] : [...oldData.splice(0, index), record, ...oldData.splice(index + 1)];
+          });
+          successNotification('변경사항이 저장되었습니다.');
+        } else {
+          errorNotification('변경사항이 실패하였습니다.');
+        }
+      },
+      onError: () => {
+        queryClient.invalidateQueries([KEY_USERS, companyId]);
+      }
+    });
     onClose();
   }
 
@@ -165,15 +172,15 @@ const OrganizationInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX
         { title: '직책', dataIndex: 'position', key: 'position' },
         { title: '이메일', dataIndex: 'email', key: 'email' },
         { title: '연락처', dataIndex: 'contact', key: 'contact' },
-        { title: '가입일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => moment.unix(value / 1000).format('YYYY-MM-DD') },
+        { title: '가입일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => transformToDate(value) },
         { title: '담당업무', dataIndex: 'task', key: 'task' },
         { title: '', dataIndex: 'id', key: 'id', render: (_: any, record: any): JSX.Element => (<EditButton onOpen={() => onOpen(record)} />) },
-      ]} loading={isLoading} dataSource={isLoading ? [] : data ? data.map((elem: any): any => ({ ...elem, key: elem.id })) : []} style={{ marginBottom: 48 }} />
+      ]} loading={isLoading} dataSource={isLoading ? [] : users ? users.map((elem: any): any => ({ ...elem, key: elem.id })) : []} style={{ marginBottom: 48 }} />
       <StyledInviteForm>
         <p className='content'>아직 가입되어 있지 않은 담당자가 있다면?</p>
         <Button type='default'>초대하기</Button>
       </StyledInviteForm>
-      <EditableDrawer form={form} onClose={onClose} onSetTable={onSetTable} visible={visible} />
+      <EditableDrawer companyId={companyId} form={form} onClose={onClose} onSetTable={onSetTable} visible={visible} />
     </StyledTableForm>
   );
 }
@@ -186,13 +193,18 @@ const EditButton: React.FC<any> = ({ onOpen }): JSX.Element => {
   );
 }
 /** [Internal Component] 조직 구성원 정보 수정을 위한 Drawer */
-const EditableDrawer: React.FC<any> = ({ form, onClose, onSetTable, visible }): JSX.Element => {
+const EditableDrawer: React.FC<any> = ({ companyId, form, onClose, onSetTable, visible }): JSX.Element => {
+  /** [Event handler] 데이터 삭제 */
+  const onDelete = useCallback(async() => {
+    const response = await deregisterUser(companyId, form.getFieldValue('id'));
+    response ? successNotification('사용자가 회사에서 제외되었습니다.') : errorNotification('사용자를 제외하는 과정에서 오류가 발생하였습니다.');
+  }, [companyId, form]);
   /** [Event handler] 데이터 저장 */
   const onSave = useCallback(() => onSetTable(form.getFieldsValue()), [form]);
 
   // 컴포넌트 반환
   return (
-    <Drawer closable={false} extra={<DrawerExtra onClick={onClose} />} footer={<DrawerFooter onSave={onSave} />} onClose={onClose} title='조직 구성원 정보 수정하기' visible={visible}>
+    <Drawer closable={false} extra={<DrawerExtra onClick={onClose} />} footer={<DrawerFooter onDelete={onDelete} onSave={onSave} />} onClose={onClose} title='조직 구성원 정보 수정하기' visible={visible}>
       <Form form={form}>
         <Form.Item name='id' hidden>
           <Input disabled />
@@ -237,9 +249,10 @@ const EditableDrawer: React.FC<any> = ({ form, onClose, onSetTable, visible }): 
   );
 }
 // Drawer footer
-const DrawerFooter: React.FC<any> = ({ onSave }): JSX.Element => {
+const DrawerFooter: React.FC<any> = ({ onDelete, onSave }): JSX.Element => {
   return (
     <StyledDrawerFooter>
+      <Button danger onClick={onDelete}>삭제</Button>
       <Button onClick={onSave} type='primary'>저장</Button>
     </StyledDrawerFooter>
   );

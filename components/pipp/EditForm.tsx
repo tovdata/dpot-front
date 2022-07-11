@@ -16,6 +16,7 @@ interface InputSectionProps {
   onFocus: (type: string, index: number, pos?: string) => void;
   onOpenModal: (type: string) => void;
   refElements?: any;
+  refTables: any;
   rels: any;
   sectionType: string;
 }
@@ -39,7 +40,7 @@ interface ReadableTableProps {
 }
 
 /** [Component] 개인정보 처리방침 편집을 위한 Input section */
-export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFocus, onOpenModal, refElements, rels, sectionType }: InputSectionProps): JSX.Element => {
+export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFocus, onOpenModal, refElements, refTables, rels, sectionType }: InputSectionProps): JSX.Element => {
   // 예시 데이터 (관계 법령에 따른 개인정보 보유 및 이용기간)
   const [examForPeriod, setExamForPeriod] = useState<string[]>([]);
   // 예시 데이터 (법정대리인의 동의 확인 방법)
@@ -93,7 +94,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
       <DIRowDivider />
       <DIRow self={refElements ? (el: any) => (refElements.current[3] = el) : undefined}>
         <Collapse activeKey={rels.ppi.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='제3자의 목적을 위해 개인정보를 제공하면 그에 관한 사항을 반드시 안내해야 합니다. \n개인정보를 제공한 건 중 아직 ‘제공받은 자의 보유 및 이용 기간’이 남아있는 건은 해당 내용을 모두 기재해야 합니다. 만약 제공된 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n※ 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' required style={{ marginBottom: 0 }} title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton disabled={rels.ppi.usage === true} onChange={(e: any): void => { onFocus('preview', 3); onChange(sectionType, e.target.value, 'ppi', 'usage') }} size='small' value={rels.ppi.usage} />} />} key='1' showArrow={false}>
+          <Collapse.Panel header={<DIRowHeader description='제3자의 목적을 위해 개인정보를 제공하면 그에 관한 사항을 반드시 안내해야 합니다. \n개인정보를 제공한 건 중 아직 ‘제공받은 자의 보유 및 이용 기간’이 남아있는 건은 해당 내용을 모두 기재해야 합니다. 만약 제공된 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n※ 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' required style={{ marginBottom: 0 }} title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton disabled={refTables.ppi.length > 0} onChange={(e: any): void => { onFocus('preview', 3); onChange(sectionType, e.target.value, 'ppi', 'usage') }} size='small' value={rels.ppi.usage} />} />} key='1' showArrow={false}>
             <Button onClick={(): void => { onOpenModal('ppi'); onFocus('preview', 3); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
@@ -101,7 +102,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
       <DIRowDivider />
       <DIRow self={refElements ? (el: any) => (refElements.current[4] = el) : undefined}>
         <Collapse activeKey={rels.cpi.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='개인정보 처리를 위탁하고 있다면, 그에 관한 사항을 반드시 안내해야 합니다(예: AWS, 채널톡, Google Analytics 등). 만약 위탁한 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n개인정보 처리 업무를 위해 이용하고 있는 업체명과 위탁 업무 내용이 모두 기재되어있는지 확인해주세요.' required style={{ marginBottom: 0 }} title='위탁하는 개인정보가 있나요?' tools={<YesOrNoRadioButton disabled={rels.cpi.usage === true} onChange={(e: any): void => { onFocus('preview', 4); onChange(sectionType, e.target.value, 'cpi', 'usage') }} size='small' value={rels.cpi.usage} />} />} key='1' showArrow={false} >
+          <Collapse.Panel header={<DIRowHeader description='개인정보 처리를 위탁하고 있다면, 그에 관한 사항을 반드시 안내해야 합니다(예: AWS, 채널톡, Google Analytics 등). 만약 위탁한 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n개인정보 처리 업무를 위해 이용하고 있는 업체명과 위탁 업무 내용이 모두 기재되어있는지 확인해주세요.' required style={{ marginBottom: 0 }} title='위탁하는 개인정보가 있나요?' tools={<YesOrNoRadioButton disabled={refTables.cpi.length > 0} onChange={(e: any): void => { onFocus('preview', 4); onChange(sectionType, e.target.value, 'cpi', 'usage') }} size='small' value={rels.cpi.usage} />} />} key='1' showArrow={false} >
             <Button onClick={(): void => { onOpenModal('cpi'); onFocus('preview', 4); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
@@ -232,12 +233,15 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
 /** [Component] 개인정보 처리방침 편집을 위한 Preview section */
 export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, prevList, refElements, refTables, rels, serviceTypes, stmt }: PreviewSectionProps): JSX.Element => {
   // 서비스 유형에 따른 쿠키 설정법
-  const settings: string[] = [];
+  const settingsForAuto: string[] = [];
+  const settingsForShape: string[] = [];
   if (serviceTypes.includes('default') || serviceTypes.includes('web')) {
-    settings.push(...stmt.auto.content.web[1]);
+    settingsForAuto.push(...stmt.auto.content.web[1]);
+    settingsForShape.push(...stmt.shape.content.web[1]);
   }
   if (serviceTypes.includes('app')) {
-    settings.push(...stmt.auto.content.app[1]);
+    settingsForAuto.push(...stmt.auto.content.app[1]);
+    settingsForShape.push(...stmt.shape.content.app[1]);
   }
 
   // 웹 로그 분석도구 사용 여부에 따른 문구
@@ -439,9 +443,9 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
             {refTables.ppi.some((row: any): boolean => !('url' in row)) ? (
               <ReadableTable columns={[
                 { title: '제공받는 자', dataIndex: 'recipient', key: 'recipient', width: '16%' },
-                { title: '제공받는 자의 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
-                { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => (<>{value.join(', ')}</>), width: '36%' },
-                { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
+                { title: '제공받는 자의 목적', dataIndex: 'purpose', key: 'purpose', render: (values: string[]) => (<ListInTable items={values} />), width: '24%' },
+                { title: '제공 항목', dataIndex: 'items', key: 'items', render: (values: string[]) => (<>{values.join(', ')}</>), width: '36%' },
+                { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (values: string[]) => (<ListInTable items={values} />), width: '24%' },
               ]} dataSource={refTables.ppi} style={{ marginTop: 8 }} />
             ) : (<></>)}
             {refTables.ppi ? refTables.ppi.some((item: any): boolean => item.isForeign) ? (
@@ -451,8 +455,8 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
                   { title: '업체명', dataIndex: 'recipient', key: 'recipient', width: '15%', },
                   { title: '국가', dataIndex: 'country', key: 'country', width: '11%' },
                   { title: '위치', dataIndex: 'location', key: 'location', width: '22%' },
-                  { title: '일시 및 방법', dataIndex: 'method', key: 'method', render: (value: string[]) => (<ListInTable items={value} />), width: '30%' },
-                  { title: '관리책임자의 연락처', dataIndex: 'charger', key: 'charger', render: (value: string[]) => (<ListInTable items={value} />), width: '22%' }
+                  { title: '일시 및 방법', dataIndex: 'method', key: 'method', render: (values: string[]) => (<ListInTable items={values} />), width: '30%' },
+                  { title: '관리책임자의 연락처', dataIndex: 'charger', key: 'charger', render: (values: string[]) => (<ListInTable items={values} />), width: '22%' }
                 ]} dataSource={refTables.ppi ? refTables.ppi.filter((item: any): boolean => item.isForeign) : []} />
               </>
             ) : (<></>) : (<></>)}
@@ -464,7 +468,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
         {rels.cpi.usage ? (
           <>
             <DDRowHeader title={stmt.cpi.title} />
-            <DDRowContent items={stmt.cpi.content.common[1]} links={rels.cpi.url ? [data.dInfo.cpi.url] : undefined} style={{ marginBottom: 8 }} />
+            <DDRowContent items={stmt.cpi.content.common[1]} links={rels.cpi.url ? [rels.cpi.url] : undefined} style={{ marginBottom: 8 }} />
             {refTables.cpi.some((row: any): boolean => !('url' in row)) ? (
               <ReadableTable columns={[
                 { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company', width: '42%' },
@@ -478,10 +482,10 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
                   { title: '업체명', dataIndex: 'company', key: 'company' },
                   { title: '국가', dataIndex: 'country', key: 'country' },
                   { title: '위치', dataIndex: 'address', key: 'address' },
-                  { title: '일시 및 방법', dataIndex: 'method', key: 'method', render: (value: string[]) => (<ListInTable items={value} />) },
-                  { title: '이전 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => (<ListInTable items={value} />) },
-                  { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />) },
-                  { title: '관리책임자의 연락처', dataIndex: 'charger', key: 'charger', render: (value: string[]) => (<ListInTable items={value} />) }
+                  { title: '일시 및 방법', dataIndex: 'method', key: 'method', render: (values: string[]) => (<ListInTable items={values} />) },
+                  { title: '이전 항목', dataIndex: 'items', key: 'items', render: (values: string[]) => (<>{values.join(', ')}</>) },
+                  { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (values: string[]) => (<ListInTable items={values} />) },
+                  { title: '관리책임자의 연락처', dataIndex: 'charger', key: 'charger', render: (values: string[]) => (<ListInTable items={values} />) }
                 ]} dataSource={refTables.cpi ? refTables.cpi.filter((item: any): boolean => item.isForeign) : []} />
               </>
             ) : (<></>) : (<></>)}
@@ -539,13 +543,13 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
               `2) 쿠키 저장 거부 시 불이익 : ${data.aInfo.cookie.disadvantage.join(', ')}`,
               '3) 쿠키의 설치·운영 및 거부 : 브라우저나 앱의 종류에 따라 아래의 방법으로 쿠키의 저장을 거부할 수 있습니다.'
             ]} style={{ marginBottom: 0 }} />
-            <DDRowItemList items={settings} links={stmt.auto.content.web.link} />
+            <DDRowItemList items={settingsForAuto} links={stmt.auto.content.web.link} />
             <DDRowContent items={stmt.auto.content.webLog[1]} style={{ marginBottom: 0 }} />
             <DDRowContent items={[
               `1) 웹 로그 분석 도구의 사용 목적 : ${data.aInfo.webLog.purpose.join(', ')}`,
               '2) 웹 로그 분석 도구의 거부∙차단 방법 :'
             ]} style={{ marginBottom: 0 }} />
-            <DDRowItemList items={data.aInfo.webLog.method} />
+            <DDRowItemList items={webLogMethod} />
             <DDRowContent items={[
               `3) 거부 시 불이익 : ${data.aInfo.webLog.disadvantage}`
             ]} />
@@ -558,7 +562,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
               `2) 쿠키 저장 거부 시 불이익 : ${data.aInfo.cookie.disadvantage.join(', ')}`,
               '3) 쿠키의 설치·운영 및 거부 : 브라우저나 앱의 종류에 따라 아래의 방법으로 쿠키의 저장을 거부할 수 있습니다.'
             ]} style={{ marginBottom: 0 }} />
-            <DDRowItemList items={settings} links={stmt.auto.content.web.link} />
+            <DDRowItemList items={settingsForAuto} links={stmt.auto.content.web.link} />
           </>
         ) : data.aInfo.webLog.usage ? (
           <>
@@ -604,6 +608,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
               `보유 및 이용기간: ${data.aInfo.thirdParty.period}`
             ]} />
             <DDRowContent items={stmt.shape.content.common[2]} style={{ marginBottom: 0 }} />
+
             <DDRowContent items={stmt.shape.content.app[1].concat(stmt.shape.content.web[1])} style={{ marginBottom: 0 }} />
             <DDRowContent items={stmt.shape.content.common[3]} />
           </>
@@ -628,7 +633,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
             />
             <DDRowContent items={stmt.shape.content.thirdParty.none[1]} style={{ marginBottom: 0 }} />
             <DDRowContent items={stmt.shape.content.common[2]} style={{ marginBottom: 0 }} />
-            <DDRowContent items={stmt.shape.content.app[1].concat(stmt.shape.content.web[1])} style={{ marginBottom: 0 }} />
+            <DDRowContent items={settingsForShape} style={{ marginBottom: 0 }} />
             <DDRowContent items={stmt.shape.content.common[3]} />
           </>
         ) : data.aInfo.thirdParty.usage ? (
@@ -643,7 +648,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
               `보유 및 이용기간 : ${data.aInfo.thirdParty.period}`
             ]} />
             <DDRowContent items={stmt.shape.content.common[2]} style={{ marginBottom: 0}} />
-            <DDRowContent items={stmt.shape.content.app[1].concat(stmt.shape.content.web[1])} style={{ marginBottom: 0 }} />
+            <DDRowContent items={settingsForShape} style={{ marginBottom: 0 }} />
             <DDRowContent items={stmt.shape.content.common[3]} />
           </>
         ) : (
@@ -691,24 +696,28 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
                 ]} dataSource={refTables.fni} />
               </>
             ) : (<></>)}
-            {refTables.pfni && refTables.pfni.length > 0 ? (
+            {(refTables.pfni && refTables.pfni.length > 0) || rels.pfni && rels.pfni.url ? (
               <>
-                <DDRowItemList items={['가명정보의 제3자 제공에 관한 사항']} style={{ marginBottom: 4 }} />
-                <ReadableTable columns={[
-                  { title: '제공받는 자', dataIndex: 'recipient', key: 'recipent', width: '20%' },
-                  { title: '제공 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]): JSX.Element => (<ListInTable items={value} />), width: '30%' },
-                  { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]): JSX.Element => (<>{value.join(', ')}</>), width: '24%' },
-                  { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]): JSX.Element => (<ListInTable items={value} />), width: '26%' }
-                ]} dataSource={refTables.pfni} />
+                <DDRowItemList items={['가명정보의 제3자 제공에 관한 사항']} links={[rels.pfni.url]} style={{ marginBottom: 4 }} />
+                {refTables.pfni && refTables.pfni.length > 0 ? (
+                  <ReadableTable columns={[
+                    { title: '제공받는 자', dataIndex: 'recipient', key: 'recipent', width: '20%' },
+                    { title: '제공 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]): JSX.Element => (<ListInTable items={value} />), width: '30%' },
+                    { title: '제공 항목', dataIndex: 'items', key: 'items', render: (value: string[]): JSX.Element => (<>{value.join(', ')}</>), width: '24%' },
+                    { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]): JSX.Element => (<ListInTable items={value} />), width: '26%' }
+                  ]} dataSource={refTables.pfni} />
+                ) : (<></>)}
               </>
             ) : (<></>)}
-            {refTables.cfni && refTables.cfni.length > 0 ? (
+            {(refTables.cfni && refTables.cfni.length > 0) || rels.cfni && rels.cfni.url ? (
               <>
                 <DDRowItemList items={['가명정보 처리의 위탁에 관한 사항']} style={{ marginBottom: 4 }} />
-                <ReadableTable columns={[
-                  { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company', width: '42%' },
-                  { title: '위탁 업무', dataIndex: 'content', key: 'content', width: '58%' }
-                ]} dataSource={refTables.cfni} />
+                {refTables.cfni && refTables.cfni.length > 0 ? (
+                  <ReadableTable columns={[
+                    { title: '위탁받는 자(수탁자)', dataIndex: 'company', key: 'company', width: '42%' },
+                    { title: '위탁 업무', dataIndex: 'content', key: 'content', width: '58%' }
+                  ]} dataSource={refTables.cfni} />
+                ) : (<></>)}
               </>
             ) : (<></>)}
             <DDRowContent items={stmt.fni.content.common[2]} style={{ marginBottom: 0 }} />

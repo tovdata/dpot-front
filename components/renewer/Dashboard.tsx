@@ -21,8 +21,10 @@ import { getUserActivityForWeek } from '@/models/queries/apis/activity';
 import { getCompany, getService, getServiceModifiedTime } from '@/models/queries/apis/company';
 import { getConsentList } from '@/models/queries/apis/consent';
 import { getUser } from '@/models/queries/apis/user';
+import { getPIPPPublishAt } from '@/models/queries/apis/pipp';
 // Query key
-import { KEY_COMPANY, KEY_DASHBOARD_ACTIVITY, KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_CPI, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_LAST_MODIFY, KEY_DASHBOARD_NEWS, KEY_DASHBOARD_PPI, KEY_SERVICE, KEY_USER } from '@/models/queries/key';
+import { KEY_COMPANY, KEY_DASHBOARD_ACTIVITY, KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_LAST_MODIFY, KEY_DASHBOARD_NEWS, KEY_DASHBOARD_PIPP, KEY_SERVICE, KEY_USER } from '@/models/queries/key';
+import { SERVICE_CPI, SERVICE_PPI } from '@/models/queries/type';
 // Util
 import { decodeAccessToken, transformToDate } from 'utils/utils';
 import { getNews } from '@/models/queries/apis/etc';
@@ -63,9 +65,7 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
                 <NumberOfProvisionCompanies serviceId={session.serviceId} />
               </Col>
               <Col span={8}>
-                <DashboardItemCard>
-                  <PIPPInfomation />
-                </DashboardItemCard>
+                <PIPPInfomation serviceId={session.serviceId} />
               </Col>
               <Col span={16}>
                 <ConsentInformaiton serviceId={session.serviceId} />
@@ -226,9 +226,9 @@ const PIItems: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
   );
 }
 /** [Internal Component] 개인정보 위탁 업체 수 표시 */
-const NumberOfConsignmentCompanies: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
+const NumberOfConsignmentCompanies: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 위탁 데이터 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_CPI, serviceId], async () => await getCPIDatas(serviceId));
+  const { isLoading, data } = useQuery([SERVICE_CPI, serviceId], async () => await getCPIDatas(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -243,9 +243,9 @@ const NumberOfConsignmentCompanies: React.FC<any> = ({ accessToken, serviceId })
   );
 }
 /** [Internal Component] 개인정보 제공 업체 수 표시 */
-const NumberOfProvisionCompanies: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
+const NumberOfProvisionCompanies: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 제공 데이터 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_PPI, serviceId], async () => await getPPIDatas(serviceId));
+  const { isLoading, data } = useQuery([SERVICE_PPI, serviceId], async () => await getPPIDatas(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -260,15 +260,19 @@ const NumberOfProvisionCompanies: React.FC<any> = ({ accessToken, serviceId }): 
   );
 }
 /** [Internal Component] 개인정보 처리방침 최종 게재일 표시 */
-const PIPPInfomation: React.FC<any> = (): JSX.Element => {
+const PIPPInfomation: React.FC<any> = ({ serviceId }): JSX.Element => {
+  // 개인정보 처리방침 상태 조회
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_PIPP, serviceId], async () => await getPIPPPublishAt(serviceId));
+
+  // 컴포넌트 반환
   return (
-    <>
+    <DashboardItemCard loading={isLoading}>
       <DashboardItemHeader title='개인정보 처리방침' />
       <div>
         <h5 style={{ color: '#2F2E41', fontSize: 12, fontWeight: '400', lineHeight: '20px', margin: 0 }}>최종 게재일</h5>
-        <p style={{ color: '#11142D', fontSize: 16, fontWeight: '600', lineHeight: '24px', margin: 0 }}>2022-01-01</p>
+        <p style={{ color: '#11142D', fontSize: 16, fontWeight: '600', lineHeight: '24px', margin: 0 }}>{data && data > 0 ? transformToDate(data) : '-'}</p>
       </div>
-    </>
+    </DashboardItemCard>
   );
 }
 /** [Internal Component] 동의서 개수 표시 */
@@ -391,7 +395,7 @@ const NewsItem: React.FC<any> = ({ date, sources, style, subject, type, url }): 
     <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 10, userSelect: 'none', ...style }}>
       <div style={{ alignItems: 'center', display: 'flex'}}>
         <Tag style={{ marginRight: 8, userSelect: 'none' }}>{type}</Tag>
-        <a style={{ color: '#11142D', cursor: 'pointer', fontSize: 14, fontWeight: '600', lineHeight: '22px' }} href={url} rel='referrer' target='_blank'>{subject}</a>
+        <a style={{ color: '#11142D', cursor: 'pointer', fontSize: 14, fontWeight: '600', lineHeight: '22px' }} href={url} rel='noreferrer' target='_blank'>{subject}</a>
       </div>
       <div style={{  alignItems: 'center', display: 'flex', justifyContent: 'space-between', minWidth: 200 }}>
         <span style={{ color: '#8C8C8C', fontSize: 12, fontWeight: '400', lineHeight: '20px'  }}>{date}</span>

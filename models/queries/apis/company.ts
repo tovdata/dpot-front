@@ -37,6 +37,23 @@ export const deleteService = async (serviceId: string): Promise<boolean> => {
   }
 }
 /**
+ * [API Caller] 사용자 소속 제거
+ * @param companyId 회사 ID
+ * @param userId 사용자 ID
+ * @returns 요청 결과
+ */
+export const deregisterUser = async (companyId: string, userId: string): Promise<boolean> => {
+  try {
+    // API 호출
+    const response: ResponseDF = await sendRequest(`/company/${companyId}/deregistration`, 'POST', { userId });
+    // 결과 반환
+    return response.result;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return false;
+  }
+}
+/**
  * [API Caller] 회사 검색
  * @param name 검색할 이름
  * @returns 검색 결과
@@ -130,7 +147,7 @@ export const getServiceModifiedTime = async (serviceId: string): Promise<any> =>
 export const registerUser = async (companyId: string, userId: string, accessLevel: number = 0): Promise<boolean> => {
   try {
     // API 호출
-    const response: ResponseDF = await sendRequest(`/company/${companyId}/registration`, 'PUT', { userId, accessLevel });
+    const response: ResponseDF = await sendRequest(`/company/${companyId}/registration`, 'POST', { userId, accessLevel });
     // 결과 반환
     return response.result;
   } catch (err) {
@@ -174,7 +191,7 @@ export const updateCompany = async (companyId: string, data: Company): Promise<R
     // ID 추출 및 제거
     delete data.id;
     // API 호출
-    const response: ResponseDF = await sendRequest(`/company/${companyId}`, 'PUT', data);
+    const response: ResponseDF = await sendRequest(`/company/${companyId}`, 'PATCH', data);
     // 결과 반환
     return response;
   } catch (err) {

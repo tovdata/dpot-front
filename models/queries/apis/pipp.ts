@@ -44,6 +44,26 @@ export const getPIPPList = async (serviceId: string): Promise<any[]> => {
   }
 }
 /**
+ * [API Caller] 개인정보 처리방침 최종 게재일
+ * @param serviceId 서비스 ID
+ * @returns 조회 결과
+ */
+export const getPIPPPublishAt = async (serviceId: string): Promise<number> => {
+  try {
+    // API 호출
+    const response: ResponseDF = await sendRequest(`/pipp/${serviceId}`, 'GET');
+    // 결과 처리 및 반환
+    if (response && ('publishAt' in response.data)) {
+      return response.data.publishAt ? response.data.publishAt : 0;
+    } else {
+      return 0;
+    }
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return 0;
+  }
+}
+/**
  * [API Caller] 개인정보 처리방침 진행 상태
  * @param serviceId 서비스 ID
  * @returns 조회 결과
@@ -88,6 +108,7 @@ export const setPIPPData = async (serviceId: string, userId: string, data: any, 
       userId,
       data: data,
       publish: status === 'publish' ? true : false,
+      publishAt: status === 'publish' ? new Date().getTime() : undefined,
       html: status === 'publish' ? html : undefined
     };
 

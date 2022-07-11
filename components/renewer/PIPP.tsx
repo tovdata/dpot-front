@@ -150,50 +150,92 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
   // 생성된 URL
   const [url, setUrl] = useState<string>('');
 
-  // 요청으로 응답된 데이터 가공 및 처리
+  // 참조 테이블 저장
   useEffect(() => {
     if (!loading) {
-      if (!initQuery) {
-        setInitQuery(true);
-        // 가공을 위한 임시 데이터 셋 정의
-        const tempRef: any = {};
-        const tempData: any = JSON.parse(JSON.stringify(rels));
-        // 데이터 가공 및 처리
-        SERVICE_LIST.forEach((type: string, index: number): any => {
-          tempRef[type] = results[index].isSuccess ? results[index].data ? results[index].data : [] : [];
-          // URL filter
-          if ((type === SERVICE_PPI || type === SERVICE_CPI || type === SERVICE_FNI || type === SERVICE_CFNI || type === SERVICE_PFNI) && tempRef[type].length > 0) {
-            if (type === SERVICE_PFNI || type === SERVICE_CFNI) {
-              tempData.fni.usage = true;
-            } else {
-              tempData[type].usage = true;
-            }
-            // Extract a url
-            if (type === SERVICE_PPI || type === SERVICE_PFNI || type === SERVICE_CPI || type === SERVICE_CFNI) {
-              let isUrl: boolean = false;
-              tempRef[type] = tempRef[type].filter((row: any): boolean => {
-                if (row['url'] === undefined) {
-                  return true;
-                } else {
-                  isUrl = true;
-                  tempData[type] !== undefined ? tempData[type].url = row['url'] : undefined;
-                  return false;
-                }
-              });
-              if (!isUrl) {
-                if (tempData[type] === undefined) tempData[type] = {};
-                tempData[type].url = undefined;
+      const tempRef: any = {};
+      for (let i = 0; i < SERVICE_LIST.length; i++) {
+        tempRef[SERVICE_LIST[i]] = results[i].data ? results[i].data : [];
+      }
+      // 참조 테이블 저장
+      setRef(tempRef);
+      // 가공을 위한 임시 데이터 셋 정의
+      const tempData: any = JSON.parse(JSON.stringify(rels));
+      // 데이터 가공 및 처리
+      SERVICE_LIST.forEach((type: string): any => {
+        // URL filter
+        if ((type === SERVICE_PPI || type === SERVICE_CPI || type === SERVICE_FNI || type === SERVICE_CFNI || type === SERVICE_PFNI) && tempRef[type].length > 0) {
+          if (type === SERVICE_PFNI || type === SERVICE_CFNI) {
+            tempData.fni.usage = true;
+          } else {
+            tempData[type].usage = true;
+          }
+          // Extract a url
+          if (type === SERVICE_PPI || type === SERVICE_PFNI || type === SERVICE_CPI || type === SERVICE_CFNI) {
+            let isUrl: boolean = false;
+            tempRef[type] = tempRef[type].filter((row: any): boolean => {
+              if (row['url'] === undefined) {
+                return true;
+              } else {
+                isUrl = true;
+                tempData[type] !== undefined ? tempData[type].url = row['url'] : undefined;
+                return false;
               }
+            });
+            if (!isUrl) {
+              if (tempData[type] === undefined) tempData[type] = {};
+              tempData[type].url = undefined;
             }
           }
-        });
-        // 참조 데이터 갱신
-        setRef(tempRef);
-        // 상태 데이터 갱신
-        setRels(tempData);
-      }
+        }
+      });
+      // 저장
+      setRels(tempData);
     }
-  }, [initQuery, loading]);
+  }, [loading, results[0].data, results[1].data, results[2].data, results[3].data, results[4].data, results[5].data]);
+  // 요청으로 응답된 데이터 가공 및 처리
+  // useEffect(() => {
+  //   if (!loading) {
+  //     if (!initQuery) {
+  //       setInitQuery(true);
+  //       // 가공을 위한 임시 데이터 셋 정의
+  //       const tempRef: any = {};
+  //       const tempData: any = JSON.parse(JSON.stringify(rels));
+  //       // 데이터 가공 및 처리
+  //       SERVICE_LIST.forEach((type: string, index: number): any => {
+  //         // URL filter
+  //         if ((type === SERVICE_PPI || type === SERVICE_CPI || type === SERVICE_FNI || type === SERVICE_CFNI || type === SERVICE_PFNI) && tempRef[type].length > 0) {
+  //           if (type === SERVICE_PFNI || type === SERVICE_CFNI) {
+  //             tempData.fni.usage = true;
+  //           } else {
+  //             tempData[type].usage = true;
+  //           }
+  //           // Extract a url
+  //           if (type === SERVICE_PPI || type === SERVICE_PFNI || type === SERVICE_CPI || type === SERVICE_CFNI) {
+  //             let isUrl: boolean = false;
+  //             tempRef[type] = tempRef[type].filter((row: any): boolean => {
+  //               if (row['url'] === undefined) {
+  //                 return true;
+  //               } else {
+  //                 isUrl = true;
+  //                 tempData[type] !== undefined ? tempData[type].url = row['url'] : undefined;
+  //                 return false;
+  //               }
+  //             });
+  //             if (!isUrl) {
+  //               if (tempData[type] === undefined) tempData[type] = {};
+  //               tempData[type].url = undefined;
+  //             }
+  //           }
+  //         }
+  //       });
+  //       // 참조 데이터 갱신
+  //       setRef(tempRef);
+  //       // 상태 데이터 갱신
+  //       setRels(tempData);
+  //     }
+  //   }
+  // }, [initQuery, loading]);
 
   /** [Event handler] 모달 열기 */
   const onOpen = useCallback((): void => setVisible(true), []);
@@ -254,16 +296,16 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
         } else if (dInfo.child.usage && dInfo.child.method.length === 0) {
           warningNotification('법정대리인의 동의 확인 방법을 선택해주세요.');
           onFocus('input', 2);
-        } else if (dInfo.ppi.usage === undefined) {
+        } else if (rels.ppi.usage === undefined) {
           warningNotification('제3자 제공 여부를 선택해주세요.');
           onFocus('input', 3);
-        } else if (dInfo.ppi.usage && (dInfo.ppi.url === undefined && ref.ppi.length === 0)) {
+        } else if (rels.ppi.usage && (rels.ppi.url === undefined && ref.ppi.length === 0)) {
           warningNotification('개인정보 제공에 대한 정보를 입력해주세요.');
           onFocus('input', 3);
-        } else if (dInfo.cpi.usage === undefined) {
+        } else if (rels.cpi.usage === undefined) {
           warningNotification('위탁 여부를 선택해주세요.');
           onFocus('input', 4);
-        } else if (dInfo.cpi.usage && (dInfo.cpi.url === undefined && ref.cpi.length === 0)) {
+        } else if (rels.cpi.usage && (rels.cpi.url === undefined && ref.cpi.length === 0)) {
           warningNotification('개인정보 위탁에 대한 정보를 입력해주세요.');
           onFocus('input', 4);
         } else if (dInfo.destructionUnused.type === undefined) {
@@ -278,10 +320,10 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
         } else if (dInfo.safety.usage && (blankCheck(dInfo.safety.activity) && dInfo.safety.certification.length === 0)) {
           warningNotification('안전성 확보조치에 관한 사항을 입력해주세요.');
           onFocus('input', 6);
-        } else if (dInfo.fni.usage === undefined) {
+        } else if (rels.fni.usage === undefined) {
           warningNotification('가명정보 처리 여부를 선택해주세요.');
           onFocus('input', 7);
-        } else if (dInfo.fni.usage && ref.fni.length === 0) {
+        } else if (rels.fni.usage && (ref.fni.length === 0 && ref.cfni.length === 0 && ref.pfni.length === 0)) {
           warningNotification('가명정보 처리에 대한 정보를 입력해주세요.');
           onFocus('input', 7);
         } else if (blankCheck(dInfo.manager.charger.name) || blankCheck(dInfo.manager.charger.position)) {
@@ -307,7 +349,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
         onOpen();
       }
     }
-  }, [data, stepIndex]);
+  }, [data, rels, stepIndex]);
   /** [Event handler] 저장 이벤트 */
   const onSave = useCallback(async (temp: boolean = true): Promise<void> => {
     // 미리보기 모달 닫기
@@ -355,15 +397,15 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
           ) : (
             <PLIPLoadingContainer />
           ) : stepIndex === 1 ? data ? (
-            <CreatePIPPSection accessToken={accessToken} data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTable={ref} rels={rels} serviceId={serviceId} serviceTypes={service ? service.types : []} />
+            <CreatePIPPSection accessToken={accessToken} data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTables={ref} rels={rels} serviceId={serviceId} serviceTypes={service ? service.types : []} />
           ) : (
             <PLIPLoadingContainer />
           ) : stepIndex === 2 ? (
             <ConfirmSection data={data.cInfo} onChange={onChange} prevList={list.filter((item: any): boolean => item.version !== 0)} sectionType='cInfo' />
           ) : (<></>)}
-          <DRModal centered onCancel={onClose} onOk={() => onSave(false)} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
+          <DRModal cancelText='취소' centered onCancel={onClose} okText='게재' onOk={() => onSave(false)} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
             {data ? (
-              <PreviewSection data={data} preview={false} prevList={list.filter((item: any): boolean => item.version !== 0)} refTables={ref} stmt={stmt(data.dInfo.name)} />
+              <PreviewSection data={data} preview={false} prevList={list.filter((item: any): boolean => item.version !== 0)} refTables={ref} rels={rels} serviceTypes={service ? service.types : []} stmt={stmt(data.dInfo.name)} />
             ) : (
               <PLIPLoadingContainer />
             )}
@@ -405,7 +447,7 @@ export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
 }
 
 /** [Internal Component] 개인정보 처리방침 생성 섹션 */
-const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus, onRefresh, refElements, refTable, rels, serviceId, serviceTypes }): JSX.Element => {
+const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus, onRefresh, refElements, refTables, rels, serviceId, serviceTypes }): JSX.Element => {
   // Query Client 생성
   const queryClient = useQueryClient();
   // 편집을 위한 모달 오픈 상태
@@ -430,10 +472,10 @@ const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus
     <>
       <Row gutter={74} style={{ height: 'calc(100vh - 324px)' }}>
         <Col span={12} style={{ height: '100%', overflowY: 'auto' }}>
-          <InputSection data={data.dInfo} onChange={onChange} onFocus={onFocus} onOpenModal={onOpen} refElements={refElements.input} refTables={refTable} rels={rels} sectionType='dInfo' />
+          <InputSection data={data.dInfo} onChange={onChange} onFocus={onFocus} onOpenModal={onOpen} refElements={refElements.input} refTables={refTables} rels={rels} sectionType='dInfo' />
         </Col>
         <Col span={12} style={{ borderLeft: '1px solid rgba(156, 156, 156, 0.3)', height: '100%', overflowY: 'auto' }}>
-          <PreviewSection data={data} preview={true} refElements={refElements.preview} refTables={refTable} rels={rels} serviceTypes={serviceTypes} stmt={stmt(data.dInfo.name)} />
+          <PreviewSection data={data} preview={true} refElements={refElements.preview} refTables={refTables} rels={rels} serviceTypes={serviceTypes} stmt={stmt(data.dInfo.name)} />
         </Col>
       </Row>
       <EditableModal accessToken={accessToken} onClose={onClose} serviceId={serviceId} type={refType} visible={open} />

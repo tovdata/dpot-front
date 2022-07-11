@@ -201,7 +201,7 @@ const SearchCompanyModal: React.FC<any> = ({ onChoice, onClose, visible }): JSX.
           list.map((item: any): JSX.Element => (
             <StyledCompanyItem key={item.id} onClick={() => onChoice(item)}>
               <h5>{item.companyName}</h5>
-              <p>개인정보보호 책임자: {item.manager ? item.manager.name : ''} ({item.manager ? item.manager.email : ''})</p>
+              <p>개인정보 보호책임자: {item.manager ? item.manager.name : ''} ({item.manager ? item.manager.email : ''})</p>
             </StyledCompanyItem>
           ))
         ) : (
