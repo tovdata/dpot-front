@@ -39,12 +39,12 @@ export const defaultPIPPData: any = {
       method: [],
       usage: undefined
     },
-    ppi: {
-      usage: undefined
-    },
-    cpi: {
-      usage: undefined
-    },
+    // ppi: {
+    //   usage: undefined
+    // },
+    // cpi: {
+    //   usage: undefined
+    // },
     destructionUnused: {
       type: undefined
     },
@@ -54,9 +54,9 @@ export const defaultPIPPData: any = {
       certification: [],
       usage: undefined
     },
-    fni: {
-      usage: undefined
-    },
+    // fni: {
+    //   usage: undefined
+    // },
     manager: {
       charger: {
         name: '',

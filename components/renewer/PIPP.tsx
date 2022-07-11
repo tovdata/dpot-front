@@ -36,12 +36,13 @@ import { statementForPIPP as stmt } from '@/models/static/statement';
 import { DocProgressStatus } from '@/models/type';
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PIPP, SERVICE_PPI } from '@/models/queries/type';
 // Query
-import { getCompany } from '@/models/queries/apis/company';
+import { getCompany, getService } from '@/models/queries/apis/company';
 import { getPIPPData, setPIPPData } from '@/models/queries/apis/pipp';
 import { getDatasByTableType } from '@/models/queries/apis/manage';
 // Util
 import { blankCheck, copyTextToClipboard, decodeAccessToken } from 'utils/utils';
 import moment from 'moment';
+import { KEY_SERVICE } from '@/models/queries/key';
 
 /** [Interface] PIPP process */
 interface PIPPProcess {
@@ -50,7 +51,7 @@ interface PIPPProcess {
   status?: string;
 }
 /** [Type] Scroll position */
-type ScrollPosition = 'start'|'end';
+type ScrollPosition = 'start' | 'end';
 
 /**
  * [Component] 개인정보 처리방침 생성 페이지
@@ -80,6 +81,8 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
   // }, [companyId, progress, serviceId]);
   // 데이터 불러오기에 대한 상태
   const [loading, setLoading] = useState<boolean>(true);
+  // 서비스 조회
+  const { data: service } = useQuery([KEY_SERVICE, serviceId], async () => await getService(serviceId));
   // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
   const { isLoading: isLoadingForData, data: loadData } = useQuery([SERVICE_PIPP, serviceId], async () => await getPIPPData(serviceId));
   // 테이블 데이터 쿼리 (API 호출)
@@ -99,8 +102,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
 
       // 임시 저장 데이터 처리
       if (progress === 'update' && loadData) {
-        console.log('1', data.dInfo);
-        setData({ ...loadData, dInfo: { ...loadData.dInfo, cpi: data.dInfo.cpi, fni: data.dInfo.fni, ppi: data.dInfo.ppi, manager: { ...loadData.dInfo.manager, charger: charger } } });
+        setData({ ...loadData, dInfo: { ...loadData.dInfo, manager: { ...loadData.dInfo.manager, charger: charger } } });
       } else {
         setData({ ...data, dInfo: { ...data.dInfo, manager: { ...data.dInfo.manager, charger: charger } } });
       }
@@ -120,7 +122,13 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
     pfni: [],
     cfni: []
   });
-  const [rels, setRels] = useState<any>({});
+  const [rels, setRels] = useState<any>({
+    cfni: { url: undefined },
+    cpi: { usage: undefined, url: undefined },
+    fni: { usage: undefined },
+    pfni: { url: undefined },
+    ppi: { usage: undefined, url: undefined }
+  });
   // Focus에 따른 스크롤 이동을 위한 엘리멘트 참조 객체
   const refs: any = {
     input: useRef([]),
@@ -149,7 +157,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
         setInitQuery(true);
         // 가공을 위한 임시 데이터 셋 정의
         const tempRef: any = {};
-        const tempData: any = JSON.parse(JSON.stringify(data.dInfo));
+        const tempData: any = JSON.parse(JSON.stringify(rels));
         // 데이터 가공 및 처리
         SERVICE_LIST.forEach((type: string, index: number): any => {
           tempRef[type] = results[index].isSuccess ? results[index].data ? results[index].data : [] : [];
@@ -181,9 +189,8 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
         });
         // 참조 데이터 갱신
         setRef(tempRef);
-        console.log(tempData);
         // 상태 데이터 갱신
-        setData({ ...data, dInfo: { ...tempData } });
+        setRels(tempData);
       }
     }
   }, [initQuery, loading]);
@@ -195,15 +202,19 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
   /** [Query handler] API를 요청하여 데이터를 갱신하기 위해 호출되는 함수 */
   const onRefresh = useCallback((): void => setInitQuery(false), []);
   /** [Event handler] 데이터 변경 이벤트 */
-  const onChange = (step: string, value: any, category: string, property?: string, subProperty?: string): void => {
+  const onChange = useCallback((step: string, value: any, category: string, property?: string, subProperty?: string): void => {
     if (property!== undefined && subProperty !== undefined) {
       setData({ ...data, [step]: { ...data[step], [category]: { ...data[step][category], [property]: { ...data[step][category][property], [subProperty]: value } } } });
     } else if (property !== undefined) {
-      setData({ ...data, [step]: { ...data[step], [category]: { ...data[step][category], [property]: value } } });
+      if (category === SERVICE_CPI || category === SERVICE_FNI || category === SERVICE_PPI) {
+        setRels({ ...rels, [category]: { ...rels[category], [property]: value }});
+      } else {
+        setData({ ...data, [step]: { ...data[step], [category]: { ...data[step][category], [property]: value } } });
+      }
     } else {
       setData({ ...data, [step]: { ...data[step], [category]: value } });
     }
-  };
+  }, [data, rels]);
   /** [Event handler] 포커스에 따라 스코롤 이동 이벤트 (Prview part) */
   const onFocus = useCallback((type: string, index: number, pos?: ScrollPosition) => { refs[type].current[index] ? refs[type].current[index].scrollIntoView((type === 'preview' && (index === 1 || index === 3 || index === 4 || index === 7)) ? { block: pos ? pos : 'start' } : { behavior: 'smooth' , block: pos ? pos : 'start' }) : undefined }, [refs]);
   /** [Event handler] 단계 이동 이벤트 */
@@ -344,7 +355,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
           ) : (
             <PLIPLoadingContainer />
           ) : stepIndex === 1 ? data ? (
-            <CreatePIPPSection accessToken={accessToken} data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTable={ref} serviceId={serviceId} />
+            <CreatePIPPSection accessToken={accessToken} data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTable={ref} rels={rels} serviceId={serviceId} serviceTypes={service ? service.types : []} />
           ) : (
             <PLIPLoadingContainer />
           ) : stepIndex === 2 ? (
@@ -394,7 +405,7 @@ export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
 }
 
 /** [Internal Component] 개인정보 처리방침 생성 섹션 */
-const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus, onRefresh, refElements, refTable, serviceId }): JSX.Element => {
+const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus, onRefresh, refElements, refTable, rels, serviceId, serviceTypes }): JSX.Element => {
   // Query Client 생성
   const queryClient = useQueryClient();
   // 편집을 위한 모달 오픈 상태
@@ -419,10 +430,10 @@ const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus
     <>
       <Row gutter={74} style={{ height: 'calc(100vh - 324px)' }}>
         <Col span={12} style={{ height: '100%', overflowY: 'auto' }}>
-          <InputSection data={data.dInfo} onChange={onChange} onFocus={onFocus} onOpenModal={onOpen} refElements={refElements.input} refTables={refTable} sectionType='dInfo' />
+          <InputSection data={data.dInfo} onChange={onChange} onFocus={onFocus} onOpenModal={onOpen} refElements={refElements.input} refTables={refTable} rels={rels} sectionType='dInfo' />
         </Col>
         <Col span={12} style={{ borderLeft: '1px solid rgba(156, 156, 156, 0.3)', height: '100%', overflowY: 'auto' }}>
-          <PreviewSection data={data} preview={true} refElements={refElements.preview} refTables={refTable} stmt={stmt(data.dInfo.name)} />
+          <PreviewSection data={data} preview={true} refElements={refElements.preview} refTables={refTable} rels={rels} serviceTypes={serviceTypes} stmt={stmt(data.dInfo.name)} />
         </Col>
       </Row>
       <EditableModal accessToken={accessToken} onClose={onClose} serviceId={serviceId} type={refType} visible={open} />
