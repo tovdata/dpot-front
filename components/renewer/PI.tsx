@@ -18,8 +18,9 @@ import { SERVICE_FNI, SERVICE_PI } from '@/models/queries/type';
 import { setQueryData } from '@/models/queryState';
 import { getFNIDatas, getPIDatas, setDataByTableType } from '@/models/queries/apis/manage';
 import { getUser } from '@/models/queries/apis/user';
+import { getService } from '@/models/queries/apis/company';
 // Query key
-import { KEY_USER } from '@/models/queries/key';
+import { KEY_SERVICE, KEY_USER } from '@/models/queries/key';
 // Util
 import { decodeAccessToken } from 'utils/utils';
 
@@ -29,6 +30,8 @@ export const FNITable: React.FC<any> = ({ accessToken, serviceId }): JSX.Element
   const userId: string = useMemo(() => decodeAccessToken(accessToken), [accessToken]);
   // 사용자 조회
   const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
+  // 서비스 조회
+  const { data: service } = useQuery([KEY_SERVICE, serviceId], async () => await getService(serviceId));
 
   // API 호출 (가명정보)
   const { isLoading, data } = useQuery([SERVICE_FNI, serviceId], async () => await getFNIDatas(serviceId));
@@ -42,7 +45,7 @@ export const FNITable: React.FC<any> = ({ accessToken, serviceId }): JSX.Element
 
   // 데이터 동기
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((value: any) => setDataByTableType({ id: userId, userName: user?.userName }, serviceId, SERVICE_FNI, value.mode, value.data));
+  const { mutate } = useMutation((value: any) => setDataByTableType({ id: userId, userName: user?.userName }, { id: serviceId, serviceName: service?.serviceName }, SERVICE_FNI, value.mode, value.data));
 
   /** [Event handler] 행 추가 */
   const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_FNI, serviceId], mutate, 'create', record), [mutate, serviceId, queryClient]);
@@ -79,6 +82,8 @@ export const PITable: React.FC<any> = ({ accessToken, serviceId }): JSX.Element 
   const userId: string = useMemo(() => decodeAccessToken(accessToken), [accessToken]);
   // 사용자 정보 조회
   const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
+  // 서비스 조회
+  const { data: service } = useQuery([KEY_SERVICE, serviceId], async () => await getService(serviceId));
 
   // API 호출 (개인정보)
   const { isLoading, data } = useQuery([SERVICE_PI, serviceId], async () => await getPIDatas(serviceId));
@@ -92,7 +97,7 @@ export const PITable: React.FC<any> = ({ accessToken, serviceId }): JSX.Element 
 
   // 데이터 동기
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((value: any) => setDataByTableType({ id: userId, userName: user?.userName }, serviceId, SERVICE_PI, value.mode, value.data));
+  const { mutate } = useMutation((value: any) => setDataByTableType({ id: userId, userName: user?.userName }, { id: serviceId, serviceName: service?.serviceName }, SERVICE_PI, value.mode, value.data));
 
   /** [Event handler] 행 추가 */
   const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'create', record), [mutate, serviceId]);

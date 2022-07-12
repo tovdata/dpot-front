@@ -74,7 +74,7 @@ export const StepInfoHeader: React.FC<any> = ({ onFinish, onMoveStep, stepIndex,
   );
 }
 /** [Component] 정보 입력 단계 (개인정보 제3자 제공 동의서에만 해당) */
-export const InputInformationPage: React.FC<any> = ({ accessToken, data, onSave, ppi, serviceId, type }): JSX.Element => {
+export const InputInformationPage: React.FC<any> = ({ data, onSave, ppi, serviceId, type }): JSX.Element => {
   // 데이터 목록
   const filtered: any[] = useMemo(() => ppi.filter((item: any): boolean => item.url === undefined), [data]);
   // 동의서 제목
@@ -97,7 +97,7 @@ export const InputInformationPage: React.FC<any> = ({ accessToken, data, onSave,
       <DisadvantageComponent type={type} disadvantage={disadvantage} setDisadvantage={setDisadvantage} />
       <AddEpiDataComponent type={type} onOpenModal={() => setVisible(!visible)} />
       <ConfirmCheckListComponent checked={data.checkList} type={type} saveData={onSave} />
-      <EditableModal accessToken={accessToken} epiData={data.epiData} onClose={onClose} onSave={onSave} serviceId={serviceId} type={type} visible={visible} />
+      <EditableModal epiData={data.epiData} onClose={onClose} onSave={onSave} serviceId={serviceId} type={type} visible={visible} />
     </StyledJobSelection>
   );
 }
@@ -126,7 +126,7 @@ export const JobSelectionPage: React.FC<any> = ({ data, onSave, pi, type }): JSX
   );
 }
 /** [Component] 정보 페이지 */
-export const EnterInformationPage: React.FC<any> = ({ accessToken, consentData, ids, onSave, pi, serviceId, type }): JSX.Element => {
+export const EnterInformationPage: React.FC<any> = ({ consentData, ids, onSave, pi, serviceId, type }): JSX.Element => {
   // 가공된 데이터 (PI)
   const dataSource = useMemo(() => filteredData(pi, ids, type), [ids, pi, type]);
   // 데이터
@@ -150,7 +150,7 @@ export const EnterInformationPage: React.FC<any> = ({ accessToken, consentData, 
       <SelectPIComponent type={type} originData={dataSource} data={filtered} onSave={setData} />
       <AddEpiDataComponent type={type} onOpenModal={onOpenModal} />
       <ConfirmCheckListComponent checked={consentData.checkList} type={type} saveData={onSave} />
-      <EditableModal accessToken={accessToken} epiData={consentData.epiData} onClose={onClose} onSave={onSave} serviceId={serviceId} type={type} visible={visible} />
+      <EditableModal epiData={consentData.epiData} onClose={onClose} onSave={onSave} serviceId={serviceId} type={type} visible={visible} />
     </>
   );
 }
@@ -241,7 +241,7 @@ const ConsentList: React.FC<any> = ({ data, onRemove }): JSX.Element => {
   );
 }
 /** [Internal Componenet] 편집 가능한 모달 */
-const EditableModal: React.FC<any> = ({ accessToken, epiData, onClose, onSave, serviceId, type, visible }): JSX.Element => {
+const EditableModal: React.FC<any> = ({ epiData, onClose, onSave, serviceId, type, visible }): JSX.Element => {
   // 키워드
   const keyword: string = useMemo(() => type === 4 ? '개인정보' : staticConsentData('')[type].word, [type]);
   // 헤더
@@ -259,7 +259,7 @@ const EditableModal: React.FC<any> = ({ accessToken, epiData, onClose, onSave, s
   // 컴포넌트 반환
   return (
     <Modal title={`법령에 근거한 ${keyword} 수집·이용`} centered footer={false} onCancel={onClose} maskClosable={false} style={{ fontFamily: 'Pretendard' }} visible={visible} width='80%'>
-      <ConsentEPITable accessToken={accessToken} type={type} description={`이용자의 동의 없이, 법령에 의거하여 수집 및 이용하고 있는 ${keyword}가 있다면 동의서에 함께 안내될 수 있도록 아래에 입력해 주세요.\\n‘${keyword} 항목’은 개인정보 수집·이용 현황표에 입력된 항목에서 선택 가능합니다.`} data={epiData} saveData={onSave} header={header} serviceId={serviceId} />
+      <ConsentEPITable type={type} description={`이용자의 동의 없이, 법령에 의거하여 수집 및 이용하고 있는 ${keyword}가 있다면 동의서에 함께 안내될 수 있도록 아래에 입력해 주세요.\\n‘${keyword} 항목’은 개인정보 수집·이용 현황표에 입력된 항목에서 선택 가능합니다.`} data={epiData} saveData={onSave} header={header} serviceId={serviceId} />
     </Modal>
   );
 }

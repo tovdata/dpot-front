@@ -185,24 +185,24 @@ export const getPPIDatas = async (serviceId: string): Promise<any[]> => {
 /**
  * [API Caller] 테이블 유형에 따라 데이터 처리
  * @param user 사용자 정보
- * @param serviceId 현재 서비스 ID
+ * @param service 서비스 정보
  * @param type 테이블 유형 [ pi | fni | ppi | pfni | cpi | cfni | dpi ]
  * @param mode 처리 유형 [ add | delete | save ]
  * @param data 처리하고자는 데이터
  * @returns 결과 데이터
  */
-export const setDataByTableType = async (user: any, serviceId: string, type: string, mode: string, data: any): Promise<any> => {
+export const setDataByTableType = async (user: any, service: any, type: string, mode: string, data: any): Promise<any> => {
   try {
     // 경로 정의
     const path: string = mode === 'add' ? `/${type}/new` : `/${type}/${data.id}`;
     // API 호출
-    const response: ResponseDF = await sendRequest(path, requestMethod(mode), requestBody(serviceId, user.id, mode, data));
+    const response: ResponseDF = await sendRequest(path, requestMethod(mode), requestBody(service.id, user.id, mode, data));
     // 에러 확인 및 로그 작성
     if (response.result) {
       // 서비스 로그
-      writeActivityLog(mode, type, serviceId, user.userName);
+      if (user) writeActivityLog(mode, type, service.id, user.userName);
       // 사용자 로그
-      writeActivityLog(mode, type, user.id);
+      if (service) writeActivityLog(mode, type, user.id, undefined, service.serviceName);
     }
     return response;
   } catch (err) {

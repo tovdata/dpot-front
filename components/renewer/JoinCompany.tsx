@@ -107,15 +107,19 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search, userId }): JSX.Eleme
     setCompanyId(value.id);
     // 검색 모달 종료
     setVisible(false);
-  }, []);
+  }, [form]);
   const onCreate = useCallback((companyId: string) => {
     setSession({ companyId: companyId, serviceId: '' });
     goHome();
-  }, []);
+  }, [goHome]);
   /** [Event handler] Submit */
   const onFinish = useCallback(async () => {
     if (search) {
-      createFinishModal('가입 승인을 요청하였습니다.', '승인이 완료되면, 알려주신 이메일로 연락드릴게요 👍', goHome);
+      if (await joinCompany(companyId, userId, 1)) {
+        createFinishModal('가입 승인을 요청하였습니다.', '승인이 완료되면, 알려주신 이메일로 연락드릴게요 👍', goHome);
+      } else {
+        errorNotification('회사 가입 과정에서 문제가 발생하였습니다. 플립(Plip)으로 문의주세요.');
+      }
     } else {
       // 폼 데이터 가져오기
       const formData: any = form.getFieldsValue();
@@ -132,7 +136,7 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search, userId }): JSX.Eleme
       const response = await createCompany(company);
       if (response.result) {
         // 회사에 사용자를 등록
-        if (await joinCompany(response.data.id, userId)) {
+        if (await joinCompany(response.data.id, userId, 4)) {
           // 서비스 생성
           if (await createServiceInCompany(response.data.id, company.companyName)) {
             return createFinishModal('회사가 생성되었습니다 !', '플립(Plip)과 함께 개인정보를 관리해보아요 :)', () => onCreate(response.data.id), '시작하기');
@@ -142,7 +146,7 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search, userId }): JSX.Eleme
       // 에러 처리
       errorNotification('회사 생성 과정에서 문제가 발생하였습니다. 플립(Plip)으로 문의주세요.');
     }
-  }, [companyId, search]);
+  }, [companyId, form, goHome, onCreate, search, userId]);
   /** [Event handler] 검색 모달 열기 */
   const onOpen = useCallback(() => setVisible(true), []);
 
@@ -248,8 +252,8 @@ const createServiceInCompany = async (companyId: string, companyName: string): P
  * @param userId 사용자 ID
  * @returns 처리 결과
  */
-const joinCompany = async (companyId: string, userId: string): Promise<boolean> => {
-  return await registerUser(companyId, userId, 4);
+const joinCompany = async (companyId: string, userId: string, accessLevel: number): Promise<boolean> => {
+  return await registerUser(companyId, userId, accessLevel);
 };
 
 export default JoinCompany;

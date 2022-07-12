@@ -1,17 +1,15 @@
 import { SERVICE_EPI, SERVICE_ESI, SERVICE_PI } from "@/models/queries/type";
 import { TableHeaderData } from "@/models/type";
-import { LinkOutlined } from "@ant-design/icons";
 import { Checkbox, Table, TableColumnProps, Tag, Typography } from "antd";
 import React, { useCallback, useMemo, useState } from "react";
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import { copyTextToClipboard } from "utils/utils";
 import { TagSelect } from "../common/Select";
 import { createTableColumnProps, EditableTable, EditableTableForm, TableContentForList, TableContentForTags } from "../common/Table";
 import { consentListHeader } from "./Header";
-import { AiOutlineDelete } from "react-icons/ai";
 // Query
 import { getPIDatas } from '@/models/queries/apis/manage';
+import { IconButtonList, LinkButtonInTable, RemoveButtonInTable } from "../renewer/Button";
 
 
 /**
@@ -28,7 +26,7 @@ export const ConsentEditPITable: React.FC<any> = ({ headers, originData, data, o
     const copy: any = JSON.parse(JSON.stringify(data));
     copy[index][key as string] = items;
     onSave(copy);
-  }, [data]);
+  }, [data, origin, onSave]);
 
   const columns: TableColumnProps<any>[] = useMemo(() => Object.keys(headers).map((key: string): TableColumnProps<any> => {
     // Extract a header data
@@ -49,7 +47,7 @@ export const ConsentEditPITable: React.FC<any> = ({ headers, originData, data, o
       }
     };
     return column;
-  }), [headers, originData]);
+  }), [data, headers, originData]);
 
   // 컴포넌트 반환
   return (
@@ -64,11 +62,11 @@ export const ConsentEditPITable: React.FC<any> = ({ headers, originData, data, o
  * @param {void} setData 정보를 변경시키는 함수
  * @returns 
  */
-export const ConsentEPITable = ({ accessToken, description, header, data, onSave, servieId, type }: any): JSX.Element => {
+export const ConsentEPITable = ({ description, header, data, onSave, serviceId, type }: any): JSX.Element => {
   // [State] Exception Personal Information
   const [epiData, setEpiData] = useState(data || []);
   // Get a state (for select options) 개인정보 수집 및 이용 정보
-  const { isLoading: piLoading, data: piData } = useQuery([SERVICE_PI, servieId], async () => await getPIDatas(servieId));
+  const { isLoading: piLoading, data: piData } = useQuery([SERVICE_PI, serviceId], async () => await getPIDatas(serviceId));
 
   // [Event handler] 행(Row) 추가 이벤트
   const onAdd = useCallback((record: any): void => setEpiData([...epiData, record]), [epiData]);
@@ -185,10 +183,7 @@ const StyledLinkText = styled.a`
     text-decoration: underline;
   }
 `;
-const StyledCopyButton = styled.button`
-  border: none;
-  background-color: transparent;
-`;
+
 export const ConsentListTable = ({ data, onRemove }: any): JSX.Element => {
   const headers = consentListHeader;
   const docType: any = {
@@ -212,10 +207,12 @@ export const ConsentListTable = ({ data, onRemove }: any): JSX.Element => {
         case 'title':
           return <StyledLinkText href={record.url} target='_blank'>{item}</StyledLinkText>
         case 'url':
-          return <>
-          <StyledCopyButton onClick={() => copyTextToClipboard(item)} style={{ color: '#000000D9', cursor: 'pointer' }}><LinkOutlined /></StyledCopyButton>
-          <StyledCopyButton onClick={() => onRemove(record.id)} style={{ color: '#000000D9', cursor: 'pointer' }}><AiOutlineDelete /></StyledCopyButton>
-          </>
+          return (
+            <IconButtonList>
+              <LinkButtonInTable url={item} />
+              <RemoveButtonInTable onConfirm={() => onRemove(record.id)} />
+            </IconButtonList>
+          )
         default:
           return <>{item}</>
       }

@@ -40,13 +40,13 @@ export const PLIPPageHeader: React.FC<any> = (): JSX.Element => {
     } else {
       errorNotification('로그아웃에 실패하였습니다.');
     }
-  }, []);
+  }, [setAccessToken]);
 
   // 헤더 메뉴 아이템
   const items: any[] = useMemo(() => [
     { label: (<Link href='/my'>내 정보</Link>), key: 'info' },
     { label: (<a onClick={onSignout}>로그아웃</a>), key: 'signin' }
-  ], []);
+  ], [onSignout]);
 
   // 컴포넌트 반환
   return (
@@ -74,7 +74,7 @@ export const PLIPPageLayout: React.FC<any> = ({ children, selectedKey }): JSX.El
   const [expand, setExpand] = useRecoilState(expandSideSelector);
   
   // 스크롤 값 저장을 위한 Hook
-  const onScroll = useCallback(() => setScroll(window.scrollY), [window]);
+  const onScroll = useCallback(() => setScroll(window.scrollY), []);
   /** [Event handler] 메뉴 확장 여부 */
   const onExpand = useCallback(() => setExpand(!expand), [expand]);
   // 스크롤 이벤트 등록 (최초 1회)

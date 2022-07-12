@@ -13,7 +13,7 @@ import { PLIPAwaitingApprovalPage } from '@/components/renewer/Page';
 import { getServices } from '@/models/queries/apis/company';
 
 /** [Component] 미사용자 확인 섹션 */
-export const PILPOtherSession: React.FC<any> = ({ children }): JSX.Element => {
+export const PLIPOtherSession: React.FC<any> = ({ children }): JSX.Element => {
   // access token 조회
   const { contents, state } = useRecoilValueLoadable(accessTokenSelector);
 
@@ -49,6 +49,7 @@ export const PLIPServiceSession: React.FC<any> = ({ children }): JSX.Element => 
       if (stateForToken === 'hasValue') {
         // 사용자 ID 조회
         const userId: string = decodeAccessToken(accessToken);
+
         // 사용자 정보 조회
         const user = await getUser(userId);
         if (user) {

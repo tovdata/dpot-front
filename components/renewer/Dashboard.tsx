@@ -326,7 +326,7 @@ const MyActivieList: React.FC<any> = ({ userId }): JSX.Element => {
   // 사용자 활동 내역 조회
   const { isLoading, data } = useQuery([KEY_DASHBOARD_ACTIVITY, userId], async () => await getUserActivityForWeek(userId));
   // 데이터 구분 및 정렬
-  const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data]);
+  const sorted: any = useMemo(() => data ? sortByDatetime(data) : {}, [data]);
 
   // 컴포넌트 반환
   return (

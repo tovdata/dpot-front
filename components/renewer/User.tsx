@@ -55,7 +55,7 @@ const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element
   const onCancel = useCallback(() => {
     setVisible(false);
     modalForm.resetFields();
-  }, []);
+  }, [modalForm]);
   /** [Event handler] 비밀번호 변경 */
   const onChangePwd = useCallback(async () => {
     modalForm.validateFields().then(async (values: any) => {
@@ -65,7 +65,7 @@ const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element
         onCancel();
       }
     });
-  }, [modalForm]);
+  }, [modalForm, onCancel]);
   /** [Event handler] 변경한 회사 정보 저장 */
   const onSave = useCallback(async () => {
     const response = await updateUser(userId, { ...user, userName: form.getFieldValue('name'), contact: form.getFieldValue('contact') });

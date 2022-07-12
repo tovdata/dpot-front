@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { MutableRefObject, useCallback, useMemo, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import ReactToPrint from 'react-to-print';
 // Component
@@ -15,12 +15,12 @@ const VscChevronLeft = dynamic(() => import('react-icons/vsc').then((mod: any): 
 // Query
 import { getDPIDatas, getPIItems, setDataByTableType } from '@/models/queries/apis/manage';
 import { getUser } from '@/models/queries/apis/user';
-import { getCompany } from '@/models/queries/apis/company';
+import { getCompany, getService } from '@/models/queries/apis/company';
 // Query key
 import { SERVICE_DPI } from '@/models/queries/type';
-import { KEY_COMPANY, KEY_USER } from '@/models/queries/key';
+import { KEY_COMPANY, KEY_SERVICE, KEY_USER } from '@/models/queries/key';
 // Util
-import { blankCheck, decodeAccessToken } from '../../utils/utils';
+import { blankCheck, decodeAccessToken, transformToDate, transformToUnix } from '../../utils/utils';
 import moment from 'moment';
 
 
@@ -93,6 +93,8 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
   const { isLoading: loadingUser, data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
   // 회사 조회
   const { isLoading: loadingCompany, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(companyId));
+  // 서비스 조회
+  const { data: service } = useQuery([KEY_SERVICE, serviceId], async () => await getService(serviceId));
 
   // 데이터 상태 관리
   const [temp, setTemp] = useState<any>(data);
@@ -106,12 +108,14 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
   // 쿼리 클라이언트 생성
   const queryClient = useQueryClient();
 
+  useEffect(() => console.log(temp), [temp]);
+
   /** [Event handler] 데이터 변경 이벤트 */
   const onChange = useCallback((property: string, value: any) => setTemp({ ...temp, [property]: value }), [temp]);
   /** [Event handler] 삭제 이벤트 */
   const onDelete = useCallback(async (id: string) => {
     if (user) {
-      await setDataByTableType({ id: userId, userName: user.userName }, serviceId, SERVICE_DPI, 'delete', { id: id });
+      await setDataByTableType({ id: userId, userName: user.userName }, { id: serviceId, serviceName: service?.serviceName }, SERVICE_DPI, 'delete', { id: id });
       // 데이터 갱신
       queryClient.invalidateQueries([SERVICE_DPI, serviceId]);
       // 목록으로 이동
@@ -133,7 +137,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
     if (blankCheck(temp.subject)) {
       warningNotification('파기 대상 개인정보를 입력해주세요.');
       refs.current[0].focus();
-    } else if (blankCheck(temp.date)) {
+    } else if (blankCheck(temp.date.toString())) {
       warningNotification('파기 일시를 선택해주세요.');
       refs.current[1].focus();
     } else if (temp.reason.length === 0) {
@@ -146,11 +150,15 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
       warningNotification('담당자를 입력해주세요.');
       refs.current[4].focus();
     } else if (user) {
-      const response: any = await setDataByTableType({ id: userId, userName: user.userName }, serviceId, SERVICE_DPI, checkNew() ? 'add' : 'save', temp);
+      // 데이터 가공
+      const copy = JSON.parse(JSON.stringify(temp));
+      // 날짜 형식 수정 (string -> number)
+      copy.date = transformToUnix(copy.date);
+      // API 호출
+      const response: any = await setDataByTableType({ id: userId, userName: user.userName }, { id: serviceId, serviceName: service?.serviceName }, SERVICE_DPI, checkNew() ? 'add' : 'save', temp);
       // 응답에 따른 처리
-      if (response && 'id' in response) {
-        temp.id = response.id;
-        temp.unix = response.createAt;
+      if (response && response.data) {
+        setTemp({ ...temp, id: response.data.id, unix: response.data.createAt });
       }
       // 데이터 갱신
       queryClient.invalidateQueries([SERVICE_DPI, serviceId]);
@@ -196,7 +204,7 @@ const DPITable: React.FC<DPITableProps> = ({ onEdit, serviceId }): JSX.Element =
   // 컴포넌트 반환
   return (
     <Table columns={[
-      { title: '파기 일시', dataIndex: 'date', key: 'date', sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix() },
+      { title: '파기 일시', dataIndex: 'date', key: 'date', render: (value: number) => transformToDate(value), sorter: (a: any, b: any): number => a.date - b.date },
       { title: '파기 대상 개인정보', dataIndex: 'subject', key: 'subject' },
       { title: '파기 사유', dataIndex: 'reason', key: 'reason', render: (value: string[]): JSX.Element => (<TableContentForList items={value} />) },
       { title: '파기 항목', dataIndex: 'items', key: 'items', render: (value: string[]): JSX.Element => (<TableContentForTags items={value} tooltip='고유식별정보' />) }
@@ -219,8 +227,8 @@ const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, i
         </Descriptions.Item>
         <Descriptions.Item label={<DescriptionLabel content='파기 일시' required />}>
           {edit ? (
-            <DatePicker format='YYYY-MM-DD' onChange={(value: any): void => onChange('date', value.format('YYYY-MM-DD'))} placeholder='날짜 선택' ref={refElements ? (el: any) => (refElements.current[1] = el) : undefined} style={{ width: '100%' }} value={data.date !== '' ? moment(data.date) : undefined} />
-          ) : (<>{data.date}</>)}
+            <DatePicker format='YYYY-MM-DD' onChange={(value: any): void => onChange('date', value.unix())} placeholder='날짜 선택' ref={refElements ? (el: any) => (refElements.current[1] = el) : undefined} style={{ width: '100%' }} value={data.date !== '' ? moment.unix(data.date): undefined} />
+          ) : (<>{transformToDate(data.date)}</>)}
         </Descriptions.Item>
         <Descriptions.Item label={<DescriptionLabel content='파기 사유' required />}>
           {edit ? (

@@ -41,6 +41,15 @@ const StyledPageTitle = styled.h2`
   margin: 0;
   white-space: nowrap;
 `;
+// Styled component
+export const StyledTitleHeader = styled.h2`
+  color: #000000D9;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  margin-bottom: 36px;
+  user-select: none;
+`;
 
 /** [Interface] Properties for page header */
 interface TOVPageTitleProps {

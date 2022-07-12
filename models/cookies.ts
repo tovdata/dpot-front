@@ -58,6 +58,7 @@ export const removeAccessToken = (): void => {
  * [Function] 사용자 ID 제거
  */
 export const removeUserId = (): void => {
+  console.log('clear')
   cookies.remove(KEY_USER);
 }
 /**

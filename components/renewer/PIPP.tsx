@@ -4,10 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQueries, useQuery, useQueryClient } from 'react-query';
 // Component
 import { Button, Col, Input, Modal, Row, Table, Tag } from 'antd';
+import { StyledPageHeader, StyledPIPPName } from '@/components/styled/PIPP';
+import { LinkButtonInTable } from '@/components/renewer/Button';
 import { PageHeaderContainStep } from '@/components/common/Header';
 import { successNotification, warningNotification } from '@/components/common/Notification';
 import { StyledTableForm, TableFormHeader } from '@/components/common/Table';
-import { StyledLinkButton, StyledPageHeader, StyledPIPPName } from '@/components/styled/PIPP';
 const CollapseForPIPP: ComponentType<any> = dynamic(() => import('@/components/pipp/Collapse').then((mod: any): any => mod.CollapseForPIPP));
 const ConfirmSection: ComponentType<any> = dynamic(() => import('@/components/pipp/ConfirmForm').then((mod: any): any => mod.ConfirmSection));
 const InputSection: ComponentType<any> = dynamic(() => import('@/components/pipp/EditForm').then((mod: any): any => mod.InputSection));
@@ -35,14 +36,15 @@ import { statementForPIPP as stmt } from '@/models/static/statement';
 // Type
 import { DocProgressStatus } from '@/models/type';
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PIPP, SERVICE_PPI } from '@/models/queries/type';
+import { KEY_SERVICE, KEY_USER } from '@/models/queries/key';
 // Query
 import { getCompany, getService } from '@/models/queries/apis/company';
 import { getPIPPData, setPIPPData } from '@/models/queries/apis/pipp';
 import { getDatasByTableType } from '@/models/queries/apis/manage';
+import { getUser } from '@/models/queries/apis/user';
 // Util
-import { blankCheck, copyTextToClipboard, decodeAccessToken } from 'utils/utils';
+import { blankCheck, copyTextToClipboard, decodeAccessToken, writeActivityLog } from 'utils/utils';
 import moment from 'moment';
-import { KEY_SERVICE } from '@/models/queries/key';
 
 /** [Interface] PIPP process */
 interface PIPPProcess {
@@ -81,6 +83,8 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
   // }, [companyId, progress, serviceId]);
   // 데이터 불러오기에 대한 상태
   const [loading, setLoading] = useState<boolean>(true);
+  // 사용자 조회
+  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
   // 서비스 조회
   const { data: service } = useQuery([KEY_SERVICE, serviceId], async () => await getService(serviceId));
   // 개인정보 처리방침에 대한 임시 저장 데이터 불러오기
@@ -362,6 +366,10 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
       if (temp) {
         successNotification('임시 저장 완료');
       } else {
+        // 로그 작성
+        if (user) writeActivityLog('create', SERVICE_PIPP, serviceId, user.userName);
+        if (service) writeActivityLog('create', SERVICE_PIPP, userId, undefined, service.serviceName);
+        // 결과 처리
         setUrl(response.data.url);
         setVisible2(true);
         onUpdateStatus();
@@ -439,7 +447,7 @@ export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
           { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (_: string, record: any): JSX.Element => list ? record.version === 0 ? (<Tag color='default'>외부링크</Tag>) : record.version === 9999 ? (<Tag color='geekblue'>현재</Tag>) : (<Tag color='green'>이전</Tag>) : (<></>) },
           { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value / 1000).format('YYYY-MM-DD HH:mm'), sorter: (a: any, b: any): number => a.createAt - b.createAt },
           { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value).format('YYYY-MM-DD'), sorter: (a: any, b: any): number => a.applyAt - b.applyAt },
-          { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => (<LinkButton url={value} />) }
+          { title: '링크', dataIndex: 'url', key: 'url', render: (value: string) => (<LinkButtonInTable url={value} />) }
         ]} dataSource={list} showSorterTooltip={false} />
       </StyledTableForm>
     </>
@@ -577,16 +585,5 @@ const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProces
 const PPIPName: React.FC<any> = ({ subject, url }): JSX.Element => {
   return (
     <StyledPIPPName href={url} rel='noreferrer' target='_blank'>{subject}</StyledPIPPName>
-  );
-}
-/** [Internal Component] 테이블 내 Link */
-const LinkButton: React.FC<any> = ({ url }): JSX.Element => {
-  /** [Event handler] 링크 복사 */
-  const onCopy = useCallback(() => copyTextToClipboard(url), [url]);
-  // 컴포넌트 반환
-  return (
-    <StyledLinkButton onClick={onCopy}>
-      <LinkOutlined />
-    </StyledLinkButton>
   );
 }

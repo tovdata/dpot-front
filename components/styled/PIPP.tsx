@@ -59,11 +59,3 @@ export const StyledPIPPName = styled.a`
   font-size: 14px;
   text-decoration: none;
 `;
-/** [Styled Component] 링크 버튼 */
-export const StyledLinkButton = styled.span`
-  align-items: 
-  color: #000000D9;
-  cursor: pointer;
-  display: flex;
-  font-size: 14px;
-`;

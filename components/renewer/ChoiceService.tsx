@@ -42,7 +42,7 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
       if (user) {
         if (user.affiliations === undefined || (user.affiliations && user.affiliations.length === 0)) {
           setComponent(<PLIP403Page redirectPath='/company/join' />);
-        } else if (user.affiliations[0].accessLevel === 0) {
+        } else if (user.affiliations[0].accessLevel === 1) {
           setComponent(<PLIPAwaitingApprovalPage />);
         } else {
           setComponent(
@@ -80,8 +80,13 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
   // 폼 객체 생성
   const [form] = Form.useForm();
 
+  // /** [Event handler] 세션 변경 */
+  const onChangeSession = useCallback((id: string) => {
+    setSession({ companyId: session.companyId, serviceId: id });
+    Router.push('/');
+  }, [session]);
   /** [Event handler] 모달 종료 */
-  const onClose = useCallback(() => setVisible(false), []);
+  const onClose = useCallback(() => setVisible(false), [session]);
   /** [Event handler] 서비스 삭제 */
   const onDelete = useCallback(async () => {
     const response = await deleteService(serviceId);
@@ -151,7 +156,7 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
         {isLoading || services === undefined ? (
           <></>
         ) : services.map((service: any): JSX.Element => (
-          <ServiceCard key={service.id} onEditService={onEditService} service={service} />
+          <ServiceCard key={service.id} onChangeSession={onChangeSession} onEditService={onEditService} service={service} />
         ))}
         <AddButton onOpen={onOpen} />
       </Row>
@@ -160,15 +165,9 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
   );
 }
 /** [Internal Component] 서비스 카드 */
-const ServiceCard: React.FC<any> = ({ onEditService, service }): JSX.Element => {
-  // 로컬 스토리지 내 서비스 정보
-  const [session, setSession] = useRecoilState(sessionSelector);
+const ServiceCard: React.FC<any> = ({ onChangeSession, onEditService, service }): JSX.Element => {
   /** [Event handler] 서비스 선택 */
-  const onSelect = useCallback(() => {
-    setSession({ companyId: session.companyId, serviceId: service.id });
-    // 이동
-    Router.push('/');
-  }, [service]);
+  const onSelect = useCallback(() => onChangeSession(service.id), [service]);
   /** [Event handler] 서비스 수정 */
   const onEdit = useCallback(() => onEditService(service), [service]);
 

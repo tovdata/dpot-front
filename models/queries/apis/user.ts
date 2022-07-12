@@ -26,7 +26,7 @@ export interface AgreementProps {
     // 결과 반환
     return response.result;
   } catch (err) {
-    console.error(`[ERROR] ${err}`);
+    console.error(`[API ERROR] ${err}`);
     return false;
   }
 }
