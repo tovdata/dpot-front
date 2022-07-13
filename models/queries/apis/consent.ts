@@ -39,14 +39,15 @@ export const getConsentList = async (serviceId: string): Promise<any[]> => {
 /**
  * [API Caller] 동의서 생성 및 수정
  * @param serviceId 서비스 ID
+ * @param userId 사용자 ID
  * @param data 동의서 데이터
- * @param html 동의서 문서
+ * @param htmlBody 동의서 문서
  * @returns 요청 결과
  */
-export const setConsent = async (serviceId: string, data: any, html?: string): Promise<any> => {
+export const setConsent = async (serviceId: string, userId: string, data: any, htmlBody?: string): Promise<any> => {
   try {
     // API 호출
-    const response: ResponseDF = await sendRequest(`/consent/publish`, 'POST', { serviceId: serviceId, data: data, htmlBody: html });
+    const response: ResponseDF = await sendRequest(`/consent/publish`, 'POST', { serviceId, userId, data, htmlBody });
     // 결과 반환
     return response;
   } catch (err) {

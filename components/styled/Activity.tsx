@@ -75,8 +75,10 @@ export const StyledTimelineRow = styled(Row)`
   }
 `;
 /** [Styled Component] 타임라인 행 (대시보드) */
-export const StyledTimelineRowForDashboard = styled(Row)`
+export const StyledTimelineRowForDashboard = styled.div`
+  align-items: start;
   color: #000000D9;
+  display: flex;
   font-size: 14px;
   font-weight: 500;
   line-height: 22px;
@@ -86,8 +88,11 @@ export const StyledTimelineRowForDashboard = styled(Row)`
   }
   .time {
     color: #003A8C;
+    width: 60px;
   }
   .content {
+    flex: 1;
     font-weight: 400;
+    word-break: keep-all;
   }
 `;

@@ -57,7 +57,7 @@ export const getUsers = async (companyId: string): Promise<PLIPUser[]> => {
     const response: ResponseDF = await sendRequest(`/company/${companyId}/details`, 'GET');
     // 데이터 가공
     if (response.result && response.data && response.data.employees) {
-      return response.data.employees.map((elem: any): PLIPUser => ({ id: elem.id, contact: elem.contact, createAt: elem.createAt, department: elem.department, email: elem.email, position: elem.position, task: elem.task, userName: elem.userName }));
+      return response.data.employees.sort((a: any, b: any): number => b.createAt - a.createAt).map((elem: any): PLIPUser => ({ id: elem.id, contact: elem.contact, createAt: elem.createAt, department: elem.department, email: elem.email, position: elem.position, task: elem.task, userName: elem.userName }));
     } else {
       return [];
     }

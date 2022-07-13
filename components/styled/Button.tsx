@@ -6,7 +6,7 @@ export const StyledButton = styled.span`
   color: #000000D9;
   cursor: pointer;
   display: flex;
-  font-size: 14px;
+  font-size: 15px;
 `;
 /** [Styled Component] 버튼 폼 */
 export const StyledButtonForm = styled.div<{ center?: boolean }>`
@@ -15,7 +15,7 @@ export const StyledButtonForm = styled.div<{ center?: boolean }>`
   justify-content: ${({ center }) => center ? 'center' : 'start'};
   button,
   span.icon {
-    margin-right: 8px;
+    margin-right: 12px;
   }
   button:last-child,
   span.icon:last-child {

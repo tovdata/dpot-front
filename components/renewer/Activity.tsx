@@ -58,9 +58,9 @@ export const PLIPActivityListForDashboard: React.FC<any> = ({ data }): JSX.Eleme
     <StyledRow key={date}>
       <StyledDateForDashboard>{date}</StyledDateForDashboard>
       {data[date].map((item: any): JSX.Element => (
-        <StyledTimelineRowForDashboard key={item.date} gutter={20}>
-          <Col className='time'>{moment.unix(item.date / 1000).format('HH:mm')}</Col>
-          <Col className='content' flex={1}>{item.content}</Col>
+        <StyledTimelineRowForDashboard key={item.date}>
+          <div className='time'>{moment.unix(item.date / 1000).format('HH:mm')}</div>
+          <div className='content'>{item.content}</div>
         </StyledTimelineRowForDashboard>
       ))}
     </StyledRow>

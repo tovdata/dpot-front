@@ -4,12 +4,12 @@ import { useRecoilValue } from 'recoil';
 // Component
 import { Button, Divider, Drawer, Form, Input, Table, Tabs } from 'antd';
 import { StyledDrawerFooter, StyledPageLayout, StyledTabSection, StyledSaveButton, StyledDrawerExtra, StyledEditButton, StyledInviteForm, StyledTableForm } from '../styled/Company';
-import { errorNotification, successNotification, warningNotification } from '../common/Notification';
+import { errorNotification, successNotification } from '../common/Notification';
 import { PLIPInputGroup } from './Input';
 // Icon
 import { CloseOutlined, EditOutlined } from '@ant-design/icons';
 // Query
-import { deregisterUser, getCompany, updateCompany } from '@/models/queries/apis/company';
+import { getCompany, updateCompany } from '@/models/queries/apis/company';
 import { getUsers, updateUser } from '@/models/queries/apis/user';
 // Query key
 import { KEY_COMPANY, KEY_USERS } from '@/models/queries/key';
@@ -167,20 +167,20 @@ const OrganizationInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
   return (
     <StyledTableForm>
       <Table columns={[
-        { title: '이름', dataIndex: 'userName', key: 'userName' },
+        { title: '이름', dataIndex: 'userName', key: 'userName', sorter: (a: any, b: any): number => a.userName > b.userName ? 1 : a.userName < b.userName ? -1 : 0 },
         { title: '부서', dataIndex: 'department', key: 'department' },
         { title: '직책', dataIndex: 'position', key: 'position' },
         { title: '이메일', dataIndex: 'email', key: 'email' },
         { title: '연락처', dataIndex: 'contact', key: 'contact' },
-        { title: '가입일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => transformToDate(value) },
+        { title: '가입일', dataIndex: 'createAt', key: 'createAt', render: (value: number): string => transformToDate(value), sorter: (a: any, b: any): number => a.createAt - b.createAt },
         { title: '담당업무', dataIndex: 'task', key: 'task' },
         { title: '', dataIndex: 'id', key: 'id', render: (_: any, record: any): JSX.Element => (<EditButton onOpen={() => onOpen(record)} />) },
-      ]} loading={isLoading} dataSource={isLoading ? [] : users ? users.map((elem: any): any => ({ ...elem, key: elem.id })) : []} style={{ marginBottom: 48 }} />
+      ]} loading={isLoading} dataSource={isLoading ? [] : users ? users.map((elem: any): any => ({ ...elem, key: elem.id })) : []} showSorterTooltip={false} style={{ marginBottom: 48 }} />
       <StyledInviteForm>
         <p className='content'>아직 가입되어 있지 않은 담당자가 있다면?</p>
         <Button type='default'>초대하기</Button>
       </StyledInviteForm>
-      <EditableDrawer companyId={companyId} form={form} onClose={onClose} onSetTable={onSetTable} visible={visible} />
+      <EditableDrawer form={form} onClose={onClose} onSetTable={onSetTable} visible={visible} />
     </StyledTableForm>
   );
 }
@@ -193,18 +193,18 @@ const EditButton: React.FC<any> = ({ onOpen }): JSX.Element => {
   );
 }
 /** [Internal Component] 조직 구성원 정보 수정을 위한 Drawer */
-const EditableDrawer: React.FC<any> = ({ companyId, form, onClose, onSetTable, visible }): JSX.Element => {
+const EditableDrawer: React.FC<any> = ({ form, onClose, onSetTable, visible }): JSX.Element => {
   /** [Event handler] 데이터 삭제 */
-  const onDelete = useCallback(async() => {
-    const response = await deregisterUser(companyId, form.getFieldValue('id'));
-    response ? successNotification('사용자가 회사에서 제외되었습니다.') : errorNotification('사용자를 제외하는 과정에서 오류가 발생하였습니다.');
-  }, [companyId, form]);
+  // const onDelete = useCallback(async() => {
+  //   const response = await deregisterUser(companyId, form.getFieldValue('id'));
+  //   response ? successNotification('사용자가 회사에서 제외되었습니다.') : errorNotification('사용자를 제외하는 과정에서 오류가 발생하였습니다.');
+  // }, [companyId, form]);
   /** [Event handler] 데이터 저장 */
   const onSave = useCallback(() => onSetTable(form.getFieldsValue()), [form]);
 
   // 컴포넌트 반환
   return (
-    <Drawer closable={false} extra={<DrawerExtra onClick={onClose} />} footer={<DrawerFooter onDelete={onDelete} onSave={onSave} />} onClose={onClose} title='조직 구성원 정보 수정하기' visible={visible}>
+    <Drawer closable={false} extra={<DrawerExtra onClick={onClose} />} footer={<DrawerFooter onSave={onSave} />} onClose={onClose} title='조직 구성원 정보 수정하기' visible={visible}>
       <Form form={form}>
         <Form.Item name='id' hidden>
           <Input disabled />
@@ -249,10 +249,10 @@ const EditableDrawer: React.FC<any> = ({ companyId, form, onClose, onSetTable, v
   );
 }
 // Drawer footer
-const DrawerFooter: React.FC<any> = ({ onDelete, onSave }): JSX.Element => {
+const DrawerFooter: React.FC<any> = ({ onSave }): JSX.Element => {
   return (
     <StyledDrawerFooter>
-      <Button danger onClick={onDelete}>삭제</Button>
+      {/* <Button danger onClick={onDelete}>삭제</Button> */}
       <Button onClick={onSave} type='primary'>저장</Button>
     </StyledDrawerFooter>
   );

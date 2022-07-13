@@ -231,7 +231,7 @@ const EditableModal: React.FC<any> = ({ edit, form, onClose, onDelete, onSave, v
           </Form.Item>
         </PLIPInputGroup>
         {edit ? (
-          <Popconfirm cancelText='아니오' okText='예' onConfirm={onDelete} title='해당 서비스를 삭제하시겠습니다?'>
+          <Popconfirm cancelText='아니오' okText='예' onConfirm={onDelete} title='해당 서비스를 삭제하시겠습니까?'>
             <Button danger>서비스 삭제</Button>
           </Popconfirm>
         ) : (<></>)}

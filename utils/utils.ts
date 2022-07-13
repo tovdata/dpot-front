@@ -127,23 +127,23 @@ export const transformToUnix = (date: string): number => {
 const getTableLocation = (path: string): string => {
   switch (path) {
     case SERVICE_PI:
-      return '\'수집・이용\' 메뉴에서 "개인정보 수집・이용" 표를';
+      return '\'수집・이용\' 메뉴의 "개인정보 수집・이용" 표를';
     case SERVICE_FNI:
-      return '\'수집・이용\' 메뉴에서 "가명정보 수집・이용" 표를';
+      return '\'수집・이용\' 메뉴의 "가명정보 수집・이용" 표를';
     case SERVICE_PPI:
-      return '\'제공・위탁\' 메뉴에서 "개인정보 제3자 제공" 표를';
+      return '\'제공・위탁\' 메뉴의 "개인정보 제3자 제공" 표를';
     case SERVICE_CPI:
-      return '\'제공・위탁\' 메뉴에서 "개인정보 위탁" 표를';
+      return '\'제공・위탁\' 메뉴의 "개인정보 위탁" 표를';
     case SERVICE_PFNI:
-      return '\'제공・위탁\' 메뉴에서 "가명정보 제3자 제공" 표를';
+      return '\'제공・위탁\' 메뉴의 "가명정보 제3자 제공" 표를';
     case SERVICE_CFNI:
-      return '\'제공・위탁\' 메뉴에서 "가명정보 위탁" 표를';
+      return '\'제공・위탁\' 메뉴의 "가명정보 위탁" 표를';
     case SERVICE_DPI:
-      return '\'파기\' 메뉴에서 "개인정보 파기 관리대장 을';
+      return '\'파기\' 메뉴의 "개인정보 파기 관리대장 을';
     case SERVICE_CONSENT:  
-      return '\'문서관리\' 메뉴에서 "동의서" 를';
+      return '\'문서관리\' 메뉴의 "동의서" 를';
     case SERVICE_PIPP:
-      return '\'문서관리\' 메뉴에서 "개인정보 처리방침" 을';
+      return '\'문서관리\' 메뉴의 "개인정보 처리방침" 을';
     default:
       return '';
   }

@@ -1,9 +1,10 @@
 import dynamic from 'next/dynamic';
+import Router from 'next/router';
 import type { ComponentType } from 'react'; 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQueries, useQuery, useQueryClient } from 'react-query';
 // Component
-import { Button, Col, Input, Modal, Row, Table, Tag } from 'antd';
+import { Button, Col, Input, Modal, Row, Spin, Table, Tag } from 'antd';
 import { StyledPageHeader, StyledPIPPName } from '@/components/styled/PIPP';
 import { LinkButtonInTable } from '@/components/renewer/Button';
 import { PageHeaderContainStep } from '@/components/common/Header';
@@ -28,19 +29,18 @@ import { defaultPIPPData } from '@/models/static/data';
 const CheckCircleOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.CheckCircleOutlined));
 const EditOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.EditOutlined));
 const FiEdit = dynamic(() => import('react-icons/fi').then((mod: any): any => mod.FiEdit));
-const LinkOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.LinkOutlined));
 const PlusOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.PlusOutlined));
 const RedoOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.RedoOutlined));
 // Statement
 import { statementForPIPP as stmt } from '@/models/static/statement';
 // Type
 import { DocProgressStatus } from '@/models/type';
-import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PIPP, SERVICE_PPI } from '@/models/queries/type';
+import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_LIST, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from '@/models/queries/type';
 import { KEY_SERVICE, KEY_USER } from '@/models/queries/key';
 // Query
 import { getCompany, getService } from '@/models/queries/apis/company';
 import { getPIPPData, setPIPPData } from '@/models/queries/apis/pipp';
-import { getDatasByTableType } from '@/models/queries/apis/manage';
+import { getDatasByTableType, getPIDatas } from '@/models/queries/apis/manage';
 import { getUser } from '@/models/queries/apis/user';
 // Util
 import { blankCheck, copyTextToClipboard, decodeAccessToken, writeActivityLog } from 'utils/utils';
@@ -50,6 +50,7 @@ import moment from 'moment';
 interface PIPPProcess {
   list?: any[];
   onProcess: (process: DocProgressStatus) => void;
+  serviceId: string;
   status?: string;
 }
 /** [Type] Scroll position */
@@ -116,7 +117,6 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
   // 단계에 대한 Title
   const steps: string[] = ['입력사항 확인', '처리방침 편집', '최종 확인'];
   // 현재 Step, 쿼리 상태, 참조 데이터에 대한 상태 생성
-  const [initQuery, setInitQuery] = useState<boolean>(false);
   const [stepIndex, setStepIndex] = useState<number>(0);
   const [ref, setRef] = useState<any>({
     pi: [],
@@ -243,10 +243,8 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
 
   /** [Event handler] 모달 열기 */
   const onOpen = useCallback((): void => setVisible(true), []);
-   /** [Event handler] 모달 닫기 */
+  /** [Event handler] 모달 닫기 */
   const onClose = useCallback((): void => setVisible(false), []);
-  /** [Query handler] API를 요청하여 데이터를 갱신하기 위해 호출되는 함수 */
-  const onRefresh = useCallback((): void => setInitQuery(false), []);
   /** [Event handler] 데이터 변경 이벤트 */
   const onChange = useCallback((step: string, value: any, category: string, property?: string, subProperty?: string): void => {
     if (property!== undefined && subProperty !== undefined) {
@@ -405,7 +403,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
           ) : (
             <PLIPLoadingContainer />
           ) : stepIndex === 1 ? data ? (
-            <CreatePIPPSection accessToken={accessToken} data={data} onChange={onChange} onFocus={onFocus} onRefresh={onRefresh} refElements={refs} refTables={ref} rels={rels} serviceId={serviceId} serviceTypes={service ? service.types : []} />
+            <CreatePIPPSection accessToken={accessToken} data={data} onChange={onChange} onFocus={onFocus} refElements={refs} refTables={ref} rels={rels} serviceId={serviceId} serviceTypes={service ? service.types : []} />
           ) : (
             <PLIPLoadingContainer />
           ) : stepIndex === 2 ? (
@@ -436,14 +434,14 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
   );
 }
 /** [Component] 개인정보 처리방침 메인 페이지 */
-export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIPPProcess): JSX.Element => {
+export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, serviceId, status }: PIPPProcess): JSX.Element => {
   return (
     <>
-      <MainPageHeader onProcess={onProcess} status={status} />
+      <MainPageHeader onProcess={onProcess} serviceId={serviceId} status={status} />
       <StyledTableForm>
         <TableFormHeader title='개인정보 처리방침 이력' />
         <Table columns={[
-          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number, record: any): JSX.Element => record.version === 0 ? (<PPIPName subject='이전 개인정보 처리방침' url={record.url} />) : (<PPIPName subject={`개인정보 처리방침 (ver. ${value === 9999 ? 'latest' : value})`} url={record.url} />), sorter: (a: any, b: any): number => a.version - b.version },
+          { title: '목록', dataIndex: 'version', key: 'version', render: (value: number, record: any): JSX.Element => record.version === 0 ? (<PPIPName subject='이전 개인정보 처리방침' url={record.url} />) : (<PPIPName subject={`개인정보 처리방침 (ver. ${value === 9999 ? '최신' : value})`} url={record.url} />), sorter: (a: any, b: any): number => a.version - b.version },
           { title: '구분', dataIndex: 'sortation', key: 'sortation', render: (_: string, record: any): JSX.Element => list ? record.version === 0 ? (<Tag color='default'>외부링크</Tag>) : record.version === 9999 ? (<Tag color='geekblue'>현재</Tag>) : (<Tag color='green'>이전</Tag>) : (<></>) },
           { title: '최종 편집일', dataIndex: 'createAt', key: 'createAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value / 1000).format('YYYY-MM-DD HH:mm'), sorter: (a: any, b: any): number => a.createAt - b.createAt },
           { title: '적용 일자', dataIndex: 'applyAt', key: 'applyAt', render: (value: number, record: any): string => record.version === 0 ? '-' : moment.unix(value).format('YYYY-MM-DD'), sorter: (a: any, b: any): number => a.applyAt - b.applyAt },
@@ -455,7 +453,7 @@ export const PIPPList: React.FC<PIPPProcess> = ({ list, onProcess, status }: PIP
 }
 
 /** [Internal Component] 개인정보 처리방침 생성 섹션 */
-const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus, onRefresh, refElements, refTables, rels, serviceId, serviceTypes }): JSX.Element => {
+const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus, refElements, refTables, rels, serviceId, serviceTypes }): JSX.Element => {
   // Query Client 생성
   const queryClient = useQueryClient();
   // 편집을 위한 모달 오픈 상태
@@ -472,8 +470,7 @@ const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus
   const onClose = useCallback((): void => {
     setOpen(false);
     queryClient.invalidateQueries([refType, serviceId]);
-    onRefresh();
-  }, [onRefresh, queryClient, refType, serviceId]);
+  }, [queryClient, refType, serviceId]);
 
   // 컴포넌트 반환
   return (
@@ -534,50 +531,66 @@ const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus
   );
 }
 /** [Internal Component] 개인정보 처리방침 메인 페이지 Header (현재 문서 작성에 대한 상태에 따라 내용 변경) */
-const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, status }: PIPPProcess): JSX.Element => {
-  // 확인 모달 생성
-  const confirm = () => Modal.confirm({
+const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, serviceId, status }: PIPPProcess): JSX.Element => {
+  // 개인정보 수집 및 이용 데이터 조회
+  const { isLoading, data: pi } = useQuery([SERVICE_PI, serviceId], async () => await getPIDatas(serviceId));
+
+  /** [Event handler] 확인 모달 열기 */
+  const onConfirm = useCallback(() => Modal.confirm({
     cancelText: '아니오',
     centered: true,
     content: '이전에 입력되어있던 내용은 삭제됩니다.',
     okText: '예',
     onOk: () => onProcess('create'),
     title: '처음부터 다시 만드시겠습니까?',
-  });
+  }), [onProcess]);
+  /** [Event handler] 문서 생성 */
+  const onCreate = useCallback(() => pi && pi.length > 0 ? onProcess('create') : Modal.warning({
+    cancelText: '아니오',
+    centered: true,
+    content: '개인정보 관리 탭에서 개인정보 처리에 관한 내용을 입력하셔야 문서를 만드실 수 있습니다.',
+    okText: '입력하러가기',
+    onOk: () => Router.push('/pim/cu'),
+    title: '입력된 정보가 없습니다.'
+  }), [pi]);
+  /** [Event handler] 문서 업데이트 */
+  const onUpdate = useCallback(() => onProcess('update'), [onProcess]);
 
   // 컴포넌트 반환
   return (
     <StyledPageHeader>
-      <div className="header">
-        <h2 className="title">개인정보 처리방침 생성</h2>
-        <Button type='default'>처리방침 생성 가이드</Button>
-      </div>
-      <div className="content">
-        <span className="form-description">
-          <span className="icon">
-            <FiEdit />
-          </span>
-          <p className="description">
-            {status === undefined || status === 'none' ? (
-              <>개인정보 관리 탭에서 입력한 내용을 기반으로, 개인정보 처리방침을 만들어보세요!</>
-            ) : status === 'progress' ? (
-              <>현재 작성 중인 개인정보 처리방침이 있어요.<br/>계속해서 작성하기를 원하시는 경우 ‘이어 만들기’ 버튼을<br/>처음부터 새로 만들기 원하신다면 ‘문서 생성하기’ 버튼을 눌러주세요.</>
-            ) : (
-              <>처리하는 개인정보에 대한 내용이 변경되면, 개인정보 처리방침을 업데이트해야 됩니다.<br/>‘문서 업데이트’ 기능으로 간단히 수정해보세요!</>
-            )}
-          </p>
-        </span>
-        {status === undefined || status === 'none' ? (
-          <Button icon={<PlusOutlined />} onClick={() => onProcess('create')} type='primary'>문서 생성하기</Button>
-        ) : status === 'progress' ? (
-          <span>
-            <Button icon={<EditOutlined />} onClick={() => onProcess('update')} type='primary' style={{ marginRight: 16 }}>이어 만들기</Button>
-            <Button icon={<PlusOutlined />} onClick={confirm} type='default'>문서 생성하기</Button>
-          </span>
-        ) : (
-          <Button icon={<RedoOutlined />} onClick={() => onProcess('update')} type='primary'>문서 업데이트</Button>
-        )}
+      <Spin spinning={isLoading}>
+        <div className="header">
+          <h2 className="title">개인정보 처리방침 생성</h2>
+          <Button type='default'>처리방침 생성 가이드</Button>
         </div>
+        <div className="content">
+          <span className="form-description">
+            <span className="icon">
+              <FiEdit />
+            </span>
+            <p className="description">
+              {status === undefined || status === 'none' ? (
+                <>개인정보 관리 탭에서 입력한 내용을 기반으로, 개인정보 처리방침을 만들어보세요!</>
+              ) : status === 'progress' ? (
+                <>현재 작성 중인 개인정보 처리방침이 있어요.<br/>계속해서 작성하기를 원하시는 경우 ‘이어 만들기’ 버튼을<br/>처음부터 새로 만들기 원하신다면 ‘문서 생성하기’ 버튼을 눌러주세요.</>
+              ) : (
+                <>처리하는 개인정보에 대한 내용이 변경되면, 개인정보 처리방침을 업데이트해야 됩니다.<br/>‘문서 업데이트’ 기능으로 간단히 수정해보세요!</>
+              )}
+            </p>
+          </span>
+          {status === undefined || status === 'none' ? (
+            <Button icon={<PlusOutlined />} onClick={onCreate} type='primary'>문서 생성하기</Button>
+          ) : status === 'progress' ? (
+            <span>
+              <Button icon={<EditOutlined />} onClick={onUpdate} type='primary' style={{ marginRight: 16 }}>이어 만들기</Button>
+              <Button icon={<PlusOutlined />} onClick={onConfirm} type='default'>문서 생성하기</Button>
+            </span>
+          ) : (
+            <Button icon={<RedoOutlined />} onClick={onUpdate} type='primary'>문서 업데이트</Button>
+          )}
+        </div>
+      </Spin>
     </StyledPageHeader>
   );
 }

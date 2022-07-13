@@ -15,7 +15,7 @@ export const StyledDrawerExtra = styled.span`
 export const StyledDrawerFooter = styled.div`
   align-items: center;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   user-select: none;
 `;
 /** [Styled Component] 회사 정보 저장 버튼 */

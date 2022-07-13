@@ -41,7 +41,7 @@ export const sendRequest = async (path: string, method: string, data?: any, isPu
       // 토큰이 없을 경우
       if (token === undefined) return { result: false };
     }
-
+    
     // API 호출
     const response: any = await api(path, method, token, data);
     // 에러 검증

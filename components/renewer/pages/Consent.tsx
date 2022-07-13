@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { ComponentType } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import { useRecoilValue } from 'recoil';
@@ -90,7 +90,7 @@ const ConsentMain: React.FC<any> = (): JSX.Element => {
       copy.type = DOC_TYPE[data.type];
       copy.creater = user?.userName;
       // 동의서 저장 API 호출
-      const response = await setConsent(session.serviceId, copy, document.getElementById('report')?.outerHTML);
+      const response = await setConsent(session.serviceId, userId, copy, document.getElementById('report')?.outerHTML);
       // 응답 처리
       if (response.result) {
         // 로그 작성
