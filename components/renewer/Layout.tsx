@@ -76,12 +76,12 @@ export const PLIPPageLayout: React.FC<any> = ({ children, selectedKey }): JSX.El
   // 스크롤 값 저장을 위한 Hook
   const onScroll = useCallback(() => setScroll(window.scrollY), []);
   /** [Event handler] 메뉴 확장 여부 */
-  const onExpand = useCallback(() => setExpand(!expand), [expand]);
+  const onExpand = useCallback(() => setExpand(!expand), [expand, setExpand]);
   // 스크롤 이벤트 등록 (최초 1회)
   useEffect(() => {
     window.addEventListener('scroll', onScroll);
     return () => removeEventListener('scroll', onScroll);
-  }, []);
+  }, [onScroll]);
 
   // 컴포넌트 반환
   return (

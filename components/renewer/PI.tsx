@@ -100,9 +100,9 @@ export const PITable: React.FC<any> = ({ accessToken, serviceId }): JSX.Element 
   const { mutate } = useMutation((value: any) => setDataByTableType({ id: userId, userName: user?.userName }, { id: serviceId, serviceName: service?.serviceName }, SERVICE_PI, value.mode, value.data));
 
   /** [Event handler] 행 추가 */
-  const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'create', record), [mutate, serviceId]);
+  const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'create', record), [mutate, queryClient, serviceId]);
   /** [Event handler] 행 삭제 */
-  const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'delete', record), [mutate, serviceId]);
+  const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'delete', record), [mutate, queryClient, serviceId]);
   /** [Event handler] 행 저장 */
   const onSave = useCallback((record: any): boolean => {
     if (record.essentialItems.length === 0 && record.selectionItems.length === 0) {
@@ -115,7 +115,7 @@ export const PITable: React.FC<any> = ({ accessToken, serviceId }): JSX.Element 
       setQueryData(queryClient, [SERVICE_PI, serviceId], mutate, 'save', record);
       return true;
     }
-  }, [mutate, serviceId]);
+  }, [mutate, queryClient, serviceId]);
 
   // Return an element
   return (<EditableTable dataSource={data ? data : []} defaultSelectOptions={defaultSelectOptions} headers={piTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} refData={ref} tableName={SERVICE_PI} />);

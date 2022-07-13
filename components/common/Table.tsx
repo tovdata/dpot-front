@@ -207,6 +207,19 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
   const [focus, setFocus] = useState<any>(defaultFocusState);
   const [selectOptions, setSelectOptions] = useState<SelectOptionsByColumn>(resetSelectOptions(dataSource, headers, tableName, refData, defaultSelectOptions));
 
+  /**
+   * [Event Handler] Update to select options
+   * @param value updated select options
+   */
+   const onUpdateSelectOptions = useCallback((value: any): void => {
+    if (tableName === 'pi') {
+      value['items'] = dataSource.length > 0 ? value.items ? extractProcessingItems(dataSource).filter((item: string): boolean => !value.items.includes(item)).concat(value.items) : extractProcessingItems(dataSource) : [];
+      if (value['period'].length === 0) value['period'] = defaultSelectOptions['period'];
+      setSelectOptions({ ...selectOptions, ...value });
+    } else {
+      setSelectOptions({ ...selectOptions, ...value });
+    }
+  }, [dataSource, defaultSelectOptions, selectOptions, tableName]);
   /** [Event handler] 업무 생성 */
   const onCreate = useCallback((): void => {
     // 새로운 Key 생성
@@ -223,7 +236,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
       // Update a state
       setRow(record);
     }
-  }, [dataSource, defaultRecord, newProjectCnt, row]);
+  }, [defaultRecord, newProjectCnt, onAdd, row]);
   /** [Event handler] 변경 */
   const onChange = useCallback((key: string, item: any, required: boolean, type?: string): void => {
     if (type && type === 'item') {
@@ -257,7 +270,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
     }
     // Update the select options
     changeSelectOptions(key, onUpdateSelectOptions, refData, tableName, item, row);
-  }, [dataSource, refData, row, tableName]);
+  }, [focus, headers, onUpdateSelectOptions, refData, row, tableName]);
   /** [Event handler] 포커즈 초기화 */
   const clearFocus = useCallback((): void => {
     setFocus(defaultFocusState);
@@ -267,28 +280,14 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
     if ((new RegExp('^npc_')).test(record.id)) {
       onDelete(record);
     }
-  }, []);
+  }, [onDelete]);
   /** [Event Handler] 편집 */
   const onEdit = useCallback((record: any): void => {
     clearFocus();
     (row.id && record.id && row.id !== record.id) ? warningNotification('작성 중인 내용을 먼저 저장해주세요.') : setRow(record);
     // Update the select options
     changeSelectOptions('subject', onUpdateSelectOptions, refData, tableName, record.subject);
-  }, [dataSource, refData, row, tableName]);
-
-  /**
-   * [Event Handler] Update to select options
-   * @param value updated select options
-   */
-  const onUpdateSelectOptions = (value: any): void => {
-    if (tableName === 'pi') {
-      value['items'] = dataSource.length > 0 ? value.items ? extractProcessingItems(dataSource).filter((item: string): boolean => !value.items.includes(item)).concat(value.items) : extractProcessingItems(dataSource) : [];
-      if (value['period'].length === 0) value['period'] = defaultSelectOptions['period'];
-      setSelectOptions({ ...selectOptions, ...value });
-    } else {
-      setSelectOptions({ ...selectOptions, ...value });
-    }
-  };
+  }, [clearFocus, onUpdateSelectOptions, refData, row, tableName]);
 
   /**
    * UseEffect

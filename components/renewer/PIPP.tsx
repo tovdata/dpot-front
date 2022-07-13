@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import Router from 'next/router';
-import type { ComponentType } from 'react'; 
+import { ComponentType, useMemo } from 'react'; 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQueries, useQuery, useQueryClient } from 'react-query';
 // Component
@@ -351,7 +351,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
         onOpen();
       }
     }
-  }, [data, rels, stepIndex]);
+  }, [data, onFocus, onOpen, ref, rels, stepIndex, steps.length]);
   /** [Event handler] 저장 이벤트 */
   const onSave = useCallback(async (temp: boolean = true): Promise<void> => {
     // 미리보기 모달 닫기
@@ -375,7 +375,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
     } else {
       temp ? warningNotification('임시 저장 실패') : warningNotification('최종 저장 실패');
     }
-  }, [data, serviceId]);
+  }, [data, onClose, onUpdateStatus, service, serviceId, status, user, userId]);
 
   // 개인정보 수집 및 이용 데이터 및 라벨링을 위한 데이터 가공 (개인정보 수집 항목)
   const itemForPI: string[] = [];
@@ -524,7 +524,7 @@ const CreatePIPPSection: React.FC<any> = ({ accessToken, onChange, data, onFocus
         setContent(<></>);
         break;
     }
-  }, [type]);
+  }, [accessToken, serviceId, type]);
   // 컴포넌트 반환
   return (
     <Modal centered footer={false} maskClosable={false} onCancel={onClose} style={{ fontFamily: 'Pretendard' }} title={title} visible={visible} width='80%'>{content}</Modal>
@@ -552,7 +552,7 @@ const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, serviceId, status }:
     okText: '입력하러가기',
     onOk: () => Router.push('/pim/cu'),
     title: '입력된 정보가 없습니다.'
-  }), [pi]);
+  }), [pi, onProcess]);
   /** [Event handler] 문서 업데이트 */
   const onUpdate = useCallback(() => onProcess('update'), [onProcess]);
 

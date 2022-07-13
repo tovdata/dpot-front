@@ -26,7 +26,7 @@ export const ConsentEditPITable: React.FC<any> = ({ headers, originData, data, o
     const copy: any = JSON.parse(JSON.stringify(data));
     copy[index][key as string] = items;
     onSave(copy);
-  }, [data, origin, onSave]);
+  }, [data, onSave]);
 
   const columns: TableColumnProps<any>[] = useMemo(() => Object.keys(headers).map((key: string): TableColumnProps<any> => {
     // Extract a header data
@@ -47,7 +47,7 @@ export const ConsentEditPITable: React.FC<any> = ({ headers, originData, data, o
       }
     };
     return column;
-  }), [data, headers, originData]);
+  }), [headers, onChange, originData]);
 
   // 컴포넌트 반환
   return (
@@ -78,7 +78,7 @@ export const ConsentEPITable = ({ description, header, data, onSave, serviceId, 
     setEpiData(newEpiData);
     onSave({ epiData: newEpiData });
     return true;
-  }, [onSave]);
+  }, [epiData, onSave]);
   // Return an element
   return (
     <EditableTableForm title='' description={description}>

@@ -106,7 +106,7 @@ const ConsentMain: React.FC<any> = (): JSX.Element => {
     } catch (err) {
       console.error(`[HANDLER ERROR] ${err}`);
     }
-  }, [accessToken, data, DOC_TYPE, service, session.serviceId, queryClient, user, userId]);
+  }, [data, DOC_TYPE, service, session.serviceId, queryClient, user, userId]);
   /** [Event handler] 동의서 삭제 */
   const onRemove = useCallback(async (consentId: string) => Modal.confirm({
     title: '해당 동의서를 삭제하시겠습니까?',
@@ -126,7 +126,7 @@ const ConsentMain: React.FC<any> = (): JSX.Element => {
         console.error(`[HANDLER ERROR] ${err}`);
       }
     }
-  }), [accessToken, service, session.serviceId, queryClient, user, userId]);
+  }), [service, session.serviceId, queryClient, user, userId]);
   /** [Event handler] 사전에 있어야할 정보가 있는지 체크 */
   const onEmptyCheck = useCallback((type: number): boolean => {
     // 개인정보 수집 및 이용 동의서, 

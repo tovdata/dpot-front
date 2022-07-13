@@ -184,7 +184,7 @@ const SignupFooter: React.FC<any> = (): JSX.Element => {
   return (
     <StyledSigninFooter>
       <p className='description'>이미 회원이신가요?</p>
-      <Link href='/signin'>
+      <Link href='/signin' passHref>
         <label className='link'>로그인</label>
       </Link>
     </StyledSigninFooter>

@@ -76,7 +76,7 @@ const CompanyInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
     } else {
       errorNotification('변경사항 저장에 실패하였습니다.');
     }
-  }, [company, form, queryClient]);
+  }, [companyId, form, queryClient]);
 
   // 컴포넌트 반환
   return (
@@ -136,7 +136,7 @@ const OrganizationInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
     form.setFieldsValue({ ...record, createAt: transformToDate(record.createAt) });
     // 모달 열기
     setVisible(true);
-  }, []);
+  }, [form]);
   /** [Event handler] Drawer 닫기 */
   const onClose = useCallback(() => setVisible(false), []);
   /** [Event handler] 테이블 데이터 변경 저장 */
@@ -200,7 +200,7 @@ const EditableDrawer: React.FC<any> = ({ form, onClose, onSetTable, visible }): 
   //   response ? successNotification('사용자가 회사에서 제외되었습니다.') : errorNotification('사용자를 제외하는 과정에서 오류가 발생하였습니다.');
   // }, [companyId, form]);
   /** [Event handler] 데이터 저장 */
-  const onSave = useCallback(() => onSetTable(form.getFieldsValue()), [form]);
+  const onSave = useCallback(() => onSetTable(form.getFieldsValue()), [form, onSetTable]);
 
   // 컴포넌트 반환
   return (

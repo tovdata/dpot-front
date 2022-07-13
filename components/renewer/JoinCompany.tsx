@@ -111,7 +111,7 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search, userId }): JSX.Eleme
   const onCreate = useCallback((companyId: string) => {
     setSession({ companyId: companyId, serviceId: '' });
     goHome();
-  }, [goHome]);
+  }, [goHome, setSession]);
   /** [Event handler] Submit */
   const onFinish = useCallback(async () => {
     if (search) {

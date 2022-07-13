@@ -74,7 +74,7 @@ interface DescriptionLabelProps {
 /** [Component] 개인정보 파기 테이블 Form */
 export const DPITableForm: React.FC<DPITableFormProps> = ({ accessToken, onCreate, onEdit, serviceId }): JSX.Element => {
   // 파기에 대한 문서 생성 버튼 정의
-  const tool: JSX.Element = useMemo(() => (<Button icon={<PlusOutlined />} onClick={onCreate} type='default'>추가하기</Button>), []);
+  const tool: JSX.Element = useMemo(() => (<Button icon={<PlusOutlined />} onClick={onCreate} type='default'>추가하기</Button>), [onCreate]);
 
   // 컴포넌트 반환
   return (
@@ -121,7 +121,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
       // 목록으로 이동
       onBack();
     }
-  }, [accessToken, serviceId, user, queryClient]);
+  }, [queryClient, onBack, service, serviceId, user, userId]);
   /** [Event handler] 편집 이벤트 */
   const onEdit = useCallback((status: boolean): void => {
     if (checkNew() && !status) {    // 추가이면서 취소일 경우, 테이블로 복귀
@@ -131,7 +131,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
     }
     // 상태 갱신
     setEdit(status);
-  }, [checkNew]);
+  }, [checkNew, data, onBack]);
   /** [Event handler] 저장 이벤트 */
   const onSave = useCallback(async (): Promise<void> => {
     if (blankCheck(temp.subject)) {
@@ -165,7 +165,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
       // 편집 모드 종료
       setEdit(false);
     };
-  }, [accessToken, checkNew, refs, serviceId, user, temp]);
+  }, [checkNew, queryClient, refs, service, serviceId, temp, user, userId]);
 
   // 컴포넌트 반환
   return (
@@ -214,7 +214,7 @@ const DPITable: React.FC<DPITableProps> = ({ onEdit, serviceId }): JSX.Element =
 /** [Internal Component] 개인정보 파기에 대한 자세한 정보 확인 Form body (보기/편집/추가) */
 const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, items, onChange, onDelete, refElements }): JSX.Element => {
   /** [Event handler] 파기 정보 삭제 */
-  const onConfirm = useCallback(() => onDelete(data.id), [data.id]);
+  const onConfirm = useCallback(() => onDelete(data.id), [data.id, onDelete]);
 
   // 컴포넌트 반환
   return (

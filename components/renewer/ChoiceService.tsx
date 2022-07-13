@@ -84,9 +84,9 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
   const onChangeSession = useCallback((id: string) => {
     setSession({ companyId: session.companyId, serviceId: id });
     Router.push('/');
-  }, [session]);
+  }, [session, setSession]);
   /** [Event handler] 모달 종료 */
-  const onClose = useCallback(() => setVisible(false), [session]);
+  const onClose = useCallback(() => setVisible(false), []);
   /** [Event handler] 서비스 삭제 */
   const onDelete = useCallback(async () => {
     const response = await deleteService(serviceId);
@@ -104,7 +104,7 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
     } else {
       errorNotification('서비스를 삭제하는 과정에서 오류가 발생하였습니다.');
     }
-  }, [companyId, serviceId, queryClient]);
+  }, [companyId, queryClient, serviceId, session.serviceId, setSession]);
   /** [Event handler] 서비스 수정 */
   const onEditService = useCallback((service: any) => {
     // 서비스 ID 설정
@@ -147,7 +147,7 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
     } else {
       errorNotification(isCreate ? '서비스 생성 과정에서 문제가 발생하였습니다.' : '서비스 변경 과정에서 문제가 발생하였습니다.');
     }
-  }).catch((err: any): void => {}), [companyId, form, serviceId]);
+  }).catch((err: any): void => {}), [companyId, form, queryClient, serviceId]);
 
   // 컴포넌트 반환
   return (
@@ -167,9 +167,9 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
 /** [Internal Component] 서비스 카드 */
 const ServiceCard: React.FC<any> = ({ onChangeSession, onEditService, service }): JSX.Element => {
   /** [Event handler] 서비스 선택 */
-  const onSelect = useCallback(() => onChangeSession(service.id), [service]);
+  const onSelect = useCallback(() => onChangeSession(service.id), [onChangeSession, service]);
   /** [Event handler] 서비스 수정 */
-  const onEdit = useCallback(() => onEditService(service), [service]);
+  const onEdit = useCallback(() => onEditService(service), [onEditService, service]);
 
   // 컴포넌트 반환
   return (

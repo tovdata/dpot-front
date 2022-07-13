@@ -30,7 +30,7 @@ export const PLIPOtherSession: React.FC<any> = ({ children }): JSX.Element => {
     } else {
       setComponent(<></>);
     }
-  }, [contents, state]);
+  }, [children, contents, state]);
 
   // 컴포넌트 반환
   return (component);
@@ -85,7 +85,7 @@ export const PLIPServiceSession: React.FC<any> = ({ children }): JSX.Element => 
         setComponent(<></>);
       }
     })();
-  }, [session, accessToken]);
+  }, [accessToken, children, session, setSession]);
 
   // 컴포넌트 반환
   return (component);
@@ -107,7 +107,7 @@ export const PLIPUserSession: React.FC<any> = ({ children }): JSX.Element => {
     } else {
       setComponent(<></>);
     }
-  }, [state, contents]);
+  }, [children, contents, state]);
 
   // 컴포넌트 반환
   return (component);

@@ -97,7 +97,7 @@ export const setPIPPData = async (serviceId: string, userId: string, data: any, 
     // 경로 정의
     const path: string = status === 'create' ? `/pipp/new` : `/pipp/${serviceId}`;
     // 메서드 정의
-    const method: string = status === 'create' ? 'POST' : 'PUT';
+    const method: string = status === 'create' ? 'POST' : status === 'publish' ? 'PUT' : 'PATCH';
     // 초기 저장 여부에 따라 요청 데이터 생성
     const body: any = status === 'create' ? {
       serviceId,
@@ -108,9 +108,11 @@ export const setPIPPData = async (serviceId: string, userId: string, data: any, 
       userId,
       data: data,
       publish: status === 'publish' ? true : false,
-      publishAt: status === 'publish' ? new Date().getTime() : undefined,
+      publishAt: status === 'publish' ? data.cInfo.applyAt : undefined,
       html: status === 'publish' ? html : undefined
     };
+
+    console.log(path, method, body);
 
     // API 호출
     const response: ResponseDF = await sendRequest(path, method, body);

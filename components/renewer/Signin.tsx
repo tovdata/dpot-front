@@ -76,7 +76,7 @@ export const SigninForm: React.FC<any> = (): JSX.Element => {
   useEffect(() => {
     setAccessToken('');
     setUser('');
-  }, []);
+  }, [setAccessToken, setUser]);
 
   // 컴포넌트 반환
   return (
@@ -102,7 +102,7 @@ const SigninFooter: React.FC<any> = (): JSX.Element => {
   return (
     <StyledSigninFooter>
       <p className='description'>아직 계정이 없으신가요?</p>
-      <Link href='/signup'>
+      <Link href='/signup' passHref>
         <label className='link'>회원가입</label>
       </Link>
     </StyledSigninFooter>

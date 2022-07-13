@@ -28,7 +28,7 @@ const Signout: React.FC<any> = (): JSX.Element => {
         Router.push('/');
       }
     })();
-  }, []);
+  }, [setAccessToken]);
 
   return (<></>);
 }

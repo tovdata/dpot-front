@@ -41,7 +41,7 @@ export const ConfirmPage: React.FC<any> = ({ type, consentData, companyName }): 
       header.items.name = `${keyword} 항목`;
     }
     return header;
-  }, [keyword]);
+  }, [keyword, type]);
 
   // // const word = type === 4 ? '개인정보' : staticConsentData('')[type].word;
   // // const title = type === 4 ? '개인정보 제공 내역' : `${word} 수집·이용 내역`;

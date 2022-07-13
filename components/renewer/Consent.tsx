@@ -51,8 +51,7 @@ export const StepInfoHeader: React.FC<any> = ({ onFinish, onMoveStep, stepIndex,
     if (mode === 'prev') stepIndex - 1 >= 0 ? onMoveStep(stepIndex - 1) : undefined;
     else if (mode === 'next') stepIndex + 1 <= steps.length ? onMoveStep(stepIndex + 1) : undefined;
     else onFinish(setUrl, setSuccessModal);
-  }, [onMoveStep, stepIndex]);
- 
+  }, [onFinish, onMoveStep, stepIndex, steps.length]);
 
   // 컴포넌트 반환
   return (
@@ -76,7 +75,7 @@ export const StepInfoHeader: React.FC<any> = ({ onFinish, onMoveStep, stepIndex,
 /** [Component] 정보 입력 단계 (개인정보 제3자 제공 동의서에만 해당) */
 export const InputInformationPage: React.FC<any> = ({ data, onSave, ppi, serviceId, type }): JSX.Element => {
   // 데이터 목록
-  const filtered: any[] = useMemo(() => ppi.filter((item: any): boolean => item.url === undefined), [data]);
+  const filtered: any[] = useMemo(() => ppi.filter((item: any): boolean => item.url === undefined), [ppi]);
   // 동의서 제목
   const [title, setTitle] = useState<string>(data.title);
   // 불이익 상태
@@ -87,7 +86,7 @@ export const InputInformationPage: React.FC<any> = ({ data, onSave, ppi, service
   /** [Event handler] 모달 닫기 */
   const onClose = useCallback(() => setVisible(false), []);
   // 데이터 갱신
-  useEffect(() => onSave({ type, title, disadvantage }), [type, title, disadvantage]);
+  useEffect(() => onSave({ type, title, disadvantage }), [disadvantage, title, type]);
 
   // 컴포넌트 반환
   return (
@@ -111,7 +110,7 @@ export const JobSelectionPage: React.FC<any> = ({ data, onSave, pi, type }): JSX
   const [disadvantage, setDisadvantage] = useState(data.disadvantage || staticConsentData('')[type].disadvantage.example);
   
   // 데이터 갱신
-  useEffect(() => onSave({ type, title, disadvantage, subjects }), [type, title, disadvantage, subjects]);
+  useEffect(() => onSave({ type, title, disadvantage, subjects }), [disadvantage, subjects, title, type]);
   // 데이터
   const staticData: any = useMemo(() => staticConsentData('')[type], [type]);
 
@@ -209,7 +208,7 @@ const CreateConsent: React.FC<any> = ({ onChangeType, onEmptyCheck, onMoveStep }
       onChangeType(type);
       onMoveStep(0);
     }
-  }, []);
+  }, [onChangeType, onEmptyCheck, onMoveStep]);
 
   // 컴포넌트 반환
   return (

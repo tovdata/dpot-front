@@ -315,25 +315,25 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
       temp.unshift(...prevList.map((item: any): any => ({ label: moment.unix(item.applyAt).format('YYYY-MM-DD'), value: item.url })));
     }
     return temp;
-  }, [data.cInfo.previous]);
+  }, [data.cInfo.previous, prevList, preview]);
   // 라벨링을 위한 데이터 (제3자 제공)
-  let provision: string[] = useMemo(() => !preview ? refTables.ppi ? refTables.ppi.map((row: any): string => row.recipient) : [] : [], [refTables.ppi]);
+  let provision: string[] = useMemo(() => !preview ? refTables.ppi ? refTables.ppi.map((row: any): string => row.recipient) : [] : [], [refTables.ppi, preview]);
   // 라벨링을 위한 데이터 (위탁)
-  let consignment: string[] = useMemo(() => !preview ? refTables.cpi ? refTables.cpi.map((row: any): string => row.subject) : [] : [], [refTables.cpi]);
+  let consignment: string[] = useMemo(() => !preview ? refTables.cpi ? refTables.cpi.map((row: any): string => row.subject) : [] : [], [refTables.cpi, preview]);
   // 라벨링을 위한 데이터 (수집 및 이용 목적)
   const purposeForPI: string[] = useMemo(() =>!preview ? refTables.pi ? refTables.pi.reduce((acc: any, row: any): void => {
     for (const elem of row.purpose) {
       if (!acc.includes(elem)) acc.push(elem);
     }
     return acc;
-  }, []) : [] : [], [refTables.pi]);
+  }, []) : [] : [], [refTables.pi, preview]);
   // 라벨링을 위한 데이터 (수집 및 이용기간)
   const periodForPI: string[] = useMemo(() =>!preview ? refTables.pi ? refTables.pi.reduce((acc: any, row: any): void => {
     for (const elem of row.period) {
       if (!acc.includes(elem)) acc.push(elem);
     }
     return acc;
-  }, []) : [] : [], [refTables.pi]);
+  }, []) : [] : [], [refTables.pi, preview]);
   // if (!preview) {
     // 라벨링을 위한 데이터 가공 (개인정보 처리목적)
     // refTables.pi ? refTables.pi.forEach((row: any): void => row.purpose.forEach((item: string): number => !purposeForPI.includes(item) ? purposeForPI.push(item) : 0)) : undefined;
