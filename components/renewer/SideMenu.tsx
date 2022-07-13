@@ -19,10 +19,10 @@ const AuditOutlined = dynamic(() => import('@ant-design/icons').then((mod: any):
 const HistoryOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.HistoryOutlined));
 
 /** [Component] 사이드 메뉴 */
-const PLIPSideMenu: React.FC<any> = ({ expand, onExpand, selectedKey, serviceName }): JSX.Element => {
+const PLIPSideMenu: React.FC<any> = ({ expand, onExpand, selectedKey, service }): JSX.Element => {
   // 사이드 메뉴 아이템
-  const items: any[] = useMemo(() => [
-    { label: '대시보드', key: '/', icon: (<DashboardOutlined />) },
+  const items: any[] = useMemo(() => service.types.includes('default') ? [
+    { label: '대시보드', key: '/home', icon: (<DashboardOutlined />) },
     { type: 'divider' },
     { label: expand ? '개인정보 관리' : '정보관리', key: 'group1', type: 'group', children: [
       { label: '수집・이용', key: '/pim/cu', icon: (<DatabaseOutlined />) },
@@ -39,7 +39,24 @@ const PLIPSideMenu: React.FC<any> = ({ expand, onExpand, selectedKey, serviceNam
       { label: '결재・승인', key: '/log/sa', icon: (<AuditOutlined />) },
       { label: '활동 내역', key: '/log/activity', icon: (<HistoryOutlined />) }
     ] }
-  ], [expand]);
+  ] : [
+    { label: '대시보드', key: '/home', icon: (<DashboardOutlined />) },
+    { type: 'divider' },
+    { label: expand ? '개인정보 관리' : '정보관리', key: 'group1', type: 'group', children: [
+      { label: '수집・이용', key: '/pim/cu', icon: (<DatabaseOutlined />) },
+      { label: '제공・위탁', key: '/pim/pc', icon: (<PartitionOutlined />) },
+      { label: '파기', key: '/pim/dest', icon: (<FireOutlined />) }
+    ] },
+    { label: '문서관리', key: 'group2', type: 'group', children: [
+      { label: '동의서', key: '/doc/consent', icon: (<CheckCircleOutlined />) },
+      { label: '개인정보처리방침', key: '/doc/pipp', icon: (<SolutionOutlined />) },
+      { label: '내부관리계획', key: '/doc/imp', icon: (<ToolOutlined />) },
+    ] },
+    { label: '활동이력', key: 'group3', type: 'group', children: [
+      { label: '결재・승인', key: '/log/sa', icon: (<AuditOutlined />) },
+      { label: '활동 내역', key: '/log/activity', icon: (<HistoryOutlined />) }
+    ] }
+  ], [expand, service.types]);
   /** [Event handler] 서비스 선택 */
   const goServices = useCallback(() => Router.push('/company/services'), []);
   /** [Event handler] 메뉴 선택 */
@@ -53,7 +70,7 @@ const PLIPSideMenu: React.FC<any> = ({ expand, onExpand, selectedKey, serviceNam
           <IoBusinessOutline />
         </StyledSideMenuProfileIcon>
         <StyledSideMenuProfileContent open={expand}>
-          <StyledServiceName onClick={goServices}>{serviceName}</StyledServiceName>
+          <StyledServiceName onClick={goServices}>{service.serviceName}</StyledServiceName>
         </StyledSideMenuProfileContent>
         <StyledSideMenuToggle onClick={onExpand} open={expand}>
           <AiOutlineArrowLeft />

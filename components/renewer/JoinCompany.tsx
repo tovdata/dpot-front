@@ -115,7 +115,7 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search, userId }): JSX.Eleme
   /** [Event handler] Submit */
   const onFinish = useCallback(async () => {
     if (search) {
-      if (await joinCompany(companyId, userId, 1)) {
+      if (await joinCompany(companyId, userId, 0)) {
         createFinishModal('가입 승인을 요청하였습니다.', '승인이 완료되면, 알려주신 이메일로 연락드릴게요 👍', goHome);
       } else {
         errorNotification('회사 가입 과정에서 문제가 발생하였습니다. 플립(Plip)으로 문의주세요.');

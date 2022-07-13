@@ -6,18 +6,22 @@ import { errorNotification, successNotification } from '../common/Notification';
 // Query
 import { signout } from '@/models/queries/apis/signin-up';
 // State
-import { accessTokenSelector } from '@/models/session';
+import { accessTokenSelector, userIdSelector } from '@/models/session';
 
 /** [Component] 로그아웃 */
 const Signout: React.FC<any> = (): JSX.Element => {
   // 액세스 토큰
   const setAccessToken = useSetRecoilState(accessTokenSelector); 
+  // 사용자 ID
+  const setUserId = useSetRecoilState(userIdSelector);
+  
   // 로그아웃
   useEffect(() => {
     (async() => {
       if (await signout()) {
         // 액세스 토큰 초기화
         setAccessToken('');
+        setUserId('');
         // 알림
         successNotification('로그아웃 되었습니다.');
         // 로그인 페이지로 이동
@@ -28,7 +32,7 @@ const Signout: React.FC<any> = (): JSX.Element => {
         Router.push('/');
       }
     })();
-  }, [setAccessToken]);
+  }, [setAccessToken, setUserId]);
 
   return (<></>);
 }

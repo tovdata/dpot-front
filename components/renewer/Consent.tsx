@@ -258,7 +258,7 @@ const EditableModal: React.FC<any> = ({ epiData, onClose, onSave, serviceId, typ
   // 컴포넌트 반환
   return (
     <Modal title={`법령에 근거한 ${keyword} 수집·이용`} centered footer={false} onCancel={onClose} maskClosable={false} style={{ fontFamily: 'Pretendard' }} visible={visible} width='80%'>
-      <ConsentEPITable type={type} description={`이용자의 동의 없이, 법령에 의거하여 수집 및 이용하고 있는 ${keyword}가 있다면 동의서에 함께 안내될 수 있도록 아래에 입력해 주세요.\\n‘${keyword} 항목’은 개인정보 수집·이용 현황표에 입력된 항목에서 선택 가능합니다.`} data={epiData} saveData={onSave} header={header} serviceId={serviceId} />
+      <ConsentEPITable type={type} description={`이용자의 동의 없이, 법령에 의거하여 수집 및 이용하고 있는 ${keyword}가 있다면 동의서에 함께 안내될 수 있도록 아래에 입력해 주세요.\\n‘${keyword} 항목’은 개인정보 수집·이용 현황표에 입력된 항목에서 선택 가능합니다.`} data={epiData} onSave={onSave} header={header} serviceId={serviceId} />
     </Modal>
   );
 }

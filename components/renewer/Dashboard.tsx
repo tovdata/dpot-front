@@ -84,16 +84,13 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
   );
 }
 
-const DashboardHeader: React.FC<any> = ({ accessToken, serviceId, userId }) => {
+const DashboardHeader: React.FC<any> = ({ serviceId, userId }) => {
   // 사용자 정보 조회
   const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
-  // 서비스 조회
-  const { data: service } = useQuery([KEY_SERVICE, serviceId], async () => await getService(serviceId));
 
   return (
     <StyledDashboardHeader>
       <h2>{user ? `${user.userName} 님 안녕하세요 😊` : ''}</h2>
-      <span className='company'>{service ? service.serviceName : ''}</span>
     </StyledDashboardHeader>
   );
 }
@@ -196,12 +193,12 @@ const LastInformation: React.FC<any> = ({ serviceId }): JSX.Element => {
   );
 }
 /** [Internal Component] 개인정보 수집 항목 차트 */
-const PIItems: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
+const PIItems: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 개인정보 수집 항목 조회
   const { isLoading, data } = useQuery([KEY_DASHBOARD_ITEMS, serviceId], async () => await getPIItemsByType(serviceId));
   // Chart data
   const chartData: any = useMemo(() => ({
-    labels: ['필수항목', '선택항목'],
+    labels: ['필수', '선택'],
     datasets: [{
       data: [data && (data as any).essentialItemsOnly ? (data as any).essentialItemsOnly.length : 0, data && (data as any).selectionItemsOnly ? (data as any).selectionItemsOnly.length : 0],
       backgroundColor: ['#6C63FF', '#C4C1F2']
@@ -276,7 +273,7 @@ const PIPPInfomation: React.FC<any> = ({ serviceId }): JSX.Element => {
   );
 }
 /** [Internal Component] 동의서 개수 표시 */
-const ConsentInformaiton: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
+const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 동의서 목록 조회
   const { isLoading, data } = useQuery([KEY_DASHBOARD_CONSENT, serviceId], async () => await getConsentList(serviceId));
   // Count 변수 설정
@@ -314,7 +311,7 @@ const ConsentInformaiton: React.FC<any> = ({ accessToken, serviceId }): JSX.Elem
         <StyledTagList>
           {types.map((item: string): JSX.Element => (<StyledTag key={item}>{item}</StyledTag>))}
         </StyledTagList>
-        <StyledDashboardItemContentEnd>
+        <StyledDashboardItemContentEnd style={{ width: 64 }}>
           <CountLabel count={count} />
         </StyledDashboardItemContentEnd>
       </div>

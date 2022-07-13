@@ -213,7 +213,7 @@ interface ConfirmCheckListProps {
 export const ConfirmCheckListComponent = ({ type, checked, saveData }: ConfirmCheckListProps): JSX.Element => {
   return (
     <CSRow>
-      <DIRowHeader title='아래의 사항을 확인해주세요' required={true} />
+      <DIRowHeader title='아래의 사항을 확인해주세요' required={true} tools={<label style={{ marginRight: 20 }}>확인</label>} />
       <DIRowContent>
         <CheckListComponent checkList={staticConsentData('')[type].checkList} checked={checked} saveData={saveData} />
       </DIRowContent>

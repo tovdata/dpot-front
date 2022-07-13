@@ -26,7 +26,6 @@ import moment from 'moment';
 
 /** [Interface] Properties for DPITable */
 interface DPITableProps {
-  accessToken: string
   onEdit: (id: string) => void;
   serviceId: string;
 }
@@ -72,14 +71,14 @@ interface DescriptionLabelProps {
 }
 
 /** [Component] 개인정보 파기 테이블 Form */
-export const DPITableForm: React.FC<DPITableFormProps> = ({ accessToken, onCreate, onEdit, serviceId }): JSX.Element => {
+export const DPITableForm: React.FC<DPITableFormProps> = ({ onCreate, onEdit, serviceId }): JSX.Element => {
   // 파기에 대한 문서 생성 버튼 정의
   const tool: JSX.Element = useMemo(() => (<Button icon={<PlusOutlined />} onClick={onCreate} type='default'>추가하기</Button>), [onCreate]);
 
   // 컴포넌트 반환
   return (
     <EditableTableForm title='개인정보 파기 관리대장' tools={tool}>
-      <DPITable accessToken={accessToken} onEdit={onEdit} serviceId={serviceId} />
+      <DPITable onEdit={onEdit} serviceId={serviceId} />
     </EditableTableForm>
   );
 }
@@ -107,8 +106,6 @@ export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, c
   const printRef: any = useRef<any>();
   // 쿼리 클라이언트 생성
   const queryClient = useQueryClient();
-
-  useEffect(() => console.log(temp), [temp]);
 
   /** [Event handler] 데이터 변경 이벤트 */
   const onChange = useCallback((property: string, value: any) => setTemp({ ...temp, [property]: value }), [temp]);
@@ -232,7 +229,7 @@ const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, i
         </Descriptions.Item>
         <Descriptions.Item label={<DescriptionLabel content='파기 사유' required />}>
           {edit ? (
-            <AddableTagSelect onChange={(value: string|string[]): void => onChange('reason', value)} options={["계약서에 명시된 보유기간 만료", "법령 의무 보유기간 만료", "이용자의 파기 요청", "1년 이상 서비스 미이용"]} placeholder='선택 및 직접 입력' refElement={refElements ? (el: any) => (refElements.current[2] = el) : undefined} value={data.reason} />
+            <AddableTagSelect onChange={(value: string|string[]): void => onChange('reason', value)} options={["계약서에 명시된 보유기간 만료", "법정 의무 보유기간 만료", "이용자의 파기 요청", "1년 이상 서비스 미이용"]} placeholder='선택 및 직접 입력' refElement={refElements ? (el: any) => (refElements.current[2] = el) : undefined} value={data.reason} />
           ) : (
             <ul style={{ margin: 0, paddingLeft: 20 }}>
               {data.reason.map((item: string, index: number): JSX.Element => (<li key={index}>{item}</li>))}
@@ -323,7 +320,7 @@ const PrintElement: React.FC<PrintElementProps> = ({ data, managerName, printRef
           {data.subject}
         </Descriptions.Item>
         <Descriptions.Item label={<DescriptionLabel content='파기 일시' required />}>
-          {data.date}
+          {transformToDate(data.date)}
         </Descriptions.Item>
         <Descriptions.Item label={<DescriptionLabel content='파기 사유' required />}>
           <ul style={{ margin: 0, paddingLeft: 20 }}>
@@ -356,7 +353,7 @@ const PrintElement: React.FC<PrintElementProps> = ({ data, managerName, printRef
         </Descriptions.Item>
       </Descriptions>
       <div className='footer'>
-        <h4 className='date'>{moment(data.date).year()}년 {moment(data.date).month() + 1}월 {moment(data.date).date()}일</h4>
+        <h4 className='date'>{moment.unix(data.date).format('YYYY년 M월 D일')}</h4>
         <p className='manager'>개인정보 보호책임자 <label>{managerName}</label> (인)</p>
       </div>
     </StyledPrintLayout>

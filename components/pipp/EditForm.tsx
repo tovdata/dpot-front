@@ -288,16 +288,16 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
     const edited: any = {};
     Object.keys(row).forEach((key: string): void => {
       if (key === 'essentialItems' && row[key].length > 0) {
-        if (edited.item === undefined) {
-          edited.item = [];
+        if (edited.items === undefined) {
+          edited.items = [];
         }
-        edited.item.push(`필수 : ${row[key].join(', ')}`);
+        edited.items.push(`필수 : ${row[key].join(', ')}`);
         row[key].forEach((item: string): number => !itemForPI.includes(item) ? itemForPI.push(item) : 0);
       } else if (key === 'selectionItems' && row[key].length > 0) {
-        if (edited.item === undefined) {
-          edited.item = [];
+        if (edited.items === undefined) {
+          edited.items = [];
         }
-        edited.item.push(`선택 : ${row[key].join(', ')}`);
+        edited.items.push(`선택 : ${row[key].join(', ')}`);
         row[key].forEach((item: string): number => !itemForPI.includes(item) ? itemForPI.push(item) : 0);
       } else {
         edited[key] = row[key];
@@ -420,7 +420,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
         <ReadableTable columns={[
           { title: '구분(업무명)', dataIndex: 'subject', key: 'subject', width: '16%' },
           { title: '처리 목적', dataIndex: 'purpose', key: 'purpose', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
-          { title: '수집 항목', dataIndex: 'item', key: 'item', render: (value: string[]) => value.map((item: string, index: number): JSX.Element => <div key={index}>{item}</div>), width: '36%' },
+          { title: '수집 항목', dataIndex: 'items', key: 'items', render: (value: string[]) => value ? value.map((item: string, index: number): JSX.Element => <div key={index}>{item}</div>) : undefined, width: '36%' },
           { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (value: string[]) => (<ListInTable items={value} />), width: '24%' },
         ]} dataSource={pi} />
         <DDRowContent items={stmt.pi.content.common[2]} style={{ marginBottom: 0 }} />
@@ -444,7 +444,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
               <ReadableTable columns={[
                 { title: '제공받는 자', dataIndex: 'recipient', key: 'recipient', width: '16%' },
                 { title: '제공받는 자의 목적', dataIndex: 'purpose', key: 'purpose', render: (values: string[]) => (<ListInTable items={values} />), width: '24%' },
-                { title: '제공 항목', dataIndex: 'items', key: 'items', render: (values: string[]) => (<>{values.join(', ')}</>), width: '36%' },
+                { title: '제공 항목', dataIndex: 'items', key: 'items', render: (values: string[]) => values ? (<>{values.join(', ')}</>) : undefined, width: '36%' },
                 { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (values: string[]) => (<ListInTable items={values} />), width: '24%' },
               ]} dataSource={refTables.ppi} style={{ marginTop: 8 }} />
             ) : (<></>)}
@@ -483,7 +483,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
                   { title: '국가', dataIndex: 'country', key: 'country' },
                   { title: '위치', dataIndex: 'address', key: 'address' },
                   { title: '일시 및 방법', dataIndex: 'method', key: 'method', render: (values: string[]) => (<ListInTable items={values} />) },
-                  { title: '이전 항목', dataIndex: 'items', key: 'items', render: (values: string[]) => (<>{values.join(', ')}</>) },
+                  { title: '이전 항목', dataIndex: 'items', key: 'items', render: (values: string[]) => values ? (<>{values.join(', ')}</>) : undefined },
                   { title: '보유 및 이용기간', dataIndex: 'period', key: 'period', render: (values: string[]) => (<ListInTable items={values} />) },
                   { title: '관리책임자의 연락처', dataIndex: 'charger', key: 'charger', render: (values: string[]) => (<ListInTable items={values} />) }
                 ]} dataSource={refTables.cpi ? refTables.cpi.filter((item: any): boolean => item.isForeign) : []} />

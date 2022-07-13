@@ -34,7 +34,7 @@ const DPIMain: React.FC<any> = (): JSX.Element => {
       {Object.keys(data).length !== 0 ? (
         <InformationForm accessToken={accessToken} companyId={session.companyId} data={data} onBack={onBack} serviceId={session.serviceId} />
       ) : (
-        <DPITableForm accessToken={accessToken} onCreate={onCreate} onEdit={onEdit} serviceId={session.serviceId} />
+        <DPITableForm onCreate={onCreate} onEdit={onEdit} serviceId={session.serviceId} />
       )}
     </>
   );

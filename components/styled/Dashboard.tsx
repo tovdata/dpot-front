@@ -10,7 +10,7 @@ export const StyledCountLabel = styled.p`
   margin: 0;
   small {
     color: #2F2E41;
-    font-size: 12;
+    font-size: 14px;
     font-weight: 400;
     line-height: 20px;
     margin-left: 5px;
@@ -162,6 +162,7 @@ export const StyledManagerSectionHeader = styled.div`
 export const StyledTagList = styled.div`
   align-items: flex-end;
   display: flex;
+  flex-wrap: wrap;
   margin-bottom: -4px;
   position: relative;
   user-select: none;

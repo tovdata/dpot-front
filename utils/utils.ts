@@ -139,7 +139,7 @@ const getTableLocation = (path: string): string => {
     case SERVICE_CFNI:
       return '\'제공・위탁\' 메뉴의 "가명정보 위탁" 표를';
     case SERVICE_DPI:
-      return '\'파기\' 메뉴의 "개인정보 파기 관리대장 을';
+      return '\'파기\' 메뉴의 "개인정보 파기 관리대장" 을';
     case SERVICE_CONSENT:  
       return '\'문서관리\' 메뉴의 "동의서" 를';
     case SERVICE_PIPP:

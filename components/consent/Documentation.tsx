@@ -34,7 +34,7 @@ export const ConfirmPage: React.FC<any> = ({ type, consentData, companyName }): 
     return header;
   }, [type]);
   /** [Event handler] */
-  const otherNoticeHeader = useCallback(async () => {
+  const otherNoticeHeader = useCallback(() => {
     const header = consentEPIHeader;
     if (type !== 4) {
       header.purpose.name = `${keyword} 수집·이용 목적`;
@@ -90,7 +90,7 @@ export const ConfirmPage: React.FC<any> = ({ type, consentData, companyName }): 
         </ConfirmItemComponent>
       )}
       <span style={{ whiteSpace: 'pre-line', marginTop: '16px' }}>{`위와 같이 ${staticConsentData(companyName)[type].word}를 제공하는데 동의합니다.`}</span>
-      <div style={{ fontWeight: '700', fontSize: '20px', marginTop: '32px', textAlign: 'center' }}>{`"${companyName}" 귀중`}</div>
+      <div style={{ fontWeight: '700', fontSize: '20px', marginTop: '32px', textAlign: 'center' }}>{`${companyName} 귀중`}</div>
     </div>
   );
 }

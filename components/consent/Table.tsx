@@ -145,6 +145,9 @@ export const ConsentTable = ({ headers, data, mode }: any) => {
     };
     return column;
   });
+
+  console.log(headers, columns, data)
+
   return <Table columns={columns} dataSource={mode === 'pi' ? convertData : data} pagination={false} />
 }
 

@@ -36,6 +36,7 @@ interface DIRowContentProps {
 /** [Interface] Properties for DIRowDivider */
 interface DIRowDividerProps {
   marginH?: number;
+  style?: React.CSSProperties;
 }
 /** [Interface] Properties for DIRowHeader */
 interface DIRowHeaderProps {
@@ -121,9 +122,9 @@ export const DIRowContent: React.FC<DIRowContentProps> = ({ children }: DIRowCon
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row divider */
-export const DIRowDivider: React.FC<DIRowDividerProps> = ({ marginH }: DIRowDividerProps): JSX.Element => {
+export const DIRowDivider: React.FC<DIRowDividerProps> = ({ marginH, style }: DIRowDividerProps): JSX.Element => {
   return (
-    <Divider dashed style={{ marginBottom: marginH ? marginH : 30, marginTop: marginH ? marginH : 30 }} />
+    <Divider dashed style={{ marginBottom: marginH ? marginH : 30, marginTop: marginH ? marginH : 30, ...style }} />
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row header */

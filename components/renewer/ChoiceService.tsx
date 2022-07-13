@@ -42,7 +42,7 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
       if (user) {
         if (user.affiliations === undefined || (user.affiliations && user.affiliations.length === 0)) {
           setComponent(<PLIP403Page redirectPath='/company/join' />);
-        } else if (user.affiliations[0].accessLevel === 1) {
+        } else if (user.affiliations[0].accessLevel === 0) {
           setComponent(<PLIPAwaitingApprovalPage />);
         } else {
           setComponent(
@@ -83,7 +83,7 @@ const ServiceCardList: React.FC<any> = ({ companyId }): JSX.Element => {
   // /** [Event handler] 세션 변경 */
   const onChangeSession = useCallback((id: string) => {
     setSession({ companyId: session.companyId, serviceId: id });
-    Router.push('/');
+    Router.push('/home');
   }, [session, setSession]);
   /** [Event handler] 모달 종료 */
   const onClose = useCallback(() => setVisible(false), []);

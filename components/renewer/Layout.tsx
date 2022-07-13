@@ -52,7 +52,7 @@ export const PLIPPageHeader: React.FC<any> = (): JSX.Element => {
   return (
     <StyledPageHeader>
       <div className='logo'>
-        <Link href='/'>PLIP</Link>
+        <Link href='/home' passHref>PLIP</Link>
       </div>
       <StyledPageHeaderNav>
         <StyledPageHeaderMenuItem>사용자 가이드</StyledPageHeaderMenuItem>
@@ -68,10 +68,14 @@ export const PLIPPageHeader: React.FC<any> = (): JSX.Element => {
 }
 /** [Component] 페이지 레이아웃 */
 export const PLIPPageLayout: React.FC<any> = ({ children, selectedKey }): JSX.Element => {
+  // 세션 조회
+  const session = useRecoilValue(sessionSelector);
   // 스크롤 상태
   const [scroll, setScroll] = useState<number>(0);
   // 메뉴 확장 여부
   const [expand, setExpand] = useRecoilState(expandSideSelector);
+  // 서비스 조회
+  const { isLoading, data: service } = useQuery([KEY_SERVICE, session.serviceId], async () => await getService(session.serviceId));
   
   // 스크롤 값 저장을 위한 Hook
   const onScroll = useCallback(() => setScroll(window.scrollY), []);
@@ -85,27 +89,23 @@ export const PLIPPageLayout: React.FC<any> = ({ children, selectedKey }): JSX.El
 
   // 컴포넌트 반환
   return (
-    <Layout>
-      <PLIPPageHeader />
-      <Layout hasSider>
-        <PLIPPageSider expand={expand} onExpand={onExpand} scroll={scroll} selectedKey={selectedKey} />
-        <StyledPageContent expand={expand.toString()} scroll={scroll}>{children}</StyledPageContent>
+    <>{isLoading ? (<></>) : (
+      <Layout>
+        <PLIPPageHeader />
+        <Layout hasSider>
+          <PLIPPageSider expand={expand} onExpand={onExpand} scroll={scroll} selectedKey={selectedKey} service={service} />
+          <StyledPageContent expand={expand.toString()} scroll={scroll}>{children}</StyledPageContent>
+        </Layout>
       </Layout>
-    </Layout>
+    )}</>
   );
 }
 /** [Component] 페이지 레이아웃 (사이드) */
-export const PLIPPageSider: React.FC<any> = ({ expand, onExpand, scroll, selectedKey }): JSX.Element => {
-  // 세션 조회
-  const session = useRecoilValue(sessionSelector);
-  // 서비스 조회
-  const { data: service } = useQuery([KEY_SERVICE, session.serviceId], async () => await getService(session.serviceId));
-
-  // 컴포넌트 반환
+export const PLIPPageSider: React.FC<any> = ({ expand, onExpand, scroll, selectedKey, service }): JSX.Element => {
   return (
     <StyledPageSider collapsed={!expand} collapsedWidth={88} scroll={scroll} width={246}>
       <div className='container'>
-        <PLIPSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} serviceName={service ? service.serviceName : ''} />
+        <PLIPSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} service={service} />
         <StyledPageSiderFooter expand={expand.toString()}>
           <div className='menu'>
             <a className='pipp'>개인정보처리방침</a>
