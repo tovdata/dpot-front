@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import type { ComponentType } from 'react';
+import { ComponentType } from 'react';
 import { useRecoilValue } from 'recoil';
 // Component
 import { Tabs } from 'antd';
@@ -17,6 +17,7 @@ const PCMain: React.FC<any> = (): JSX.Element => {
   // 세션 조회
   const session = useRecoilValue(sessionSelector);
 
+  // 컴포넌트 반환
   return (
     <Tabs defaultActiveKey="1">
       <CustomTabPane tab="제공" key="1">

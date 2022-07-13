@@ -545,7 +545,7 @@ const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, serviceId, status }:
     title: '처음부터 다시 만드시겠습니까?',
   }), [onProcess]);
   /** [Event handler] 문서 생성 */
-  const onCreate = useCallback(() => pi && pi.length > 0 ? onProcess('create') : Modal.warning({
+  const onCreate = useCallback(() => pi && pi.length > 0 ? onProcess('create') : Modal.confirm({
     cancelText: '아니오',
     centered: true,
     content: '개인정보 관리 탭에서 개인정보 처리에 관한 내용을 입력하셔야 문서를 만드실 수 있습니다.',
