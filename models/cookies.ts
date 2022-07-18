@@ -1,9 +1,8 @@
 import { decode } from 'jsonwebtoken';
 import type { JwtPayload } from 'jsonwebtoken';
 import Cookies from 'universal-cookie';
-
+// Key
 const KEY_TOKEN = 'auth';
-const KEY_USER = 'uuid';
 
 const cookies = new Cookies();
 
@@ -13,13 +12,6 @@ const cookies = new Cookies();
  */
 export const getAccessToken = (): string | undefined => {
   return cookies.get(KEY_TOKEN);
-}
-/**
- * [Function] 사용자 ID 불러오기
- * @returns 사용자 ID
- */
-export const getUserId = (): string | undefined => {
-  return cookies.get(KEY_USER);
 }
 /**
  * [Function] 액세스 토큰 저장
@@ -38,27 +30,10 @@ export const setAccessToken = (token: string): void => {
   }
 }
 /**
- * [Function] 사용자 ID 저장
- * @param userId 사용자 ID
- */
-export const setUserId = (userId: string): void => {
-  try {
-    setCookie(KEY_USER, userId);
-  } catch (err) {
-    console.error(`[COOKIE ERROR] ${err}`);
-  }
-}
-/**
  * [Function] 액세스 토큰 제거
  */
-export const removeAccessToken = (): void => {
-  cookies.remove(KEY_TOKEN);
-}
-/**
- * [Function] 사용자 ID 제거
- */
-export const removeUserId = (): void => {
-  cookies.remove(KEY_USER);
+export const removeAccessToken = (): any => {
+  cookies.remove(KEY_TOKEN, { path: '/' });
 }
 /**
  * [Function] 쿠키에 데이터 저장
@@ -67,8 +42,5 @@ export const removeUserId = (): void => {
  * @param expires 만료일
  */
 const setCookie = (key: string, value: string, expires?: Date) => {
-  cookies.set(key, value, {
-    path: '/',
-    expires: expires ? expires : undefined
-  });
+  cookies.set(key, value, { path: '/', expires: expires ? expires : undefined });
 }

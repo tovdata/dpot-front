@@ -5,7 +5,6 @@ const KEY_SIDEMENU = 'plip-sm';
 const KEY_USER = 'plip-user';
 // Util
 import { getAccessToken, removeAccessToken, setAccessToken } from '@/models/cookies';
-import { getUserId, removeUserId, setUserId } from '@/models/cookies';
 import { updateToken } from '@/models/queries/core';
 
 /** [Interface] 회사 및 서비스 세션 구조 */
@@ -43,20 +42,8 @@ const tokenEffects = () => ({ setSelf, onSet }: any): any => {
       setAccessToken(newValue)
     } else {
       removeAccessToken();
-      removeUserId();
     }
   });
-}
-/**
- * [Internal Function] 사용자 ID 대한 데이터 동기 (조회/저장)
- * @returns 조회 시, 데이터 조회 결과
- */
-const userIdEffects = () => ({ setSelf, onSet }: any): any => {
-  // Get
-  const value: string | undefined = getUserId();
-  if (value) setSelf(value);
-  // Set
-  onSet((newValue: any) => newValue !== '' ? setUserId(newValue) : removeUserId());
 }
 /**
  * [Internal Function] 로컬 스토리지에 대한 데이터 동기 (조회/저장)
@@ -126,12 +113,6 @@ const sessionAtom = atom<Session>({
   default: { companyId: '', serviceId: '' },
   effects: [localStorageEffects(KEY_SESSION)]
 });
-/** [Atom] 사용자 */
-const userIdAtom = atom<string>({
-  key: `userIdAtom_${getUnixTimestamp()}`,
-  default: '',
-  effects: [userIdEffects()]
-});
 
 /** [Selector] 액세스 토큰  */
 export const accessTokenSelector = selector<string>({
@@ -160,10 +141,4 @@ export const sessionSelector = selector<Session>({
   key: `sessionSelector_${getUnixTimestamp()}`,
   get: ({ get }: any) => get(sessionAtom),
   set: ({ set }: any, newValue: any) => set(sessionAtom, newValue)
-});
-/** [Selector] 사용자 ID */
-export const userIdSelector = selector<string>({
-  key: `userIdSelector_${getUnixTimestamp()}`,
-  get: ({ get }: any) => get(userIdAtom),
-  set: ({ set }: any, newValue: any) => set(userIdAtom, newValue)
 });

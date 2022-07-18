@@ -1,22 +1,15 @@
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography, Button, Modal } from 'antd';
+import { TableColumnProps, Table, Tag, Checkbox, Input, Space, Typography, Modal } from 'antd';
 import { AddableSelect, AddableTagSelect, SingleSelect, TagSelect, IFTTTSelect } from './Select';
 import { checkRequired, TableFooterContainAddButton, TableEditCell, EmptyTableFooter, TableContentForList, createTableColumnProps, TableContentForTags } from './Table';
-// FontcreateTableColumnProps
-import { FS_HXXS, LH_HXXS } from '../../static/font';
-// Icon
-import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
-import { IoAddCircle } from 'react-icons/io5';
 // Module
 import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // Type
 import { SelectOptionsByColumn, TableHeaderData, TableHeadersData } from '../../models/type';
-import { SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI } from '../../models/queries/type';
 // Utils
-import { changeSelectOptions, extractProcessingItems, resetSelectOptions, setDataSource } from '../../utils/table';
-import { CloseOutlined } from '@ant-design/icons';
+import { changeSelectOptions, resetSelectOptions } from '../../utils/table';
 import Router from 'next/router';
 
 // Styled element (OuterTable)
@@ -108,7 +101,7 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
     } else {
       tableName === 'ppi' || tableName === 'cpi' ? prerequisiteModal(!modal) : prerequisiteModal(!modal, true);
     }
-  }, [defaultRecord, onAdd, prerequisite, row.id, tableName]);
+  }, [defaultRecord, modal, onAdd, prerequisite, row.id, tableName]);
   /**
    * [Event Handler] Change a row
    * @param key column key
