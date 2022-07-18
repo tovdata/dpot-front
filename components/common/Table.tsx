@@ -266,14 +266,14 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
       // Set a row
       setRow({ ...row, [key]: item });
       // Check a required
-      setFocus({ ...focus, [key]: checkRequired(headers[key].name, item, required) });
+      // setFocus({ ...focus, [key]: checkRequired(headers[key].name, item, required) });
     }
     // Update the select options
     changeSelectOptions(key, onUpdateSelectOptions, refData, tableName, item, row);
   }, [focus, headers, onUpdateSelectOptions, refData, row, tableName]);
   /** [Event handler] 포커즈 초기화 */
   const clearFocus = useCallback((): void => {
-    setFocus(defaultFocusState);
+    // setFocus(defaultFocusState);
   }, [defaultFocusState]);
   /** [Event Handler] 취소 이벤트 */
   const onRollback = useCallback((record: any): void => {
@@ -283,7 +283,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
   }, [onDelete]);
   /** [Event Handler] 편집 */
   const onEdit = useCallback((record: any): void => {
-    clearFocus();
+    // clearFocus();
     (row.id && record.id && row.id !== record.id) ? warningNotification('작성 중인 내용을 먼저 저장해주세요.') : setRow(record);
     // Update the select options
     changeSelectOptions('subject', onUpdateSelectOptions, refData, tableName, record.subject);
@@ -309,7 +309,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
       return warning;
     });
     // Set a state
-    setFocus(state);
+    // setFocus(state);
     // Return
     return !result.includes(true);
   }, [headers, row]);

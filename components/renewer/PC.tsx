@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import type { QueryClient, UseMutateFunction } from 'react-query';
 import { useRecoilValue } from 'recoil';
 // Component
-import { Button, Modal, Tooltip } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { EditableExpandTable, prerequisiteModal } from '@/components/common/ExpandTable';
 import { ModalToInputURL } from '@/components/common/Modal';
 import { EditableTableForm } from '@/components/common/Table';
@@ -26,7 +26,6 @@ import { KEY_SERVICE, KEY_USER } from '@/models/queries/key';
 import { SERVICE_CFNI, SERVICE_CPI, SERVICE_FNI, SERVICE_PFNI, SERVICE_PI, SERVICE_PPI } from '@/models/queries/type';
 // Util
 import { decodeAccessToken } from 'utils/utils';
-import Router from 'next/router';
 
 /**
  * [Internal Component] URL 입력을 위한 링크 버튼
@@ -99,7 +98,7 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   /** [Event handler] 행(Row) 삭제 이벤트 */
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PPI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
   /** [Event handler] 링크 모달 오픈 */
-  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : prerequisiteModal(), [prerequisite]);
+  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : modal ? prerequisiteModal(false) : prerequisiteModal(), [modal, prerequisite]);
 
   /** [Event handler] 행(Row) 저장 이벤트 */
   const onSave = useCallback((record: any): boolean => {
@@ -124,7 +123,7 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
       <Button style={{ marginRight: 8 }} type='default'>제공 정보 입력 가이드</Button>
       <LinkButton onClick={onOpenModal} url={url.url} />
     </div>
-  ), [url]);
+  ), [onOpenModal, url]);
   // URL 정보를 제외한 PIM List
   const PIMList: any[] = useMemo(() => data ? data.filter((item:any) => item.url === undefined): [], [data]);
 
@@ -134,7 +133,7 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
       {isModalOpen ? (
         <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={onClose} onSave={onSaveUrl} />
       ) : (<></>)}
-      <EditableExpandTable dataSource={isLoading ? [] : PIMList} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={ppiTableHeader} innerHeaders={eppiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} prerequisite={prerequisite} refData={loadingPI ? [] : pi} tableName={SERVICE_PPI} />
+      <EditableExpandTable dataSource={isLoading ? [] : PIMList} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={ppiTableHeader} innerHeaders={eppiTableHeader} isLoading={isLoading} modal={modal} onAdd={onAdd} onDelete={onDelete} onSave={onSave} prerequisite={prerequisite} refData={loadingPI ? [] : pi} tableName={SERVICE_PPI} />
     </EditableTableForm>
   );
 }
@@ -181,7 +180,7 @@ export const PFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
   // [Event handler] 행(Row) 삭제 이벤트
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PFNI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
   /** [Event handler] 링크 모달 오픈 */
-  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : prerequisiteModal(true), [prerequisite]);
+  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : modal ? prerequisiteModal(false, true) : prerequisiteModal(true), [modal, prerequisite]);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = useCallback((record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
@@ -202,18 +201,16 @@ export const PFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
   // 헤더에 들어갈 버튼 정의
   const tools: JSX.Element = useMemo(() => (
     <LinkButton onClick={onOpenModal} url={url.url} />
-  ), [url]);
+  ), [onOpenModal, url]);
   // URL 정보를 제외한 PIM List
   const PIMList = useMemo(() => data ? data.filter((item:any) => item.url === undefined) : [], [data]);
-  // 가명정보 제공 테이블
-  const PFNITable = <EditableExpandTable dataSource={isLoading ? [] : PIMList} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={pfniTableHeader} innerHeaders={epfniTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} prerequisite={prerequisite} refData={loadingFNI ? [] : fni} tableName={SERVICE_PFNI} />
   // 컴포넌트 반환
   return (
     <EditableTableForm modal={modal} style={style} title='가명정보 제3자 제공' tools={tools}>
       {isModalOpen ? (
         <ModalToInputURL discription='제공 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={onClose} onSave={onSaveUrl} />
       ) : (<></>)}
-      {PFNITable}
+      <EditableExpandTable dataSource={isLoading ? [] : PIMList} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={pfniTableHeader} innerHeaders={epfniTableHeader} isLoading={isLoading} modal={modal} onAdd={onAdd} onDelete={onDelete} onSave={onSave} prerequisite={prerequisite} refData={loadingFNI ? [] : fni} tableName={SERVICE_PFNI} />
     </EditableTableForm>
   );
 }
@@ -264,7 +261,7 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   // [Event handler] 행(Row) 삭제 이벤트
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_CPI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
   /** [Event handler] 링크 모달 오픈 */
-  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : prerequisiteModal(), [prerequisite]);
+  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : modal ? prerequisiteModal(false) : prerequisiteModal(), [modal, prerequisite]);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = useCallback((record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
@@ -288,18 +285,16 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
       <Button style={{ marginRight: 8 }} type='default'>위탁 정보 입력 가이드</Button>
       <LinkButton onClick={onOpenModal} url={url.url} />
     </div>
-  ), [url]);
+  ), [onOpenModal, url]);
   // URL 정보를 제외한 PIM List
   const PIMList: any[] = useMemo(() => data ? data.filter((item:any) => item.url === undefined) : [], [data]);
-  // 개인정보 위탁 테이블
-  const CPITable = <EditableExpandTable dataSource={isLoading ? [] : PIMList} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={cpiTableHeader} innerHeaders={ecpiTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} prerequisite={prerequisite} refData={ref} tableName={SERVICE_CPI} />
   // 컴포넌트 반환
   return (
     <EditableTableForm description='‘개인정보 위탁’이란 개인정보 처리 업무의 일부를 다른 업체에 맡겨 처리하는 것을 말합니다(콜센터, A/S센터, 클라우드 등).\n각 위탁 건에 대해 아래의 내용을 입력해주세요. 국외로 제공되는 경우에는 ‘국외 여부’에 체크한 뒤 추가 정보도 입력해야 해요.\n위탁 내역이 정리된 별도의 페이지가 있다면, 우측에 ‘링크(URL)’ 버튼을 클릭하여 연결시킬 수 있어요.' modal={modal} title='개인정보 위탁' tools={tools}>
       {isModalOpen ? (
         <ModalToInputURL discription='위탁 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={onClose} onSave={onSaveUrl} />
       ) : (<></>)}
-      {CPITable}
+      <EditableExpandTable dataSource={isLoading ? [] : PIMList} defaultSelectOptions={defaultSelectOptions} expandKey='isForeign' headers={cpiTableHeader} innerHeaders={ecpiTableHeader} isLoading={isLoading} modal={modal} onAdd={onAdd} onDelete={onDelete} onSave={onSave} prerequisite={prerequisite} refData={ref} tableName={SERVICE_CPI} />
     </EditableTableForm>
   );
 }
@@ -341,7 +336,7 @@ export const CFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
   // [Event handler] 행(Row) 삭제 이벤트
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_CFNI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
   /** [Event handler] 링크 모달 오픈 */
-  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : prerequisiteModal(true), [prerequisite]);
+  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : modal ? prerequisiteModal(false, true) : prerequisiteModal(true), [modal, prerequisite]);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = useCallback((record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
@@ -364,18 +359,16 @@ export const CFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
     <div>
       <LinkButton onClick={onOpenModal} url={url.url} />
     </div>
-  ), [url]);
+  ), [onOpenModal, url]);
   // URL 정보를 제외한 PIM List
   const PIMList: any[] = useMemo(() => data ? data.filter((item:any) => item.url === undefined) : [], [data]);
-  // 가명정보 위탁 테이블 
-  const CFNITable = <EditableExpandTable dataSource={isLoading ? [] : PIMList} expandKey='isForeign' headers={cfniTableHeader} innerHeaders={ecfniTableHeader} isLoading={isLoading} onAdd={onAdd} onDelete={onDelete} onSave={onSave} prerequisite={prerequisite} refData={loadingFNI ? [] : fni} tableName={SERVICE_CFNI} />
   // 컴포넌트 반환
   return (
     <EditableTableForm modal={modal} style={style} title='가명정보 위탁' tools={tools}>
       {isModalOpen ? (
         <ModalToInputURL discription='위탁 내용이 링크로 존재하는 경우 아래에 URL 주소를 입력해주세요.' defaultValue={url.url} open={isModalOpen} onClose={onClose} onSave={onSaveUrl} />
       ) : (<></>)}
-      {CFNITable}
+      <EditableExpandTable dataSource={isLoading ? [] : PIMList} expandKey='isForeign' headers={cfniTableHeader} innerHeaders={ecfniTableHeader} isLoading={isLoading} modal={modal} onAdd={onAdd} onDelete={onDelete} onSave={onSave} prerequisite={prerequisite} refData={loadingFNI ? [] : fni} tableName={SERVICE_CFNI} />
     </EditableTableForm>
   );
 }

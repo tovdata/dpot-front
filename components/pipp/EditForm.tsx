@@ -94,7 +94,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
       <DIRowDivider />
       <DIRow self={refElements ? (el: any) => (refElements.current[3] = el) : undefined}>
         <Collapse activeKey={rels.ppi.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='제3자의 목적을 위해 개인정보를 제공하면 그에 관한 사항을 반드시 안내해야 합니다. \n개인정보를 제공한 건 중 아직 ‘제공받은 자의 보유 및 이용 기간’이 남아있는 건은 해당 내용을 모두 기재해야 합니다. 만약 제공된 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n※ 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' required style={{ marginBottom: 0 }} title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton disabled={refTables.ppi.length > 0} onChange={(e: any): void => { onFocus('preview', 3); onChange(sectionType, e.target.value, 'ppi', 'usage') }} size='small' value={rels.ppi.usage} />} />} key='1' showArrow={false}>
+          <Collapse.Panel header={<DIRowHeader description='제3자의 목적을 위해 개인정보를 제공하면 그에 관한 사항을 반드시 안내해야 합니다. \n개인정보를 제공한 건 중 아직 ‘제공받은 자의 보유 및 이용 기간’이 남아있는 건은 해당 내용을 모두 기재해야 합니다. 만약 제공된 개인정보가 국외에서 처리되고 있다면, 그에 관한 내용도 추가로 작성되어야 합니다.\n※ 제공받는 자에 관한 내용은 별도의 페이지로 만들어 링크를 통해 확인하게 할 수도 있습니다.' required style={{ marginBottom: 0 }} title='개인정보를 제3자에게 제공하나요?' tools={<YesOrNoRadioButton disabled={refTables.ppi.length > 0 || rels.ppi.url} onChange={(e: any): void => { onFocus('preview', 3); onChange(sectionType, e.target.value, 'ppi', 'usage') }} size='small' value={rels.ppi.usage} />} />} key='1' showArrow={false}>
             <Button onClick={(): void => { onOpenModal('ppi'); onFocus('preview', 3); }} size='small' style={{ fontSize: 12, padding: '0 12px' }} type='default'>수정하기</Button>
           </Collapse.Panel>
         </Collapse>
@@ -160,7 +160,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ data, onChange, onFo
       <DIRowDivider />
       <DIRow self={refElements ? (el: any) => (refElements.current[7] = el) : undefined}>
         <Collapse activeKey={rels.fni.usage ? ['1'] : []} ghost>
-          <Collapse.Panel header={<DIRowHeader description='개인정보처리자는 개인정보 보호법 제28조의2에 따라 개인정보를 가명처리 하거나 가명처리된 정보를 처리하는 경우, 이에 관한 내용을 개인정보 처리방침에 기재해야 합니다.\n‘수정하기’ 버튼을 눌러 내용을 변경하시면 자동으로 저장 및 반영됩니다.' required style={{ marginBottom: 0 }} title='가명정보를 처리하나요?' tools={<YesOrNoRadioButton disabled={rels.fni.usage === true} onChange={(e: any): void => { onChange(sectionType, e.target.value, 'fni', 'usage'); e.target.value ? onFocus('preview', 7) : undefined }} size='small' value={rels.fni.usage} />} />} key='1' showArrow={false} >
+          <Collapse.Panel header={<DIRowHeader description='개인정보처리자는 개인정보 보호법 제28조의2에 따라 개인정보를 가명처리 하거나 가명처리된 정보를 처리하는 경우, 이에 관한 내용을 개인정보 처리방침에 기재해야 합니다.\n‘수정하기’ 버튼을 눌러 내용을 변경하시면 자동으로 저장 및 반영됩니다.' required style={{ marginBottom: 0 }} title='가명정보를 처리하나요?' tools={<YesOrNoRadioButton disabled={refTables.fni.length > 0} onChange={(e: any): void => { onChange(sectionType, e.target.value, 'fni', 'usage'); e.target.value ? onFocus('preview', 7) : undefined }} size='small' value={rels.fni.usage} />} />} key='1' showArrow={false} >
             <Button onClick={(): void => { onOpenModal('fni'); onFocus('preview', 7); }} type='default' size='small' style={{ fontSize: 12, padding: '0 12px' }}>수정하기</Button>
           </Collapse.Panel>
         </Collapse>

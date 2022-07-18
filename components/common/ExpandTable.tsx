@@ -49,6 +49,7 @@ interface EditableTableProps extends TableProps {
   expandKey: string;
   innerHeaders: TableHeadersData;
   isLoading?: boolean;
+  modal?: boolean;
   onAdd: (record: any) => void;
   onDelete: (value: any) => void;
   onSave: (value: any) => boolean;
@@ -67,7 +68,7 @@ interface TableProps {
 /**
  * [Component] Editable table
  */
-export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, isLoading, onAdd, onDelete, onSave, pagination, prerequisite, refData, tableName }: EditableTableProps): JSX.Element => {
+export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, isLoading, modal, onAdd, onDelete, onSave, pagination, prerequisite, refData, tableName }: EditableTableProps): JSX.Element => {
   // Set a default focus and default record for columns in row
   const defaultFocusState: any = {};
   const defaultRecord: any = {};
@@ -105,9 +106,9 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
         setRow(record);
       }
     } else {
-      tableName === 'ppi' || tableName === 'cpi' ? prerequisiteModal() : prerequisiteModal(true);
+      tableName === 'ppi' || tableName === 'cpi' ? prerequisiteModal(!modal) : prerequisiteModal(!modal, true);
     }
-  }, [defaultRecord, onAdd, prerequisite, tableName]);
+  }, [defaultRecord, onAdd, prerequisite, row.id, tableName]);
   /**
    * [Event Handler] Change a row
    * @param key column key
@@ -334,14 +335,15 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
 /**
  * [Function] 전제 조건 미부합 모달
  * @param fni 가명정보 여부
+ * @param isRedirect 리다이렉트 경로
  */
- export const prerequisiteModal = (fni?: boolean) => {
+ export const prerequisiteModal = (isRedirect: boolean = true, fni?: boolean) => {
   Modal.confirm({
     cancelText: '아니오',
     centered: true,
     content: fni ? `가명정보 관리 탭에서 개인정보 처리에 관한 내용을 입력하셔야 문서를 만드실 수 있습니다.` : `개인정보 관리 탭에서 개인정보 처리에 관한 내용을 입력하셔야 문서를 만드실 수 있습니다.`,
     okText: '입력하러가기',
-    onOk: () => Router.push('/pim/cu'),
+    onOk: () => isRedirect ? Router.push('/pim/cu') : undefined,
     title: '입력된 정보가 없습니다.'
   });
 }

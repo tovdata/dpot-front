@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ComponentType } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import { useRecoilValue } from 'recoil';

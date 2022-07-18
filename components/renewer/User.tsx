@@ -47,7 +47,7 @@ const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element
   // 회사명 설정
   useEffect(() => form.setFieldsValue({ ...form, company: company ? company.companyName : '' }), [form, company]);
   // 사용자 정보 설정
-  useEffect(() => form.setFieldsValue({ name: user ? user.userName : '', contact: user ? user.contact : '' }), [user, form]);
+  useEffect(() => form.setFieldsValue({ name: user ? user.userName : '', email: user ? user.email : '', contact: user ? user.contact : '' }), [user, form]);
 
   /** [Event handler] 모달 열기 */
   const onOpen = useCallback(() => setVisible(true), []);
@@ -68,7 +68,7 @@ const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element
   }, [user, modalForm, onCancel]);
   /** [Event handler] 변경한 회사 정보 저장 */
   const onSave = useCallback(async () => {
-    const response = await updateUser(userId, { ...user, userName: form.getFieldValue('name'), contact: form.getFieldValue('contact') });
+    const response = await updateUser(userId, { userName: form.getFieldValue('name'), contact: form.getFieldValue('contact') });
     if (response) {
       successNotification('변경된 사용자 정보가 저장되었습니다.');
     } else {
@@ -91,6 +91,11 @@ const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element
             <StyledUserFormHeader>내 정보</StyledUserFormHeader>
             <PLIPInputGroup label='회사명'>
               <Form.Item name='company'>
+                <Input disabled />
+              </Form.Item>
+            </PLIPInputGroup>
+            <PLIPInputGroup label='이메일' required>
+              <Form.Item name='email'>
                 <Input disabled />
               </Form.Item>
             </PLIPInputGroup>

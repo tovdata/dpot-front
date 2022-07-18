@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import Router from 'next/router';
-import { ComponentType, useMemo } from 'react'; 
+import { ComponentType } from 'react'; 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQueries, useQuery, useQueryClient } from 'react-query';
 // Component

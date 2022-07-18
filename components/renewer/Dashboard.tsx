@@ -283,16 +283,16 @@ const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
     // type에 따라 태그 변경
     let tagName: string = '';
     switch(item.data.type) {
-      case 'pi':
+      case 0:
         tagName = '개인정보';
         break;
-      case 'si':
+      case 3:
         tagName = '민감정보';
         break;
-      case 'uii':
+      case 1:
         tagName = '고유식별정보';
         break;
-      case 'mai':
+      case 2:
         tagName = '마케팅';
         break;
       default:

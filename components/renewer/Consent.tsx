@@ -16,7 +16,7 @@ const AiOutlineQuestionCircle = dynamic(() => import('react-icons/ai').then((mod
 const CheckCircleOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.CheckCircleOutlined));
 const ExclamationCircleOutlined = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.ExclamationCircleOutlined));
 // Util
-import { copyTextToClipboard, transformToDatetime } from 'utils/utils';
+import { copyTextToClipboard } from 'utils/utils';
 import { filteredData } from 'utils/consent';
 
 /** [Component] 동의서 초기 페이지 */
@@ -227,7 +227,7 @@ const ConsentList: React.FC<any> = ({ data, onRemove }): JSX.Element => {
     id: item.id,
     type: item.data.type,
     title: item.data.title,
-    editedAt: transformToDatetime(item.publishedAt),
+    editedAt: item.publishedAt,
     creater: item.data.creater,
     url: item.url
   })), [data]);

@@ -253,7 +253,7 @@ const requestMethod = (mode: string): string => {
     case 'delete':
       return 'DELETE';
     case 'save':
-      return 'PUT';
+      return 'PATCH';
   }
   return 'GET';
 }

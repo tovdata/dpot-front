@@ -166,7 +166,7 @@ export const consentListHeader: TableHeadersData = {
     width: '30%'
   },
   editedAt: {
-    display: 'string',
+    display: 'datetime',
     name: '최종 편집일',
     required: true,
     width: '20%'

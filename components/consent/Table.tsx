@@ -10,6 +10,7 @@ import { consentListHeader } from "./Header";
 // Query
 import { getPIDatas } from '@/models/queries/apis/manage';
 import { IconButtonList, LinkButtonInTable, RemoveButtonInTable } from "../renewer/Button";
+import { transformToDatetime } from "utils/utils";
 
 
 /**
@@ -190,19 +191,21 @@ const StyledLinkText = styled.a`
 export const ConsentListTable = ({ data, onRemove }: any): JSX.Element => {
   const headers = consentListHeader;
   const docType: any = {
-    'pi': { name: '개인정보', color: 'geekblue' },
-    'si': { name: '민감정보', color: 'magenta' },
-    'uii': { name: '고유식별정보', color: 'purple' },
-    'mai': { name: '마케팅', color: 'cyan' },
-    'tpp': { name: '제3자제공', color: 'green' }
+    0: { name: '개인정보', color: 'geekblue' },
+    3: { name: '민감정보', color: 'magenta' },
+    1: { name: '고유식별정보', color: 'purple' },
+    2: { name: '마케팅', color: 'cyan' },
+    4: { name: '제3자제공', color: 'green' }
   };
   const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
     // Extract a header data
     const header: TableHeaderData = headers[key];
     // Create a column
     const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description, header.width);
-    column.render = (item: any, record: any, index: number): JSX.Element => {
+    column.render = (item: any, record: any, index: number): any => {
       switch (header.display) {
+        case 'datetime':
+          return transformToDatetime(item);
         case 'tag':
           return <Tag color={docType[item].color}>{docType[item].name}</Tag>
         case 'list':
@@ -220,12 +223,17 @@ export const ConsentListTable = ({ data, onRemove }: any): JSX.Element => {
           return <>{item}</>
       }
     };
+    // Sort
+    if (key === 'type') {
+      column.sorter = (a: any, b: any): number => a.type > b.type ? 1 : a.type < b.type ? -1 : 0;
+    } else if (key === 'editedAt') {
+      column.sorter = (a: any, b: any): number => { console.log(a); return a.editedAt - b.editedAt };
+    }
+    // Return
     return column;
   });
-  return <Table 
-    columns={columns}
-    dataSource={data}
-    pagination={{
-      position: ['bottomRight'],
-    }} />
+
+  return (
+    <Table columns={columns} dataSource={data} showSorterTooltip={false} />
+  );
 }
