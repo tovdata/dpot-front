@@ -18,7 +18,7 @@ export const setQueryData = (queryClient: QueryClient, type: any, mutate: UseMut
     const uMode = mode.split('/')[1];
     mutate({ mode: uMode, data: record }, {
       onSuccess: async (response) => {
-        queryClient.setQueryData(type, (oldData: any): any => updateURLData(oldData, uMode === 'add' ? { id: response?.id, url: record?.url } : record));
+        queryClient.setQueryData(type, (oldData: any): any => updateURLData(oldData, uMode === 'add' ? { id: response.data.id, url: record.url } : record));
       },
       onError: () => {
         queryClient.invalidateQueries(type);
@@ -27,7 +27,7 @@ export const setQueryData = (queryClient: QueryClient, type: any, mutate: UseMut
   } else {
     mutate({ mode: mode, data: record }, {
       onSuccess: async (response) => {
-        queryClient.setQueryData(type, (oldData: any): any => updateData(mode, oldData, mode === 'add' ? response.id : record.id, record));
+        queryClient.setQueryData(type, (oldData: any): any => updateData(mode, oldData, mode === 'add' ? response.data.id : record.id, record));
       },
       onError: () => {
         queryClient.invalidateQueries(type);

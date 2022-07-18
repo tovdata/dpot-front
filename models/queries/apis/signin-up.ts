@@ -1,5 +1,10 @@
-import { extractData } from '../internal';
-import { createRequest, createRequestNotAuth, RequestDF, ResponseDF, SERVER_URL } from '../type';
+
+// API
+import { sendRequest } from '@/models/queries/core';
+// Type
+import type { ResponseDF } from '@/models/queries/type';
+// Util
+import { decode } from 'jsonwebtoken';
 
 /** [Interface] 회원가입에 필요한 데이터 */
 export interface SignupProps {
@@ -16,12 +21,10 @@ export interface SignupProps {
  */
 export const checkDuplicate = async (email: string): Promise<boolean> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequest('POST', { email });
     // API 호출
-    const response = await fetch(`${SERVER_URL}auth/signup/availability`, request);
-    // 결과 추출 및 반환
-    return (await extractData(response, 'duplicate')).result;
+    const response: ResponseDF = await sendRequest('/auth/signup/availability', 'POST', { email }, true);
+    // 결과 반환
+    return response.result;
   } catch (err) {
     console.error(`[ERROR] ${err}`);
     return false;
@@ -34,12 +37,10 @@ export const checkDuplicate = async (email: string): Promise<boolean> => {
  */
 export const resendAuthMail = async (email: string): Promise<boolean> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequest('POST', { email });
     // API 호출
-    const response = await fetch(`${SERVER_URL}auth/signup/resend`, request);
-    // 결과 추출 및 반환
-    return (await extractData(response, 'resend')).result;
+    const response: ResponseDF = await sendRequest('/auth/signup/resend', 'POST', { email }, true);
+    // 결과 반환
+    return response.result;
   } catch (err) {
     console.error(`[ERROR] ${err}`);
     return false;
@@ -53,12 +54,19 @@ export const resendAuthMail = async (email: string): Promise<boolean> => {
  */
 export const signin = async (email: string, password: string): Promise<ResponseDF> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequest('POST', { email, password });
     // API 호출
-    const response: any = await fetch(`${SERVER_URL}auth/signin`, request);
-    // 데이터 추출 및 반환
-    return await extractData(response);
+    const response: ResponseDF = await sendRequest('/auth/signin', 'POST', { email, password }, true);
+    // 결과 처리 및 반환
+    if (response.result) {
+      const extracted: any = decode(response.data.AccessToken);
+      if (response.data.AccessToken) {
+        return { result: true, data: { accessToken: response.data.AccessToken, userId: extracted.sub } };
+      } else {
+        return { result: false };
+      }
+    } else {
+      return response;
+    }
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return { result: false };
@@ -70,12 +78,10 @@ export const signin = async (email: string, password: string): Promise<ResponseD
  */
 export const signout = async (): Promise<boolean> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequest('POST', {});
     // API 호출
-    const response: any = await fetch(`${SERVER_URL}auth/signout`, request);
-    // 데이터 추출 및 반환
-    return (await extractData(response, 'signout')).result;
+    const response: ResponseDF = await sendRequest('/auth/signout', 'POST');
+    // 결과 반환
+    return response.result;
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return false;
@@ -88,34 +94,12 @@ export const signout = async (): Promise<boolean> => {
  */
 export const signup = async (data: SignupProps): Promise<ResponseDF> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = createRequestNotAuth('POST', data);
     // API 호출
-    const response: any = await fetch(`${SERVER_URL}auth/signup`, request);
-    // 데이터 추출 및 반환
-    return await extractData(response);
+    const response: ResponseDF = await sendRequest('/auth/signup', 'POST', data, true);
+    // 결과 반환
+    return response;
   } catch (err) {
     console.error(`[ERROR] ${err}`);
     return { result: false };
-  }
-}
-/**
- * [API Caller] Access Token 갱신
- * @param userId 사용자 ID
- * @returns access token
- */
-export const updateToken = async (userId: string): Promise<string> => {
-  try {
-    // 요청 객체 생성
-    const request: RequestDF = createRequestNotAuth('POST', { id: userId });
-    // API 호출
-    const response: any = await fetch(`${SERVER_URL}auth/silentrefresh`, request);
-    // 데이터 추출
-    const result: any = await response.json();
-    // 데이터 반환
-    return ('AccessToken' in result) ? result.AccessToken : '';
-  } catch (err) {
-    console.error(`[ERROR] ${err}`);
-    return '';
   }
 }

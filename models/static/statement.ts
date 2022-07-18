@@ -43,7 +43,7 @@ export const statementForPIPP = (company: string): any => {
             `③ ${company}은(는) 근거법령에 의거하여 재난, 감염병, 급박한 생명·신체 위험을 초래하는 사건·사고, 급박한 재산 손실 등의 긴급상황이 발생하는 경우 정보주체의 동의 없이 관계기관에 개인정보를 제공할 수 있습니다. 이 경우 회사는 필요한 최소한의 개인정보만을 제공하며, 목적과 다르게 제공하지 않겠습니다.`
           ],
           link: [
-            `https://dpot-web.s3.ap-northeast-2.amazonaws.com/doc/static/thirdparty.pdf`
+            `https://dpot-web.s3.ap-northeast-2.amazonaws.com/doc/static/plip.pdf`
           ]
         },
         foreign: {

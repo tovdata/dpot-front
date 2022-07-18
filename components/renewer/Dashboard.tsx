@@ -7,73 +7,76 @@ import { Doughnut } from 'react-chartjs-2';
 // Component
 import { Col, Row, Spin, Tag } from 'antd';
 import { PLIPLayoutPadding } from '@/components/styled/Layout';
-import { PLIPActivityListForDashboard, sortByDatetime } from './Activity';
+import { PLIPActivityListForDashboard, sortByDatetime } from '@/components/renewer/Activity';
 // State
-import { companySelector, serviceSelector, userSelector } from '@/models/session';
+import { accessTokenSelector, sessionSelector } from '@/models/session';
 // Styled
-import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader, StyledDashboardItemContentForCPO } from '../styled/Dashboard';
-import { StyledTag, StyledTagList } from '../styled/Dashboard';
-import { StyledLatestInfoRow } from '../styled/Dashboard';
-import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader } from '../styled/Dashboard';
+import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader, StyledDashboardItemContentForCPO } from '@/components/styled/Dashboard';
+import { StyledTag, StyledTagList } from '@/components/styled/Dashboard';
+import { StyledLatestInfoRow } from '@/components/styled/Dashboard';
+import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader } from '@/components/styled/Dashboard';
 // Query
-import { getConsentList, getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/api';
+import { getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/apis/manage';
 import { getUserActivityForWeek } from '@/models/queries/apis/activity';
+import { getCompany, getService, getServiceModifiedTime } from '@/models/queries/apis/company';
+import { getConsentList } from '@/models/queries/apis/consent';
+import { getUser } from '@/models/queries/apis/user';
+import { getPIPPPublishAt } from '@/models/queries/apis/pipp';
 // Query key
-import { KEY_COMPANY, KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_CPI, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_PPI } from '@/models/queries/key';
-import { getCompany } from '@/models/queries/apis/company';
+import { KEY_COMPANY, KEY_DASHBOARD_ACTIVITY, KEY_DASHBOARD_CONSENT, KEY_DASHBOARD_ITEMS, KEY_DASHBOARD_LAST_MODIFY, KEY_DASHBOARD_NEWS, KEY_DASHBOARD_PIPP, KEY_SERVICE, KEY_USER } from '@/models/queries/key';
+import { SERVICE_CPI, SERVICE_PPI } from '@/models/queries/type';
+// Util
+import { decodeAccessToken, transformToDate } from 'utils/utils';
+import { getNews } from '@/models/queries/apis/etc';
 
 // Set chart
 ChartJS.register(ArcElement, Tooltip);
 
 /** [Component] 대시보드 */
 const Dashboard: React.FC<any> = (): JSX.Element => {
-  // 로컬 스토리지 내 회사 및 서비스 정보 조회
-  const sessionCompany = useRecoilValue(companySelector);
-  const sessionService = useRecoilValue(serviceSelector);
-  const sessionUser = useRecoilValue(userSelector);
+  // 액세스 토큰 조회
+  const accessToken: string = useRecoilValue(accessTokenSelector);
+  // 세션 조회
+  const session = useRecoilValue(sessionSelector);
+  // 사용자 ID 조회
+  const userId: string = decodeAccessToken(accessToken);
+
   // 컴포넌트 반환
   return (
     <div style={{ backgroundColor: '#F0F5FF', height: '100%' }}>
       <PLIPLayoutPadding>
-        <StyledDashboardHeader>
-          <h2>{sessionUser.userName} 님 안녕하세요 😊</h2>
-          <span className='company'>{sessionService.serviceName}</span>
-        </StyledDashboardHeader>
+        <DashboardHeader serviceId={session.serviceId} userId={userId} />
         <Row gutter={[24, 24]}>
           <Col span={14}>
-            <ChargerForCompany companyId={sessionCompany.id} />
+            <ChargerForCompany companyId={session.companyId} />
           </Col>
           <Col span={10}>
-            <LastInformation />
+            <LastInformation serviceId={session.serviceId} />
           </Col>
           <Col span={14}>
-            <Row gutter={[16, 16]}>
+            <Row gutter={[16, 16]} style={{ height: '100%' }}>
               <Col span={8}>
-                <PIItems serviceId={sessionService.id} />
+                <PIItems serviceId={session.serviceId} />
               </Col>
               <Col span={8}>
-                <NumberOfConsignmentCompanies serviceId={sessionService.id} />
+                <NumberOfConsignmentCompanies serviceId={session.serviceId} />
               </Col>
               <Col span={8}>
-                <NumberOfProvisionCompanies serviceId={sessionService.id} />
+                <NumberOfProvisionCompanies serviceId={session.serviceId} />
               </Col>
               <Col span={8}>
-                <DashboardItemCard>
-                  <PIPPInfomation />
-                </DashboardItemCard>
+                <PIPPInfomation serviceId={session.serviceId} />
               </Col>
               <Col span={16}>
-                <ConsentInformaiton serviceId={sessionService.id} />
+                <ConsentInformaiton serviceId={session.serviceId} />
               </Col>
             </Row>
           </Col>
           <Col span={10}>
-            <MyActivieList userId={sessionUser.id} />
+            <MyActivieList userId={userId} />
           </Col>
           <Col span={24}>
-            <DashboardItemCard>
-              <PINews />
-            </DashboardItemCard>
+            <PINews />
           </Col>
         </Row>
       </PLIPLayoutPadding>
@@ -81,6 +84,16 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
   );
 }
 
+const DashboardHeader: React.FC<any> = ({ serviceId, userId }) => {
+  // 사용자 정보 조회
+  const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
+
+  return (
+    <StyledDashboardHeader>
+      <h2>{user ? `${user.userName} 님 안녕하세요 😊` : ''}</h2>
+    </StyledDashboardHeader>
+  );
+}
 /** [Internal Component] 대시보드 아이템 카드  */
 const DashboardItemCard: React.FC<any> = ({ children, loading }): JSX.Element => {
   return (
@@ -147,15 +160,34 @@ const ChargerForCompany: React.FC<any> = ({ companyId }): JSX.Element => {
   );
 }
 /** [Internal Component] 최근 정보 수정일 */
-const LastInformation: React.FC<any> = (): JSX.Element => {
+const LastInformation: React.FC<any> = ({ serviceId }): JSX.Element => {
+  // 최종 수정일 조회
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_LAST_MODIFY, serviceId], async () => await getServiceModifiedTime(serviceId));
+  // 동의서에 대한 최종 수정일
+  const modifyDateForConsent = useMemo(() => data && data.consent.modifiedAt !== 0 ? transformToDate(data.consent.modifiedAt) : '', [data]);
+  // 동의서에 대한 최종 수정자
+  const userForContsent = useMemo(() => data ? data.consent.user : '', [data]);
+  // 개인정보 처리방침에 대한 최종 수정일
+  const modifyDateForPIPP = useMemo(() => data && data.pipp.modifiedAt !== 0 ? transformToDate(data.pipp.modifiedAt) : '', [data]);
+  // 개인정보 처리방침에 대한 최종 수정자
+  const userForPIPP = useMemo(() => data ? data.pipp.user : '', [data]);
+  // 개인정보 수집 및 이용에 대한 최종 수정일
+  const modifyDateForPI = useMemo(() => data && data.pi_fni.modifiedAt !== 0 ? transformToDate(data.pi_fni.modifiedAt) : '', [data]);
+  // 개인정보 수집 및 이용에 대한 최종 수정자
+  const userForPI = useMemo(() => data ? data.pi_fni.user : '', [data]);
+  // 개인정보 제공 및 위탁에 대한 최종 수정일
+  const modifyDateForPC = useMemo(() => data && data.ppi_cpi_pfni_cfni.modifiedAt !== 0 ? transformToDate(data.ppi_cpi_pfni_cfni.modifiedAt) : '', [data]);
+  // 개인정보 수집 및 이용에 대한 최종 수정자
+  const userForPC = useMemo(() => data ? data.ppi_cpi_pfni_cfni.user : '', [data]);
+
   return (
-    <DashboardItemCard>
+    <DashboardItemCard loading={isLoading}>
       <DashboardItemHeader title='최근 정보 수정일' />
       <div>
-        <LastInformationRow date='2022-06-08' subject='동의서' user='김토브' />
-        <LastInformationRow date='2022-06-08' subject='개인정보 처리방침' user='김토브' />
-        <LastInformationRow date='2022-06-08' subject='개인정보 수집・이용 현황' user='김토브' />
-        <LastInformationRow date='2022-06-08' subject='개인정보 제공・위탁 현황' user='김토브' />
+        <LastInformationRow date={modifyDateForConsent} subject='동의서' user={userForContsent} />
+        <LastInformationRow date={modifyDateForPIPP} subject='개인정보 처리방침' user={userForPIPP} />
+        <LastInformationRow date={modifyDateForPI} subject='개인정보 수집・이용 현황' user={userForPI} />
+        <LastInformationRow date={modifyDateForPC} subject='개인정보 제공・위탁 현황' user={userForPC} />
       </div>
     </DashboardItemCard>
   );
@@ -166,7 +198,7 @@ const PIItems: React.FC<any> = ({ serviceId }): JSX.Element => {
   const { isLoading, data } = useQuery([KEY_DASHBOARD_ITEMS, serviceId], async () => await getPIItemsByType(serviceId));
   // Chart data
   const chartData: any = useMemo(() => ({
-    labels: ['필수항목', '선택항목'],
+    labels: ['필수', '선택'],
     datasets: [{
       data: [data && (data as any).essentialItemsOnly ? (data as any).essentialItemsOnly.length : 0, data && (data as any).selectionItemsOnly ? (data as any).selectionItemsOnly.length : 0],
       backgroundColor: ['#6C63FF', '#C4C1F2']
@@ -193,7 +225,7 @@ const PIItems: React.FC<any> = ({ serviceId }): JSX.Element => {
 /** [Internal Component] 개인정보 위탁 업체 수 표시 */
 const NumberOfConsignmentCompanies: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 위탁 데이터 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_CPI, serviceId], async () => await getCPIDatas(serviceId));
+  const { isLoading, data } = useQuery([SERVICE_CPI, serviceId], async () => await getCPIDatas(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -210,7 +242,7 @@ const NumberOfConsignmentCompanies: React.FC<any> = ({ serviceId }): JSX.Element
 /** [Internal Component] 개인정보 제공 업체 수 표시 */
 const NumberOfProvisionCompanies: React.FC<any> = ({ serviceId }): JSX.Element => {
   // 제공 데이터 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_PPI, serviceId], async () => await getPPIDatas(serviceId));
+  const { isLoading, data } = useQuery([SERVICE_PPI, serviceId], async () => await getPPIDatas(serviceId));
   // Count 변수 설정
   const count: number = useMemo(() => data ? data.filter((row: any): boolean => !('url' in row)).length : 0, [data]);
 
@@ -225,15 +257,19 @@ const NumberOfProvisionCompanies: React.FC<any> = ({ serviceId }): JSX.Element =
   );
 }
 /** [Internal Component] 개인정보 처리방침 최종 게재일 표시 */
-const PIPPInfomation: React.FC<any> = (): JSX.Element => {
+const PIPPInfomation: React.FC<any> = ({ serviceId }): JSX.Element => {
+  // 개인정보 처리방침 상태 조회
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_PIPP, serviceId], async () => await getPIPPPublishAt(serviceId));
+
+  // 컴포넌트 반환
   return (
-    <>
+    <DashboardItemCard loading={isLoading}>
       <DashboardItemHeader title='개인정보 처리방침' />
       <div>
         <h5 style={{ color: '#2F2E41', fontSize: 12, fontWeight: '400', lineHeight: '20px', margin: 0 }}>최종 게재일</h5>
-        <p style={{ color: '#11142D', fontSize: 16, fontWeight: '600', lineHeight: '24px', margin: 0 }}>2022-01-01</p>
+        <p style={{ color: '#11142D', fontSize: 16, fontWeight: '600', lineHeight: '24px', margin: 0 }}>{data && data > 0 ? transformToDate(data) : '-'}</p>
       </div>
-    </>
+    </DashboardItemCard>
   );
 }
 /** [Internal Component] 동의서 개수 표시 */
@@ -247,16 +283,16 @@ const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
     // type에 따라 태그 변경
     let tagName: string = '';
     switch(item.data.type) {
-      case 'pi':
+      case 0:
         tagName = '개인정보';
         break;
-      case 'si':
+      case 3:
         tagName = '민감정보';
         break;
-      case 'uii':
+      case 1:
         tagName = '고유식별정보';
         break;
-      case 'mai':
+      case 2:
         tagName = '마케팅';
         break;
       default:
@@ -275,7 +311,7 @@ const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
         <StyledTagList>
           {types.map((item: string): JSX.Element => (<StyledTag key={item}>{item}</StyledTag>))}
         </StyledTagList>
-        <StyledDashboardItemContentEnd>
+        <StyledDashboardItemContentEnd style={{ width: 64 }}>
           <CountLabel count={count} />
         </StyledDashboardItemContentEnd>
       </div>
@@ -285,9 +321,9 @@ const ConsentInformaiton: React.FC<any> = ({ serviceId }): JSX.Element => {
 /** [Internal Component] 나의 활동 내역 */
 const MyActivieList: React.FC<any> = ({ userId }): JSX.Element => {
   // 사용자 활동 내역 조회
-  const { isLoading, data } = useQuery("dashboard-activity", async () => await getUserActivityForWeek(userId));
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_ACTIVITY, userId], async () => await getUserActivityForWeek(userId));
   // 데이터 구분 및 정렬
-  const sorted: any = useMemo(() => !isLoading ? sortByDatetime(data) : {}, [data]);
+  const sorted: any = useMemo(() => data ? sortByDatetime(data) : {}, [data]);
 
   // 컴포넌트 반환
   return (
@@ -338,22 +374,25 @@ const ViewAll: React.FC<any> = ({ href }): JSX.Element => {
 }
 /** [Internal Component] 뉴스 목록 컴포넌트 */
 const NewItems: React.FC<any> = (): JSX.Element => {
+  // 뉴스 조회
+  const { isLoading, data } = useQuery([KEY_DASHBOARD_NEWS, 0], async () => await getNews());
+  // 아이템 생성
+  const items: JSX.Element[] = useMemo(() => data ? data.map((item: any): any => (<NewsItem date={transformToDate(item.regAt)} key={item.id} sources={item.source} subject={item.title} type={item.category} url={item.url} />)) : [], [data]);
+
+  // 컴포넌트 반환
   return (
-    <div>
-      <NewsItem date='2022-05-29' sources='개인정보보호위원회' subject='2021년 법령해석 심의 의결 결정문 모음집' type='정부자료' />
-      <NewsItem date='2022-05-29' sources='한겨례' subject='“쇼핑몰 장바구니 속 운동화, 페이스북이 어떻게 알았지?”' type='업계동향' />
-      <NewsItem date='2022-05-29' sources='개인정보보호위원회' subject='2021년 법령해석 심의 의결 결정문 모음집' type='정부자료' />
-      <NewsItem date='2022-05-29' sources='개인정보보호위원회' style={{ marginBottom: 0 }} subject='2021년 법령해석 심의 의결 결정문 모음집' type='정부자료' />
-    </div>
+    <DashboardItemCard loading={isLoading}>
+      <div>{items}</div>
+    </DashboardItemCard>
   );
 }
 /** [Internal Component] 뉴스 Row 컴포넌트 */
-const NewsItem: React.FC<any> = ({ date, sources, style, subject, type }): JSX.Element => {
+const NewsItem: React.FC<any> = ({ date, sources, style, subject, type, url }): JSX.Element => {
   return (
-    <div style={{ alignItems: 'center', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', marginBottom: 10, ...style }}>
+    <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 10, userSelect: 'none', ...style }}>
       <div style={{ alignItems: 'center', display: 'flex'}}>
         <Tag style={{ marginRight: 8, userSelect: 'none' }}>{type}</Tag>
-        <span style={{ color: '#11142D', fontSize: 14, fontWeight: '600', lineHeight: '22px' }}>{subject}</span>
+        <a style={{ color: '#11142D', cursor: 'pointer', fontSize: 14, fontWeight: '600', lineHeight: '22px' }} href={url} rel='noreferrer' target='_blank'>{subject}</a>
       </div>
       <div style={{  alignItems: 'center', display: 'flex', justifyContent: 'space-between', minWidth: 200 }}>
         <span style={{ color: '#8C8C8C', fontSize: 12, fontWeight: '400', lineHeight: '20px'  }}>{date}</span>

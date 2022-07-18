@@ -1,5 +1,7 @@
+import dynamic from 'next/dynamic';
 import Router from 'next/router';
 import { useCallback, useState } from 'react';
+import { useQuery } from 'react-query';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 // Component
 import { Button, Form, Input, Modal } from 'antd';
@@ -7,37 +9,52 @@ import { StyledJoinCompanyTypeCard, StyledPageBackground, StyledPageLayout } fro
 import { StyledChoiceCompanyForm, StyledCompanyList, StyledCompanyItem } from '../styled/JoinCompany';
 import { PLIPInputGroup } from './Input';
 import { errorNotification } from '../common/Notification';
-import { PLIP401Page } from './Page';
+const PLIP401Page = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIP401Page));
+const PLIP403Page = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIP403Page));
 // Icon
 import { PlusCircleOutlined, SearchOutlined } from '@ant-design/icons';
 // State
-import { companySelector, userSelector } from '@/models/session';
+import { accessTokenSelector, sessionSelector } from '@/models/session';
 // Query
 import { createService, findCompanies, registerUser, setCompany } from '@/models/queries/apis/company';
+import { getUser } from '@/models/queries/apis/user';
+// Type
 import { Company } from '@/models/queries/type';
+import { KEY_USER } from '@/models/queries/key';
+// Util
+import { decodeAccessToken } from 'utils/utils';
 
 /** [Component] 초기 회사 참여 (생성 또는 참여) */
 const JoinCompany: React.FC<any> = (): JSX.Element => {
-  // 로컬 스토리지 내 회사 정보 조회
-  const sessionCompany = useRecoilValue(companySelector);
-  const sessionUser = useRecoilValue(userSelector);
+  // 액세스 토큰 조회
+  const accessToken: string = useRecoilValue(accessTokenSelector);
+  // 사용자 ID 추출
+  const userId: string = decodeAccessToken(accessToken);
+  // 사용자 조회
+  const { isLoading, data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
+
   // 회사 검색 여부
   const [search, setSearch] = useState<boolean|undefined>(undefined);
   /** [Event handler] 이전 단계로 이동 */
-  const onBack = () => setSearch(undefined);
+  const onBack = useCallback(() => setSearch(undefined), []);
   /** [Event handler] 회사 참여를 위한 유형 선택 */
-  const onChoice = (search: boolean) => setSearch(search);
-
+  const onChoice = useCallback((search: boolean) => setSearch(search), []);
+  
+  // 컴포넌트 반환
   return (
     <>
-      {sessionCompany && sessionCompany.id !== '' ? (
+      {isLoading ? (
+        <></>
+      ) : user === undefined ? (
         <PLIP401Page />
+      ) : user.affiliations === undefined || user.affiliations.length > 0 ? (
+        <PLIP403Page />
       ) : (
         <StyledPageBackground>
           {search === undefined ? (
-            <JoinCompanyType onChoice={onChoice} userName={sessionUser.userName} />
+            <JoinCompanyType onChoice={onChoice} userName={user.userName} />
           ) : (
-            <ChoiceCompanyForm onBack={onBack} search={search} userId={sessionUser.id} />
+            <ChoiceCompanyForm onBack={onBack} search={search} userId={userId} />
           )}
         </StyledPageBackground>
       )}
@@ -76,7 +93,7 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search, userId }): JSX.Eleme
   // 회사 정보
   const [companyId, setCompanyId] = useState<string>('');
   // 회사 정보 저장을 위한 setter
-  const setCompany = useSetRecoilState(companySelector);
+  const setSession = useSetRecoilState(sessionSelector);
 
   /** [Event handler] 홈으로 이동 */
   const goHome = useCallback(() => Router.push('/company/services'), []);
@@ -90,15 +107,19 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search, userId }): JSX.Eleme
     setCompanyId(value.id);
     // 검색 모달 종료
     setVisible(false);
-  }, []);
-  const onCreate = useCallback((value: any) => {
-    setCompany(value);
+  }, [form]);
+  const onCreate = useCallback((companyId: string) => {
+    setSession({ companyId: companyId, serviceId: '' });
     goHome();
-  }, []);
+  }, [goHome, setSession]);
   /** [Event handler] Submit */
   const onFinish = useCallback(async () => {
     if (search) {
-      createFinishModal('가입 승인을 요청하였습니다.', '승인이 완료되면, 알려주신 이메일로 연락드릴게요 👍', goHome);
+      if (await joinCompany(companyId, userId, 0)) {
+        createFinishModal('가입 승인을 요청하였습니다.', '승인이 완료되면, 알려주신 이메일로 연락드릴게요 👍', goHome);
+      } else {
+        errorNotification('회사 가입 과정에서 문제가 발생하였습니다. 플립(Plip)으로 문의주세요.');
+      }
     } else {
       // 폼 데이터 가져오기
       const formData: any = form.getFieldsValue();
@@ -115,17 +136,17 @@ const ChoiceCompanyForm: React.FC<any> = ({ onBack, search, userId }): JSX.Eleme
       const response = await createCompany(company);
       if (response.result) {
         // 회사에 사용자를 등록
-        if (await joinCompany(response.data.id, userId)) {
+        if (await joinCompany(response.data.id, userId, 4)) {
           // 서비스 생성
           if (await createServiceInCompany(response.data.id, company.companyName)) {
-            return createFinishModal('회사가 생성되었습니다 !', '플립(Plip)과 함께 개인정보를 관리해보아요 :)', () => onCreate({ id: response.data.id, name: company.companyName, manager: company.manager }), '시작하기');
+            return createFinishModal('회사가 생성되었습니다 !', '플립(Plip)과 함께 개인정보를 관리해보아요 :)', () => onCreate(response.data.id), '시작하기');
           }
         }
       }
       // 에러 처리
       errorNotification('회사 생성 과정에서 문제가 발생하였습니다. 플립(Plip)으로 문의주세요.');
     }
-  }, [companyId, search]);
+  }, [companyId, form, goHome, onCreate, search, userId]);
   /** [Event handler] 검색 모달 열기 */
   const onOpen = useCallback(() => setVisible(true), []);
 
@@ -184,7 +205,7 @@ const SearchCompanyModal: React.FC<any> = ({ onChoice, onClose, visible }): JSX.
           list.map((item: any): JSX.Element => (
             <StyledCompanyItem key={item.id} onClick={() => onChoice(item)}>
               <h5>{item.companyName}</h5>
-              <p>개인정보보호 책임자: {item.manager ? item.manager.name : ''} ({item.manager ? item.manager.email : ''})</p>
+              <p>개인정보 보호책임자: {item.manager ? item.manager.name : ''} ({item.manager ? item.manager.email : ''})</p>
             </StyledCompanyItem>
           ))
         ) : (
@@ -231,8 +252,8 @@ const createServiceInCompany = async (companyId: string, companyName: string): P
  * @param userId 사용자 ID
  * @returns 처리 결과
  */
-const joinCompany = async (companyId: string, userId: string): Promise<boolean> => {
-  return await registerUser(companyId, userId, 4);
+const joinCompany = async (companyId: string, userId: string, accessLevel: number): Promise<boolean> => {
+  return await registerUser(companyId, userId, accessLevel);
 };
 
 export default JoinCompany;

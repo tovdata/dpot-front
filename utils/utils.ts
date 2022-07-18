@@ -4,7 +4,7 @@ import { successNotification } from "@/components/common/Notification";
 import moment from "moment";
 import { decode } from "jsonwebtoken";
 // Type
-import { SERVICE_CFNI, SERVICE_CPI, SERVICE_DPI, SERVICE_FNI, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from "@/models/queries/type";
+import { SERVICE_CFNI, SERVICE_CONSENT, SERVICE_CPI, SERVICE_DPI, SERVICE_FNI, SERVICE_PFNI, SERVICE_PI, SERVICE_PIPP, SERVICE_PPI } from "@/models/queries/type";
 // Query
 import { setActivity } from "@/models/queries/apis/activity";
 
@@ -37,14 +37,19 @@ export const copyTextToClipboard = (url: string) => {
  * @returns 사용자 ID
  */
  export const decodeAccessToken = (token: string): string => {
-  // 토큰이 없을 경우, 
-  if (token === undefined || token === null || token === '') return '';
-  // 복호화
-  const decoded: any = decode(token);
-  // 추출된 데이터 처리
-  if (decoded !== undefined && decoded !== null && 'sub' in decoded) {
-    return decoded.sub;
-  } else {
+  try {
+    // 토큰이 없을 경우, 
+    if (token === undefined || token === null || token === '') return '';
+    // 복호화
+    const decoded: any = decode(token);
+    // 추출된 데이터 처리
+    if (decoded !== undefined && decoded !== null && 'sub' in decoded) {
+      return decoded.sub;
+    } else {
+      return '';
+    }
+  } catch (err) {
+    console.error(err);
     return '';
   }
 }
@@ -54,8 +59,9 @@ export const copyTextToClipboard = (url: string) => {
  * @param path 활동 위치 (path)
  * @param id 대상 ID
  * @param user 사용자 이름
+ * @param serviceName 서비스 이름
  */
-export const writeActivityLog = (mode: string, path: string, id: string, user?: string) => {
+export const writeActivityLog = (mode: string, path: string, id: string, user?: string, serviceName?: string) => {
   if (typeof window !== 'undefined') {
     // 로그 대상 정의
     const target: string = user ? 'service' : 'user';
@@ -65,17 +71,57 @@ export const writeActivityLog = (mode: string, path: string, id: string, user?: 
     if (pathStr !== '') {
       switch (mode) {
         case 'add':
-          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 추가하였습니다.` : `${pathStr}를 추가하였습니다.`);
+          setActivity(target, id, user ? `${user} 님이 ${pathStr} 추가하였습니다.` : serviceName ? `${serviceName}에서 ${pathStr} 추가하였습니다.` : `${pathStr} 추가하였습니다.`);
+          break;
+        case 'create':
+          setActivity(target, id, user ? `${user} 님이 ${pathStr} 생성하였습니다.` : serviceName ? `${serviceName}에서 ${pathStr} 생성하였습니다.` : `${pathStr} 생성하였습니다.`);
           break;
         case 'delete':
-          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 삭제하였습니다.` : `${pathStr}를 삭제하였습니다.`);
+          setActivity(target, id, user ? `${user} 님이 ${pathStr} 삭제하였습니다.` : serviceName ? `${serviceName}에서 ${pathStr} 삭제하였습니다.` : `${pathStr} 삭제하였습니다.`);
           break;
         case 'save':
         case 'update':
-          setActivity(target, id, user ? `${user} 님이 ${pathStr}를 수정하였습니다.` : `${pathStr}를 수정하였습니다.`);
+          setActivity(target, id, user ? `${user} 님이 ${pathStr} 수정하였습니다.` : serviceName ? `${serviceName}에서 ${pathStr} 수정하였습니다.` : `${pathStr} 수정하였습니다.`);
           break;
       }
     }
+  }
+}
+/**
+ * [Function] 날짜 변환
+ * @param timestamp unix timestamp
+ * @returns 변환된 날짜 (YYYY-MM-DD)
+ */
+export const transformToDate = (timestamp: number): string => {
+  if (Math.floor(timestamp / 1000000000000) > 0) {
+    return moment.unix(timestamp / 1000).format('YYYY-MM-DD');
+  } else {
+    return moment.unix(timestamp).format('YYYY-MM-DD');
+  }
+}
+/**
+ * [Function] 날짜 변환
+ * @param timestamp unix timestamp
+ * @returns 변환된 날짜 (YYYY-MM-DD HH:mm)
+ */
+export const transformToDatetime = (timestamp: number): string => {
+  if (Math.floor(timestamp / 1000000000000) > 0) {
+    return moment.unix(timestamp / 1000).format('YYYY-MM-DD HH:mm');
+  } else {
+    return moment.unix(timestamp).format('YYYY-MM-DD HH:mm');
+  }
+}
+/**
+ * [Function]
+ * @param date 날짜 형식 문자열 (YYYY-MM-DD)
+ * @returns unix timestamp
+ */
+export const transformToUnix = (date: string): number => {
+  try {
+    return moment(date, 'YYYY-MM-DD').unix();
+  } catch (err) {
+    console.error('[I_FUNC ERROR] 형식 변경 에러 (날짜형식이 맞지 않습니다.)');
+    return 0;
   }
 }
 /**
@@ -86,23 +132,23 @@ export const writeActivityLog = (mode: string, path: string, id: string, user?: 
 const getTableLocation = (path: string): string => {
   switch (path) {
     case SERVICE_PI:
-      return '"수집・이용" 탭의 "개인정보 수집・이용" 표';
+      return '\'수집・이용\' 메뉴의 "개인정보 수집・이용" 표를';
     case SERVICE_FNI:
-      return '"수집・이용" 탭의 "가명정보 수집・이용" 표';
+      return '\'수집・이용\' 메뉴의 "가명정보 수집・이용" 표를';
     case SERVICE_PPI:
-      return '"제공・위탁" 탭의 "개인정보 제3자 제공" 표';
+      return '\'제공・위탁\' 메뉴의 "개인정보 제3자 제공" 표를';
     case SERVICE_CPI:
-      return '"제공・위탁" 탭의 "개인정보 위탁" 표';
+      return '\'제공・위탁\' 메뉴의 "개인정보 위탁" 표를';
     case SERVICE_PFNI:
-      return '"제공・위탁" 탭의 "가명정보 제3자 제공" 표';
+      return '\'제공・위탁\' 메뉴의 "가명정보 제3자 제공" 표를';
     case SERVICE_CFNI:
-      return '"제공・위탁" 탭의 "가명정보 위탁" 표';
+      return '\'제공・위탁\' 메뉴의 "가명정보 위탁" 표를';
     case SERVICE_DPI:
-      return '"파기" 탭의 "개인정보 파기 관리대장" 표';
-    case 'consent':  
-      return '동의서';
+      return '\'파기\' 메뉴의 "개인정보 파기 관리대장" 을';
+    case SERVICE_CONSENT:  
+      return '\'문서관리\' 메뉴의 "동의서" 를';
     case SERVICE_PIPP:
-      return '개인정보 처리방침';
+      return '\'문서관리\' 메뉴의 "개인정보 처리방침" 을';
     default:
       return '';
   }

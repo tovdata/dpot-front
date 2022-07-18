@@ -1,5 +1,3 @@
-import { getAccessToken } from "../session";
-
 /** 기본 Backend Server URL*/
 export const SERVER_URL = 'https://api-dev.plip.kr:8081/api/';
 /** API 응답 상태 */
@@ -9,6 +7,8 @@ export const RESPONSE_STATUS_NOT_FOUND = 'NOT_FOUND';
 export const RESPONSE_STATUS_REQUEST_ERROR = 'REQUEST_ERROR';
 export const RESPONSE_STATUS_UNKNOWN_ERROR = 'UNKNOWN_ERROR';
 export const RESPONSE_STATUS_NOT_AUTHORIZED = 'NOT_AUTHORIZED';
+export const RESPONSE_STATUS_TOKEN_EXPIRED = 'TOKEN_EXPIRED';
+export const RESPONSE_STATUS_INVALID_TOKEN = 'INVALID_TOKEN';
 /** API 서비스 경로 */
 export const SERVICE_PI = 'pi';
 export const SERVICE_FNI = 'fni';
@@ -27,7 +27,6 @@ export const SERVICE_LIST = [
   SERVICE_FNI,
   SERVICE_PPI,
   SERVICE_CPI,
-  SERVICE_DPI,
   SERVICE_PFNI,
   SERVICE_CFNI
 ];
@@ -59,15 +58,12 @@ export interface RequestDF {
  * @param data 요청 데이터
  * @returns 요청 객체
  */
-export const createRequest = async (method: string, data?: any): Promise<RequestDF> => {
-  // 액세스 토큰 추출
-  const accessToken: string = await getAccessToken();
+export const createRequest = async (token: string, method: string, data?: any): Promise<RequestDF> => {
   // 요청 객체 반환
   return {
     credentials: 'include',
     body: method === 'GET' ? undefined : data ? JSON.stringify(data) : undefined,
     headers: {
-      'Authorization': accessToken,
       'Content-Type': 'application/json'
     },
     method: method

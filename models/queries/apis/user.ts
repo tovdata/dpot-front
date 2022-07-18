@@ -1,5 +1,7 @@
-import { extractData } from '../internal';
-import { createRequest, createRequestNotAuth, PLIPUser, RequestDF, SERVER_URL } from '../type';
+// API
+import { sendRequest } from '@/models/queries/core';
+// Type
+import type { PLIPUser, ResponseDF } from '@/models/queries/type';
 
 /** [Interface] 사용자 약관 동의 데이터 */
 export interface AgreementProps {
@@ -11,29 +13,20 @@ export interface AgreementProps {
 /**
  * [API Caller] 사용자 추가 (For Server)
  * @param userId 사용자 ID (by Cognito)
- * @param accessToken 액세스 토큰
  * @param user 사용자 데이터
  * @param agreement 약관 동의 내역
  * @returns 요청 결과
  */
- export const addUser = async (userId: string, accessToken: string, user: PLIPUser, agreement: AgreementProps): Promise<boolean> => {
+ export const addUser = async (userId: string, user: PLIPUser, agreement: AgreementProps): Promise<boolean> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = {
-      credentials: 'include',
-      body: JSON.stringify({ ...user, ...agreement }),
-      headers: {
-        'Authorization': accessToken,
-        'Content-Type': 'application/json'
-      },
-      method: 'POST'
-    };
+    // 요청 데이터 정의
+    const data: any = { ...user, agreement };
     // API 호출
-    const response = await fetch(`${SERVER_URL}user/new/${userId}`, request);
-    // 데이터 추출 및 반환
-    return (await extractData(response)).result;
+    const response: ResponseDF = await sendRequest(`/user/new/${userId}`, 'POST', data, true);
+    // 결과 반환
+    return response.result;
   } catch (err) {
-    console.error(`[ERROR] ${err}`);
+    console.error(`[API ERROR] ${err}`);
     return false;
   }
 }
@@ -44,14 +37,10 @@ export interface AgreementProps {
  */
 export const getUser = async (userId: string): Promise<PLIPUser|undefined> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequest('GET');
     // API 호출
-    const response = await fetch(`${SERVER_URL}user/${userId}`, request);
-    // 데이터 추출
-    const result = await extractData(response);
-    // 데이터 반환
-    return result.result && result.data ? result.data as PLIPUser : undefined;
+    const response: ResponseDF = await sendRequest(`/user/${userId}`, 'GET');
+    // 결과 반환
+    return response.result && response.data ? response.data as PLIPUser : undefined;
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return undefined;
@@ -62,23 +51,39 @@ export const getUser = async (userId: string): Promise<PLIPUser|undefined> => {
  * @param companyId 회사 ID
  * @returns 조회 결과
  */
-export const getUserList = async (companyId: string): Promise<PLIPUser[]> => {
+export const getUsers = async (companyId: string): Promise<PLIPUser[]> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequest('GET');
     // API 호출
-    const response = await fetch(`${SERVER_URL}company/${companyId}/details`, request);
-    // 데이터 추출
-    const result = await extractData(response);
+    const response: ResponseDF = await sendRequest(`/company/${companyId}/details`, 'GET');
     // 데이터 가공
-    if (result.result && result.data && result.data.employees) {
-      return result.data.employees.map((elem: any): PLIPUser => ({ id: elem.id, contact: elem.contact, createAt: elem.createAt, department: elem.department, email: elem.email, position: elem.position, task: elem.task, userName: elem.userName }));
+    if (response.result && response.data && response.data.employees) {
+      return response.data.employees.sort((a: any, b: any): number => b.createAt - a.createAt).map((elem: any): PLIPUser => ({ id: elem.id, contact: elem.contact, createAt: elem.createAt, department: elem.department, email: elem.email, position: elem.position, task: elem.task, userName: elem.userName }));
     } else {
       return [];
     }
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return [];
+  }
+}
+/**
+ * [API Caller] 비밀번호 변경
+ * @param userName 사용자 이름
+ * @param prevPassword 이전 비밀번호
+ * @param newPassword 새로운 비밀번호
+ * @returns 요청 결과
+ */
+export const updatePassword = async (userName: string, prevPassword: string, newPassword: string): Promise<boolean> => {
+  try {
+    // Body
+    const body = { username: userName, prevpassword: prevPassword, newpassword: newPassword };
+    // API 호출
+    const response: ResponseDF = await sendRequest(`/auth/password`, 'POST', body);
+    // 결과 반환
+    return response.result;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return false;
   }
 }
 /**
@@ -93,12 +98,11 @@ export const updateUser = async (userId: string, data: PLIPUser): Promise<boolea
     const copy: PLIPUser = JSON.parse(JSON.stringify(data));
     // ID 속성이 있을 경우, 삭제
     if ('id' in copy) delete copy.id;
-    // 요청 객체 생성
-    const request = await createRequest('PUT', copy);
+    if ('createAt' in copy) delete copy.createAt;
     // API 호출
-    const response = await fetch(`${SERVER_URL}user/${userId}`, request);
-    // 데이터 추출 및 결과 반환
-    return (await extractData(response)).result;
+    const response: ResponseDF = await sendRequest(`/user/${userId}`, 'PATCH', copy);
+    // 결과 반환
+    return response.result;
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return false;

@@ -1,16 +1,17 @@
-import { getPIDatas } from "@/models/queries/api";
 import { SERVICE_EPI, SERVICE_ESI, SERVICE_PI } from "@/models/queries/type";
 import { TableHeaderData } from "@/models/type";
-import { LinkOutlined } from "@ant-design/icons";
 import { Checkbox, Table, TableColumnProps, Tag, Typography } from "antd";
-import { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import { copyTextToClipboard } from "utils/utils";
 import { TagSelect } from "../common/Select";
 import { createTableColumnProps, EditableTable, EditableTableForm, TableContentForList, TableContentForTags } from "../common/Table";
 import { consentListHeader } from "./Header";
-import { AiOutlineDelete } from "react-icons/ai";
+// Query
+import { getPIDatas } from '@/models/queries/apis/manage';
+import { IconButtonList, LinkButtonInTable, RemoveButtonInTable } from "../renewer/Button";
+import { transformToDatetime } from "utils/utils";
+
 
 /**
  * [Component] '정보 입력'에서 수정되는 개인정보 테이블
@@ -20,21 +21,22 @@ import { AiOutlineDelete } from "react-icons/ai";
  * @param {void} setData 정보를 변경시키는 함수
  * @returns 
  */
-export const ConsentEditPITable = ({ headers, orignData, data, setData }: any): JSX.Element => {
-  // [Handler] items가 변경될 때 동작
-  const onChangeHandler = (index: number, key: React.Key | undefined, items: string | string[]): void => {
-    const newData = JSON.parse(JSON.stringify(data));
-    newData[index][key as string] = items;
-    setData(newData);
-  }
-  const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
+export const ConsentEditPITable: React.FC<any> = ({ headers, originData, data, onSave }): JSX.Element => {
+  /** [Event handler] 데이터 변경 */
+  const onChange = useCallback((index: number, key: React.Key | undefined, items: string | string[]): void => {
+    const copy: any = JSON.parse(JSON.stringify(data));
+    copy[index][key as string] = items;
+    onSave(copy);
+  }, [data, onSave]);
+
+  const columns: TableColumnProps<any>[] = useMemo(() => Object.keys(headers).map((key: string): TableColumnProps<any> => {
     // Extract a header data
     const header: TableHeaderData = headers[key];
     // Create a column
     const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description, header.width);
     column.render = (item: any, record: any, index: number): JSX.Element => {
       if (header.editable) {
-        return <TagSelect onChange={(items: string | string[]): void => onChangeHandler(index, column.key, items)} value={item} options={orignData[index][column.key as string]} />
+        return <TagSelect onChange={(items: string | string[]): void => onChange(index, column.key, items)} value={item} options={originData[index][column.key as string]} />
       }
       switch (header.display) {
         case 'string':
@@ -46,8 +48,12 @@ export const ConsentEditPITable = ({ headers, orignData, data, setData }: any): 
       }
     };
     return column;
-  });
-  return <Table columns={columns} dataSource={data} pagination={false} />
+  }), [headers, onChange, originData]);
+
+  // 컴포넌트 반환
+  return (
+    <Table columns={columns} dataSource={data} pagination={false} />
+  );
 }
 /**
  * [Component] 법령에 근거하여 정보주체의 동의없이 수집하는 정보를 작성하는 테이블
@@ -57,27 +63,27 @@ export const ConsentEditPITable = ({ headers, orignData, data, setData }: any): 
  * @param {void} setData 정보를 변경시키는 함수
  * @returns 
  */
-export const ConsentEPITable = ({ description, header, data, saveData, type }: any): JSX.Element => {
+export const ConsentEPITable = ({ description, header, data, onSave, serviceId, type }: any): JSX.Element => {
   // [State] Exception Personal Information
   const [epiData, setEpiData] = useState(data || []);
   // Get a state (for select options) 개인정보 수집 및 이용 정보
-  const { isLoading: piLoading, data: piData } = useQuery(SERVICE_PI, async () => await getPIDatas('b7dc6570-4be9-4710-85c1-4c3788fcbd12'));
+  const { isLoading: piLoading, data: piData } = useQuery([SERVICE_PI, serviceId], async () => await getPIDatas(serviceId));
 
   // [Event handler] 행(Row) 추가 이벤트
-  const onAdd = (record: any): void => setEpiData([...epiData, record]);
+  const onAdd = useCallback((record: any): void => setEpiData([...epiData, record]), [epiData]);
   // [Event handler] 행(Row) 삭제 이벤트
-  const onDelete = (index: number): void => epiData.length - 1 === index ? setEpiData([...epiData.slice(0, index)]) : setEpiData([...epiData.slice(0, index), ...epiData.slice(index + 1)]);
+  const onDelete = useCallback((index: number): void => epiData.length - 1 === index ? setEpiData([...epiData.slice(0, index)]) : setEpiData([...epiData.slice(0, index), ...epiData.slice(index + 1)]), [epiData]);
   // [Event handler] 행(Row) 저장 이벤트
-  const onSave = (record: any): boolean => {
-    const newEpiData = epiData.map((item: any, index: number) => record.id === item.id ? record : item);
+  const onSaved = useCallback((record: any): boolean => {
+    const newEpiData = epiData.map((item: any) => record.id === item.id ? record : item);
     setEpiData(newEpiData);
-    saveData({ epiData: newEpiData });
+    onSave({ epiData: newEpiData });
     return true;
-  }
+  }, [epiData, onSave]);
   // Return an element
   return (
     <EditableTableForm title='' description={description}>
-      <EditableTable refData={piLoading ? [] : piData} dataSource={epiData} headers={header} isLoading={false} onAdd={onAdd} onDelete={onDelete} onSave={onSave} tableName={type === 2 ? SERVICE_ESI : SERVICE_EPI} />
+      <EditableTable refData={piLoading ? [] : piData} dataSource={epiData} headers={header} isLoading={false} onAdd={onAdd} onDelete={onDelete} onSave={onSaved} tableName={type === 2 ? SERVICE_ESI : SERVICE_EPI} />
     </EditableTableForm>);
 }
 /** [Component] 최종 확인 단계에서 입력한 정보를 보여주는 테이블
@@ -140,6 +146,9 @@ export const ConsentTable = ({ headers, data, mode }: any) => {
     };
     return column;
   });
+
+  console.log(headers, columns, data)
+
   return <Table columns={columns} dataSource={mode === 'pi' ? convertData : data} pagination={false} />
 }
 
@@ -178,26 +187,25 @@ const StyledLinkText = styled.a`
     text-decoration: underline;
   }
 `;
-const StyledCopyButton = styled.button`
-  border: none;
-  background-color: transparent;
-`;
+
 export const ConsentListTable = ({ data, onRemove }: any): JSX.Element => {
   const headers = consentListHeader;
   const docType: any = {
-    'pi': { name: '개인정보', color: 'geekblue' },
-    'si': { name: '민감정보', color: 'magenta' },
-    'uii': { name: '고유식별정보', color: 'purple' },
-    'mai': { name: '마케팅', color: 'cyan' },
-    'tpp': { name: '제3자제공', color: 'green' }
+    0: { name: '개인정보', color: 'geekblue' },
+    3: { name: '민감정보', color: 'magenta' },
+    1: { name: '고유식별정보', color: 'purple' },
+    2: { name: '마케팅', color: 'cyan' },
+    4: { name: '제3자제공', color: 'green' }
   };
   const columns: TableColumnProps<any>[] = Object.keys(headers).map((key: string): TableColumnProps<any> => {
     // Extract a header data
     const header: TableHeaderData = headers[key];
     // Create a column
     const column: TableColumnProps<any> = createTableColumnProps(key, header.name, header.description, header.width);
-    column.render = (item: any, record: any, index: number): JSX.Element => {
+    column.render = (item: any, record: any, index: number): any => {
       switch (header.display) {
+        case 'datetime':
+          return transformToDatetime(item);
         case 'tag':
           return <Tag color={docType[item].color}>{docType[item].name}</Tag>
         case 'list':
@@ -205,20 +213,27 @@ export const ConsentListTable = ({ data, onRemove }: any): JSX.Element => {
         case 'title':
           return <StyledLinkText href={record.url} target='_blank'>{item}</StyledLinkText>
         case 'url':
-          return <>
-          <StyledCopyButton onClick={() => copyTextToClipboard(item)} style={{ color: '#000000D9', cursor: 'pointer' }}><LinkOutlined /></StyledCopyButton>
-          <StyledCopyButton onClick={() => onRemove(record.id)} style={{ color: '#000000D9', cursor: 'pointer' }}><AiOutlineDelete /></StyledCopyButton>
-          </>
+          return (
+            <IconButtonList>
+              <LinkButtonInTable url={item} />
+              <RemoveButtonInTable onConfirm={() => onRemove(record.id)} />
+            </IconButtonList>
+          )
         default:
           return <>{item}</>
       }
     };
+    // Sort
+    if (key === 'type') {
+      column.sorter = (a: any, b: any): number => a.type > b.type ? 1 : a.type < b.type ? -1 : 0;
+    } else if (key === 'editedAt') {
+      column.sorter = (a: any, b: any): number => { console.log(a); return a.editedAt - b.editedAt };
+    }
+    // Return
     return column;
   });
-  return <Table 
-    columns={columns}
-    dataSource={data}
-    pagination={{
-      position: ['bottomRight'],
-    }} />
+
+  return (
+    <Table columns={columns} dataSource={data} showSorterTooltip={false} />
+  );
 }

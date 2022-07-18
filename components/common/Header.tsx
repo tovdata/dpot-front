@@ -41,6 +41,15 @@ const StyledPageTitle = styled.h2`
   margin: 0;
   white-space: nowrap;
 `;
+// Styled component
+export const StyledTitleHeader = styled.h2`
+  color: #000000D9;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  margin-bottom: 36px;
+  user-select: none;
+`;
 
 /** [Interface] Properties for page header */
 interface TOVPageTitleProps {
@@ -109,7 +118,7 @@ export const PageHeaderContainStep = ({ current, goTo, onBack, onMove, onSave, t
         {current > 0 ? <Button type='default' onClick={() => onMove('prev')}>이전</Button> : <span></span>}
         <div>
           {canTemporarySave && <Button onClick={() => onSave(true)} type='default'>임시저장</Button>}
-          {current < steps.length - 1 ? <Button type='primary' onClick={() => onMove('next')} style={{ marginLeft: 16 }}>다음</Button> : <Button onClick={() => onMove('complete')} style={{ marginLeft: 16 }} type='primary'>완료</Button>}
+          {current < steps.length - 1 ? <Button type='primary' onClick={() => onMove('next')} style={{ marginLeft: 16 }}>다음</Button> : <Button onClick={() => onMove('complete')} style={{ marginLeft: 16 }} type='primary'>확인</Button>}
         </div>
       </StyledPageHeaderExtra>
     </StyledPageHeader>

@@ -1,7 +1,6 @@
-import { decode } from 'jsonwebtoken';
 import Link from 'next/link';
 import Router from 'next/router';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
 // Component
 import { Divider, Form, Input, Modal } from 'antd';
@@ -9,7 +8,7 @@ import { errorNotification, successNotification, warningNotification } from '../
 import { StyledFinishButton, StyledResendMailModalContent, StyledSigninFooter, StyledSigninHeader } from '../styled/Signin';
 import { PLIPInputGroup } from './Input';
 // State
-import { accessTokenSelector, companySelector, userSelector } from '@/models/session';
+import { accessTokenSelector, sessionSelector, userIdSelector } from '@/models/session';
 // Query
 import { getUser } from '@/models/queries/apis/user';
 import { resendAuthMail, signin } from '@/models/queries/apis/signin-up';
@@ -27,9 +26,9 @@ export const SigninHeader: React.FC<any> = (): JSX.Element => {
 export const SigninForm: React.FC<any> = (): JSX.Element => {
   // Form 객체
   const [form] = Form.useForm();
-  // 로컬 스토리지 내에 회사, 사용자 정보 Seletor
-  const setSessionCompany = useSetRecoilState(companySelector);
-  const setSessionUser = useSetRecoilState(userSelector);
+  // 세션, 사용자 ID Seletor
+  const setSession = useSetRecoilState(sessionSelector);
+  const setUserId = useSetRecoilState(userIdSelector);
   // 토큰 갱신을 위한 Setter
   const setAccessToken = useSetRecoilState(accessTokenSelector);
 
@@ -39,21 +38,22 @@ export const SigninForm: React.FC<any> = (): JSX.Element => {
     const response = await signin(form.getFieldValue('email'), form.getFieldValue('password'));
     // 결과에 따른 처리
     if (response.result) {
-      // 토큰에서 사용자 정보 추출
-      const info: any = decode(response.data.IdToken);
       // 로컬 저장소에 사용자 설정
-      setSessionUser({ id: info.sub, userName: info.name });
+      const userId: string = response.data.userId;
+      console.log(userId)
+      setUserId(userId);
       // 액세스 토큰 저장
-      setAccessToken(response.data.AccessToken);
+      const accessToken: string = response.data.accessToken;
+      setAccessToken(accessToken);
 
       // 회사 등록 여부 확인 및 라우팅
-      let user = await getUser(info.sub);
+      let user = await getUser(userId);
       if (user && user.affiliations && user.affiliations.length > 0) {
         // 회사 정보 조회 및 저장
         const company: any = await getCompany(user.affiliations[0].id);
         // 결과에 따른 처리
         if (company) {
-          setSessionCompany({ id: company.id, companyName: company.companyName, manager:company.manager });
+          setSession({ companyId: company.id, serviceId: '' });
           Router.push('/company/services');
         } else {
           errorNotification('로그인 과정에서 문제가 발생하였습니다.');
@@ -71,7 +71,12 @@ export const SigninForm: React.FC<any> = (): JSX.Element => {
     } else {
       errorNotification('아이디 혹은 비밀번호가 올바르지 않습니다.');
     }
-  }, [form]);
+  }, [form, setAccessToken, setSession]);
+
+  // 로그인 페이지 렌더링 시점
+  useEffect(() => {
+    setAccessToken('');
+  }, [setAccessToken]);
 
   // 컴포넌트 반환
   return (
@@ -97,7 +102,7 @@ const SigninFooter: React.FC<any> = (): JSX.Element => {
   return (
     <StyledSigninFooter>
       <p className='description'>아직 계정이 없으신가요?</p>
-      <Link href='/signup'>
+      <Link href='/signup' passHref>
         <label className='link'>회원가입</label>
       </Link>
     </StyledSigninFooter>
@@ -113,7 +118,7 @@ const ResendMailModalContent: React.FC<any> = ({ email }): JSX.Element => {
     } else {
       warningNotification('이메일 전송에 실패하였습니다.');
     }
-  }, []);
+  }, [email]);
   // 컴포넌트 반환
   return (
     <StyledResendMailModalContent>

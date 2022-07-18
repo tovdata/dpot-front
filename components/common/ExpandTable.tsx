@@ -1,22 +1,16 @@
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
-import { TableColumnProps, Table, Tag, Tooltip, Checkbox, Popconfirm, Input, Space, Typography, Button } from 'antd';
+import { TableColumnProps, Table, Tag, Checkbox, Input, Space, Typography, Modal } from 'antd';
 import { AddableSelect, AddableTagSelect, SingleSelect, TagSelect, IFTTTSelect } from './Select';
 import { checkRequired, TableFooterContainAddButton, TableEditCell, EmptyTableFooter, TableContentForList, createTableColumnProps, TableContentForTags } from './Table';
-// FontcreateTableColumnProps
-import { FS_HXXS, LH_HXXS } from '../../static/font';
-// Icon
-import { AiOutlineDelete, AiOutlineEdit, AiOutlineQuestionCircle, AiOutlineSave } from 'react-icons/ai';
-import { IoAddCircle } from 'react-icons/io5';
 // Module
 import { createWarningMessage, createSimpleWarningNotification } from './Notification';
 // Type
 import { SelectOptionsByColumn, TableHeaderData, TableHeadersData } from '../../models/type';
-import { SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI } from '../../models/queries/type';
 // Utils
-import { changeSelectOptions, extractProcessingItems, resetSelectOptions, setDataSource } from '../../utils/table';
-import { CloseOutlined } from '@ant-design/icons';
+import { changeSelectOptions, resetSelectOptions } from '../../utils/table';
+import Router from 'next/router';
 
 // Styled element (OuterTable)
 const OuterTable = styled(Table)`
@@ -48,10 +42,12 @@ interface EditableTableProps extends TableProps {
   expandKey: string;
   innerHeaders: TableHeadersData;
   isLoading?: boolean;
+  modal?: boolean;
   onAdd: (record: any) => void;
   onDelete: (value: any) => void;
   onSave: (value: any) => boolean;
   onClickURL?: () => void;
+  prerequisite: boolean;
   refData: any;
   tableName: string;
 }
@@ -65,7 +61,7 @@ interface TableProps {
 /**
  * [Component] Editable table
  */
-export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, isLoading, onAdd, onDelete, onSave, pagination, refData, tableName }: EditableTableProps): JSX.Element => {
+export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, isLoading, modal, onAdd, onDelete, onSave, pagination, prerequisite, refData, tableName }: EditableTableProps): JSX.Element => {
   // Set a default focus and default record for columns in row
   const defaultFocusState: any = {};
   const defaultRecord: any = {};
@@ -86,22 +82,26 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
   /**
    * [Event Handler] Create a row
    */
-  const onCreate = (): void => {
-    // Set a key
-    const key: string = `npc_${newProjectCnt.current++}`;
-    // Create a new row
-    const record: any = { ...defaultRecord, id: key, key: key };
+  const onCreate = useCallback((): void => {
+    if (prerequisite) {
+      // Set a key
+      const key: string = `npc_${newProjectCnt.current++}`;
+      // Create a new row
+      const record: any = { ...defaultRecord, id: key, key: key };
 
-    // Check a editing status
-    if (row.id !== undefined) {
-      createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.', 2.4, 'topRight');
+      // Check a editing status
+      if (row.id !== undefined) {
+        createSimpleWarningNotification('현재 수정 중인 데이터를 저장하고 진행해주세요.', 2.4, 'topRight');
+      } else {
+        // Add a row
+        onAdd(record);
+        // Update a state
+        setRow(record);
+      }
     } else {
-      // Add a row
-      onAdd(record);
-      // Update a state
-      setRow(record);
+      tableName === 'ppi' || tableName === 'cpi' ? prerequisiteModal(!modal) : prerequisiteModal(!modal, true);
     }
-  }
+  }, [defaultRecord, modal, onAdd, prerequisite, row.id, tableName]);
   /**
    * [Event Handler] Change a row
    * @param key column key
@@ -323,4 +323,20 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
       onExpandedRowsChange: (expandedRows: any) => setExpandedKeys(expandedRows)
     }} footer={footer} loading={isLoading} pagination={pagination ? undefined : false} />
   )
+}
+
+/**
+ * [Function] 전제 조건 미부합 모달
+ * @param fni 가명정보 여부
+ * @param isRedirect 리다이렉트 경로
+ */
+ export const prerequisiteModal = (isRedirect: boolean = true, fni?: boolean) => {
+  Modal.confirm({
+    cancelText: '아니오',
+    centered: true,
+    content: fni ? `가명정보 관리 탭에서 개인정보 처리에 관한 내용을 입력하셔야 문서를 만드실 수 있습니다.` : `개인정보 관리 탭에서 개인정보 처리에 관한 내용을 입력하셔야 문서를 만드실 수 있습니다.`,
+    okText: '입력하러가기',
+    onOk: () => isRedirect ? Router.push('/pim/cu') : undefined,
+    title: '입력된 정보가 없습니다.'
+  });
 }

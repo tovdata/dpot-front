@@ -95,7 +95,7 @@ export const ppiTableHeader: TableHeadersData = {
     width: '18%'
   },
   purpose: {
-    description: '개인정보를 ‘제공받은 자의 목적’을 모두 입력해주세요. 예시에서 고르거나, 직접 추가할 수 있어요.',
+    description: '개인정보를 ‘제공받은 자의 목적’을 모두 입력해주세요.',
     display: 'list',
     name: '제공받는자의 목적',
     placeholder: '직접 입력',

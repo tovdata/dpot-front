@@ -5,12 +5,15 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import Link from 'next/link';
 import { StyledPageContent, StyledPageHeader, StyledPageHeaderMenuItem, StyledPageHeaderNav, StyledPageSider, StyledPageSiderFooter } from '../styled/Layout';
 // State
-import { accessTokenSelector, expandSideSelector, serviceSelector } from '@/models/session';
+import { accessTokenSelector, expandSideSelector, sessionSelector } from '@/models/session';
 import { Dropdown, Layout, Menu } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import PLIPSideMenu from './SideMenu';
 import { signout } from '@/models/queries/apis/signin-up';
 import { errorNotification, successNotification } from '../common/Notification';
+import { useQuery } from 'react-query';
+import { KEY_SERVICE } from '@/models/queries/key';
+import { getService } from '@/models/queries/apis/company';
 
 export interface PLIPPageLayoutProps {
   children?: JSX.Element | JSX.Element[];
@@ -19,7 +22,7 @@ export interface PLIPPageLayoutProps {
 
 /** [Component] 페이지 레이아웃 (헤더) */
 export const PLIPPageHeader: React.FC<any> = (): JSX.Element => {
-  // 로컬 스토리지에 저장된 모든 정보
+  // 액세스 토큰
   const setAccessToken = useSetRecoilState(accessTokenSelector);
 
   /** [Event handler] 회사 관리로 이동 */
@@ -37,19 +40,19 @@ export const PLIPPageHeader: React.FC<any> = (): JSX.Element => {
     } else {
       errorNotification('로그아웃에 실패하였습니다.');
     }
-  }, []);
+  }, [setAccessToken]);
 
   // 헤더 메뉴 아이템
   const items: any[] = useMemo(() => [
     { label: (<Link href='/my'>내 정보</Link>), key: 'info' },
     { label: (<a onClick={onSignout}>로그아웃</a>), key: 'signin' }
-  ], []);
+  ], [onSignout]);
 
   // 컴포넌트 반환
   return (
     <StyledPageHeader>
       <div className='logo'>
-        <Link href='/'>PLIP</Link>
+        <Link href='/home' passHref>PLIP</Link>
       </div>
       <StyledPageHeaderNav>
         <StyledPageHeaderMenuItem>사용자 가이드</StyledPageHeaderMenuItem>
@@ -65,42 +68,44 @@ export const PLIPPageHeader: React.FC<any> = (): JSX.Element => {
 }
 /** [Component] 페이지 레이아웃 */
 export const PLIPPageLayout: React.FC<any> = ({ children, selectedKey }): JSX.Element => {
+  // 세션 조회
+  const session = useRecoilValue(sessionSelector);
   // 스크롤 상태
   const [scroll, setScroll] = useState<number>(0);
   // 메뉴 확장 여부
   const [expand, setExpand] = useRecoilState(expandSideSelector);
+  // 서비스 조회
+  const { isLoading, data: service } = useQuery([KEY_SERVICE, session.serviceId], async () => await getService(session.serviceId));
   
   // 스크롤 값 저장을 위한 Hook
-  const onScroll = useCallback(() => setScroll(window.scrollY), [window]);
+  const onScroll = useCallback(() => setScroll(window.scrollY), []);
   /** [Event handler] 메뉴 확장 여부 */
-  const onExpand = useCallback(() => setExpand(!expand), [expand]);
+  const onExpand = useCallback(() => setExpand(!expand), [expand, setExpand]);
   // 스크롤 이벤트 등록 (최초 1회)
   useEffect(() => {
     window.addEventListener('scroll', onScroll);
     return () => removeEventListener('scroll', onScroll);
-  }, []);
+  }, [onScroll]);
 
   // 컴포넌트 반환
   return (
-    <Layout>
-      <PLIPPageHeader />
-      <Layout hasSider>
-        <PLIPPageSider expand={expand} onExpand={onExpand} scroll={scroll} selectedKey={selectedKey} />
-        <StyledPageContent expand={expand.toString()} scroll={scroll}>{children}</StyledPageContent>
+    <>{isLoading ? (<></>) : (
+      <Layout>
+        <PLIPPageHeader />
+        <Layout hasSider>
+          <PLIPPageSider expand={expand} onExpand={onExpand} scroll={scroll} selectedKey={selectedKey} service={service} />
+          <StyledPageContent expand={expand.toString()} scroll={scroll}>{children}</StyledPageContent>
+        </Layout>
       </Layout>
-    </Layout>
+    )}</>
   );
 }
 /** [Component] 페이지 레이아웃 (사이드) */
-export const PLIPPageSider: React.FC<any> = ({ expand, onExpand, scroll, selectedKey }): JSX.Element => {
-  // 로컬 스토리지 내 서비스 정보 및 메뉴 확장 여부 조회
-  const sessionService = useRecoilValue(serviceSelector);
-
-  // 컴포넌트 반환
+export const PLIPPageSider: React.FC<any> = ({ expand, onExpand, scroll, selectedKey, service }): JSX.Element => {
   return (
     <StyledPageSider collapsed={!expand} collapsedWidth={88} scroll={scroll} width={246}>
       <div className='container'>
-        <PLIPSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} serviceName={sessionService.serviceName} />
+        <PLIPSideMenu expand={expand} onExpand={onExpand} selectedKey={selectedKey} service={service} />
         <StyledPageSiderFooter expand={expand.toString()}>
           <div className='menu'>
             <a className='pipp'>개인정보처리방침</a>

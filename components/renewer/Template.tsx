@@ -33,7 +33,7 @@ export const TemplateList: React.FC<any> = (): JSX.Element => {
         { title: '', dataIndex: 'url', key: 'url', render: (value: string) => (<DownloadButton />)}
       ]} dataSource={[
         { title: '알기 쉬운 개인정보 처리 동의 안내서', publishAt: '1655690032000', sources: '개인정보보호위원회', url: '' }
-      ]} />
+      ]} showSorterTooltip={false} />
     </StyledTabPane>
   );
 }
@@ -51,7 +51,7 @@ export const GuideLine: React.FC<any> = (): JSX.Element => {
         { title: '', dataIndex: 'url', key: 'url', render: (value: string) => (<DownloadButton />)}
       ]} dataSource={[
         { title: '알기 쉬운 개인정보 처리 동의 안내서', publishAt: '1655690032000', sources: '개인정보보호위원회', url: '' }
-      ]} />
+      ]} showSorterTooltip={false} />
     </StyledTabPane>
   );
 }

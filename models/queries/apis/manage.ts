@@ -1,12 +1,11 @@
-// Logging
-import { writeActivityLog } from "utils/utils";
-// Module
-import { createRequest as createRequestObj, ResponseDF } from "../type";
-import { createRequestForManage, extractData, processArrayResponse } from "../internal";
+// API
+import { sendRequest } from '@/models/queries/core';
 // Type
-import { User } from "@/models/session";
-import { RequestDF, SERVER_URL } from "../type";
-import { SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_DPI } from '../type';
+import type { ResponseDF } from '@/models/queries/type';
+import { SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVICE_CFNI, SERVICE_DPI } from '@/models/queries/type';
+// Util
+import { writeActivityLog } from 'utils/utils';
+
 
 /**
  * [API Caller] 가명정보 위탁에 대한 데이터 조회
@@ -15,12 +14,10 @@ import { SERVICE_PI, SERVICE_FNI, SERVICE_PPI, SERVICE_PFNI, SERVICE_CPI, SERVIC
  */
 export const getCFNIDatas = async (serviceId: string): Promise<any[]> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/cfnis`, request);
-    // 응답 데이터 처리 및 반환
-    return await processArrayResponse(response);
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}/cfnis`, 'GET');
+    // 결과 반환
+    return response.result && response.data ? extract(response.data) : []; 
   } catch (err) {
     console.error(`[API ERROR] (GET /cfnis) ${err}`);
     return [];
@@ -33,12 +30,10 @@ export const getCFNIDatas = async (serviceId: string): Promise<any[]> => {
  */
 export const getCPIDatas = async (serviceId: string): Promise<any[]> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/cpis`, request);
-    // 응답 데이터 처리 및 반환
-    return await processArrayResponse(response);
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}/cpis`, 'GET');
+    // 결과 반환
+    return response.result && response.data ? extract(response.data) : []; 
   } catch (err) {
     console.error(`[API ERROR] (GET /cpis) ${err}`);
     return [];
@@ -82,12 +77,10 @@ export const getDatasByTableType = async (serviceId: string, type: string): Prom
  */
 export const getDPIDatas = async (serviceId: string): Promise<any[]> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/dpis`, request);
-    // 응답 데이터 처리 및 반환
-    return await processArrayResponse(response);
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}/dpis`, 'GET');
+    // 결과 반환
+    return response.result && response.data ? extract(response.data) : []; 
   } catch (err) {
     console.error(`[API ERROR] (GET /dpis) ${err}`);
     return [];
@@ -100,12 +93,10 @@ export const getDPIDatas = async (serviceId: string): Promise<any[]> => {
  */
 export const getFNIDatas = async (serviceId: string): Promise<any[]> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/fnis`, request);
-    // 응답 데이터 처리 및 반환
-    return await processArrayResponse(response);
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}/fnis`, 'GET');
+    // 결과 반환
+    return response.result && response.data ? extract(response.data) : [];
   } catch (err) {
     console.error(`[API ERROR] (GET /fnis) ${err}`);
     return [];
@@ -118,12 +109,10 @@ export const getFNIDatas = async (serviceId: string): Promise<any[]> => {
  */
 export const getPFNIDatas = async (serviceId: string): Promise<any[]> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pfnis`, request);
-    // 응답 데이터 처리 및 반환
-    return await processArrayResponse(response);
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}/pfnis`, 'GET');
+    // 결과 반환
+    return response.result && response.data ? extract(response.data) : []; 
   } catch (err) {
     console.error(`[API ERROR] (GET /pfnis) ${err}`);
     return [];
@@ -136,12 +125,10 @@ export const getPFNIDatas = async (serviceId: string): Promise<any[]> => {
  */
 export const getPIDatas = async (serviceId: string): Promise<any[]> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pis`, request);
-    // 응답 데이터 처리 및 반환
-    return await processArrayResponse(response);
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}/pis`, 'GET');
+    // 결과 반환
+    return response.result && response.data ? extract(response.data) : []; 
   } catch (err) {
     console.error(`[API ERROR] (GET /pis) ${err}`);
     return [];
@@ -154,14 +141,10 @@ export const getPIDatas = async (serviceId: string): Promise<any[]> => {
  */
 export const getPIItems = async (serviceId: string): Promise<any[]> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pi/allitems`, request);
-    // 응답 데이터 추출
-    const result = await extractData(response); 
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}/pi/allitems`, 'GET');
     // 결과 반환
-    return result.result ? result.data.allItems ? result.data.allItems.sort() : [] : [];
+    return response.result && response.data && response.data.allItems ? response.data.allItems.sort() : [];
   } catch (err) {
     console.error(`[API ERROR] (GET /pi/allitems) ${err}`);
     return [];
@@ -174,14 +157,10 @@ export const getPIItems = async (serviceId: string): Promise<any[]> => {
  */
 export const getPIItemsByType = async (serviceId: string): Promise<any[]> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/pi/allitems`, request);
-    // 응답 데이터 추출
-    const result = await extractData(response); 
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}/pi/allitems`, 'GET');
     // 결과 반환
-    return result.result ? result.data : { allItems: [], essentialItemsOnly: [], selectionItemsOnly: [] };
+    return response.result && response.data ? response.data : { allItems: [], essentialItemsOnly: [], selectionItemsOnly: [] };
   } catch (err) {
     console.error(`[API ERROR] (GET /pi/allitems) ${err}`);
     return [];
@@ -194,42 +173,100 @@ export const getPIItemsByType = async (serviceId: string): Promise<any[]> => {
  */
 export const getPPIDatas = async (serviceId: string): Promise<any[]> => {
   try {
-    // 요청 객체 생성
-    const request: RequestDF = await createRequestObj('GET');
     // API 호출
-    const response: Response = await fetch(`${SERVER_URL}service/${serviceId}/ppis`, request);
-    // 응답 데이터 처리 및 반환
-    return await processArrayResponse(response);
+    const response: ResponseDF = await sendRequest(`/service/${serviceId}/ppis`, 'GET');
+    // 결과 반환
+    return response.result && response.data ? extract(response.data) : []; 
   } catch (err) {
     console.error(`[API ERROR] (GET /ppis) ${err}`);
     return [];
   }
 }
-
 /**
  * [API Caller] 테이블 유형에 따라 데이터 처리
  * @param user 사용자 정보
- * @param serviceId 현재 서비스 ID
+ * @param service 서비스 정보
  * @param type 테이블 유형 [ pi | fni | ppi | pfni | cpi | cfni | dpi ]
  * @param mode 처리 유형 [ add | delete | save ]
  * @param data 처리하고자는 데이터
  * @returns 결과 데이터
  */
-export const setDataByTableType = async (user: User, serviceId: string, type: string, mode: string, data: any): Promise<any> => {
-  // URL 및 Request 정의
-  const url: string = mode === 'add' ? `${SERVER_URL}${type}/new` : `${SERVER_URL}${type}/${data.id}`;
-  // 요청 객체 생성
-  const request: RequestDF = await createRequestForManage(serviceId, mode, data);
-  // API 요청
-  const response: Response = await fetch(url, request);
-  // 데이터 변환
-  const result: ResponseDF = await extractData(response, mode);
-  // 에러 확인 및 로그 작성
-  if (result) {
-    // 서비스 로그
-    writeActivityLog(mode, type, serviceId, user.userName);
-    // 사용자 로그
-    writeActivityLog(mode, type, user.id);
+export const setDataByTableType = async (user: any, service: any, type: string, mode: string, data: any): Promise<any> => {
+  try {
+    // 경로 정의
+    const path: string = mode === 'add' ? `/${type}/new` : `/${type}/${data.id}`;
+    // API 호출
+    const response: ResponseDF = await sendRequest(path, requestMethod(mode), requestBody(service.id, user.id, mode, data));
+    // 에러 확인 및 로그 작성
+    if (response.result) {
+      // 서비스 로그
+      if (user) writeActivityLog(mode, type, service.id, user.userName);
+      // 사용자 로그
+      if (service) writeActivityLog(mode, type, user.id, undefined, service.serviceName);
+    }
+    return response;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return { result: false };
   }
-  return result;
+}
+
+/**
+ * [Internal Function] 요청 데이터
+ * @param serviceId 서비스 ID
+ * @param userId 사용자 ID
+ * @param mode 요청 모드
+ * @param data 데이터
+ * @returns 처리 결과
+ */
+const requestBody = (serviceId: string, userId: string, mode: string, data: any): any => {
+  // 데이터 복사 (깊은 복사)
+  const copy: any = JSON.parse(JSON.stringify(data));
+  // Timestamp 추출
+  const createAt: number|undefined = data.createAt;
+  // id, key, unix 속성 삭제
+  delete copy.id;
+  delete copy.key;
+  delete copy.createAt;
+  // 기본 데이터 형식
+  const basis: any = { serviceId, userId };
+  // 요청 메서드 및 Body 정의
+  switch (mode) {
+    case 'add':
+      return { ...basis, data: copy };
+    case 'delete':
+      return { ...basis };
+    case 'save':
+      return { ...basis, createAt: Number(createAt), data: copy };
+  }
+  return { ...basis };
+}
+/**
+ * [Internal Funcion] 요청 메서드
+ * @param mode 요청 모드
+ * @returns HTTP 메서드
+ */
+const requestMethod = (mode: string): string => {
+  switch (mode) {
+    case 'add':
+      return 'POST';
+    case 'delete':
+      return 'DELETE';
+    case 'save':
+      return 'PATCH';
+  }
+  return 'GET';
+}
+
+const extract = (data: any): any[] => {
+  try {
+    return data.map((item: any): any => ({
+      createAt: item.createAt,
+      id: item.id,
+      key: item.id,
+      ...item.data
+    })).sort((a: any, b: any): number => a.createAt - b.createAt);
+  } catch (err) {
+    return [];
+  }
 }

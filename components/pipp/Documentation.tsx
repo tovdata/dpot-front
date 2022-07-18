@@ -36,6 +36,7 @@ interface DIRowContentProps {
 /** [Interface] Properties for DIRowDivider */
 interface DIRowDividerProps {
   marginH?: number;
+  style?: React.CSSProperties;
 }
 /** [Interface] Properties for DIRowHeader */
 interface DIRowHeaderProps {
@@ -121,9 +122,9 @@ export const DIRowContent: React.FC<DIRowContentProps> = ({ children }: DIRowCon
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row divider */
-export const DIRowDivider: React.FC<DIRowDividerProps> = ({ marginH }: DIRowDividerProps): JSX.Element => {
+export const DIRowDivider: React.FC<DIRowDividerProps> = ({ marginH, style }: DIRowDividerProps): JSX.Element => {
   return (
-    <Divider dashed style={{ marginBottom: marginH ? marginH : 30, marginTop: marginH ? marginH : 30 }} />
+    <Divider dashed style={{ marginBottom: marginH ? marginH : 30, marginTop: marginH ? marginH : 30, ...style }} />
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 입력 폼 Row header */
@@ -188,7 +189,7 @@ export const DDRow: React.FC<RowProps> = ({ children, self }: RowProps): JSX.Ele
 }
 
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row content */
-export const DDRowContent: React.FC<DDRowContentProps> = ({ items, links, preview, style }: DDRowContentProps): JSX.Element => {
+export const DDRowContent: React.FC<DDRowContentProps> = ({ items, links, style }: DDRowContentProps): JSX.Element => {
   return items ? (
     <div style={{ marginBottom: 8, ...style }}>
       {items.map((item: string | JSX.Element, index: number): JSX.Element => (<p key={index} style={{ fontSize: 14, margin: 0 }}>
@@ -209,7 +210,7 @@ export const DDRowHeader: React.FC<DDRowHeaderProps> = ({ preview, self, title }
   );
 }
 /** [Component] 개인정보 처리방침 문서 생성을 위한 미리보기 폼 Row item list */
-export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, links, preview, style }: DDRowItemListProps): JSX.Element => {
+export const DDRowItemList: React.FC<DDRowItemListProps> = ({ items, level, links, style }: DDRowItemListProps): JSX.Element => {
   // 목록 레벨에 따른 스타일 정의
   let styleByType: React.CSSProperties;
   switch (level) {

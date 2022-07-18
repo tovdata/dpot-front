@@ -39,12 +39,12 @@ export const defaultPIPPData: any = {
       method: [],
       usage: undefined
     },
-    ppi: {
-      usage: undefined
-    },
-    cpi: {
-      usage: undefined
-    },
+    // ppi: {
+    //   usage: undefined
+    // },
+    // cpi: {
+    //   usage: undefined
+    // },
     destructionUnused: {
       type: undefined
     },
@@ -54,9 +54,9 @@ export const defaultPIPPData: any = {
       certification: [],
       usage: undefined
     },
-    fni: {
-      usage: undefined
-    },
+    // fni: {
+    //   usage: undefined
+    // },
     manager: {
       charger: {
         name: '',
@@ -162,7 +162,7 @@ export const staticConsentData =(companyName:string)=> [
     ],
     document: {
       fixedText: [
-        { text: `"${companyName}"은(는) "개인정보 보호법"에 따라 아래와 같이 수집하는 개인정보의 항목, 수집 및 이용 목적, 보유 및 이용 기간을 안내드리고 동의를 받고자 합니다.`, important: false }
+        { text: `${companyName}은(는) "개인정보 보호법"에 따라 아래와 같이 수집하는 개인정보의 항목, 수집 및 이용 목적, 보유 및 이용 기간을 안내드리고 동의를 받고자 합니다.`, important: false }
       ]
     }
   },
@@ -177,7 +177,7 @@ export const staticConsentData =(companyName:string)=> [
     },
     disadvantage: {
       description: '동의를 거부할 권리가 있다는 사실과 동의 거부에 따른 불이익에 대한 구체적인 내용이 반드시 포함되어야 합니다.',
-      example: '정보주체는 위와 같이 민감정보를 처리하는 것에 대한 동의를 거부할 권리가 있습니다. \n그러나 동의를 거부할 경우 "맞춤형 서비스 제공/건강정보 분석 서비스 이용"이 제한될 수 있습니다.'
+      example: '정보주체는 위와 같이 민감정보를 처리하는 것에 대한 동의를 거부할 권리가 있습니다.\r\n그러나 동의를 거부할 경우 "맞춤형 서비스 제공/건강정보 분석 서비스 이용"이 제한될 수 있습니다.'
     },
     checkList: [
       {
@@ -199,7 +199,7 @@ export const staticConsentData =(companyName:string)=> [
     document: {
       title: 'OOO 서비스를 위한 민감정보 수집 및 이용 동의서',
       fixedText: [
-        { text: `"${companyName}"은(는) 아래와 같이 민감정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.`, important: false }
+        { text: `${companyName}은(는) 아래와 같이 민감정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.`, important: false }
       ]
     }
   },
@@ -214,7 +214,7 @@ export const staticConsentData =(companyName:string)=> [
     },
     disadvantage: {
       description: '동의를 거부할 권리가 있다는 사실과 동의 거부에 따른 불이익에 대한 구체적인 내용이 반드시 포함되어야 합니다.',
-      example: '정보주체는 위와 같이 고유식별정보를 처리하는 것에 대한 동의를 거부할 권리가 있습니다.\\n그러나 동의를 거부할 경우 "회원가입/환불처리/본인확인"이 제한될 수 있습니다.'
+      example: '정보주체는 위와 같이 고유식별정보를 처리하는 것에 대한 동의를 거부할 권리가 있습니다.\n그러나 동의를 거부할 경우 "회원가입/환불처리/본인확인"이 제한될 수 있습니다.'
     },
     checkList: [
       {
@@ -227,7 +227,7 @@ export const staticConsentData =(companyName:string)=> [
     ],
     document: {
       fixedText: [
-        { text: `"${companyName}"은(는) 아래와 같이 고유식별정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.`, important: false }
+        { text: `${companyName}은(는) 아래와 같이 고유식별정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.`, important: false }
       ]
     }
   },
@@ -262,8 +262,8 @@ export const staticConsentData =(companyName:string)=> [
     ],
     document: {
       fixedText: [
-        { text: `"${companyName}"은(는) 아래와 같이 마케팅 및 광고성 정보 수신을 위해 개인정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.`, important: false },
-        { text: `"${companyName}"은(는) 상품이나 서비스의 홍보 또는 판매 권유 등을 위하여 해당 개인정보를 이용하여 정보주체에게 연락할 수 있습니다.`, important: true }
+        { text: `${companyName}은(는) 아래와 같이 마케팅 및 광고성 정보 수신을 위해 개인정보 수집 및 이용에 관한 사항을 안내드리고 동의를 받고자 합니다.`, important: false },
+        { text: `${companyName}은(는) 상품이나 서비스의 홍보 또는 판매 권유 등을 위하여 해당 개인정보를 이용하여 정보주체에게 연락할 수 있습니다.`, important: true }
       ]
     }
   },
@@ -290,7 +290,7 @@ export const staticConsentData =(companyName:string)=> [
     ],
     document: {
       fixedText: [
-        { text: `"${companyName}"은(는) 아래와 같이 개인정보를 제3자에게 제공하는 사항을 안내드리고 동의를 받고자 합니다.`, bold: false }
+        { text: `${companyName}은(는) 아래와 같이 개인정보를 제3자에게 제공하는 사항을 안내드리고 동의를 받고자 합니다.`, bold: false }
       ]
     }
   },

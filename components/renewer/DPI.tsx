@@ -1,4 +1,5 @@
-import { MutableRefObject, useCallback, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import ReactToPrint from 'react-to-print';
 // Component
@@ -9,17 +10,19 @@ import { AddableTagSelect, TagSelect } from '../common/Select';
 import { StyledDescriptionLabel, StyledInformationFormFooter, StyledInformationFormHeader, StyledPrintLayout } from '../styled/DPI';
 import { PLIPLoadingContainer } from './Page';
 // Icon
-import { PlusOutlined } from '@ant-design/icons';
-import { VscChevronLeft } from 'react-icons/vsc';
-// Module
-import { blankCheck } from '../../utils/utils';
-import moment from 'moment';
-// State
-import { Company, User } from '@/models/session';
+const PlusOutlined =  dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.PlusOutlined));
+const VscChevronLeft = dynamic(() => import('react-icons/vsc').then((mod: any): any => mod.VscChevronLeft));
 // Query
-import { getDPIDatas, getPIItems, setDataByTableType } from '@/models/queries/api';
+import { getDPIDatas, getPIItems, setDataByTableType } from '@/models/queries/apis/manage';
+import { getUser } from '@/models/queries/apis/user';
+import { getCompany, getService } from '@/models/queries/apis/company';
 // Query key
 import { SERVICE_DPI } from '@/models/queries/type';
+import { KEY_COMPANY, KEY_SERVICE, KEY_USER } from '@/models/queries/key';
+// Util
+import { blankCheck, decodeAccessToken, transformToDate, transformToUnix } from '../../utils/utils';
+import moment from 'moment';
+
 
 /** [Interface] Properties for DPITable */
 interface DPITableProps {
@@ -27,18 +30,16 @@ interface DPITableProps {
   serviceId: string;
 }
 /** [Interface] Properties for DPITableForm */
-export interface DPITableFormProps {
+export interface DPITableFormProps extends DPITableProps {
   onCreate: () => void;
-  onEdit: (id: string) => void;
-  serviceId: string;
 }
 /** [Interface] Properties for InformationForm */
 export interface InformationFormProps {
-  company: Company;
+  accessToken: string;
+  companyId: string;
   data: any;
   onBack: () => void;
   serviceId: string;
-  user: User;
 }
 /** [Interface] Properties for InformationFormHeader */
 interface InformationFormHeaderProps {
@@ -59,8 +60,8 @@ interface InformationFormBodyProps {
 }
 /** [Interface] Properties for PrintElement */
 interface PrintElementProps {
-  company: Company;
   data: any;
+  managerName: string;
   printRef: MutableRefObject<any>;
 }
 /** [Interface] Properties for DescriptionLabel */
@@ -72,7 +73,7 @@ interface DescriptionLabelProps {
 /** [Component] 개인정보 파기 테이블 Form */
 export const DPITableForm: React.FC<DPITableFormProps> = ({ onCreate, onEdit, serviceId }): JSX.Element => {
   // 파기에 대한 문서 생성 버튼 정의
-  const tool: JSX.Element = useMemo(() => (<Button icon={<PlusOutlined />} onClick={onCreate} type='default'>추가하기</Button>), []);
+  const tool: JSX.Element = useMemo(() => (<Button icon={<PlusOutlined />} onClick={onCreate} type='default'>추가하기</Button>), [onCreate]);
 
   // 컴포넌트 반환
   return (
@@ -82,9 +83,18 @@ export const DPITableForm: React.FC<DPITableFormProps> = ({ onCreate, onEdit, se
   );
 }
 /** [Component] 개인정보 파기에 대한 자세한 정보 확인 Form (보기/편집/추가) */
-export const InformationForm: React.FC<InformationFormProps> = ({ company, data, onBack, serviceId, user }): JSX.Element => {
+export const InformationForm: React.FC<InformationFormProps> = ({ accessToken, companyId, data, onBack, serviceId }): JSX.Element => {
+  // 사용자 ID 추출
+  const userId: string = useMemo(() => decodeAccessToken(accessToken), [accessToken]);
   // 개인정보 수집 및 이용으로부터 항목 조회 (서버 API)
-  const { isLoading, data: items } = useQuery(['piItems', serviceId], async () => getPIItems(serviceId));
+  const { isLoading: loadingItems, data: items } = useQuery(['piItems', serviceId], async () => await getPIItems(serviceId));
+  // 사용자 조회
+  const { isLoading: loadingUser, data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
+  // 회사 조회
+  const { isLoading: loadingCompany, data: company } = useQuery([KEY_COMPANY, companyId], async () => await getCompany(companyId));
+  // 서비스 조회
+  const { data: service } = useQuery([KEY_SERVICE, serviceId], async () => await getService(serviceId));
+
   // 데이터 상태 관리
   const [temp, setTemp] = useState<any>(data);
   // 현재 상태가 추가인지 편집인지 확인하는 메서드
@@ -101,12 +111,14 @@ export const InformationForm: React.FC<InformationFormProps> = ({ company, data,
   const onChange = useCallback((property: string, value: any) => setTemp({ ...temp, [property]: value }), [temp]);
   /** [Event handler] 삭제 이벤트 */
   const onDelete = useCallback(async (id: string) => {
-    await setDataByTableType(user, serviceId, SERVICE_DPI, 'delete', { id: id });
-    // 데이터 갱신
-    queryClient.invalidateQueries([SERVICE_DPI, serviceId]);
-    // 목록으로 이동
-    onBack();
-  }, [serviceId, user, queryClient]);
+    if (user) {
+      await setDataByTableType({ id: userId, userName: user.userName }, { id: serviceId, serviceName: service?.serviceName }, SERVICE_DPI, 'delete', { id: id });
+      // 데이터 갱신
+      queryClient.invalidateQueries([SERVICE_DPI, serviceId]);
+      // 목록으로 이동
+      onBack();
+    }
+  }, [queryClient, onBack, service, serviceId, user, userId]);
   /** [Event handler] 편집 이벤트 */
   const onEdit = useCallback((status: boolean): void => {
     if (checkNew() && !status) {    // 추가이면서 취소일 경우, 테이블로 복귀
@@ -116,13 +128,13 @@ export const InformationForm: React.FC<InformationFormProps> = ({ company, data,
     }
     // 상태 갱신
     setEdit(status);
-  }, [checkNew]);
+  }, [checkNew, data, onBack]);
   /** [Event handler] 저장 이벤트 */
   const onSave = useCallback(async (): Promise<void> => {
     if (blankCheck(temp.subject)) {
       warningNotification('파기 대상 개인정보를 입력해주세요.');
       refs.current[0].focus();
-    } else if (blankCheck(temp.date)) {
+    } else if (blankCheck(temp.date.toString())) {
       warningNotification('파기 일시를 선택해주세요.');
       refs.current[1].focus();
     } else if (temp.reason.length === 0) {
@@ -134,31 +146,35 @@ export const InformationForm: React.FC<InformationFormProps> = ({ company, data,
     } else if (blankCheck(temp.charger)) {
       warningNotification('담당자를 입력해주세요.');
       refs.current[4].focus();
-    } else {
-      const response: any = await setDataByTableType(user, serviceId, SERVICE_DPI, checkNew() ? 'add' : 'save', temp);
+    } else if (user) {
+      // 데이터 가공
+      const copy = JSON.parse(JSON.stringify(temp));
+      // 날짜 형식 수정 (string -> number)
+      copy.date = transformToUnix(copy.date);
+      // API 호출
+      const response: any = await setDataByTableType({ id: userId, userName: user.userName }, { id: serviceId, serviceName: service?.serviceName }, SERVICE_DPI, checkNew() ? 'add' : 'save', temp);
       // 응답에 따른 처리
-      if (response && 'id' in response) {
-        temp.id = response.id;
-        temp.unix = response.createAt;
+      if (response && response.data) {
+        setTemp({ ...temp, id: response.data.id, unix: response.data.createAt });
       }
       // 데이터 갱신
       queryClient.invalidateQueries([SERVICE_DPI, serviceId]);
       // 편집 모드 종료
       setEdit(false);
     };
-  }, [checkNew, refs, serviceId, user, temp]);
+  }, [checkNew, queryClient, refs, service, serviceId, temp, user, userId]);
 
   // 컴포넌트 반환
   return (
     <>
-      {isLoading ? (
+      {loadingCompany || loadingItems || loadingUser ? (
         <PLIPLoadingContainer />
       ) : (
         <>
           <InformationFormHeader edit={edit} onBack={onBack} onEdit={onEdit} onSave={onSave} printRef={printRef} />
           <InformationFormBody data={temp} edit={edit} items={items ? items : []} onChange={onChange} onDelete={onDelete} refElements={refs} />
           <div style={{ display: 'none' }}>
-            <PrintElement company={company} data={temp} printRef={printRef} />
+            <PrintElement data={temp} managerName={company ? company.manager.name : ''} printRef={printRef} />
           </div>
         </>
       )}
@@ -185,7 +201,7 @@ const DPITable: React.FC<DPITableProps> = ({ onEdit, serviceId }): JSX.Element =
   // 컴포넌트 반환
   return (
     <Table columns={[
-      { title: '파기 일시', dataIndex: 'date', key: 'date', sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix() },
+      { title: '파기 일시', dataIndex: 'date', key: 'date', render: (value: number) => transformToDate(value), sorter: (a: any, b: any): number => a.date - b.date },
       { title: '파기 대상 개인정보', dataIndex: 'subject', key: 'subject' },
       { title: '파기 사유', dataIndex: 'reason', key: 'reason', render: (value: string[]): JSX.Element => (<TableContentForList items={value} />) },
       { title: '파기 항목', dataIndex: 'items', key: 'items', render: (value: string[]): JSX.Element => (<TableContentForTags items={value} tooltip='고유식별정보' />) }
@@ -195,7 +211,7 @@ const DPITable: React.FC<DPITableProps> = ({ onEdit, serviceId }): JSX.Element =
 /** [Internal Component] 개인정보 파기에 대한 자세한 정보 확인 Form body (보기/편집/추가) */
 const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, items, onChange, onDelete, refElements }): JSX.Element => {
   /** [Event handler] 파기 정보 삭제 */
-  const onConfirm = useCallback(() => onDelete(data.id), [data.id]);
+  const onConfirm = useCallback(() => onDelete(data.id), [data.id, onDelete]);
 
   // 컴포넌트 반환
   return (
@@ -208,12 +224,12 @@ const InformationFormBody: React.FC<InformationFormBodyProps> = ({ data, edit, i
         </Descriptions.Item>
         <Descriptions.Item label={<DescriptionLabel content='파기 일시' required />}>
           {edit ? (
-            <DatePicker format='YYYY-MM-DD' onChange={(value: any): void => onChange('date', value.format('YYYY-MM-DD'))} placeholder='날짜 선택' ref={refElements ? (el: any) => (refElements.current[1] = el) : undefined} style={{ width: '100%' }} value={data.date !== '' ? moment(data.date) : undefined} />
-          ) : (<>{data.date}</>)}
+            <DatePicker format='YYYY-MM-DD' onChange={(value: any): void => onChange('date', value.unix())} placeholder='날짜 선택' ref={refElements ? (el: any) => (refElements.current[1] = el) : undefined} style={{ width: '100%' }} value={data.date !== '' ? moment.unix(data.date): undefined} />
+          ) : (<>{transformToDate(data.date)}</>)}
         </Descriptions.Item>
         <Descriptions.Item label={<DescriptionLabel content='파기 사유' required />}>
           {edit ? (
-            <AddableTagSelect onChange={(value: string|string[]): void => onChange('reason', value)} options={["계약서에 명시된 보유기간 만료", "법령 의무 보유기간 만료", "이용자의 파기 요청", "1년 이상 서비스 미이용"]} placeholder='선택 및 직접 입력' refElement={refElements ? (el: any) => (refElements.current[2] = el) : undefined} value={data.reason} />
+            <AddableTagSelect onChange={(value: string|string[]): void => onChange('reason', value)} options={["계약서에 명시된 보유기간 만료", "법정 의무 보유기간 만료", "이용자의 파기 요청", "1년 이상 서비스 미이용"]} placeholder='선택 및 직접 입력' refElement={refElements ? (el: any) => (refElements.current[2] = el) : undefined} value={data.reason} />
           ) : (
             <ul style={{ margin: 0, paddingLeft: 20 }}>
               {data.reason.map((item: string, index: number): JSX.Element => (<li key={index}>{item}</li>))}
@@ -294,7 +310,7 @@ const InformationFormHeader: React.FC<InformationFormHeaderProps> = ({ edit, onB
   );
 }
 /** [Internal Component] 파기 문서 인쇄를 위한 컴포넌트 */
-const PrintElement: React.FC<PrintElementProps> = ({ company, data, printRef }): JSX.Element => {
+const PrintElement: React.FC<PrintElementProps> = ({ data, managerName, printRef }): JSX.Element => {
   // 컴포넌트 반환
   return (
     <StyledPrintLayout ref={printRef}>
@@ -304,7 +320,7 @@ const PrintElement: React.FC<PrintElementProps> = ({ company, data, printRef }):
           {data.subject}
         </Descriptions.Item>
         <Descriptions.Item label={<DescriptionLabel content='파기 일시' required />}>
-          {data.date}
+          {transformToDate(data.date)}
         </Descriptions.Item>
         <Descriptions.Item label={<DescriptionLabel content='파기 사유' required />}>
           <ul style={{ margin: 0, paddingLeft: 20 }}>
@@ -337,8 +353,8 @@ const PrintElement: React.FC<PrintElementProps> = ({ company, data, printRef }):
         </Descriptions.Item>
       </Descriptions>
       <div className='footer'>
-        <h4 className='date'>{moment(data.date).year()}년 {moment(data.date).month() + 1}월 {moment(data.date).date()}일</h4>
-        <p className='manager'>개인정보 보호책임자 <label>{company.manager.name}</label> (인)</p>
+        <h4 className='date'>{moment.unix(data.date).format('YYYY년 M월 D일')}</h4>
+        <p className='manager'>개인정보 보호책임자 <label>{managerName}</label> (인)</p>
       </div>
     </StyledPrintLayout>
   );

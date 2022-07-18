@@ -107,7 +107,7 @@ export const SignupForm: React.FC<any> = (): JSX.Element => {
         // 결과 처리
         if (response.result) {
           // 사용자 약관 동의 내역 저장
-          const result = await addUser(response.data.UserSub, '', { userName: formData.name, email: formData.email, contact: formData.phone }, { esa1: formData.esa1, esa2: formData.esa2, ssa1: formData.ssa1 });
+          const result = await addUser(response.data.UserSub, { userName: formData.name, email: formData.email, contact: formData.phone }, { esa1: formData.esa1, esa2: formData.esa2, ssa1: formData.ssa1 });
           if (result) {
             createSuccessModal();
           } else {
@@ -184,7 +184,7 @@ const SignupFooter: React.FC<any> = (): JSX.Element => {
   return (
     <StyledSigninFooter>
       <p className='description'>이미 회원이신가요?</p>
-      <Link href='/signin'>
+      <Link href='/signin' passHref>
         <label className='link'>로그인</label>
       </Link>
     </StyledSigninFooter>
