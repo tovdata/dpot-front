@@ -92,7 +92,7 @@ export const updatePassword = async (userName: string, prevPassword: string, new
  * @param data 사용자 정보
  * @returns 요청 결과
  */
-export const updateUser = async (userId: string, data: PLIPUser): Promise<boolean> => {
+export const updateUser = async (userId: string, data: any): Promise<boolean> => {
   try {
     // 데이터 복사
     const copy: PLIPUser = JSON.parse(JSON.stringify(data));

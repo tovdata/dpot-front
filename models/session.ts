@@ -124,7 +124,7 @@ const expandSideAtom = atom<boolean>({
 const sessionAtom = atom<Session>({
   key: `sessionAtom_${getUnixTimestamp()}`,
   default: { companyId: '', serviceId: '' },
-  effects: [localStorageEffects(KEY_SESSION)]
+  effects: [sessionStorageEffects(KEY_SESSION)]
 });
 /** [Atom] 사용자 */
 const userIdAtom = atom<string>({

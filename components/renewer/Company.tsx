@@ -127,7 +127,7 @@ const OrganizationInfoSection: React.FC<any> = ({ companyId }): JSX.Element => {
   const [visible, setVisible] = useState<boolean>(false);
   // 데이터 동기
   const { mutate } = useMutation(async ({ data }: any) => {
-    return await updateUser(data.id, data);
+    return await updateUser(data.id, { department: data.department, position: data.position, task: data.task });
   });
 
   /** [Event handler] Drawer 열기 */
