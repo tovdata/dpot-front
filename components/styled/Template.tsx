@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 // Component
-import { Button } from 'antd';
+import Grid from 'antd/lib/card/Grid';
 // Icon
 import { DownloadOutlined } from '@ant-design/icons';
 
@@ -24,16 +24,25 @@ export const StyledTabPaneTitle = styled.h2`
   margin: 0;
 `;
 /** [Styled Component] 템플릿 카드 */
-export const StyledTemplateCard = styled.div`
+export const StyledTemplateCard = styled.a`
   align-items: center;
   border: 1px solid #F0F0F0;
+  color: rgba(0, 0, 0, 0.85);
   cursor: pointer;
   display: flex;
   height: 100%;
   justify-content: center;
   padding-bottom: 42px;
   padding-top: 42px;
+  transition: 0.3s all;
+  text-decoration: none;
   user-select: none;
+  width: 100%;
+  &:hover{
+    color: rgba(0, 0, 0, 0.85);
+    box-shadow: 0 1px 2px -2px rgb(0 0 0 / 16%), 0 3px 6px 0 rgb(0 0 0 / 12%), 0 5px 12px 4px rgb(0 0 0 / 9%);
+    transform:scale(1.01);
+  };
 `;
 /** [Styled Component] 다운로드 버튼 */
 export const StyledDownloadButton = styled.a`

@@ -13,16 +13,16 @@ export const TemplateList: React.FC<any> = (): JSX.Element => {
       </StyledTabPaneHeader>
       <Row gutter={16}>
         <Col span={6}>
-          <StyledTemplateCard>영상정보처리기기(CCTV) 운영관리 방침</StyledTemplateCard>
+          <TemplateCard text='영상정보처리기기(CCTV) 운영관리 방침' url='/doc/template/imp.docx' />
         </Col>
         <Col span={6}>
-          <StyledTemplateCard>개인정보 처리위탁 계약서</StyledTemplateCard>
+          <TemplateCard text='개인정보 처리위탁 계약서' url='/doc/template/임시문서.docx' />
         </Col>
         <Col span={6}>
-          <StyledTemplateCard>개인정보 보호교육 계획(안)</StyledTemplateCard>
+          <TemplateCard text='개인정보 보호교육 계획(안)' url='/doc/template/임시문서.docx' />
         </Col>
         <Col span={6}>
-          <StyledTemplateCard>개인정보처리시스템 접근권한 관리대장</StyledTemplateCard>
+          <TemplateCard text='개인정보처리시스템 접근권한 관리대장' url='/doc/template/임시문서.docx' />
         </Col>
       </Row>
       <Divider dashed style={{ marginBottom: 30, marginTop: 30 }} />
@@ -62,5 +62,11 @@ const DownloadButton: React.FC<any> = ({}): JSX.Element => {
     <StyledDownloadButton>
       <StyledDownloadIcon />
     </StyledDownloadButton>
+  );
+}
+/** [Internal Component] 템플릿 다운로드 카드 */
+const TemplateCard: React.FC<any> = ({ text, url }): JSX.Element => {
+  return (
+    <StyledTemplateCard download href={url}>{text}</StyledTemplateCard>
   );
 }
