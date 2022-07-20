@@ -1,14 +1,14 @@
 import type { NextPage } from 'next';
-import Router from 'next/router';
+import dynamic from 'next/dynamic';
 // Component
-import { Button } from 'antd';
+const Main = dynamic(() => import('@/components/renewer/pages/Main'), { loading: () => (<></>), ssr: false });
 
 const Page: NextPage = () => {
   return (
     <>
-      <h2>This is main page</h2>
-      <Button onClick={() => Router.push('/signin')}>Start</Button>
+      <Main />
     </>
   )
 }
+
 export default Page;

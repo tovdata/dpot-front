@@ -48,6 +48,8 @@ export const sendRequest = async (path: string, method: string, data?: any, isPu
     if (!validateResponse(response)) {
       if (response.message && response.message.includes('UserNotConfirmedException')) {
         return { result: false, data: { noConfirm: true } };
+      } else if (response.message && (response.message.includes('Invalid link') || response.message.includes('This confirmation link has expired'))) {
+        return { result: false, data: { status: 'expires' } };
       } else {
         return { result: false };
       }

@@ -72,6 +72,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <RecoilRoot>
           <Head>
             <title>Plip</title>
+            <link rel="shortcut icon" href="/images/favicon.svg" />
             <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
             <meta name='keyword' content='Privacy, privacy, privacy information, documentation, policy' />
             <meta name='author' content='TOVDATA' />

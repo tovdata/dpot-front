@@ -4,6 +4,22 @@ import { sendRequest } from '@/models/queries/core';
 import type { Company, PLIPService, ResponseDF } from '@/models/queries/type';
 
 /**
+ * [API Caller] 회사 가입 승인
+ * @param code UUID
+ * @returns 요청 결과
+ */
+export const approval = async (code: string): Promise<ResponseDF> => {
+  try {
+    // API 호출
+    const response: ResponseDF = await sendRequest(`/auth/code/confirmation?code=${code}`, 'GET', undefined, true);
+    // 결과 반환
+    return response;
+  } catch (err) {
+    console.error(`[API ERROR] ${err}`);
+    return { result: false };
+  }
+}
+/**
  * [API Caller] 서비스 생성
  * @param companyId 회사 ID
  * @param data 서비스 데이터

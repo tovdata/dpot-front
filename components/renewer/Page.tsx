@@ -13,6 +13,7 @@ import Image403 from '@/public/images/403.png';
 import Image404 from '@/public/images/404.png';
 import ImageApproval from '@/public/images/approval.png';
 import ImageEmail from '@/public/images/email.png';
+import ImageReject from '@/public/images/reject.png';
 import ImageServiceDev from '@/public/images/service_develop.png';
 
 /** [Interface] Properties for PLIPPage */
@@ -33,6 +34,12 @@ interface PLIPContainerLayout {
 export const PLIPApprovalPage: React.FC<any> = (): JSX.Element => {
   return (
     <PLIPPageLayout icon={ApprovalIcon} isBack redirectPath='/' title={<>회사 가입 승인이 완료되었습니다 👍</>} />
+  );
+}
+/** [Component] 가입 승인 거절/만료 페이지 */
+export const PLIPApprovalRejectPage: React.FC<any> = (): JSX.Element => {
+  return (
+    <PLIPPageLayout icon={RejectIcon} isBack redirectPath='/' title={<>이미 승인이 완료되었거나,<br/>요청 시간이 초과되었습니다</>} />
   );
 }
 /** [Component] 가입 대기 페이지 */
@@ -57,6 +64,12 @@ export const PLIPSimpleLoadingPage: React.FC<any> = (): JSX.Element => {
 export const PLIPLoadingContainer: React.FC<any> = (): JSX.Element => {
   return (
     <PLIPContainerLayout description='페이지를 불러오는 중입니다. 잠시만 기다려주세요.' icon={LoadingIcon} title='Loading' />
+  );
+}
+/** [Component] 커스텀 로딩 페이지 */
+export const PLIPCustomLoadingPage: React.FC<any> = ({ description, title }): JSX.Element => {
+  return (
+    <PLIPPageLayout description={description} icon={LoadingIcon} title={title} />
   );
 }
 /** [Component] 로딩 페이지 */
@@ -158,6 +171,10 @@ const Icon404: JSX.Element = (
 /** [Internal Component] 서비스 준비 중 아이콘 */
 const PreparingIcon: JSX.Element = (
   <Image src={ImageServiceDev} alt='Implementing' priority />
+);
+/** [Internal Component] 로딩 아이콘 */
+const RejectIcon: JSX.Element = (
+  <Image src={ImageReject} alt='Reject' priority />
 );
 /** [Internal Component] 로딩 아이콘 */
 const SimpleLoadingIcon: JSX.Element = (
