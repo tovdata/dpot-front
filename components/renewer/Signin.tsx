@@ -40,7 +40,6 @@ export const SigninForm: React.FC<any> = (): JSX.Element => {
     if (response.result) {
       // 로컬 저장소에 사용자 설정
       const userId: string = response.data.userId;
-      console.log(userId)
       setUserId(userId);
       // 액세스 토큰 저장
       const accessToken: string = response.data.accessToken;
@@ -71,7 +70,7 @@ export const SigninForm: React.FC<any> = (): JSX.Element => {
     } else {
       errorNotification('아이디 혹은 비밀번호가 올바르지 않습니다.');
     }
-  }, [form, setAccessToken, setSession]);
+  }, [form, setAccessToken, setSession, setUserId]);
 
   // 로그인 페이지 렌더링 시점
   useEffect(() => {

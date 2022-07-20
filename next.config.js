@@ -15,6 +15,10 @@ module.exports = {
     ];
   },
   trailingSlash: true,
+  // i18n: {
+  //   locales: ["ko"],
+  //   defaultLocale: "ko"
+  // },
   images: {
     loader: 'akamai',
     path: 'https://dev.plip.kr'

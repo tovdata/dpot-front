@@ -11,6 +11,7 @@ const LoadingOutlined: ComponentType<{spin: boolean, style: React.CSSProperties}
 import Image401 from '@/public/images/401.png';
 import Image403 from '@/public/images/403.png';
 import Image404 from '@/public/images/404.png';
+import ImageApproval from '@/public/images/approval.png';
 import ImageEmail from '@/public/images/email.png';
 import ImageServiceDev from '@/public/images/service_develop.png';
 
@@ -28,7 +29,13 @@ interface PLIPContainerLayout {
   title?: React.ReactNode;
 }
 
-/** [Component] 로딩 페이지 */
+/** [Component] 가입 승인 완료 페이지 */
+export const PLIPApprovalPage: React.FC<any> = (): JSX.Element => {
+  return (
+    <PLIPPageLayout icon={ApprovalIcon} isBack redirectPath='/' title={<>회사 가입 승인이 완료되었습니다 👍</>} />
+  );
+}
+/** [Component] 가입 대기 페이지 */
 export const PLIPAwaitingApprovalPage: React.FC<any> = (): JSX.Element => {
   return (
     <PLIPPageLayout buttonText='로그아웃' icon={AwaitingApprovalIcon} isBack redirectPath='/signout' title={<>회사 관리자의 승인을 기다리고 있어요.<br/>승인이 완료되면 알려주신 이메일로 연락드릴게요 👍</>} />
@@ -128,6 +135,10 @@ const PLIPPageLayout: React.FC<PLIPContainerLayout> = ({ buttonText, description
   )
 }
 
+/** [Internal Component] 로딩 아이콘 */
+const ApprovalIcon: JSX.Element = (
+  <Image src={ImageApproval} alt='Approval' priority />
+);
 /** [Internal Component] 로딩 아이콘 */
 const AwaitingApprovalIcon: JSX.Element = (
   <Image src={ImageEmail} alt='Waiting' priority />
