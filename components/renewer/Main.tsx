@@ -1,8 +1,7 @@
+import { animated, easings, useSpring } from 'react-spring';
 // Component
-import { Button } from 'antd';
-import { StyledDescriptionCard, StyledDescriptionCardList, StyledMainContainer, StyledMainFooter, StyledMainHeader, StyledMainHero, StyledMainSection } from '@/components/styled/Main';
-import { useCallback } from 'react';
-import Router from 'next/router';
+import { StyledDescriptionCard, StyledDescriptionCardList, StyledMainContainer, StyledMainFooter, StyledMainHeader, StyledMainHero, StyledMainIntro, StyledMainSection } from '@/components/styled/Main';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /** [Component] 메인 페이지 풋터 */
 export const MainFooter: React.FC<any> = (): JSX.Element => {
@@ -59,15 +58,40 @@ export const MainHeader: React.FC<any> = (): JSX.Element => {
 }
 /** [Component] 메인 페이지 바디 */
 export const MainBody: React.FC<any> = (): JSX.Element => {
+  // 스크롤 및 브라우저 크기 상태
+  const [pos, setPos] = useState<number>(0);
+  const [scroll, setScroll] = useState<number>(0);
+  const [win, setWin] = useState<number>(window.innerHeight);
+  /** [Event handler] 브라우저 크기 갱신 */
+  const updateWin = useCallback(() => setWin(window.innerHeight), [window.innerHeight]);
+  /** [Event handler] 스크롤 갱신 */
+  const updateScroll = useCallback(() => setScroll(window.scrollY), [window.scrollY]);
+  // 윈도우 이벤트 설정
+  useEffect(() => {
+    window.addEventListener('resize', updateWin);
+    window.addEventListener('scroll', updateScroll);
+    // 이벤트 제거
+    return () => {
+      window.removeEventListener('resize', updateWin);
+      window.removeEventListener('scroll', updateScroll);
+    };
+  }, []);
+  // 현재 스크롤 값 계산
+  useEffect(() => setPos(win + scroll), [scroll, win]);
+
+  // 컴포넌트 반환
   return (
     <StyledMainContainer>
       <MainHero />
+      <Intro1 pos={pos} />
+      <Intro2 pos={pos} />
       <MainDescription />
       <Section0 />
-      <Section1 />
-      <Section2 />
-      <Section3 />
-      <Section4 />
+      <Section1 pos={pos} />
+      <Section2 pos={pos} />
+      <Section3 pos={pos} />
+      <Section4 pos={pos} />
+      <Section5 pos={pos} />
     </StyledMainContainer>
   );
 }
@@ -88,56 +112,136 @@ const MainDescription: React.FC<any> = (): JSX.Element => {
     </StyledDescriptionCardList>
   );
 }
+/** [Internal Component] 인트로 1 */
+const Intro1: React.FC<any> = ({ pos }): JSX.Element => {
+  return (
+    <Intro imageUrl='/images/main/intro1.png' pos={pos} text={<>개발빼고<br/>다 하고 계신가요?<br/><br/>개인정보는<br/>플립-하세요!</>} />
+  );
+}
+/** [Internal Component] 인트로 2 */
+const Intro2: React.FC<any> = ({ pos }): JSX.Element => {
+  return (
+    <Intro imageUrl='/images/main/intro2.png' pos={pos} text={<>풀잎씨, 오늘도<br/>야근하시나요?<br/><br/>개인정보는<br/>플립-하세요!</>} />
+  );
+}
 /** [Internal Component] 섹션 0 */
 const Section0: React.FC<any> = () :JSX.Element => {
   return (
-    <Section title={<>사업에 집중하세요.<br/>개인정보 관리는 플립이 도와드릴게요!</>} />
+    <Section title={<>사업에 집중하세요.<br/><label style={{ backgroundColor: '#E7F3F8' }}>개인정보 관리는 플립이 도와드릴게요!</label></>} />
   );
 }
 /** [Internal Component] 섹션 1 */
-const Section1: React.FC<any> = (): JSX.Element => {
+const Section1: React.FC<any> = ({ pos }): JSX.Element => {
   return (
-    <Section imageRight imageUrl='/images/main/section1.png' text={<>법에 대한 전문 지식이 없어도,<br/>개인정보 필수문서를 만들수 있다면?!<br/><br/>플립에서는 법에서 요구하는 내용을 제대로 반영하여 만들 수 있습니다!</>} title='제대로 만들어 드립니다!' />
+    <Section imageRight imageUrl='/images/main/section1.png' pos={pos} text={<>법에 대한 전문 지식이 없어도,<br/>개인정보 필수문서를 만들수 있다면?!<br/><br/>플립에서는 법에서 요구하는 내용을 제대로 반영하여 만들 수 있습니다!</>} title='제대로 만들어 드립니다!' />
   );
 }
 /** [Internal Component] 섹션 2 */
-const Section2: React.FC<any> = (): JSX.Element => {
+const Section2: React.FC<any> = ({ pos }): JSX.Element => {
   return (
-    <Section imageUrl='/images/main/section2.png' text={<>개인정보 필수 문서,<br/>어디에 관리되고 있나요?<br/>폴더 여기저기? 버전관리는?<br/><br/>고민은 이제 그만!<br/>한 곳에서, 딱 필요한 문서들만 만들어 관리합니다!</>} title='흩어져 있던 문서를 한 곳에서 관리!' />
+    <Section imageUrl='/images/main/section2.png' pos={pos} text={<>개인정보 필수 문서,<br/>어디에 관리되고 있나요?<br/>폴더 여기저기? 버전관리는?<br/><br/>고민은 이제 그만!<br/>한 곳에서, 딱 필요한 문서들만 만들어 관리합니다!</>} title='흩어져 있던 문서를 한 곳에서 관리!' />
   );
 }
 /** [Internal Component] 섹션 3 */
-const Section3: React.FC<any> = (): JSX.Element => {
+const Section3: React.FC<any> = ({ pos }): JSX.Element => {
   return (
-    <Section imageRight imageUrl='/images/main/section3.png' text={<>담당자가 여러 명이어도!<br/>담당자가 바뀌어도!<br/>함께 관리 가능한 서비스!<br/><br/>업무 이력 확인을 통해<br/>나의 이전 업무 내용 확인과,<br/>여러 부서의 담당자들이 함께<br/>협업 가능합니다!</>} title='함께하는 개인정보 관리!' />
+    <Section imageRight imageUrl='/images/main/section3.png' pos={pos} text={<>담당자가 여러 명이어도!<br/>담당자가 바뀌어도!<br/>함께 관리 가능한 서비스!<br/><br/>업무 이력 확인을 통해<br/>나의 이전 업무 내용 확인과,<br/>여러 부서의 담당자들이 함께<br/>협업 가능합니다!</>} title='함께하는 개인정보 관리!' />
   );
 }
 /** [Internal Component] 섹션 4 */
-const Section4: React.FC<any> = (): JSX.Element => {
+const Section4: React.FC<any> = ({ pos }): JSX.Element => {
   return (
-    <Section imageUrl='/images/main/section4.png' text={<>수집되는 개인정보가 바뀔 때마다,<br/>서비스 내용이 변할 때마다,<br/>내부 조직 개편될 때마다,<br/>법이 개정될 때마다,<br/><br/>개인정보 수집·이용 현황을 수정하면<br/>문서에도 바로 반영이 가능합니다!</>} title='조직 내외부의 변화에 빠른 대응 가능!' />
+    <Section imageUrl='/images/main/section4.png' pos={pos} text={<>수집되는 개인정보가 바뀔 때마다,<br/>서비스 내용이 변할 때마다,<br/>내부 조직 개편될 때마다,<br/>법이 개정될 때마다,<br/><br/>개인정보 수집·이용 현황을 수정하면<br/>문서에도 바로 반영이 가능합니다!</>} title='조직 내외부의 변화에 빠른 대응 가능!' />
+  );
+}
+/** [Internal Component] 섹션 5 */
+const Section5: React.FC<any> = () :JSX.Element => {
+  return (
+    <Section title={<label style={{ color: '#0B6E99' }}>개인정보 관리<br/>새로운 패러다임 시작,<br/>플립.</label>} style={{ marginTop: 160 }} />
   );
 }
 /** [Internal Component] 섹션 */
-const Section: React.FC<any> = ({ imageRight, imageUrl, text, title }): JSX.Element => {
+const Intro: React.FC<any> = ({ imageUrl, pos, text }): JSX.Element => {
+  // 참조 객체
+  const ref = useRef<any>();
+  // 애니메이션
+  const [style, animate] = useSpring(() => ({
+    config: {
+      duration: 900,
+      easing: easings.easeInOutSine
+    },
+    opacity: 0,
+    transform: "translate3d(0, 40px, 0)"
+  }));
+  // 애니메이션 발동 조건
+  useEffect(() => {
+    const { clientHeight, offsetTop } = ref.current;
+    if (pos > offsetTop + Math.floor(clientHeight / 3)) {
+      animate.start({
+        opacity: 1,
+        transform: "translate3d(0, 0, 0)"
+      });
+    }
+  }, [pos]);
+
+  // 컴포넌트 반환
   return (
-    <StyledMainSection>
-      <h3 className='title'>{title}</h3>
-      {text ? (
-        <div className='content'>
-          {imageUrl && (imageRight === undefined || imageRight === false) ? (
-            <div className='image'>
-              <img src={imageUrl} />
-            </div>
-          ) : (<></>)}
-          <div className='text'>{text}</div>
-          {imageUrl && imageRight ? (
-            <div className='image'>
-              <img src={imageUrl} />
-            </div>
-          ) : (<></>)}
+    <animated.div ref={ref} style={style}>
+      <StyledMainIntro>
+        <div className='image'>
+          <img src={imageUrl} />
         </div>
-      ) : (<></>)}
-    </StyledMainSection>
+        <div className='text'>{text}</div>
+      </StyledMainIntro>
+    </animated.div>
+  );
+}
+/** [Internal Component] 섹션 */
+const Section: React.FC<any> = ({ imageRight, imageUrl, pos, text, title, style }): JSX.Element => {
+  // 참조 객체
+  const ref = useRef<any>();
+  // 애니메이션
+  const [aStyle, animate] = useSpring(() => ({
+    config: {
+      duration: 900,
+      easing: easings.easeInOutSine
+    },
+    opacity: pos === undefined ? 1 : 0,
+    transform: pos === undefined ? "translate3d(0, 0, 0)" : "translate3d(0, 40px, 0)"
+  }));
+  // 애니메이션 발동 조건
+  useEffect(() => {
+    if (pos) {
+      const { clientHeight, offsetTop } = ref.current;
+      if (pos > offsetTop + Math.floor(clientHeight / 3)) {
+        animate.start({
+          opacity: 1,
+          transform: "translate3d(0, 0, 0)"
+        });
+      }
+    }
+  }, [pos]);
+
+  return (
+    <animated.div ref={ref} style={aStyle}>
+      <StyledMainSection style={style}>
+        <h3 className='title'>{title}</h3>
+        {text ? (
+          <div className='content'>
+            {imageUrl && (imageRight === undefined || imageRight === false) ? (
+              <div className='image'>
+                <img src={imageUrl} />
+              </div>
+            ) : (<></>)}
+            <div className='text'>{text}</div>
+            {imageUrl && imageRight ? (
+              <div className='image'>
+                <img src={imageUrl} />
+              </div>
+            ) : (<></>)}
+          </div>
+        ) : (<></>)}
+      </StyledMainSection>
+    </animated.div>
   );
 }

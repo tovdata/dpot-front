@@ -353,15 +353,15 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
     }
   }, [data, onFocus, onOpen, ref, rels, stepIndex, steps.length]);
   /** [Event handler] 저장 이벤트 */
-  const onSave = useCallback(async (temp: boolean = true): Promise<void> => {
+  const onSave = useCallback(async (isPublish: boolean = true): Promise<void> => {
     // 미리보기 모달 닫기
     onClose();
     // 처리 상태 정의
-    const apiStatus: string = status === 'none' ? 'create' : temp ? 'update' : 'publish';
+    const isCreate: boolean = status === 'none' ? true : false;
     // API 호출
-    const response = await setPIPPData(serviceId, userId, data, apiStatus, apiStatus ? document.getElementById('report')?.outerHTML : undefined);
+    const response = await setPIPPData(serviceId, userId, data, isCreate, isPublish, document.getElementById('report')?.outerHTML);
     if (response.result) {
-      if (temp) {
+      if (!isPublish) {
         successNotification('임시 저장 완료');
       } else {
         // 로그 작성
@@ -373,7 +373,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
         onUpdateStatus();
       }
     } else {
-      temp ? warningNotification('임시 저장 실패') : warningNotification('최종 저장 실패');
+      isPublish ? warningNotification('최종 저장 실패') : warningNotification('임시 저장 실패');
     }
   }, [data, onClose, onUpdateStatus, service, serviceId, status, user, userId]);
 
@@ -409,7 +409,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
           ) : stepIndex === 2 ? (
             <ConfirmSection data={data.cInfo} onChange={onChange} prevList={list.filter((item: any): boolean => item.version !== 0)} sectionType='cInfo' />
           ) : (<></>)}
-          <DRModal cancelText='취소' centered onCancel={onClose} okText='게재' onOk={() => onSave(false)} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
+          <DRModal cancelText='취소' centered onCancel={onClose} okText='게재' onOk={() => onSave(true)} visible={visible} style={{ paddingBottom: 56, top: 56 }} width='80%'>
             {data ? (
               <PreviewSection data={data} preview={false} prevList={list.filter((item: any): boolean => item.version !== 0)} refTables={ref} rels={rels} serviceTypes={service ? service.types : []} stmt={stmt(data.dInfo.name)} />
             ) : (

@@ -88,18 +88,19 @@ export const getPIPPStatus = async (serviceId: string): Promise<string> => {
  * @param serviceId 현재 서비스 ID
  * @param userId 사용자 ID
  * @param data 임시 저장을 위한 데이터
- * @param status 데이터 저장 상태 (생성 완료일 경우, status = 'publish')
+ * @param isCreate 데이터 첫 생성 여부
+ * @param isPublish 처리방침 게재 여부
  * @param html 최종 문서 HTML 코드
  * @returns API로부터 응답받은 데이터
  */
-export const setPIPPData = async (serviceId: string, userId: string, data: any, status: string, html?: string): Promise<any> => {
+export const setPIPPData = async (serviceId: string, userId: string, data: any, isCreate: boolean, isPublish: boolean, html?: string): Promise<any> => {
   try {
     // 경로 정의
-    const path: string = status === 'create' ? `/pipp/new` : `/pipp/${serviceId}`;
+    const path: string = isCreate ? `/pipp/new` : `/pipp/${serviceId}`;
     // 메서드 정의
-    const method: string = status === 'create' ? 'POST' : status === 'publish' ? 'PUT' : 'PATCH';
+    const method: string = isCreate ? 'POST' : isPublish ? 'PUT' : 'PATCH';
     // 초기 저장 여부에 따라 요청 데이터 생성
-    const body: any = status === 'create' ? {
+    const body: any = isCreate ? {
       serviceId,
       userId,
       data: data,
@@ -107,12 +108,10 @@ export const setPIPPData = async (serviceId: string, userId: string, data: any, 
     } : {
       userId,
       data: data,
-      publish: status === 'publish' ? true : false,
-      publishAt: status === 'publish' ? data.cInfo.applyAt : undefined,
-      html: status === 'publish' ? html : undefined
+      publish: isPublish ? true : false,
+      publishAt: isPublish ? data.cInfo.applyAt : undefined,
+      html: isPublish ? html : undefined
     };
-
-    console.log(path, method, body);
 
     // API 호출
     const response: ResponseDF = await sendRequest(path, method, body);

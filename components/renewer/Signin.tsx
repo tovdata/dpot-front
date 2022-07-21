@@ -75,7 +75,7 @@ export const SigninForm: React.FC<any> = (): JSX.Element => {
   // 로그인 페이지 렌더링 시점
   useEffect(() => {
     setAccessToken('');
-  }, [setAccessToken]);
+  }, []);
 
   // 컴포넌트 반환
   return (

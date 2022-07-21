@@ -100,12 +100,12 @@ export const StyledMainHero = styled.h2`
   font-size: 40px;
   font-weight: 700;
   line-height: 48px;
-  margin: 0;
+  margin-bottom: 52px;
   user-select: none;
 `;
 /** [Styled Component] 설명 카드 목록 */
 export const StyledDescriptionCardList = styled.div`
-  margin-top: 56px;
+  margin-top: 58px;
   position: relative;
 `;
 /** [Styled Component] 설명 카드 */
@@ -121,6 +121,29 @@ export const StyledDescriptionCard = styled.div`
   user-select: none;
   &:last-child {
     margin-bottom: 0;
+  }
+`;
+/** [Styled Component] 메인 섹션 */
+export const StyledMainIntro = styled.div`
+  display: flex;
+  padding: 12px 0;
+  position: relative;
+  user-select: none;
+  .text {
+    flex-basis: (42% - 46px);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 39px;
+    margin-left: 46px;
+    margin-top: 16px;
+  }
+  .image {
+    flex-basis: 58%;
+    height: 100%;
+    img {
+      object-fit: cover;
+      width: 100%;
+    }
   }
 `;
 /** [Styled Component] 메인 섹션 */
