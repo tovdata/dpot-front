@@ -4,7 +4,8 @@ import { ComponentType, useCallback } from 'react';
 // Component
 import { Button, Spin } from 'antd';
 import Image from 'next/image';
-import { StyledContainer, StyledFullScreen } from '../styled/Page';
+import { StyledContainer, StyledFullScreen } from '@/components/styled/Page';
+import { errorNotification, successNotification } from '@/components/common/Notification';
 // Icon
 const LoadingOutlined: ComponentType<{spin: boolean, style: React.CSSProperties}> = dynamic(() => import('@ant-design/icons').then((mod: any): any => mod.LoadingOutlined));
 // Images
@@ -15,6 +16,8 @@ import ImageApproval from '@/public/images/approval.png';
 import ImageEmail from '@/public/images/email.png';
 import ImageReject from '@/public/images/reject.png';
 import ImageServiceDev from '@/public/images/service_develop.png';
+// Query
+import { registerUser } from '@/models/queries/apis/company';
 
 /** [Interface] Properties for PLIPPage */
 interface PLIPPageProps {
@@ -43,9 +46,33 @@ export const PLIPApprovalRejectPage: React.FC<any> = (): JSX.Element => {
   );
 }
 /** [Component] 가입 대기 페이지 */
-export const PLIPAwaitingApprovalPage: React.FC<any> = (): JSX.Element => {
+export const PLIPAwaitingApprovalPage: React.FC<any> = ({ companyId, userId }): JSX.Element => {
+  /** [Event handler] 경로 이동 */
+  const onRedirect = useCallback(() => Router.push('/'), []);
+  /** [Event handler] 승인 재요청 */
+  const onResend = useCallback(async () => {
+    if (await registerUser(companyId, userId, 0)) {
+      successNotification('가입 승인이 재요청되었습니다.');
+    } else {
+      errorNotification('가입 승인 재요청에 실패하였습니다.');
+    }
+  }, [companyId, userId]);
+
+  // 컴포넌트 반환
   return (
-    <PLIPPageLayout buttonText='로그아웃' icon={AwaitingApprovalIcon} isBack redirectPath='/signout' title={<>회사 관리자의 승인을 기다리고 있어요.<br/>승인이 완료되면 알려주신 이메일로 연락드릴게요 👍</>} />
+    <StyledFullScreen>
+      <div className='section'>
+        <div className='icon'>{AwaitingApprovalIcon}</div>
+        <div className='content'>
+          <h2>회사 관리자의 승인을 기다리고 있어요<br/>조금만 기다려주세요 👍</h2>
+          <Button onClick={onRedirect} style={{ width: '100%' }} type='primary'>메인 화면으로</Button>
+          <div className='footer'>
+            <a className='underline' onClick={onResend}>가입 승인 재요청</a>
+            <a>회원 탈퇴</a>
+          </div>
+        </div>
+      </div>
+    </StyledFullScreen>
   );
 }
 /** [Component] 심플 로딩 컨테이너 */
@@ -126,7 +153,9 @@ const PLIPContainerLayout: React.FC<PLIPContainerLayout> = ({ buttonText, descri
 }
 /** [Internal Component] 페이지 레이아웃 */
 const PLIPPageLayout: React.FC<PLIPContainerLayout> = ({ buttonText, description, icon, isBack, redirectPath, title }): JSX.Element => {
+  /** [Event handler] 경로 이동 */
   const onRedirect = useCallback(() => Router.push(redirectPath ? redirectPath : '/'), [redirectPath]);
+
   // 컴포넌트 반환
   return (
     <StyledFullScreen>
@@ -145,7 +174,7 @@ const PLIPPageLayout: React.FC<PLIPContainerLayout> = ({ buttonText, description
         ) : (<></>)}
       </div>
     </StyledFullScreen>
-  )
+  );
 }
 
 /** [Internal Component] 로딩 아이콘 */

@@ -12,7 +12,7 @@ import { errorNotification, successNotification } from '../common/Notification';
 import { PLIPInputGroup } from './Input';
 const PLIP401Page: ComponentType<any> = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIP401Page));
 const PLIP403Page: ComponentType<any> = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIP403Page));
-const PLIPAwaitingApprovalPage = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIPAwaitingApprovalPage));
+const PLIPAwaitingApprovalPage: ComponentType<any> = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIPAwaitingApprovalPage));
 const PLIPSimpleLoadingPage = dynamic(() => import('@/components/renewer/Page').then((mod: any): any => mod.PLIPSimpleLoadingPage));
 // Icon
 import { IoAddOutline, IoBusinessSharp, IoDesktopOutline, IoPhonePortraitOutline, IoSettingsOutline } from 'react-icons/io5';
@@ -43,7 +43,7 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
         if (user.affiliations === undefined || (user.affiliations && user.affiliations.length === 0)) {
           setComponent(<PLIP403Page redirectPath='/company/join' />);
         } else if (user.affiliations[0].accessLevel === 0) {
-          setComponent(<PLIPAwaitingApprovalPage />);
+          setComponent(<PLIPAwaitingApprovalPage companyId={user.affiliations[0].id} userId={userId} />);
         } else {
           setComponent(
             <StyledPageBackground>

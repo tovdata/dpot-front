@@ -63,7 +63,8 @@ export const PLIPServiceSession: React.FC<any> = ({ children }): JSX.Element => 
               setSession({ companyId: '', serviceId: '' });
               setComponent(<PLIP403Page />);
             } else if (user.affiliations[index].accessLevel === 0) {
-              setComponent(<PLIPAwaitingApprovalPage />);
+              console.log(user.affiliations[index].id, userId);
+              setComponent(<PLIPAwaitingApprovalPage companyId={user.affiliations[index].id} userId={userId} />);
             } else {
               const services = await getServices(session.companyId);
               if (services) {
