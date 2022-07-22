@@ -109,7 +109,7 @@ export const PLIPPageSider: React.FC<any> = ({ expand, onExpand, scroll, selecte
         <StyledPageSiderFooter expand={expand.toString()}>
           <div className='menu'>
             <a className='pipp'>개인정보처리방침</a>
-            <a className='terms'>이용약관</a>
+            <a className='terms' href='https://tovdata.notion.site/4ba3e66ff6b84db78dcabae071eeca3c' rel="noopener noreferrer" target='_blank'>이용약관</a>
           </div>
           <p className='copyright'>©2022. TOVDATA Inc.</p>
         </StyledPageSiderFooter>

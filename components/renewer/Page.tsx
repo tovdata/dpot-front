@@ -48,7 +48,7 @@ export const PLIPApprovalRejectPage: React.FC<any> = (): JSX.Element => {
 /** [Component] 가입 대기 페이지 */
 export const PLIPAwaitingApprovalPage: React.FC<any> = ({ companyId, userId }): JSX.Element => {
   /** [Event handler] 경로 이동 */
-  const onRedirect = useCallback(() => Router.push('/'), []);
+  const onRedirect = useCallback(() => Router.push('/signout'), []);
   /** [Event handler] 승인 재요청 */
   const onResend = useCallback(async () => {
     if (await registerUser(companyId, userId, 0)) {
@@ -65,7 +65,7 @@ export const PLIPAwaitingApprovalPage: React.FC<any> = ({ companyId, userId }): 
         <div className='icon'>{AwaitingApprovalIcon}</div>
         <div className='content'>
           <h2>회사 관리자의 승인을 기다리고 있어요<br/>조금만 기다려주세요 👍</h2>
-          <Button onClick={onRedirect} style={{ width: '100%' }} type='primary'>메인 화면으로</Button>
+          <Button onClick={onRedirect} style={{ width: '100%' }} type='default'>로그아웃</Button>
           <div className='footer'>
             <a className='underline' onClick={onResend}>가입 승인 재요청</a>
             <a>회원 탈퇴</a>

@@ -17,9 +17,9 @@ export interface Session {
 /**
  * [Internal Function] 로컬 스토리지 초기화
  */
-const clearLocalStorage = (): void => {
+const clearSessionStorage = (): void => {
   if (typeof window !== 'undefined') {
-    window.localStorage.clear();
+    window.sessionStorage.clear();
   }
 }
 /**
@@ -57,32 +57,6 @@ const userIdEffects = () => ({ setSelf, onSet }: any): any => {
   if (value) setSelf(value);
   // Set
   onSet((newValue: any) => newValue !== '' ? setUserId(newValue) : removeUserId());
-}
-/**
- * [Internal Function] 로컬 스토리지에 대한 데이터 동기 (조회/저장)
- * @param key 데이터 키
- * @returns 조회 시, 데이터 조회 결과
- */
-const localStorageEffects = (key: string) => ({ setSelf, onSet }: any): any => {
-  if (typeof window !== 'undefined') {
-    // Get
-    const value: string|null = window.localStorage.getItem(key);
-    if (value !== null) {
-      // 변환
-      const data: any = JSON.parse(value);
-      // 반환
-      setSelf(key === KEY_USER ? (data as string).replace(/"/g, '') : data);
-    }
-    // Set
-    onSet((newValue: any) => {
-      // ID 속성에 대한 값이 공백이 아닌 경우에는 Add/Update, 공백인 경우에는 Delete
-      if (newValue.companyId !== '') {
-        window.localStorage.setItem(key, JSON.stringify(newValue));
-      } else {
-        window.localStorage.removeItem(key);
-      }
-    });
-  }
 }
 /**
  * [Internal Function] 세션 스토리지에 대한 데이터 동기 (조회/저장)
@@ -146,7 +120,7 @@ export const accessTokenSelector = selector<string>({
   set: ({ set }: any, newValue: any) => {
     set(accessTokenAtom, newValue);
     // 값이 공백인 경우, 로컬 스토리지 초기화
-    if (newValue === '') clearLocalStorage();
+    if (newValue === '') clearSessionStorage();
   }
 });
 /** [Selector] 사이드 메뉴 확장 */

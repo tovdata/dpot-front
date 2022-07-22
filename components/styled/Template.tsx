@@ -4,6 +4,49 @@ import Grid from 'antd/lib/card/Grid';
 // Icon
 import { DownloadOutlined } from '@ant-design/icons';
 
+/** [Styled Component] 템플릿 페이지 섹션 */
+export const StyledSection = styled.div`
+  position: relative;
+  margin-bottom: 56px;
+`;
+/** [Styled Component] 템플릿 페이지 섹션 헤더 */
+export const StyledSectionHeader = styled.div`
+  align-items: center;
+  display: flex;
+  margin-bottom: 28px;
+  position: relative;
+  .title {
+    color: #000000D9;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 24px;
+    margin: 0;
+  }
+`;
+/** [Styled Component] 템플릿 카드 */
+export const StyledTemplateCard = styled.a`
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(47, 46, 65, 0.15);
+  color: #000000D9;
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  font-weight: 500;
+  height: 100%;
+  justify-content: center;
+  line-height: 22px;
+  padding: 30px 42px;
+  transition: 0.3s all;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  width: 100%;
+  &:hover{
+    transform:scale(1.03);
+  };
+`;
+
 /** [Styled Component] 탭 패널 */
 export const StyledTabPane = styled.div`
   padding-top: 48px;
@@ -23,27 +66,7 @@ export const StyledTabPaneTitle = styled.h2`
   line-height: 24px;
   margin: 0;
 `;
-/** [Styled Component] 템플릿 카드 */
-export const StyledTemplateCard = styled.a`
-  align-items: center;
-  border: 1px solid #F0F0F0;
-  color: rgba(0, 0, 0, 0.85);
-  cursor: pointer;
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  padding-bottom: 42px;
-  padding-top: 42px;
-  transition: 0.3s all;
-  text-decoration: none;
-  user-select: none;
-  width: 100%;
-  &:hover{
-    color: rgba(0, 0, 0, 0.85);
-    box-shadow: 0 1px 2px -2px rgb(0 0 0 / 16%), 0 3px 6px 0 rgb(0 0 0 / 12%), 0 5px 12px 4px rgb(0 0 0 / 9%);
-    transform:scale(1.01);
-  };
-`;
+
 /** [Styled Component] 다운로드 버튼 */
 export const StyledDownloadButton = styled.a`
   background-color: rgba(255, 255, 255, 0);

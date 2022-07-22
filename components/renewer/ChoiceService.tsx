@@ -3,7 +3,7 @@ import Router from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import type { ComponentType } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 // Component
 import { Button, Checkbox, Col, Form, Input, Modal, Popconfirm, Row } from 'antd';
 import { StyledPageBackground, StyledPageLayout } from '@/components/styled/JoinCompany';
@@ -27,6 +27,8 @@ import { KEY_SERVICES, KEY_USER } from '@/models/queries/key';
 import { decodeAccessToken } from 'utils/utils';
 
 const ChoiceService: React.FC<any> = (): JSX.Element => {
+  // 세션
+  const setSession = useSetRecoilState(sessionSelector);
   // 액세스 토큰 조회
   const accessToken: string = useRecoilValue(accessTokenSelector);
   // 사용자 ID 추출
@@ -45,6 +47,9 @@ const ChoiceService: React.FC<any> = (): JSX.Element => {
         } else if (user.affiliations[0].accessLevel === 0) {
           setComponent(<PLIPAwaitingApprovalPage companyId={user.affiliations[0].id} userId={userId} />);
         } else {
+          // 세션 설정
+          setSession({ companyId: user.affiliations[0].id, serviceId: '' });
+          // 컴포넌트 설정
           setComponent(
             <StyledPageBackground>
               <StyledPageLayout>

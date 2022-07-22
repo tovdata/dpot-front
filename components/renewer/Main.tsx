@@ -176,7 +176,7 @@ const Intro: React.FC<any> = ({ imageUrl, pos, text }): JSX.Element => {
   // 애니메이션 발동 조건
   useEffect(() => {
     const { clientHeight, offsetTop } = ref.current;
-    if (pos > offsetTop + Math.floor(clientHeight / 3)) {
+    if (pos > offsetTop + Math.floor(clientHeight / 3 * 2)) {
       animate.start({
         opacity: 1,
         transform: "translate3d(0, 0, 0)"
@@ -213,7 +213,7 @@ const Section: React.FC<any> = ({ imageRight, imageUrl, pos, text, title, style 
   useEffect(() => {
     if (pos) {
       const { clientHeight, offsetTop } = ref.current;
-      if (pos > offsetTop + Math.floor(clientHeight / 3)) {
+      if (pos > offsetTop + Math.floor(clientHeight / 3 * 2)) {
         animate.start({
           opacity: 1,
           transform: "translate3d(0, 0, 0)"
