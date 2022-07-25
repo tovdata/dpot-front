@@ -11,7 +11,7 @@ import { PLIPActivityListForDashboard, sortByDatetime } from '@/components/renew
 // State
 import { accessTokenSelector, sessionSelector } from '@/models/session';
 // Styled
-import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader, StyledDashboardItemContentForCPO } from '@/components/styled/Dashboard';
+import { StyledCountLabel, StyledDashboardItemCard, StyledDashboardItemContent, StyledDashboardItemContentEnd, StyledDashboardItemHeader, StyledDashboardHeader, StyledDashboardItemContentForCPO, StyledNewsItem } from '@/components/styled/Dashboard';
 import { StyledTag, StyledTagList } from '@/components/styled/Dashboard';
 import { StyledLatestInfoRow } from '@/components/styled/Dashboard';
 import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader } from '@/components/styled/Dashboard';
@@ -95,9 +95,9 @@ const DashboardHeader: React.FC<any> = ({ serviceId, userId }) => {
   );
 }
 /** [Internal Component] 대시보드 아이템 카드  */
-const DashboardItemCard: React.FC<any> = ({ children, loading }): JSX.Element => {
+const DashboardItemCard: React.FC<any> = ({ children, loading, style }): JSX.Element => {
   return (
-    <StyledDashboardItemCard>
+    <StyledDashboardItemCard style={style}>
       <Spin spinning={loading ? true : false} size='large'>
         <StyledDashboardItemContent>
           {children}
@@ -337,7 +337,7 @@ const MyActivieList: React.FC<any> = ({ userId }): JSX.Element => {
 const PINews: React.FC<any> = (): JSX.Element => {
   return (
     <>
-      <DashboardItemHeader extra={<ViewAll />} title='최근 개인정보 뉴스' />
+      <DashboardItemHeader title='개인정보 템플릿' />
       <NewItems />
     </>
   );
@@ -374,31 +374,30 @@ const ViewAll: React.FC<any> = ({ href }): JSX.Element => {
 }
 /** [Internal Component] 뉴스 목록 컴포넌트 */
 const NewItems: React.FC<any> = (): JSX.Element => {
-  // 뉴스 조회
-  const { isLoading, data } = useQuery([KEY_DASHBOARD_NEWS, 0], async () => await getNews());
-  // 아이템 생성
-  const items: JSX.Element[] = useMemo(() => data ? data.map((item: any): any => (<NewsItem date={transformToDate(item.regAt)} key={item.id} sources={item.source} subject={item.title} type={item.category} url={item.url} />)) : [], [data]);
-
-  // 컴포넌트 반환
   return (
-    <DashboardItemCard loading={isLoading}>
-      <div>{items}</div>
+    <DashboardItemCard style={{ height: 'auto' }}>
+      <div>
+        <NewsItem date='22-07-21' subject='개인정보 내부 관리계획' sources='TOVDATA' url='https://s3.ap-northeast-2.amazonaws.com/plip.kr/doc/static/templates/(%E1%84%90%E1%85%A9%E1%84%87%E1%85%B3%E1%84%83%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%90%E1%85%A5)_%E1%84%90%E1%85%A6%E1%86%B7%E1%84%91%E1%85%B3%E1%86%AF%E1%84%85%E1%85%B5%E1%86%BA1_%E1%84%80%E1%85%A2%E1%84%8B%E1%85%B5%E1%86%AB%E1%84%8C%E1%85%A5%E1%86%BC%E1%84%87%E1%85%A9+%E1%84%82%E1%85%A2%E1%84%87%E1%85%AE+%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%B5%E1%84%80%E1%85%A8%E1%84%92%E1%85%AC%E1%86%A8+%E1%84%8C%E1%85%A1%E1%86%A8%E1%84%89%E1%85%A5%E1%86%BC%E1%84%8B%E1%85%A8%E1%84%89%E1%85%B5.docx' type='템플릿' />
+        <NewsItem date='22-07-21' subject='개인정보 처리 위탁 계약서' sources='TOVDATA' url='https://s3.ap-northeast-2.amazonaws.com/plip.kr/doc/static/templates/(%E1%84%90%E1%85%A9%E1%84%87%E1%85%B3%E1%84%83%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%90%E1%85%A5)_%E1%84%90%E1%85%A6%E1%86%B7%E1%84%91%E1%85%B3%E1%86%AF%E1%84%85%E1%85%B5%E1%86%BA2_%E1%84%80%E1%85%A2%E1%84%8B%E1%85%B5%E1%86%AB%E1%84%8C%E1%85%A5%E1%86%BC%E1%84%87%E1%85%A9%E1%84%8E%E1%85%A5%E1%84%85%E1%85%B5%E1%84%8B%E1%85%B1%E1%84%90%E1%85%A1%E1%86%A8+%E1%84%80%E1%85%A8%E1%84%8B%E1%85%A3%E1%86%A8%E1%84%89%E1%85%A5(%E1%84%8B%E1%85%A1%E1%86%AB).docx' type='템플릿' />
+        <NewsItem date='22-07-21' subject='개인정보 보호교육 계획(안)' sources='TOVDATA' url='https://s3.ap-northeast-2.amazonaws.com/plip.kr/doc/static/templates/(%E1%84%90%E1%85%A9%E1%84%87%E1%85%B3%E1%84%83%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%90%E1%85%A5)_%E1%84%90%E1%85%A6%E1%86%B7%E1%84%91%E1%85%B3%E1%86%AF%E1%84%85%E1%85%B5%E1%86%BA3_%E1%84%80%E1%85%A2%E1%84%8B%E1%85%B5%E1%86%AB%E1%84%8C%E1%85%A5%E1%86%BC%E1%84%87%E1%85%A9%E1%84%87%E1%85%A9%E1%84%92%E1%85%A9+%E1%84%80%E1%85%AD%E1%84%8B%E1%85%B2%E1%86%A8%E1%84%80%E1%85%A8%E1%84%92%E1%85%AC%E1%86%A8(%E1%84%8B%E1%85%A1%E1%86%AB).docx' type='템플릿' />
+        <NewsItem date='22-07-21' subject='영상정보처리기기(CCTV) 운영관리 방침' sources='TOVDATA' url='https://s3.ap-northeast-2.amazonaws.com/plip.kr/doc/static/templates/(%E1%84%90%E1%85%A9%E1%84%87%E1%85%B3%E1%84%83%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%90%E1%85%A5)_%E1%84%90%E1%85%A6%E1%86%B7%E1%84%91%E1%85%B3%E1%86%AF%E1%84%85%E1%85%B5%E1%86%BA4_%E1%84%8B%E1%85%A7%E1%86%BC%E1%84%89%E1%85%A1%E1%86%BC%E1%84%8C%E1%85%A5%E1%86%BC%E1%84%87%E1%85%A9%E1%84%8E%E1%85%A5%E1%84%85%E1%85%B5%E1%84%80%E1%85%B5%E1%84%80%E1%85%B5+%E1%84%8B%E1%85%AE%E1%86%AB%E1%84%8B%E1%85%A7%E1%86%BC%E1%84%8C%E1%85%B5%E1%84%8E%E1%85%B5%E1%86%B7+%E1%84%8C%E1%85%A1%E1%86%A8%E1%84%89%E1%85%A5%E1%86%BC%E1%84%8B%E1%85%A8%E1%84%89%E1%85%B5.docx' type='템플릿' />
+      </div>
     </DashboardItemCard>
   );
 }
 /** [Internal Component] 뉴스 Row 컴포넌트 */
-const NewsItem: React.FC<any> = ({ date, sources, style, subject, type, url }): JSX.Element => {
+const NewsItem: React.FC<any> = ({ date, subject, sources, style, type, url }): JSX.Element => {
   return (
-    <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 10, userSelect: 'none', ...style }}>
+    <StyledNewsItem style={{ ...style }}>
       <div style={{ alignItems: 'center', display: 'flex'}}>
         <Tag style={{ marginRight: 8, userSelect: 'none' }}>{type}</Tag>
         <a style={{ color: '#11142D', cursor: 'pointer', fontSize: 14, fontWeight: '600', lineHeight: '22px' }} href={url} rel='noreferrer' target='_blank'>{subject}</a>
       </div>
-      <div style={{  alignItems: 'center', display: 'flex', justifyContent: 'space-between', minWidth: 200 }}>
+      <div className='right'>
         <span style={{ color: '#8C8C8C', fontSize: 12, fontWeight: '400', lineHeight: '20px'  }}>{date}</span>
         <span style={{ color: '#2F2E41', fontSize: 12, fontWeight: '400', lineHeight: '20px' }}>{sources}</span>
       </div>
-    </div>
+    </StyledNewsItem>
   );
 }
 

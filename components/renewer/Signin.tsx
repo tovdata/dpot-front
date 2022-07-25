@@ -86,7 +86,7 @@ export const SigninForm: React.FC<any> = (): JSX.Element => {
         </Form.Item>
       </PLIPInputGroup>
       <PLIPInputGroup label='비밀번호'>
-        <Form.Item name='password' rules={[{ required: true, message: '비밀번호을 입력해주세요.' }]}>
+        <Form.Item name='password' rules={[{ required: true, message: '비밀번호를 입력해주세요.' }]}>
           <Input.Password />
         </Form.Item>
       </PLIPInputGroup>

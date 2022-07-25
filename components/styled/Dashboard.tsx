@@ -140,6 +140,22 @@ export const StyledManagerSection = styled.div`
   height: 100%;
   justify-content: center;
 `;
+export const StyledNewsItem = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  user-select: none;
+  &:last-child {
+    margin-bottom: 0;
+  }
+  .right {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    min-width: 160px;
+  }
+`;
 /** [Styled Component] 개인정보 보호책임자 섹션 헤더 */
 export const StyledManagerSectionHeader = styled.div`
   align-items: center;
