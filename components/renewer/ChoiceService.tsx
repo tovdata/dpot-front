@@ -182,7 +182,7 @@ const ServiceCard: React.FC<any> = ({ onChangeSession, onEditService, service })
       <StyledServiceCard>
         <div className='content'>
           <div className='icons'>
-            {service.types.map((type: string): JSX.Element => (<span className='icon' key={type}>{
+            {service.types.sort((a: string, b: string): number => a < b ? 1 : a > b ? -1 : 0).map((type: string): JSX.Element => (<span className='icon' key={type}>{
               type === 'default' ? (<IoBusinessSharp />) : type === 'web' ? (<IoDesktopOutline />) : (<IoPhonePortraitOutline />)
             }</span>))}
           </div>

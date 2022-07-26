@@ -131,6 +131,8 @@ export const StyledPageBackground = styled.div`
 `;
 /** [Styled Component] 회사 및 서비스 선택 페이지 레이아웃 */
 export const StyledPageLayout = styled.div`
+  margin-bottom: 96px;
+  margin-top: 96px;
   position: relative;
   width: 880px;
   .title {

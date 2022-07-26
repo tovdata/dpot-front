@@ -28,12 +28,12 @@ export const DefaultTemplates: React.FC<any> = (): JSX.Element => {
     </StyledSection>
   );
 }
-/** [Component] 참고자료 섹션 */
-export const References: React.FC<any> = (): JSX.Element => {
+/** [Component] 가이드라인 섹션 */
+export const Guidelines: React.FC<any> = (): JSX.Element => {
   return (
     <StyledSection>
       <StyledSectionHeader>
-        <h2 className='title'>참고자료</h2>
+        <h2 className='title'>가이드라인</h2>
       </StyledSectionHeader>
       <Table columns={[
         { title: '구분', dataIndex: 'category', key: 'category', render: (value: string): JSX.Element => value === 'template' ? <Tag color='geekblue'>템플릿</Tag> : <Tag color='geekblue'>가이드라인</Tag> },

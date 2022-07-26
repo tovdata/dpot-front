@@ -18,7 +18,7 @@ import { StyledDescriptionForm, StyledManagerSection, StyledManagerSectionHeader
 // Query
 import { getCPIDatas, getPIItemsByType, getPPIDatas } from '@/models/queries/apis/manage';
 import { getUserActivityForWeek } from '@/models/queries/apis/activity';
-import { getCompany, getService, getServiceModifiedTime } from '@/models/queries/apis/company';
+import { getCompany, getServiceModifiedTime } from '@/models/queries/apis/company';
 import { getConsentList } from '@/models/queries/apis/consent';
 import { getUser } from '@/models/queries/apis/user';
 import { getPIPPPublishAt } from '@/models/queries/apis/pipp';
@@ -27,7 +27,6 @@ import { KEY_COMPANY, KEY_DASHBOARD_ACTIVITY, KEY_DASHBOARD_CONSENT, KEY_DASHBOA
 import { SERVICE_CPI, SERVICE_PPI } from '@/models/queries/type';
 // Util
 import { decodeAccessToken, transformToDate } from 'utils/utils';
-import { getNews } from '@/models/queries/apis/etc';
 
 // Set chart
 ChartJS.register(ArcElement, Tooltip);
@@ -74,9 +73,6 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
           </Col>
           <Col span={10}>
             <MyActivieList userId={userId} />
-          </Col>
-          <Col span={24}>
-            <PINews />
           </Col>
         </Row>
       </PLIPLayoutPadding>

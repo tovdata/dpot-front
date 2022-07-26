@@ -33,7 +33,7 @@ const PLIPSideMenu: React.FC<any> = ({ expand, onExpand, selectedKey, service })
       { label: '동의서', key: '/doc/consent', icon: (<CheckCircleOutlined />) },
       { label: '개인정보처리방침', key: '/doc/pipp', icon: (<SolutionOutlined />) },
       { label: '내부관리계획', key: '/doc/imp', icon: (<ToolOutlined />) },
-      { label: '템플릿・참고자료', key: '/doc/template', icon: (<PaperClipOutlined />) }
+      { label: '템플릿・가이드라인', key: '/doc/template', icon: (<PaperClipOutlined />) }
     ] },
     { label: '활동이력', key: 'group3', type: 'group', children: [
       { label: '결재・승인', key: '/log/sa', icon: (<AuditOutlined />) },

@@ -1,13 +1,13 @@
 import dynamic from 'next/dynamic';
 // Component
 const Templates = dynamic(() => import('@/components/renewer/Template').then((mod: any): any => mod.DefaultTemplates));
-const References = dynamic(() => import('@/components/renewer/Template').then((mod: any): any => mod.References));
+const Guidelines = dynamic(() => import('@/components/renewer/Template').then((mod: any): any => mod.Guidelines));
 
 const TemplateMain: React.FC<any> = (): JSX.Element => {
   return (
     <>
       <Templates />
-      <References />
+      <Guidelines />
     </>
   );
 }

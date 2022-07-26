@@ -92,6 +92,8 @@ export const StyledPageHeader = styled(Layout.Header)`
   padding-right: 40px;
   text-decoration: none;
   .logo {
+    align-items: center;
+    display: flex;
     color: #000000;
     cursor: pointer;
     margin: 0;
