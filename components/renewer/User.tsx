@@ -3,18 +3,20 @@ import { useQuery } from 'react-query';
 import { useRecoilValue } from 'recoil';
 // Component
 import { Button, Divider, Form, Input, Modal } from 'antd';
-import { errorNotification, successNotification } from '../common/Notification';
-import { StyledUserForm, StyledUserFormHeader, StyledWithdrawal } from '../styled/User';
-import { PLIPSimpleLoadingContainer } from './Page';
+import { errorNotification, successNotification } from '@/components/common/Notification';
+import { StyledUserForm, StyledUserFormHeader, StyledWithdrawal } from '@/components/styled/User';
+import { PLIPSimpleLoadingContainer } from '@/components/renewer/Page';
+import { PLIPInputGroup } from '@/components/renewer/Input';
 // Query
-import { getUser, updatePassword, updateUser } from '@/models/queries/apis/user';
-import { PLIPInputGroup } from './Input';
-import { accessTokenSelector, sessionSelector } from '@/models/session';
-import { decodeAccessToken } from 'utils/utils';
-import { KEY_COMPANY } from '@/models/queries/key';
 import { getCompany } from '@/models/queries/apis/company';
+import { getUser, updatePassword, updateUser } from '@/models/queries/apis/user';
 // Query key
-const KEY_USER = 'plip-user';
+import { KEY_COMPANY, KEY_USER } from '@/models/queries/key';
+// State
+import { accessTokenSelector, sessionSelector } from '@/models/session';
+// Util
+import { decodeAccessToken } from 'utils/utils';
+
 
 /** [Component] 내 정보 관리 */
 const ManageUser: React.FC<any> = (): JSX.Element => {
@@ -79,6 +81,15 @@ const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element
   const confirmPassword = ({ getFieldValue }: any) => ({ validator(_: any, value: string) {
     return !value || getFieldValue('newPassword') === value ? Promise.resolve() : Promise.reject(new Error('비밀번호가 일치하지 않습니다.'));
   } });
+  /** [Event handler] 회원 탈퇴에 대한 알림 */
+  const onNoti = useCallback(() => {
+    Modal.warning({
+      centered: true,
+      content: 'plip@tovdata.com으로 이메일을 보내주시면 탈퇴에 대한 안내와 더불어 즉시 처리해드릴게요 !',
+      okText: '닫기',
+      title: '현재 베타서비스 중입니다.',
+    });
+  }, []);
 
   // 컴포넌트 반환
   return (
@@ -117,7 +128,7 @@ const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element
               <Button htmlType='submit' type='primary' style={{ width: '100%' }}>저장</Button>
             </Form.Item>
             <StyledWithdrawal>
-              <a className='content'>회원 탈퇴하기</a>
+              <a className='content' onClick={onNoti}>회원 탈퇴하기</a>
             </StyledWithdrawal>
           </Form>
           <Modal footer={[(<Button key='ok' onClick={onChangePwd} type='primary'>변경하기</Button>)]} onCancel={onCancel} title='비밀번호 변경' visible={visible}>

@@ -93,22 +93,18 @@ export const getPIPPStatus = async (serviceId: string): Promise<string> => {
  * @param html 최종 문서 HTML 코드
  * @returns API로부터 응답받은 데이터
  */
-export const setPIPPData = async (serviceId: string, userId: string, data: any, isCreate: boolean, isPublish: boolean, html?: string): Promise<any> => {
+export const setPIPPData = async (serviceId: string, userId: string, data: any, isCreate: boolean, isPublish: boolean, html?: string): Promise<ResponseDF> => {
   try {
     // 경로 정의
     const path: string = isCreate ? `/pipp/new` : `/pipp/${serviceId}`;
     // 메서드 정의
     const method: string = isCreate ? 'POST' : isPublish ? 'PUT' : 'PATCH';
     // 초기 저장 여부에 따라 요청 데이터 생성
-    const body: any = isCreate ? {
+    const body: any = {
       serviceId,
       userId,
       data: data,
-      publish: false
-    } : {
-      userId,
-      data: data,
-      publish: isPublish ? true : false,
+      publish: isPublish,
       publishAt: isPublish ? data.cInfo.applyAt : undefined,
       html: isPublish ? html : undefined
     };

@@ -358,6 +358,7 @@ export const CreatePIPPForm: React.FC<any> = ({ accessToken, companyId, list, on
     onClose();
     // 처리 상태 정의
     const isCreate: boolean = status === 'none' ? true : false;
+
     // API 호출
     const response = await setPIPPData(serviceId, userId, data, isCreate, isPublish, document.getElementById('report')?.outerHTML);
     if (response.result) {
