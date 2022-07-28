@@ -172,7 +172,7 @@ export const PFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
     if (_url && _url.length > 0) setUrl(_url[0]);
   }, [data]);
   // 전제 조건 검토
-  useEffect(() => fni && fni.length > 0 ? setPrerequisite(true) : setPrerequisite(false), [fni]);
+  useEffect(() => fni && fni.length > 0 ? setPrerequisite(true) : setPrerequisite(false), [fni, loadingFNI]);
 
   // [Event handler] 행(Row) 추가 이벤트
   const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PFNI, serviceId], mutate, 'create', record), [mutate, serviceId, queryClient]);
@@ -181,7 +181,7 @@ export const PFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
   // [Event handler] 행(Row) 삭제 이벤트
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PFNI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
   /** [Event handler] 링크 모달 오픈 */
-  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : modal ? prerequisiteModal(false, true) : prerequisiteModal(true), [modal, prerequisite]);
+  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : modal ? prerequisiteModal(false, true) : prerequisiteModal(true, true), [modal, prerequisite]);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = useCallback((record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
@@ -339,7 +339,7 @@ export const CFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
   // [Event handler] 행(Row) 삭제 이벤트
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_CFNI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
   /** [Event handler] 링크 모달 오픈 */
-  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : modal ? prerequisiteModal(false, true) : prerequisiteModal(true), [modal, prerequisite]);
+  const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : modal ? prerequisiteModal(false, true) : prerequisiteModal(true, true), [modal, prerequisite]);
   // [Event handler] 행(Row) 저장 이벤트
   const onSave = useCallback((record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {

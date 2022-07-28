@@ -235,7 +235,7 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
             }
           case 'item':
             if (row.id === record.id) {
-              return (<TagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
+              return (<TagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return item && item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
@@ -244,13 +244,13 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
               // Extract a options
               const options: string[] = (key === 'essentialItems' || key === 'selectionItems') ? selectOptions['items']?.filter((item: string): boolean => key === 'essentialItems' ? !row['selectionItems'].includes(item) : !row['essentialItems'].includes(item)) : selectOptions[key] ? selectOptions[key] : [];
               // Return an element
-              return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={options} value={row[key]} />);
+              return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required, 'item')} options={options} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return item && item.length > 0 ? (<TableContentForTags items={item} key={index} tooltip='고유식별정보' />) : (<Typography.Text type='secondary'>해당 없음</Typography.Text>);
             }
           case 'list':
             if (row.id === record.id) {
-              return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required)} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
+              return (<AddableTagSelect error={focus[key]} onChange={(items: string | string[]): void => onChange(key, items, header.required)} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return (<TableContentForList items={item} key={index} />);
             }
@@ -269,19 +269,19 @@ export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKe
             }
           case 'select':
             if (row.id === record.id) {
-              return (<SingleSelect error={focus[key]} onChange={(item: string | string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
+              return (<SingleSelect error={focus[key]} onChange={(item: string | string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return (<>{item}</>);
             }
           case 'selectA':
             if (row.id === record.id) {
-              return (<AddableSelect error={focus[key]} onChange={(item: string | string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} value={row[key]} />);
+              return (<AddableSelect error={focus[key]} onChange={(item: string | string[]): void => onChange(key, item, header.required)} options={selectOptions[key] ? selectOptions[key] : []} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} />);
             } else {
               return (<>{item}</>);
             }
           default:
             if (row.id === record.id) {
-              return (<Input key={index} onChange={(e: any): void => onChange(key, e.target.value, header.required)} value={row[key]} status={focus[key] ? 'error' : undefined} />);
+              return (<Input key={index} onChange={(e: any): void => onChange(key, e.target.value, header.required)} placeholder={header.placeholder ? header.placeholder : undefined} value={row[key]} status={focus[key] ? 'error' : undefined} />);
             } else {
               return (<>{item}</>);
             }

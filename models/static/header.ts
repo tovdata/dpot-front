@@ -239,6 +239,7 @@ export const cpiTableHeader: TableHeadersData = {
     description: '편리한 입력을 위해 위탁업무를 구분했어요. 위탁업무의 종류를 선택하거나 입력하세요.',
     display: 'selectA',
     name: '구분',
+    placeholder: '업체명 or 목록링크',
     required: true,
     width: '28%'
   },
