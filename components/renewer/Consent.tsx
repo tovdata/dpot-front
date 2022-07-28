@@ -172,10 +172,13 @@ const ConsentCard = ({ title, description }: any): JSX.Element => {
 }
 /** [Internal Component] 동의서 생성 폼 */
 const CreateConsent: React.FC<any> = ({ onChangeType, onEmptyCheck, onMoveStep }): JSX.Element => {
+  /** [Event handler] 가이드 */
+  const onGuide = useCallback(() => window.open('https://support.plip.kr/7c852800-f137-4553-86ce-f72dc05981ae', '_blank'), []);
+
   // 헤더 정의
   const header: JSX.Element = useMemo(() => (
     <div>
-      <Button style={{ marginRight: 8 }} type='default'>동의서 생성 가이드</Button>
+      <Button onClick={onGuide} style={{ marginRight: 8 }} type='default'>동의서 생성 가이드</Button>
     </div>
   ), []);
 

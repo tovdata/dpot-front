@@ -108,14 +108,16 @@ export const StyledPageHeaderNav = styled.div`
   }
 `;
 /** [Styled Component] 페이지 헤더 메뉴 아이템 */
-export const StyledPageHeaderMenuItem = styled.span`
+export const StyledPageHeaderMenuItem = styled.a`
   border-left: 1px solid #F0F0F0;
+  color: #000000;
   cursor: pointer;
   font-size: 12px;
   font-weight: 600;
   line-height: 20px;
   padding-left: 24px;
   padding-right: 24px;
+  text-decoration: none;
   &:first-child {
     border-left: none;
   }

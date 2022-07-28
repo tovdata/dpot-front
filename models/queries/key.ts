@@ -15,3 +15,4 @@ export const KEY_USERS: string = 'plip-users';
 
 export const KEY_USER_ACTIVITY: string = 'userActivity';
 export const KEY_SERVICE_ACTIVITY: string = 'serviceActivity'; 
+export const KEY_TEMPLATES: string = 'plip-templates';

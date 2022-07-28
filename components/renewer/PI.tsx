@@ -67,8 +67,11 @@ export const FNITable: React.FC<any> = ({ accessToken, serviceId }): JSX.Element
 }
 /** [Component] 가명정보 수집 및 이용 테이블 폼 */
 export const FNITableForm: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
+  /** [Event handler] 가이드 */
+  const onGuide = useCallback(() => window.open('https://support.plip.kr/077047c8-6dcc-4ca7-a988-22d434a095e5', '_blank'), []);
+
   // Form tools 정의
-  const tools: JSX.Element = useMemo(() => (<Button type='default'>가명정보 입력 가이드</Button>), []);
+  const tools: JSX.Element = useMemo(() => (<Button onClick={onGuide} type='default'>가명정보 입력 가이드</Button>), []);
   // 컴포넌트 반환
   return (
     <EditableTableForm description='통계작성, 과학적 연구, 공익적 기록보존을 위한 경우에는 사용자의 동의없이 가명정보를 처리할 수 있어요.\n보유중인 개인정보를 가명처리하여 이용하거나, 가명정보를 제공받아 사내에서 이용하고 있는 경우, 업무별로 나누어 가명정보 현황을 입력하세요.' title='가명정보 수집・이용 현황' tools={tools}>
@@ -122,8 +125,11 @@ export const PITable: React.FC<any> = ({ accessToken, serviceId }): JSX.Element 
 }
 /** [Component] 개인정보 수집 및 이용 테이블 폼 */
 export const PITableForm: React.FC<any> = ({ accessToken, serviceId }): JSX.Element => {
+  /** [Event handler] 가이드 */
+  const onGuide = useCallback(() => window.open('https://support.plip.kr/99989435-0ec8-478d-92a9-6b1105300c5e', '_blank'), []);
+
   // Form tools 정의
-  const tools: JSX.Element = useMemo(() => (<Button type='default'>현황 정보 입력 가이드</Button>), []);
+  const tools: JSX.Element = useMemo(() => (<Button onClick={onGuide} type='default'>현황 정보 입력 가이드</Button>), []);
   // 컴포넌트 반환
   return (
     <EditableTableForm description='사용자로부터 직접 입력 받거나, 제3자로부터 제공받아 사내에서 이용하고 있는 개인정보 현황을 업무별로 나누어 입력하세요.' title='개인정보 수집・이용 현황' tools={tools}>

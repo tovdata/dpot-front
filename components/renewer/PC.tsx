@@ -97,9 +97,10 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   const onClose = useCallback(() => setIsModalOpen(false), []);
   /** [Event handler] 행(Row) 삭제 이벤트 */
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PPI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
+  /** [Event handler] 가이드 */
+  const onGuide = useCallback(() => window.open('https://support.plip.kr/954ae661-0897-4dbe-9f00-a382c2392c65', '_blank'), []);
   /** [Event handler] 링크 모달 오픈 */
   const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : modal ? prerequisiteModal(false) : prerequisiteModal(), [modal, prerequisite]);
-
   /** [Event handler] 행(Row) 저장 이벤트 */
   const onSave = useCallback((record: any): boolean => {
     if (new RegExp('^npc_').test(record.id)) {
@@ -120,7 +121,7 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   // 헤더에 들어갈 버튼 정의
   const tools: JSX.Element = useMemo(() => (
     <div>
-      <Button style={{ marginRight: 8 }} type='default'>제공 정보 입력 가이드</Button>
+      <Button onClick={onGuide} style={{ marginRight: 8 }} type='default'>제공 정보 입력 가이드</Button>
       <LinkButton onClick={onOpenModal} url={url.url} />
     </div>
   ), [onOpenModal, url]);
@@ -260,6 +261,8 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   const onClose = useCallback(() => setIsModalOpen(false), []);
   // [Event handler] 행(Row) 삭제 이벤트
   const onDelete = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_CPI, serviceId], mutate, 'delete', record), [mutate, serviceId, queryClient]);
+  /** [Event handler] 가이드 */
+  const onGuide = useCallback(() => window.open('https://support.plip.kr/eb41bd26-7ba3-4703-a8e4-c047503f98f7', '_blank'), []);
   /** [Event handler] 링크 모달 오픈 */
   const onOpenModal = useCallback(() => prerequisite ? setIsModalOpen(true) : modal ? prerequisiteModal(false) : prerequisiteModal(), [modal, prerequisite]);
   // [Event handler] 행(Row) 저장 이벤트
@@ -282,7 +285,7 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
   // 헤더에 들어갈 버튼 정의
   const tools: JSX.Element = useMemo(() => (
     <div>
-      <Button style={{ marginRight: 8 }} type='default'>위탁 정보 입력 가이드</Button>
+      <Button onClick={onGuide} style={{ marginRight: 8 }} type='default'>위탁 정보 입력 가이드</Button>
       <LinkButton onClick={onOpenModal} url={url.url} />
     </div>
   ), [onOpenModal, url]);

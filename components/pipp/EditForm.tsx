@@ -401,9 +401,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({ data, preview, p
             <DTCItem content='미이용자의 개인정보 파기 등에 관한 조치' />
           ) : (<></>)}
           <DTCItem content='정보주체와 법정대리인의 권리·의무 및 행사방법' />
-          {data.dInfo.safety.usage ? (
-            <DTCItem content='개인정보의 안전성 확보조치' />
-          ) : (<></>)}
+          <DTCItem content='개인정보의 안전성 확보조치' />
           <DTCItem content='개인정보의 자동 수집 장치의 설치·운영 및 거부에 관한 사항' />
           <DTCItem content='행태정보의 수집·이용 및 거부 등에 관한 사항' />
           <DTCItem content='추가적인 이용·제공 판단기준' />

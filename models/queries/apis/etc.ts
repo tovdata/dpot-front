@@ -26,7 +26,7 @@ export const getTemplates = async (): Promise<any[]> => {
     // API 호출
     const response = await sendRequest('/template/all', 'GET');
     // 결과 반환
-    return response.result && response.data ? response.data : [];
+    return response.result && response.data ? response.data.filter((item: any): boolean => item.category !== 'default').sort((a: any, b: any): number => b.createAt - a.createAt) : [];
   } catch (err) {
     console.error(`[API ERROR] ${err}`);
     return [];

@@ -64,7 +64,7 @@ export const PLIPPageHeader: React.FC<any> = (): JSX.Element => {
       </Link>
       </div>
       <StyledPageHeaderNav>
-        <StyledPageHeaderMenuItem>사용자 가이드</StyledPageHeaderMenuItem>
+        <StyledPageHeaderMenuItem href='https://support.plip.kr' rel='noreferrer' target='_blank'>사용자 가이드</StyledPageHeaderMenuItem>
         <StyledPageHeaderMenuItem onClick={goManagement}>회사 관리</StyledPageHeaderMenuItem>
         <Dropdown overlay={<Menu items={items} />} trigger={['click']}>
           <span className='icon'>

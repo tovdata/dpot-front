@@ -554,6 +554,8 @@ const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, serviceId, status }:
     onOk: () => Router.push('/pim/cu'),
     title: '입력된 정보가 없습니다.'
   }), [pi, onProcess]);
+  /** [Event handler] 가이드 */
+  const onGuide = useCallback(() => window.open('https://support.plip.kr/d2326536-239b-42b6-85b8-5f08c952e05a', '_blank'), []);
   /** [Event handler] 문서 업데이트 */
   const onUpdate = useCallback(() => onProcess('update'), [onProcess]);
 
@@ -563,7 +565,7 @@ const MainPageHeader: React.FC<PIPPProcess> = ({ onProcess, serviceId, status }:
       <Spin spinning={isLoading}>
         <div className="header">
           <h2 className="title">개인정보 처리방침 생성</h2>
-          <Button type='default'>처리방침 생성 가이드</Button>
+          <Button onClick={onGuide} type='default'>처리방침 생성 가이드</Button>
         </div>
         <div className="content">
           <span className="form-description">

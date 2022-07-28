@@ -1,8 +1,11 @@
 // Component
-import { Col, Divider, Row, Table, Tag } from 'antd';
+import { Col, Row, Table, Tag } from 'antd';
 import { StyledDownloadButton, StyledDownloadIcon, StyledSection, StyledSectionHeader, StyledTabPane, StyledTabPaneHeader, StyledTabPaneTitle, StyledTemplateCard } from '@/components/styled/Template';
 // Module
 import moment from 'moment';
+import { useQuery } from 'react-query';
+import { KEY_TEMPLATES } from '@/models/queries/key';
+import { getTemplates } from '@/models/queries/apis/etc';
 
 /** [Component] 기본 템플릿 섹션 */
 export const DefaultTemplates: React.FC<any> = (): JSX.Element => {
@@ -30,28 +33,30 @@ export const DefaultTemplates: React.FC<any> = (): JSX.Element => {
 }
 /** [Component] 가이드라인 섹션 */
 export const Guidelines: React.FC<any> = (): JSX.Element => {
+  // 템플릿 조회
+  const { isLoading, data } = useQuery(KEY_TEMPLATES, async () => await getTemplates());
+
+  // 컴포넌트 반환
   return (
     <StyledSection>
       <StyledSectionHeader>
         <h2 className='title'>가이드라인</h2>
       </StyledSectionHeader>
       <Table columns={[
-        { title: '구분', dataIndex: 'category', key: 'category', render: (value: string): JSX.Element => value === 'template' ? <Tag color='geekblue'>템플릿</Tag> : <Tag color='geekblue'>가이드라인</Tag> },
-        { title: '목록', dataIndex: 'title', key: 'title', sorter: (a: any, b: any): number => a.title > b.title ? 1 : a.title < b.title ? -1 : 0 },
-        { title: '게시일', dataIndex: 'publishAt', key: 'publishAt', render: (value: number) => moment.unix(value / 1000).format('YYYY-MM-DD') },
-        { title: '출처', dataIndex: 'sources', key: 'sources' },
-        { title: '', dataIndex: 'url', key: 'url', render: (value: string) => (<DownloadButton />)}
-      ]} dataSource={[
-        { category: 'template', title: '알기 쉬운 개인정보 처리 동의 안내서', publishAt: '1655690032000', sources: '개인정보보호위원회', url: '' }
-      ]} showSorterTooltip={false} />
+        { title: '구분', dataIndex: 'category', key: 'category', render: (value: string): JSX.Element => value === 'template' ? <Tag color='geekblue'>템플릿</Tag> : <Tag color='geekblue'>가이드라인</Tag>, width: '16%' },
+        { title: '목록', dataIndex: 'title', key: 'title', sorter: (a: any, b: any): number => a.title > b.title ? 1 : a.title < b.title ? -1 : 0, width: '46%' },
+        { title: '게시일', dataIndex: 'publishAt', key: 'publishAt', render: (value: number) => moment.unix(value / 1000).format('YYYY-MM-DD'), width: '16%' },
+        { title: '출처', dataIndex: 'sources', key: 'sources', width: '16%' },
+        { title: '', dataIndex: 'url', key: 'url', render: (value: string) => (<DownloadButton url={value} />), width: '6%'}
+      ]} dataSource={data ? data : []} loading={isLoading} showSorterTooltip={false} />
     </StyledSection>
   );
 }
 
 /** [Internal Component] 테이블 내 Link */
-const DownloadButton: React.FC<any> = ({}): JSX.Element => {
+const DownloadButton: React.FC<any> = ({ url }): JSX.Element => {
   return (
-    <StyledDownloadButton>
+    <StyledDownloadButton href={url}>
       <StyledDownloadIcon />
     </StyledDownloadButton>
   );
