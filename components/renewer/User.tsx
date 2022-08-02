@@ -76,7 +76,7 @@ const UserInfoSection: React.FC<any> = ({ accessToken, companyId }): JSX.Element
     } else {
       errorNotification('사용자 정보 저장에 실패하였습니다.');
     }
-  }, [user, form, userId]);
+  }, [form, userId]);
   // 비밀번호 확인 함수
   const confirmPassword = ({ getFieldValue }: any) => ({ validator(_: any, value: string) {
     return !value || getFieldValue('newPassword') === value ? Promise.resolve() : Promise.reject(new Error('비밀번호가 일치하지 않습니다.'));

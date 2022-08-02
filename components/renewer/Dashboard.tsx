@@ -80,7 +80,7 @@ const Dashboard: React.FC<any> = (): JSX.Element => {
   );
 }
 
-const DashboardHeader: React.FC<any> = ({ serviceId, userId }) => {
+const DashboardHeader: React.FC<any> = ({ userId }) => {
   // 사용자 정보 조회
   const { data: user } = useQuery([KEY_USER, userId], async () => await getUser(userId));
 

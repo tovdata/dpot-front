@@ -1,4 +1,4 @@
-import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 // Component
 import { TableColumnProps, Table, Tag, Checkbox, Input, Space, Typography, Modal } from 'antd';
@@ -62,16 +62,21 @@ interface TableProps {
  * [Component] Editable table
  */
 export const EditableExpandTable = ({ dataSource, defaultSelectOptions, expandKey, headers, innerHeaders, isLoading, modal, onAdd, onDelete, onSave, pagination, prerequisite, refData, tableName }: EditableTableProps): JSX.Element => {
-  // Set a default focus and default record for columns in row
-  const defaultFocusState: any = {};
-  const defaultRecord: any = {};
-  const totalheaders = { ...innerHeaders, ...headers };
-  // Extract a focus state by inner header key
-  Object.keys(totalheaders).forEach((key: string): void => {
-    defaultFocusState[key] = false;
-    const type: string = totalheaders[key].display;
-    defaultRecord[key] = type === 'checkbox' ? false : (type === 'item' || type === 'itemA' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
-  });
+  const totalheaders = useMemo(() => ({ ...innerHeaders, ...headers }), [innerHeaders, headers]);
+  /// Set a default focus and default record for columns in row
+  const defaultFocusState: any = useMemo(() => {
+    return Object.keys(totalheaders).reduce((acc: any, key: string) => {
+      acc[key] = false;
+      return acc;
+    }, {});
+  }, [totalheaders]);
+  const defaultRecord: any = useMemo(() => {
+    return Object.keys(totalheaders).reduce((acc: any, key: string) => {
+      const type: string = totalheaders[key].display;
+      acc[key] = type === 'checkbox' ? false : (type === 'item' || type === 'itemA' || type === 'list' || type === 'period' || type === 'purpose') ? [] : '';
+      return acc;
+    }, {});
+  }, [totalheaders]);
   // Set a ref
   const newProjectCnt: MutableRefObject<number> = useRef(0);
   // Set a local state

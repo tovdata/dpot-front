@@ -180,7 +180,7 @@ const CreateConsent: React.FC<any> = ({ onChangeType, onEmptyCheck, onMoveStep }
     <div>
       <Button onClick={onGuide} style={{ marginRight: 8 }} type='default'>동의서 생성 가이드</Button>
     </div>
-  ), []);
+  ), [onGuide]);
 
   // 컴포넌트
   const [component, setComponent] = useState<JSX.Element>(<PLIPLoadingContainer />);

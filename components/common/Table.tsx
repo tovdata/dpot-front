@@ -265,16 +265,10 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
     } else {
       // Set a row
       setRow({ ...row, [key]: item });
-      // Check a required
-      // setFocus({ ...focus, [key]: checkRequired(headers[key].name, item, required) });
     }
     // Update the select options
     changeSelectOptions(key, onUpdateSelectOptions, refData, tableName, item, row);
-  }, [focus, headers, onUpdateSelectOptions, refData, row, tableName]);
-  /** [Event handler] 포커즈 초기화 */
-  const clearFocus = useCallback((): void => {
-    // setFocus(defaultFocusState);
-  }, [defaultFocusState]);
+  }, [onUpdateSelectOptions, refData, row, tableName]);
   /** [Event Handler] 취소 이벤트 */
   const onRollback = useCallback((record: any): void => {
     if ((new RegExp('^npc_')).test(record.id)) {
@@ -283,11 +277,10 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
   }, [onDelete]);
   /** [Event Handler] 편집 */
   const onEdit = useCallback((record: any): void => {
-    // clearFocus();
     (row.id && record.id && row.id !== record.id) ? warningNotification('작성 중인 내용을 먼저 저장해주세요.') : setRow(record);
     // Update the select options
     changeSelectOptions('subject', onUpdateSelectOptions, refData, tableName, record.subject);
-  }, [clearFocus, onUpdateSelectOptions, refData, row, tableName]);
+  }, [onUpdateSelectOptions, refData, row, tableName]);
 
   /**
    * UseEffect
@@ -397,7 +390,7 @@ export const EditableTable = ({ dataSource, defaultSelectOptions, headers, isLoa
         dataIndex: 'id',
         key: 'id',
         title: '',
-        render: (_: any, record: any, index: number): JSX.Element => (<TableEditCell edit={row.id === record.id} key={index} onDelete={() => { clearFocus(); onDelete(record); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { checkRequiredForRow() ? onSave(row) ? onEdit({}) : undefined : undefined }} onCancel={() => { clearFocus(); onEdit({}); onRollback(record) }} />),
+        render: (_: any, record: any, index: number): JSX.Element => (<TableEditCell edit={row.id === record.id} key={index} onDelete={() => { onDelete(record); onEdit({}) }} onEdit={() => onEdit(record)} onSave={() => { checkRequiredForRow() ? onSave(row) ? onEdit({}) : undefined : undefined }} onCancel={() => { onEdit({}); onRollback(record) }} />),
         width: '4%'
       });
     }

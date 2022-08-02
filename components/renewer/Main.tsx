@@ -63,9 +63,9 @@ export const MainBody: React.FC<any> = (): JSX.Element => {
   const [scroll, setScroll] = useState<number>(0);
   const [win, setWin] = useState<number>(window.innerHeight);
   /** [Event handler] 브라우저 크기 갱신 */
-  const updateWin = useCallback(() => setWin(window.innerHeight), [window.innerHeight]);
+  const updateWin = useCallback(() => setWin(window.innerHeight), []);
   /** [Event handler] 스크롤 갱신 */
-  const updateScroll = useCallback(() => setScroll(window.scrollY), [window.scrollY]);
+  const updateScroll = useCallback(() => setScroll(window.scrollY), []);
   // 윈도우 이벤트 설정
   useEffect(() => {
     window.addEventListener('resize', updateWin);

@@ -1,5 +1,5 @@
 /** 기본 Backend Server URL*/
-export const SERVER_URL = 'https://api-dev.plip.kr:8081/api/';
+export const SERVER_URL = 'https://api.plip.kr/api/';
 /** API 응답 상태 */
 export const RESPONSE_STATUS_OK = 'OK';
 export const RESPONSE_STATUS_ERROR = 'ERROR';

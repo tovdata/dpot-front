@@ -10,7 +10,7 @@ module.exports = {
     return [
       {
         source: '/server/:path*',
-        destination: 'https://api-dev.plip.kr:8081/api/:path*',
+        destination: 'https://api.plip.kr/api/:path*',
       },
     ];
   },
@@ -21,7 +21,7 @@ module.exports = {
   // },
   images: {
     loader: 'akamai',
-    path: 'https://dev.plip.kr'
+    path: 'https://www.plip.kr'
   },
   webpack(config) {
     config.module.rules.push({

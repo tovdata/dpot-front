@@ -6,7 +6,7 @@ import { decode } from 'jsonwebtoken';
 import { getAccessToken, getUserId, setAccessToken } from '@/models/cookies';
 
 /** API Server URL */
-const SERVER_URL = 'https://api-dev.plip.kr:8081/api';
+const SERVER_URL = 'https://api.plip.kr/api';
 // API 응답 코드
 export const RESPONSE_STATUS_OK = 'OK';
 export const RESPONSE_STATUS_ERROR = 'ERROR';

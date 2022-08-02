@@ -124,7 +124,7 @@ export const PPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
       <Button onClick={onGuide} style={{ marginRight: 8 }} type='default'>제공 정보 입력 가이드</Button>
       <LinkButton onClick={onOpenModal} url={url.url} />
     </div>
-  ), [onOpenModal, url]);
+  ), [onGuide, onOpenModal, url]);
   // URL 정보를 제외한 PIM List
   const PIMList: any[] = useMemo(() => data ? data.filter((item:any) => item.url === undefined): [], [data]);
 
@@ -172,7 +172,7 @@ export const PFNITableForm: React.FC<any> = ({ accessToken, modal, serviceId, st
     if (_url && _url.length > 0) setUrl(_url[0]);
   }, [data]);
   // 전제 조건 검토
-  useEffect(() => fni && fni.length > 0 ? setPrerequisite(true) : setPrerequisite(false), [fni, loadingFNI]);
+  useEffect(() => fni && fni.length > 0 ? setPrerequisite(true) : setPrerequisite(false), [fni]);
 
   // [Event handler] 행(Row) 추가 이벤트
   const onAdd = useCallback((record: any): void => setQueryData(queryClient, [SERVICE_PFNI, serviceId], mutate, 'create', record), [mutate, serviceId, queryClient]);
@@ -288,7 +288,7 @@ export const CPITableForm: React.FC<any> = ({ accessToken, modal, serviceId }): 
       <Button onClick={onGuide} style={{ marginRight: 8 }} type='default'>위탁 정보 입력 가이드</Button>
       <LinkButton onClick={onOpenModal} url={url.url} />
     </div>
-  ), [onOpenModal, url]);
+  ), [onGuide, onOpenModal, url]);
   // URL 정보를 제외한 PIM List
   const PIMList: any[] = useMemo(() => data ? data.filter((item:any) => item.url === undefined) : [], [data]);
   // 컴포넌트 반환
